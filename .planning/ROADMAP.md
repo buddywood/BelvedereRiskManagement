@@ -29,10 +29,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can reset forgotten password via email link
   4. User session data is encrypted and secure during transmission and storage
   5. User can complete multi-factor authentication to access assessment data
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD during phase planning
+- [ ] 01-01-PLAN.md -- Bootstrap Next.js, Prisma schema, Auth.js config, registration and login
+- [ ] 01-02-PLAN.md -- Route protection middleware, password reset flow, rate limiting
+- [ ] 01-03-PLAN.md -- TOTP MFA implementation, encryption, recovery codes, end-to-end verification
 
 ### Phase 2: Assessment Engine & Core Scoring
 **Goal**: Users can complete guided Family Governance assessment and receive transparent risk scores
@@ -80,11 +82,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Authentication & Security | 0/0 | Not started | - |
+| 1. Authentication & Security | 0/3 | Planned | - |
 | 2. Assessment Engine & Core Scoring | 0/0 | Not started | - |
 | 3. Branching Logic | 0/0 | Not started | - |
 | 4. Reports & Templates | 0/0 | Not started | - |
