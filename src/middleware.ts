@@ -11,11 +11,27 @@ export default auth((req) => {
     pathname.startsWith(route)
   );
 
+  // MFA-related routes that should be accessible without MFA verification
+  const mfaRoutes = ["/mfa/verify", "/mfa/setup"];
+  const isMFARoute = mfaRoutes.some((route) => pathname.startsWith(route));
+
   // Redirect unauthenticated users from protected routes
   if (isProtectedRoute && !isAuthenticated) {
     const signInUrl = new URL("/signin", req.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(signInUrl);
+  }
+
+  // Check MFA verification for authenticated users with MFA enabled
+  if (isAuthenticated && !isMFARoute && isProtectedRoute) {
+    const user = req.auth?.user;
+
+    // If user has MFA enabled but hasn't verified yet, redirect to MFA verify
+    if (user?.mfaEnabled && !user?.mfaVerified) {
+      const mfaVerifyUrl = new URL("/mfa/verify", req.url);
+      mfaVerifyUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(mfaVerifyUrl);
+    }
   }
 
   return NextResponse.next();

@@ -5,6 +5,7 @@ declare module "next-auth" {
     user: {
       id: string;
       mfaEnabled?: boolean;
+      mfaVerified?: boolean;
     } & DefaultSession["user"];
   }
 
