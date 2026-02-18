@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 1 of 4 (Authentication & Security)
-Plan: 1 of 3 completed
+Plan: 2 of 3 completed
 Status: In progress
-Last activity: 2026-02-18 — Completed 01-01: Bootstrap authentication foundation
+Last activity: 2026-02-18 — Completed 01-02: Route protection and password reset
 
-Progress: [██░░░░░░░░] 8% (1 of 12 plans)
+Progress: [███░░░░░░░] 17% (2 of 12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 6.9 minutes
-- Total execution time: 0.1 hours
+- Total plans completed: 2
+- Average duration: 5.0 minutes
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01 | 1 | 6.9 min | 6.9 min |
+| 01 | 2 | 10.3 min | 5.2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6.9 min)
-- Trend: Initial baseline
+- Last 5 plans: 01-01 (6.9 min), 01-02 (3.4 min)
+- Trend: Accelerating
 
 *Updated after each plan completion*
 
@@ -42,6 +42,9 @@ Progress: [██░░░░░░░░] 8% (1 of 12 plans)
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- In-memory rate limiting for MVP (01-02): In-memory Map storage sufficient for single-instance MVP with 60s cleanup. Production needs Redis/Upstash for multi-instance.
+- SHA-256 token hashing (01-02): Reset tokens hashed with SHA-256 before database storage. Prevents token theft if database compromised. 15-minute expiry, single-use.
+- Generic success messages for forgot-password (01-02): Always return 'If an account exists...' message to prevent email enumeration attacks.
 - JWT session strategy over database sessions (01-01): Auth.js v5 with credentials provider doesn't auto-create database sessions. JWT with server-side lookup avoids manual session creation complexity.
 - Prisma 7 with pg adapter (01-01): Prisma 7 requires explicit connection adapters. pg adapter with connection pooling provides production-ready PostgreSQL connectivity.
 - Argon2id for password hashing (01-01): Most secure password hashing algorithm with OWASP-recommended parameters (65536 KiB memory, 3 iterations).
@@ -65,10 +68,11 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 01-01-PLAN.md - Bootstrap authentication foundation
-Resume file: .planning/phases/01-authentication-security/01-01-SUMMARY.md
+Stopped at: Completed 01-02-PLAN.md - Route protection and password reset
+Resume file: .planning/phases/01-authentication-security/01-02-SUMMARY.md
 
 **User action required before next plan:**
 - Configure PostgreSQL database (local or cloud provider)
 - Run `npx prisma db push` to create tables
-- Test registration and login flows
+- Configure Resend email service (RESEND_API_KEY, FROM_EMAIL)
+- Test registration, login, and password reset flows
