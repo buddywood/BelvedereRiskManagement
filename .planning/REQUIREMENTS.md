@@ -1,0 +1,140 @@
+# Requirements: Belvedere Risk Management
+
+**Defined:** 2026-02-17
+**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
+
+## v1 Requirements
+
+Requirements for MVP demo. Each maps to roadmap phases.
+
+### Authentication & Security
+
+- [ ] **AUTH-01**: User can create account with email and password
+- [ ] **AUTH-02**: User can log in and stay logged in across sessions
+- [ ] **AUTH-03**: User can reset password via email link
+- [ ] **AUTH-04**: User session data is encrypted and secure
+- [ ] **AUTH-05**: System requires multi-factor authentication for data access
+
+### Assessment Engine
+
+- [ ] **ASMT-01**: User can start guided Family Governance assessment
+- [ ] **ASMT-02**: System presents 60-80 questions with progress indicator
+- [ ] **ASMT-03**: System implements branching logic to skip irrelevant questions
+- [ ] **ASMT-04**: User can save progress and resume assessment later
+- [ ] **ASMT-05**: System validates responses and prevents incomplete submissions
+- [ ] **ASMT-06**: Assessment completes in target 12-15 minutes with branching
+
+### Risk Scoring
+
+- [ ] **SCOR-01**: System calculates weighted risk scores from responses
+- [ ] **SCOR-02**: System aggregates scores from questions → sub-categories → pillar score
+- [ ] **SCOR-03**: System displays risk score with transparent breakdown by category
+- [ ] **SCOR-04**: System identifies top 3-5 specific missing controls
+- [ ] **SCOR-05**: System shows risk level (Low/Medium/High) with clear criteria
+
+### Report Generation
+
+- [ ] **REPT-01**: System generates executive summary of risk assessment
+- [ ] **REPT-02**: System creates detailed PDF report with professional formatting
+- [ ] **REPT-03**: Report includes risk breakdown by governance category
+- [ ] **REPT-04**: Report includes specific recommendations for identified gaps
+- [ ] **REPT-05**: User can download branded PDF report immediately
+
+### Policy Templates
+
+- [ ] **TMPL-01**: System provides 5-7 core governance policy templates
+- [ ] **TMPL-02**: System pre-fills templates based on risk assessment results
+- [ ] **TMPL-03**: Templates address decision-making authority and access controls
+- [ ] **TMPL-04**: Templates include succession planning and family behavior standards
+- [ ] **TMPL-05**: User can download customized policy templates (Word/PDF)
+
+### User Interface
+
+- [ ] **UI-01**: Assessment interface feels conversational (TurboTax-style)
+- [ ] **UI-02**: Progress indicator shows completion status throughout
+- [ ] **UI-03**: Interface provides inline help and definitions for complex terms
+- [ ] **UI-04**: Results dashboard displays scores and recommendations clearly
+- [ ] **UI-05**: System works responsively across desktop and tablet devices
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Enhanced Analytics
+
+- **ANAL-01**: User can view assessment history and score trends over time
+- **ANAL-02**: System provides maturity model scoring and progression roadmap
+- **ANAL-03**: System generates risk area visualizations and charts
+
+### Advanced Modules
+
+- **MDUL-01**: System includes conflict resolution assessment module
+- **MDUL-02**: System includes next-generation readiness assessment
+- **MDUL-03**: System provides succession planning deep-dive assessment
+
+### Collaboration Features
+
+- **CLAB-01**: Multiple family members can review assessment results
+- **CLAB-02**: User can share reports with advisors via secure link
+- **CLAB-03**: System tracks review and approval workflow
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Real-time collaboration | Creates governance conflicts; complicates security for MVP |
+| AI-generated recommendations | Black box approach loses HNW client trust; liability concerns |
+| Comprehensive financial integration | Massive scope creep; not needed for governance assessment |
+| Other risk pillars (Financial, Operational) | Family Governance focus for MVP validation |
+| Custom question builder | Breaks scoring consistency; MVP uses proven question set |
+| Mobile native app | Responsive web sufficient; defer until usage patterns proven |
+| Social features (forums/chat) | Liability and moderation burden; external communication preferred |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| AUTH-05 | Phase 1 | Pending |
+| ASMT-01 | Phase 2 | Pending |
+| ASMT-02 | Phase 2 | Pending |
+| ASMT-03 | Phase 3 | Pending |
+| ASMT-04 | Phase 2 | Pending |
+| ASMT-05 | Phase 2 | Pending |
+| ASMT-06 | Phase 3 | Pending |
+| SCOR-01 | Phase 2 | Pending |
+| SCOR-02 | Phase 2 | Pending |
+| SCOR-03 | Phase 4 | Pending |
+| SCOR-04 | Phase 2 | Pending |
+| SCOR-05 | Phase 4 | Pending |
+| REPT-01 | Phase 4 | Pending |
+| REPT-02 | Phase 4 | Pending |
+| REPT-03 | Phase 4 | Pending |
+| REPT-04 | Phase 4 | Pending |
+| REPT-05 | Phase 4 | Pending |
+| TMPL-01 | Phase 4 | Pending |
+| TMPL-02 | Phase 4 | Pending |
+| TMPL-03 | Phase 4 | Pending |
+| TMPL-04 | Phase 4 | Pending |
+| TMPL-05 | Phase 4 | Pending |
+| UI-01 | Phase 2 | Pending |
+| UI-02 | Phase 2 | Pending |
+| UI-03 | Phase 2 | Pending |
+| UI-04 | Phase 4 | Pending |
+| UI-05 | Phase 2 | Pending |
+
+**Coverage:**
+- v1 requirements: 30 total
+- Mapped to phases: 30
+- Unmapped: 0 ✓
+
+---
+*Requirements defined: 2026-02-17*
+*Last updated: 2026-02-17 after initial definition*
