@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 2 of 4 (Assessment Engine & Core Scoring)
-Plan: 5 of 6 completed
+Plan: 6 of 6 completed
 Status: In progress
-Last activity: 2026-02-20 — Completed 02-04: Question flow UI
+Last activity: 2026-02-20 — Completed 02-05: Scoring engine integration and results display
 
-Progress: [█████░░░░░] 50% (6 of 12 plans)
+Progress: [██████░░░░] 58% (7 of 12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 4.5 minutes
+- Total plans completed: 7
+- Average duration: 4.3 minutes
 - Total execution time: 0.5 hours
 
 **By Phase:**
@@ -28,10 +28,10 @@ Progress: [█████░░░░░] 50% (6 of 12 plans)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 2 | 10.3 min | 5.2 min |
-| 02 | 4 | 17.2 min | 4.3 min |
+| 02 | 5 | 20.7 min | 4.1 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3.0 min), 02-03 (4.2 min), 02-02 (6.0 min), 02-04 (4.0 min)
+- Last 5 plans: 02-03 (4.2 min), 02-02 (6.0 min), 02-04 (4.0 min), 02-05 (3.5 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -62,6 +62,9 @@ Recent decisions affecting current work:
 - [Phase 02-02]: 0-10 scoring scale where 10 = best governance: More intuitive than 'risk score' where high = bad. Aligns with maturity model mental framework.
 - [Phase 02-04]: Card-based answer selections with shadcn Card components for premium feel
 - [Phase 02-04]: 1000ms debounce for auto-save balances responsiveness and server load
+- [Phase 02-05]: 50% minimum completion threshold for scoring: Prevents misleading scores from insufficient data. Better to block scoring than give false confidence.
+- [Phase 02-05]: Exclude unanswered questions from calculations (never default to low risk): Unknown risk is not low risk. Defaulting to safe scores would create false sense of security.
+- [Phase 02-05]: Professional advisory tone throughout (no gamification): Family governance is serious business. Clean numeric scores and severity bars provide clarity without trivialization.
 
 ### Pending Todos
 
@@ -78,8 +81,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 02-04-PLAN.md - Question flow UI
-Resume file: .planning/phases/02-assessment-engine-core-scoring/02-04-SUMMARY.md
+Stopped at: Completed 02-05-PLAN.md - Scoring engine integration and results display
+Resume file: .planning/phases/02-assessment-engine-core-scoring/02-05-SUMMARY.md
 
-**Completed plans (out of order):** 02-01, 02-03, 02-02, 02-04
-**Next plan:** 02-05 (Scoring engine integration)
+**Completed plans (out of order):** 02-01, 02-03, 02-02, 02-04, 02-05
+**Next plan:** 02-06 (Assessment testing and validation)
