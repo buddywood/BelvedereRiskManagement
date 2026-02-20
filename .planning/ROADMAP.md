@@ -46,14 +46,15 @@ Plans:
   3. User can save progress mid-assessment and resume later without data loss
   4. System calculates weighted risk scores showing transparent breakdown by category
   5. User sees specific missing controls identified from assessment responses
-**Plans**: 5 plans
+**Plans**: 6 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Install dependencies, shadcn/ui, Prisma schema, question definitions, scoring engine
-- [ ] 02-02-PLAN.md -- Assessment hub page, Zustand store, API endpoints, pillar cards, progress tracking
-- [ ] 02-03-PLAN.md -- Question flow UI, card-based answers, auto-save, navigation with branching
-- [ ] 02-04-PLAN.md -- Scoring API, results page with score display, risk drivers, action plan
-- [ ] 02-05-PLAN.md -- Dashboard integration, smart resume, completion flow, end-to-end verification
+- [ ] 02-01-PLAN.md -- Install dependencies, shadcn/ui, Prisma schema, TypeScript types
+- [ ] 02-02-PLAN.md -- Question bank (60-80 questions), scoring engine, branching rules
+- [ ] 02-03-PLAN.md -- Assessment hub page, Zustand store with server rehydration, API endpoints
+- [ ] 02-04-PLAN.md -- Question flow UI, card-based answers, auto-save, navigation with branching
+- [ ] 02-05-PLAN.md -- Scoring API, results page with score display, risk drivers, action plan
+- [ ] 02-06-PLAN.md -- Dashboard integration, smart resume, completion flow, end-to-end verification
 
 ### Phase 3: Branching Logic
 **Goal**: Assessment adapts to user context, skipping irrelevant questions to achieve 12-minute completion target
@@ -91,6 +92,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Authentication & Security | 0/3 | Planned | - |
-| 2. Assessment Engine & Core Scoring | 0/5 | Planned | - |
+| 2. Assessment Engine & Core Scoring | 0/6 | Planned | - |
 | 3. Branching Logic | 0/0 | Not started | - |
 | 4. Reports & Templates | 0/0 | Not started | - |
