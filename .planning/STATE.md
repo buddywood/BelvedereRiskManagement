@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 2 of 4 (Assessment Engine & Core Scoring)
-Plan: 3 of 6 completed
+Plan: 4 of 6 completed
 Status: In progress
-Last activity: 2026-02-20 — Completed 02-03: Assessment hub and state management
+Last activity: 2026-02-20 — Completed 02-02: Question bank and scoring engine
 
-Progress: [████░░░░░░] 33% (4 of 12 plans)
+Progress: [████░░░░░░] 42% (5 of 12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 4.3 minutes
-- Total execution time: 0.3 hours
+- Total plans completed: 5
+- Average duration: 4.6 minutes
+- Total execution time: 0.4 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 2 | 10.3 min | 5.2 min |
-| 02 | 2 | 7.2 min | 3.6 min |
+| 02 | 3 | 13.2 min | 4.4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6.9 min), 01-02 (3.4 min), 02-01 (3.0 min), 02-03 (4.2 min)
+- Last 5 plans: 01-02 (3.4 min), 02-01 (3.0 min), 02-03 (4.2 min), 02-02 (6.0 min)
 - Trend: Stable
 
 *Updated after each plan completion*
@@ -43,6 +43,9 @@ Progress: [████░░░░░░] 33% (4 of 12 plans)
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- 0-10 scoring scale where 10 = best governance (02-02): More intuitive than 'risk score' where high = bad. Aligns with maturity model mental framework.
+- Simple 1-level branching (02-02): Skip trust/business/succession sections if not applicable. Deeper nesting deferred based on research recommendation to monitor completion rates.
+- 68 questions across 8 sub-categories (02-02): Balances comprehensive coverage with 15-minute completion target. Distributed based on risk impact.
 - localStorage as optimistic cache, server API as source of truth (02-03): Zustand persist provides fast local state, but loadFromServer() rehydrates from API on mount. Ensures save/resume works after browser restart or localStorage clear.
 - pillar-based progress tracking (02-03): Show pillar completion progress, not question counts (e.g., "X of Y questions" per pillar, not "Question 3 of 80"). Research shows total counts are demoralizing.
 - Hierarchical weighted scoring model (02-01): Question -> Sub-Category -> Pillar structure enables granular risk analysis. Bottom-up score aggregation supports flexible weighting algorithms.
@@ -54,6 +57,9 @@ Recent decisions affecting current work:
 - JWT session strategy over database sessions (01-01): Auth.js v5 with credentials provider doesn't auto-create database sessions. JWT with server-side lookup avoids manual session creation complexity.
 - Prisma 7 with pg adapter (01-01): Prisma 7 requires explicit connection adapters. pg adapter with connection pooling provides production-ready PostgreSQL connectivity.
 - Argon2id for password hashing (01-01): Most secure password hashing algorithm with OWASP-recommended parameters (65536 KiB memory, 3 iterations).
+- [Phase 02-02]: 68 questions across 8 sub-categories: Balances comprehensive coverage with 15-minute completion target. Distributed based on risk impact.
+- [Phase 02-02]: Simple 1-level branching: Skip trust/business/succession sections if not applicable. Deeper nesting deferred based on research recommendation to monitor completion rates.
+- [Phase 02-02]: 0-10 scoring scale where 10 = best governance: More intuitive than 'risk score' where high = bad. Aligns with maturity model mental framework.
 
 ### Pending Todos
 
@@ -70,7 +76,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 02-03-PLAN.md - Assessment hub and state management
-Resume file: .planning/phases/02-assessment-engine-core-scoring/02-03-SUMMARY.md
+Stopped at: Completed 02-02-PLAN.md - Question bank and scoring engine
+Resume file: .planning/phases/02-assessment-engine-core-scoring/02-02-SUMMARY.md
 
+**Completed plans (out of order):** 02-01, 02-03, 02-02
 **Next plan:** 02-04 (Question flow UI)
