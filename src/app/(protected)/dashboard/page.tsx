@@ -20,7 +20,7 @@ export default async function DashboardPage() {
     include: {
       _count: { select: { responses: true } },
       scores: {
-        orderBy: { createdAt: 'desc' },
+        orderBy: { calculatedAt: 'desc' },
         take: 1,
       },
     },
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
                                     Overall Score
                                   </p>
                                   <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                                    {latestScore.overallScore.toFixed(1)} / 10
+                                    {latestScore.score.toFixed(1)} / 10
                                   </p>
                                 </div>
                                 <Badge
