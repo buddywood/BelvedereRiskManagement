@@ -7,15 +7,20 @@ import { useAssessmentStore } from '@/lib/assessment/store';
 import { PillarCard } from '@/components/assessment/PillarCard';
 import { OverallProgress } from '@/components/assessment/ProgressBar';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Loader2, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { Pillar } from '@/lib/assessment/types';
+import { getVisibleQuestions } from '@/lib/assessment/branching';
+import { allQuestions } from '@/lib/assessment/questions';
+import { formatDistanceToNow } from 'date-fns';
 
 /**
  * Assessment Hub Page
  *
  * Entry point for starting or resuming family governance assessments.
  * Implements server rehydration on mount for save/resume functionality.
+ * Enhanced with smart resume to navigate to exact next required question.
  */
 
 // MVP: Single pillar with 8 sub-categories (will expand in future phases)
@@ -111,9 +116,27 @@ export default function AssessmentHubPage() {
   };
 
   const handleContinueAssessment = () => {
+    // Smart resume: Find next unanswered question using branching logic
+    const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
+    const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions);
+
+    // Find first unanswered question
+    let nextQuestionIndex = 0;
+    for (let i = 0; i < visibleQuestions.length; i++) {
+      const question = visibleQuestions[i];
+      const answer = store.answers[question.id];
+      if (answer === undefined || answer === null) {
+        nextQuestionIndex = i;
+        break;
+      }
+      // If all questions answered, go to last question (for review)
+      if (i === visibleQuestions.length - 1) {
+        nextQuestionIndex = i;
+      }
+    }
+
     const pillar = store.currentPillar || 'family-governance';
-    const questionIndex = store.currentQuestionIndex || 0;
-    router.push(`/assessment/${pillar}/${questionIndex}`);
+    router.push(`/assessment/${pillar}/${nextQuestionIndex}`);
   };
 
   // Determine pillar status
@@ -124,8 +147,15 @@ export default function AssessmentHubPage() {
   };
 
   const pillarStatus = getPillarStatus();
-  const questionsAnswered = Object.keys(store.answers).length;
-  const totalQuestions = 40; // MVP: approximate count for Family Governance pillar
+
+  // Calculate accurate question count using branching logic
+  const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
+  const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions);
+  const questionsAnswered = visibleQuestions.filter((q) => {
+    const answer = store.answers[q.id];
+    return answer !== undefined && answer !== null;
+  }).length;
+  const totalQuestions = visibleQuestions.length || pillarQuestions.length;
 
   // Show loading skeleton until hydrated
   if (isInitializing || (store.assessmentId && !store.isHydrated)) {
@@ -153,6 +183,27 @@ export default function AssessmentHubPage() {
           Complete the assessment to receive personalized recommendations.
         </p>
       </div>
+
+      {/* Welcome Back Banner (In-progress state) */}
+      {pillarStatus === 'in-progress' && store.assessmentId && (
+        <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950">
+          <AlertTitle className="text-lg font-semibold text-blue-900 dark:text-blue-100">
+            Welcome Back!
+          </AlertTitle>
+          <AlertDescription className="text-blue-800 dark:text-blue-200 space-y-2">
+            <p>
+              You've completed <strong>{questionsAnswered}</strong> of <strong>{totalQuestions}</strong> questions.
+              Pick up where you left off.
+            </p>
+            {store.lastSaved && (
+              <p className="text-sm flex items-center gap-2">
+                <Clock className="h-3 w-3" />
+                Last saved {formatDistanceToNow(new Date(store.lastSaved), { addSuffix: true })}
+              </p>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Overall Progress */}
       {store.assessmentId && (
@@ -194,7 +245,7 @@ export default function AssessmentHubPage() {
             >
               {createAssessmentMutation.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   Starting...
                 </>
               ) : (
@@ -205,11 +256,18 @@ export default function AssessmentHubPage() {
         ) : pillarStatus === 'in-progress' ? (
           <>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-              You have answered {questionsAnswered} of {totalQuestions} questions.
-              Pick up where you left off.
+              Continue with your assessment to receive personalized governance recommendations.
             </p>
             <Button size="lg" onClick={handleContinueAssessment}>
               Continue Assessment
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/assessment/family-governance/0')}
+              className="mt-2"
+            >
+              Review Answers from Beginning
             </Button>
           </>
         ) : (
