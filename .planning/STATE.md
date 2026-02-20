@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 2 of 4 (Assessment Engine & Core Scoring)
-Plan: 1 of 6 completed
+Plan: 3 of 6 completed
 Status: In progress
-Last activity: 2026-02-20 — Completed 02-01: Dependencies and foundation setup
+Last activity: 2026-02-20 — Completed 02-03: Assessment hub and state management
 
-Progress: [███░░░░░░░] 25% (3 of 12 plans)
+Progress: [████░░░░░░] 33% (4 of 12 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 4.4 minutes
-- Total execution time: 0.2 hours
+- Total plans completed: 4
+- Average duration: 4.3 minutes
+- Total execution time: 0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 2 | 10.3 min | 5.2 min |
-| 02 | 1 | 3.0 min | 3.0 min |
+| 02 | 2 | 7.2 min | 3.6 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (6.9 min), 01-02 (3.4 min), 02-01 (3.0 min)
-- Trend: Accelerating
+- Last 5 plans: 01-01 (6.9 min), 01-02 (3.4 min), 02-01 (3.0 min), 02-03 (4.2 min)
+- Trend: Stable
 
 *Updated after each plan completion*
 
@@ -43,6 +43,8 @@ Progress: [███░░░░░░░] 25% (3 of 12 plans)
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- localStorage as optimistic cache, server API as source of truth (02-03): Zustand persist provides fast local state, but loadFromServer() rehydrates from API on mount. Ensures save/resume works after browser restart or localStorage clear.
+- pillar-based progress tracking (02-03): Show pillar completion progress, not question counts (e.g., "X of Y questions" per pillar, not "Question 3 of 80"). Research shows total counts are demoralizing.
 - Hierarchical weighted scoring model (02-01): Question -> Sub-Category -> Pillar structure enables granular risk analysis. Bottom-up score aggregation supports flexible weighting algorithms.
 - JSON fields for assessment flexibility (02-01): answer, breakdown, missingControls use Json type for schema evolution. Type safety enforced in TypeScript layer, not DB constraints.
 - shadcn/ui component library (02-01): Radix UI primitives with zinc color scheme. Owned components avoid library lock-in, provide accessibility out of the box.
@@ -68,9 +70,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 02-01-PLAN.md - Dependencies and foundation setup
-Resume file: .planning/phases/02-assessment-engine-core-scoring/02-01-SUMMARY.md
+Stopped at: Completed 02-03-PLAN.md - Assessment hub and state management
+Resume file: .planning/phases/02-assessment-engine-core-scoring/02-03-SUMMARY.md
 
-**User action required before next plan:**
-- Run `npx prisma db push` to apply assessment schema changes
-- All dependencies installed and verified (no configuration needed)
+**Next plan:** 02-04 (Question flow UI)
