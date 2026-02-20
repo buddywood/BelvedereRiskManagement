@@ -24,6 +24,7 @@ model User {
 
   accounts      Account[]
   sessions      Session[]
+  assessments   Assessment[]
 
   @@index([email])
 }
@@ -67,4 +68,69 @@ model VerificationToken {
   used       Boolean  @default(false)
 
   @@unique([identifier, token])
+}
+
+model Assessment {
+  id            String           @id @default(cuid())
+  userId        String
+  version       Int              @default(1)
+  status        AssessmentStatus @default(IN_PROGRESS)
+  currentPillar String?
+  currentQuestionIndex Int?      @default(0)
+  startedAt     DateTime         @default(now())
+  completedAt   DateTime?
+  updatedAt     DateTime         @updatedAt
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses     AssessmentResponse[]
+  scores        PillarScore[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model AssessmentResponse {
+  id           String   @id @default(cuid())
+  assessmentId String
+  questionId   String
+  pillar       String
+  subCategory  String
+  answer       Json
+  skipped      Boolean  @default(false)
+  answeredAt   DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, questionId])
+  @@index([assessmentId])
+}
+
+model PillarScore {
+  id           String    @id @default(cuid())
+  assessmentId String
+  pillar       String
+  score        Float
+  riskLevel    RiskLevel
+  breakdown    Json
+  missingControls Json?
+  calculatedAt DateTime  @default(now())
+
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, pillar])
+  @@index([assessmentId])
+}
+
+enum AssessmentStatus {
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
