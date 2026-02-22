@@ -23,9 +23,20 @@ const totp = new TOTP({
 export async function enrollMFA(userId: string) {
   // Generate TOTP secret using built-in method
   const secret = totp.generateSecret();
+  console.debug("[MFA] Generated TOTP secret", {
+    secretLength: secret.length,
+    secretFormat: "base32",
+  });
 
   // Encrypt secret before storing
-  const encryptedSecret = encrypt(secret);
+  let encryptedSecret: string;
+  try {
+    encryptedSecret = encrypt(secret);
+    console.debug("[MFA] Successfully encrypted secret");
+  } catch (encryptError) {
+    console.error("[MFA] Failed to encrypt secret:", encryptError);
+    throw encryptError;
+  }
 
   // Get user email for QR code label
   const user = await prisma.user.findUnique({
@@ -42,6 +53,7 @@ export async function enrollMFA(userId: string) {
     where: { id: userId },
     data: { mfaSecret: encryptedSecret },
   });
+  console.debug("[MFA] Stored encrypted secret for user");
 
   // Generate otpauth URI using built-in method
   const otpauthUrl = totp.toURI({
@@ -49,9 +61,11 @@ export async function enrollMFA(userId: string) {
     label: user.email,
     issuer: "Belvedere",
   });
+  console.debug("[MFA] Generated otpauth URI");
 
   // Generate QR code data URL
   const qrCodeUrl = await toDataURL(otpauthUrl);
+  console.debug("[MFA] Generated QR code");
 
   return {
     qrCodeUrl,
@@ -73,21 +87,65 @@ export async function verifyMFAToken(
   });
 
   if (!user?.mfaSecret) {
+    console.debug("[TOTP] User has no MFA secret stored");
     return false;
   }
 
   // Decrypt secret
-  const secret = decrypt(user.mfaSecret);
-
-  // Verify token with 30-second tolerance window
+  let secret: string;
   try {
+    secret = decrypt(user.mfaSecret);
+    console.debug("[TOTP] Successfully decrypted secret", {
+      secretLength: secret.length,
+      encryptedLength: user.mfaSecret.length,
+    });
+  } catch (decryptError) {
+    console.error("[TOTP] Failed to decrypt secret:", decryptError);
+    return false;
+  }
+
+  // Validate token format
+  if (!token || typeof token !== "string") {
+    console.debug("[TOTP] Invalid token - not a string:", typeof token);
+    return false;
+  }
+
+  if (!/^\d{6}$/.test(token)) {
+    console.debug("[TOTP] Invalid token format. Expected 6 digits, got:", {
+      token,
+      length: token.length,
+    });
+    return false;
+  }
+
+  // Verify token with tolerance window (60 seconds = 2 periods, past and future)
+  try {
+    console.debug("[TOTP] Starting verification", {
+      token,
+      secretLength: secret.length,
+      tolerance: "60 seconds (±1 period)",
+    });
+
+    // TOTP class instance has crypto and base32 plugins pre-configured
+    // verify(token, options) where options are partial overrides
     const result = await totp.verify(token, {
       secret,
-      epochTolerance: 30,
+      epochTolerance: 60, // 60 seconds = 2 x 30-second periods
     });
-    return result.valid;
+
+    console.debug("[TOTP] Verification result:", {
+      valid: result.valid,
+      delta: result.valid ? (result as any).delta : undefined,
+      epoch: result.valid ? (result as any).epoch : undefined,
+    });
+
+    return result.valid === true;
   } catch (error) {
-    console.error("TOTP verification error:", error);
+    console.error("[TOTP] Verification error:", {
+      error: error instanceof Error ? error.message : String(error),
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return false;
   }
 }
