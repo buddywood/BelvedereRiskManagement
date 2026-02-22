@@ -5,8 +5,15 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { encrypt, decrypt } from "@/lib/encryption";
 
-// Initialize TOTP with default options
+// Initialize TOTP with Node.js crypto adapter
 const totp = new TOTP();
+totp.options = {
+  crypto: {
+    createHmac: (algorithm, key) =>
+      crypto.createHmac(algorithm, Buffer.from(key, "hex")),
+    randomBytes: crypto.randomBytes,
+  },
+};
 
 /**
  * Enroll user in MFA by generating TOTP secret and QR code
