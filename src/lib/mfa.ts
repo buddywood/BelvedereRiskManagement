@@ -1,27 +1,28 @@
-import { TOTP } from "otplib";
-import { generateSecret } from "otplib";
+import { TOTP } from "@otplib/totp";
+import { NobleCryptoPlugin } from "@otplib/plugin-crypto-noble";
+import { ScureBase32Plugin } from "@otplib/plugin-base32-scure";
 import { toDataURL } from "qrcode";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { encrypt, decrypt } from "@/lib/encryption";
 
-// Initialize TOTP with Node.js crypto adapter
-const totp = new TOTP();
-totp.options = {
-  crypto: {
-    createHmac: (algorithm, key) =>
-      crypto.createHmac(algorithm, Buffer.from(key, "hex")),
-    randomBytes: crypto.randomBytes,
-  },
-};
+// Initialize TOTP with Noble crypto and Scure Base32 plugins
+const totp = new TOTP({
+  crypto: new NobleCryptoPlugin(),
+  base32: new ScureBase32Plugin(),
+  issuer: "Belvedere",
+  digits: 6,
+  period: 30,
+  algorithm: "sha1",
+});
 
 /**
  * Enroll user in MFA by generating TOTP secret and QR code
  * Does NOT enable MFA yet - user must verify TOTP first
  */
 export async function enrollMFA(userId: string) {
-  // Generate TOTP secret
-  const secret = generateSecret();
+  // Generate TOTP secret using built-in method
+  const secret = totp.generateSecret();
 
   // Encrypt secret before storing
   const encryptedSecret = encrypt(secret);
@@ -42,8 +43,12 @@ export async function enrollMFA(userId: string) {
     data: { mfaSecret: encryptedSecret },
   });
 
-  // Generate otpauth URI for QR code
-  const otpauthUrl = `otpauth://totp/Belvedere:${encodeURIComponent(user.email)}?secret=${secret}&issuer=Belvedere`;
+  // Generate otpauth URI using built-in method
+  const otpauthUrl = totp.toURI({
+    secret,
+    label: user.email,
+    issuer: "Belvedere",
+  });
 
   // Generate QR code data URL
   const qrCodeUrl = await toDataURL(otpauthUrl);
@@ -74,9 +79,12 @@ export async function verifyMFAToken(
   // Decrypt secret
   const secret = decrypt(user.mfaSecret);
 
-  // Verify token (TOTP.verify has built-in window tolerance)
+  // Verify token with 30-second tolerance window
   try {
-    const result = await totp.verify(token, { secret });
+    const result = await totp.verify(token, {
+      secret,
+      epochTolerance: 30,
+    });
     return result.valid;
   } catch (error) {
     console.error("TOTP verification error:", error);
