@@ -11,6 +11,12 @@ Enhance assessment personalization through comprehensive household member profil
 
 **Dependencies:** None (builds on existing v1.0 authentication)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Data layer: Prisma schema, Zod validation, Server Actions for household member CRUD
+- [ ] 05-02-PLAN.md — UI layer: Profile form components, member cards, profiles page, and navigation
+
 **Requirements:**
 - PROFILE-01: User can create household member profiles with full name, age, occupation/career, and primary contact information (phone and email)
 - PROFILE-02: User can specify family relationship for each household member (spouse, child, parent, etc.)
