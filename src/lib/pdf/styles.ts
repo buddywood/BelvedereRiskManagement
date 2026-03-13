@@ -1,0 +1,163 @@
+import { StyleSheet } from '@react-pdf/renderer'
+
+export const styles = StyleSheet.create({
+  page: {
+    fontFamily: 'Helvetica',
+    fontSize: 11,
+    paddingTop: 72,
+    paddingBottom: 72,
+    paddingHorizontal: 72,
+    lineHeight: 1.5,
+    color: '#374151',
+  },
+
+  header: {
+    fontSize: 24,
+    marginBottom: 20,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+  },
+
+  subheader: {
+    fontSize: 18,
+    marginBottom: 16,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+  },
+
+  section: {
+    marginBottom: 24,
+  },
+
+  paragraph: {
+    marginBottom: 12,
+    textAlign: 'justify',
+    lineHeight: 1.6,
+  },
+
+  table: {
+    display: 'table',
+    width: '100%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+  },
+
+  tableRow: {
+    margin: 'auto',
+    flexDirection: 'row',
+  },
+
+  tableHeader: {
+    backgroundColor: '#f9fafb',
+    fontWeight: 'bold',
+  },
+
+  tableCol: {
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+    padding: 8,
+    flex: 1,
+  },
+
+  footer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 72,
+    right: 72,
+    textAlign: 'center',
+    fontSize: 9,
+    color: '#6b7280',
+  },
+
+  coverTitle: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+    textAlign: 'center',
+    marginBottom: 40,
+  },
+
+  coverSubtitle: {
+    fontSize: 20,
+    color: '#374151',
+    textAlign: 'center',
+    marginBottom: 60,
+  },
+
+  scoreDisplay: {
+    textAlign: 'center',
+    marginVertical: 40,
+  },
+
+  scoreNumber: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+  },
+
+  riskBadge: {
+    backgroundColor: '#dc2626',
+    color: 'white',
+    padding: '8 16',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+
+  progressBar: {
+    height: 8,
+    backgroundColor: '#e5e7eb',
+    marginVertical: 4,
+    flexDirection: 'row',
+  },
+
+  progressFill: {
+    backgroundColor: '#10b981',
+    height: '100%',
+  },
+
+  confidential: {
+    position: 'absolute',
+    bottom: 72,
+    left: 72,
+    right: 72,
+    textAlign: 'center',
+    fontSize: 10,
+    color: '#6b7280',
+    borderTop: '1 solid #e5e7eb',
+    paddingTop: 12,
+  },
+
+  metricGrid: {
+    display: 'flex',
+    flexDirection: 'row',
+    marginVertical: 20,
+  },
+
+  metricItem: {
+    flex: 1,
+    textAlign: 'center',
+    padding: 12,
+    backgroundColor: '#f9fafb',
+    margin: 4,
+  },
+
+  metricLabel: {
+    fontSize: 10,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+
+  metricValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+  },
+})
