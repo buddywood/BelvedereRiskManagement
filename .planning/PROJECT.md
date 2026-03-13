@@ -8,6 +8,18 @@ A complete 12-minute TurboTax-style Family Governance assessment that produces p
 
 Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
 
+## Current Milestone: v1.1 Household Profile Integration
+
+**Goal:** Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables.
+
+**Target features:**
+- Household member profile collection (names, ages, occupations, contact info)
+- Extended family tracking (adult children/grandchildren not in home)
+- Assessment question personalization based on family composition
+- Pre-filled report and policy template data from profiles
+- Enhanced branching logic using household context
+- Family-specific governance recommendations
+
 ## Requirements
 
 ### Validated
@@ -68,4 +80,4 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - **Scope**: Family Governance pillar only — validated as sufficient for MVP
 
 ---
-*Last updated: 2026-03-13 after v1.0 milestone*
+*Last updated: 2026-03-12 after v1.1 milestone started*
