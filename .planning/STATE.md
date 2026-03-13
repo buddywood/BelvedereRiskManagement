@@ -36,6 +36,7 @@ Progress: [████████░░] 75% (9 of 12 plans)
 
 *Updated after each plan completion*
 | Phase 01 P03 | 5.2 | 2 tasks | 11 files |
+| Phase 03 P01 | 6.5 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,9 @@ Recent decisions affecting current work:
 - [Phase 01-03]: TOTP with 30-second time window and 1-step tolerance: Standard authenticator app compatibility with otplib. Balances security and usability.
 - [Phase 01-03]: Rate limiting: 5 attempts per 5 minutes on MFA endpoints: Prevents brute force attacks on TOTP codes while allowing for user error.
 - [Phase 01-03]: SHA-256 hashed recovery codes for single-use security: Recovery codes are hashed before storage and marked as used to prevent replay attacks.
+- [Phase 03-01]: Backward compatibility preserved with optional visibleQuestionIds parameter
+- [Phase 03-01]: Subcategories with zero visible questions excluded from score weighting
+- [Phase 03-01]: 50% completion threshold now based on visible questions, not total questions
 
 ### Pending Todos
 
