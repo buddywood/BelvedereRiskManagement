@@ -114,11 +114,30 @@ export async function GET(
       missingControls: pillarScore.missingControls as any,
     };
 
+    // Load household members
+    const householdMembers = await prisma.householdMember.findMany({
+      where: { userId: session.user.id },
+      select: { fullName: true, relationship: true, age: true, governanceRoles: true, isResident: true }
+    });
+
+    // Build HouseholdProfile from members
+    const householdProfile = householdMembers.length > 0 ? {
+      members: householdMembers.map(m => ({
+        id: '', // Not needed for templates
+        fullName: m.fullName,
+        age: m.age,
+        relationship: m.relationship,
+        governanceRoles: m.governanceRoles as string[],
+        isResident: m.isResident
+      }))
+    } : null;
+
     // Map assessment data to template data
     const templateData = mapAssessmentToTemplate(
       templateId,
       scoreData,
-      session.user.email
+      session.user.email,
+      householdProfile
     );
 
     // Generate Word document
