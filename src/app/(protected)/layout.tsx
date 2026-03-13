@@ -20,15 +20,34 @@ export default async function ProtectedLayout({
       <div className="page-shell">
         <div className="hero-surface overflow-hidden rounded-[2rem]">
           <header className="border-b section-divider bg-background/55">
-            <div className="flex flex-col gap-6 px-5 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
-              <div className="space-y-3">
+            <div className="px-5 py-4 sm:px-8 lg:px-10">
+              <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <p className="editorial-kicker">Belvedere Risk Management</p>
-                  <h1 className="text-3xl font-semibold leading-none">
+                  <h1 className="text-2xl font-semibold leading-none sm:text-3xl">
                     Governance Assessment Workspace
                   </h1>
                 </div>
-                <nav className="flex flex-wrap gap-2">
+
+                <div className="flex shrink-0 items-center gap-3">
+                  <div className="hidden rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground lg:block">
+                    Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
+                  </div>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await signOut({ redirectTo: "/" });
+                    }}
+                  >
+                    <Button type="submit" variant="outline" size="sm">
+                      Sign Out
+                    </Button>
+                  </form>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
                   <Button asChild variant="ghost" size="sm">
                     <Link href="/dashboard">Dashboard</Link>
                   </Button>
@@ -39,22 +58,10 @@ export default async function ProtectedLayout({
                     <Link href="/settings">Settings</Link>
                   </Button>
                 </nav>
-              </div>
 
-              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-                <div className="rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground">
+                <div className="rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground lg:hidden md:max-w-[24rem]">
                   Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
                 </div>
-                <form
-                  action={async () => {
-                    "use server";
-                    await signOut({ redirectTo: "/" });
-                  }}
-                >
-                  <Button type="submit" variant="outline">
-                    Sign Out
-                  </Button>
-                </form>
               </div>
             </div>
           </header>

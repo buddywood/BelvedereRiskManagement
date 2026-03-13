@@ -143,7 +143,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <section className="hero-surface rounded-[1.75rem] p-6 sm:p-8">
+      <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
         <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <SectionProgress
             answeredCount={progress.answered}
@@ -151,7 +151,19 @@ export default function QuestionPage({ params }: QuestionPageProps) {
             pillarName="Family Governance"
           />
 
-          <Card className="bg-background/60">
+          <div className="flex flex-wrap gap-2 sm:hidden">
+            <div className="rounded-full border section-divider bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+              Question {questionIndex + 1} / {visibleQuestions.length}
+            </div>
+            <div className="rounded-full border section-divider bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+              {currentQuestion.required ? 'Required' : 'Optional'}
+            </div>
+            <div className="rounded-full border section-divider bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+              {isSaving ? 'Saving...' : 'Autosave active'}
+            </div>
+          </div>
+
+          <Card className="hidden bg-background/60 sm:block">
             <CardContent className="grid gap-3 pt-6 sm:grid-cols-3">
               <div>
                 <p className="editorial-kicker">Question</p>
@@ -177,7 +189,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
       </section>
 
       <Card className="overflow-hidden">
-        <CardContent className="space-y-8 pt-8">
+        <CardContent className="space-y-6 pt-6 sm:space-y-8 sm:pt-8">
           <QuestionCard
             question={currentQuestion}
             currentAnswer={currentAnswer}

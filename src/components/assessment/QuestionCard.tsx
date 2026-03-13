@@ -166,13 +166,13 @@ export function QuestionCard({
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      <div className="space-y-5">
+    <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
+      <div className="space-y-4 sm:space-y-5">
         <div className="space-y-3">
           <p className="editorial-kicker">
             {question.required ? "Required Question" : "Optional Question"}
           </p>
-          <h2 className="text-3xl font-semibold leading-tight text-balance text-foreground sm:text-4xl">
+          <h2 className="text-2xl font-semibold leading-tight text-balance text-foreground sm:text-4xl">
             {question.text}
           </h2>
         </div>
@@ -189,7 +189,7 @@ export function QuestionCard({
         />
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         {renderAnswerComponent()}
       </div>
 
