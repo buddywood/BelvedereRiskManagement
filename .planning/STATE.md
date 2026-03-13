@@ -10,9 +10,9 @@
 
 **Milestone:** v1.1 Household Profile Integration
 **Phase:** 6 - Assessment Integration
-**Plan:** 1 of 1 COMPLETED
-**Status:** Phase 6 Plan 1 Complete
-**Progress:** [█████████░] 94%
+**Plan:** 2 of 2 COMPLETED
+**Status:** Phase 6 Complete
+**Progress:** [██████████] 100%
 
 ## Performance Metrics
 
@@ -39,6 +39,9 @@
 - Profile parameter made optional everywhere for 100% backward compatibility in assessment branching
 - ProfileCondition only evaluated when profile exists (null/undefined = show all questions)
 - TextTemplate functions receive profile|null to handle both cases gracefully
+- Profile data cached for 5 minutes via TanStack Query for assessment session duration
+- Personalized text passed as separate prop to QuestionCard for clean separation of concerns
+- Profile stored in Zustand store but excluded from persistence (fetched fresh each session)
 
 ### Known Requirements
 - **Profile Foundation:** 6 requirements for basic household member management and extended family tracking
@@ -68,8 +71,8 @@
 
 ## Session Continuity
 
-**Last milestone activity:** Phase 6 Assessment Integration - Plan 1 completion
-**Last phase completed:** Phase 6 Plan 1 (Assessment personalization engine on 2026-03-13)
+**Last milestone activity:** Phase 6 Assessment Integration - Complete
+**Last phase completed:** Phase 6 Plans 1-2 (Assessment personalization and UI integration on 2026-03-13)
 **Context for next session:** Phase 6 complete - Ready to plan Phase 7 - Household Reporting
 
 ### Artifacts Created
