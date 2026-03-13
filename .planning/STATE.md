@@ -12,12 +12,12 @@
 **Phase:** 5 - Profile Foundation
 **Plan:** Not yet created
 **Status:** Planning
-**Progress:** ████████████████████████████████████████ 0% (0/14 requirements complete)
+**Progress:** ████████████████████████████████████████ 0% (0/15 requirements complete)
 
 ## Performance Metrics
 
 **Milestones completed:** 1 (v1.0 MVP shipped 2026-03-13)
-**Current milestone progress:** 0% (0/14 requirements complete)
+**Current milestone progress:** 0% (0/15 requirements complete)
 **Phase completion rate:** N/A (first phase of milestone)
 
 **Previous velocity (v1.0):**
@@ -33,10 +33,10 @@
 - Quick depth applied resulting in 3 focused phases covering all 14 requirements
 
 ### Known Requirements
-- **Profile Foundation:** 5 requirements for basic household member management
+- **Profile Foundation:** 6 requirements for basic household member management and extended family tracking
 - **Assessment Integration:** 5 requirements for personalized question branching
 - **Household Reporting:** 4 requirements for customized deliverables
-- Total coverage: 14/14 requirements mapped to phases
+- Total coverage: 15/15 requirements mapped to phases
 
 ### Technical Context
 - Building on existing v1.0 MVP with Next.js 15, TypeScript, PostgreSQL stack

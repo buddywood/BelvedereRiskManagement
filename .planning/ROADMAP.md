@@ -12,11 +12,12 @@ Enhance assessment personalization through comprehensive household member profil
 **Dependencies:** None (builds on existing v1.0 authentication)
 
 **Requirements:**
-- PROFILE-01: User can create household member profiles with full name, age, and primary contact information (phone and email)
+- PROFILE-01: User can create household member profiles with full name, age, occupation/career, and primary contact information (phone and email)
 - PROFILE-02: User can specify family relationship for each household member (spouse, child, parent, etc.)
 - PROFILE-03: User can assign governance roles to household members (decision maker, advisor, successor, etc.)
 - PROFILE-04: User can edit and update existing household member profiles after initial creation
 - PROFILE-05: User can remove household members from their profile when family composition changes
+- PROFILE-06: User can track extended family members not living in the home (adult children, grandchildren) with basic contact information
 
 **Success Criteria:**
 1. User can add new household members with complete profile information in under 2 minutes per member
@@ -63,11 +64,11 @@ Enhance assessment personalization through comprehensive household member profil
 
 | Phase | Status | Requirements | Success Criteria |
 |-------|--------|--------------|------------------|
-| 5 - Profile Foundation | Not Started | 5/5 | 0/4 |
+| 5 - Profile Foundation | Not Started | 6/6 | 0/4 |
 | 6 - Assessment Integration | Not Started | 5/5 | 0/4 |
 | 7 - Household Reporting | Not Started | 4/4 | 0/4 |
 
-**Total:** 14/14 requirements across 3 phases
+**Total:** 15/15 requirements across 3 phases
 
 ## Previous Milestones
 

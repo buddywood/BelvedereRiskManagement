@@ -1,17 +1,18 @@
 # Requirements: v1.1 Household Profile Integration
 
 **Milestone:** v1.1 Household Profile Integration
-**Goal:** Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables.
+**Goal:** Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables. Supports structured 45-minute intake sessions that systematically capture household composition, governance roles, and family dynamics before transitioning to quantified risk assessment.
 
 ## Milestone v1.1 Requirements
 
 ### Profile Foundation
 
-- [ ] **PROFILE-01**: User can create household member profiles with full name, age, and primary contact information (phone and email)
+- [ ] **PROFILE-01**: User can create household member profiles with full name, age, occupation/career, and primary contact information (phone and email)
 - [ ] **PROFILE-02**: User can specify family relationship for each household member (spouse, child, parent, etc.)
 - [ ] **PROFILE-03**: User can assign governance roles to household members (decision maker, advisor, successor, etc.)
 - [ ] **PROFILE-04**: User can edit and update existing household member profiles after initial creation
 - [ ] **PROFILE-05**: User can remove household members from their profile when family composition changes
+- [ ] **PROFILE-06**: User can track extended family members not living in the home (adult children, grandchildren) with basic contact information
 
 ### Assessment Integration
 
@@ -37,7 +38,6 @@
 - Profile validation and conflict resolution for multiple perspectives
 
 ### Advanced Household Features (v1.3+)
-- Household composition tracking with extended family not living in home
 - Individual privacy controls with member-level data access
 - Member-aware assessment state with unified profile management
 - Member-specific PDF report sections tailored to individual roles
@@ -68,6 +68,7 @@
 | PROFILE-03 | Phase 5 | Pending |
 | PROFILE-04 | Phase 5 | Pending |
 | PROFILE-05 | Phase 5 | Pending |
+| PROFILE-06 | Phase 5 | Pending |
 | ASSESS-01 | Phase 6 | Pending |
 | ASSESS-02 | Phase 6 | Pending |
 | ASSESS-03 | Phase 6 | Pending |
@@ -80,4 +81,4 @@
 
 ---
 *Requirements defined: 2026-03-12*
-*Total requirements: 14 (v1.1)*
+*Total requirements: 15 (v1.1)*
