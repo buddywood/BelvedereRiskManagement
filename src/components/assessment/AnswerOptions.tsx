@@ -30,8 +30,8 @@ export function SingleChoiceCards({ options, value, onChange }: SingleChoiceCard
           <Card
             key={String(option.value)}
             className={cn(
-              "cursor-pointer transition-all hover:border-zinc-400 dark:hover:border-zinc-600",
-              isSelected && "border-zinc-900 dark:border-zinc-100 bg-blue-50/50 dark:bg-blue-950/20"
+              "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40",
+              isSelected && "border-brand/50 bg-brand/10"
             )}
             onClick={() => onChange(option.value)}
           >
@@ -39,17 +39,17 @@ export function SingleChoiceCards({ options, value, onChange }: SingleChoiceCard
               <div className={cn(
                 "flex h-5 w-5 items-center justify-center rounded-full border-2 mt-0.5 shrink-0",
                 isSelected
-                  ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100"
-                  : "border-zinc-300 dark:border-zinc-700"
+                  ? "border-primary bg-primary"
+                  : "border-border"
               )}>
-                {isSelected && <Check className="h-3 w-3 text-white dark:text-zinc-900" />}
+                {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
               </div>
               <div className="flex-1">
-                <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                <div className="font-medium text-foreground">
                   {option.label}
                 </div>
                 {option.description && (
-                  <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                  <div className="text-sm text-muted-foreground mt-1 leading-6">
                     {option.description}
                   </div>
                 )}
@@ -82,8 +82,8 @@ export function YesNoCards({ value, onChange }: YesNoCardsProps) {
           <Card
             key={option.value}
             className={cn(
-              "cursor-pointer transition-all hover:border-zinc-400 dark:hover:border-zinc-600",
-              isSelected && "border-zinc-900 dark:border-zinc-100 bg-blue-50/50 dark:bg-blue-950/20"
+              "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40",
+              isSelected && "border-brand/50 bg-brand/10"
             )}
             onClick={() => onChange(option.value)}
           >
@@ -91,12 +91,12 @@ export function YesNoCards({ value, onChange }: YesNoCardsProps) {
               <div className={cn(
                 "flex h-6 w-6 items-center justify-center rounded-full border-2 mb-3",
                 isSelected
-                  ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100"
-                  : "border-zinc-300 dark:border-zinc-700"
+                  ? "border-primary bg-primary"
+                  : "border-border"
               )}>
-                {isSelected && <Check className="h-4 w-4 text-white dark:text-zinc-900" />}
+                {isSelected && <Check className="h-4 w-4 text-primary-foreground" />}
               </div>
-              <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              <div className="text-lg font-semibold text-foreground">
                 {option.label}
               </div>
             </CardContent>
@@ -127,8 +127,8 @@ export function MaturityScale({ options, value, onChange }: MaturityScaleProps) 
           <Card
             key={String(option.value)}
             className={cn(
-              "cursor-pointer transition-all hover:border-zinc-400 dark:hover:border-zinc-600 relative",
-              isSelected && "border-zinc-900 dark:border-zinc-100 bg-blue-50/50 dark:bg-blue-950/20"
+              "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 relative overflow-hidden",
+              isSelected && "border-brand/50 bg-brand/10"
             )}
             onClick={() => onChange(option.value as number)}
           >
@@ -136,7 +136,7 @@ export function MaturityScale({ options, value, onChange }: MaturityScaleProps) 
             <div
               className="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl transition-opacity"
               style={{
-                backgroundColor: `hsl(${120 * (progressLevel / totalLevels)}, 60%, 50%)`,
+                backgroundColor: `hsl(${44 + 28 * (progressLevel / totalLevels)} 68% 58%)`,
                 opacity: isSelected ? 1 : 0.3,
               }}
             />
@@ -144,17 +144,17 @@ export function MaturityScale({ options, value, onChange }: MaturityScaleProps) 
               <div className={cn(
                 "flex h-5 w-5 items-center justify-center rounded-full border-2 mt-0.5 shrink-0",
                 isSelected
-                  ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900 dark:bg-zinc-100"
-                  : "border-zinc-300 dark:border-zinc-700"
+                  ? "border-primary bg-primary"
+                  : "border-border"
               )}>
-                {isSelected && <Check className="h-3 w-3 text-white dark:text-zinc-900" />}
+                {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
               </div>
               <div className="flex-1">
-                <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                <div className="font-medium text-foreground">
                   {option.label}
                 </div>
                 {option.description && (
-                  <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">
+                  <div className="text-sm text-muted-foreground mt-1 leading-6">
                     {option.description}
                   </div>
                 )}
@@ -200,7 +200,7 @@ export function NumericInput({
         className="text-lg"
       />
       {(min !== undefined || max !== undefined) && (
-        <div className="text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="text-sm text-muted-foreground">
           {min !== undefined && max !== undefined
             ? `Enter a value between ${min} and ${max}`
             : min !== undefined
@@ -243,11 +243,11 @@ export function ShortTextInput({
       />
       {maxLength && (
         <div className="flex justify-between text-sm">
-          <span className="text-zinc-500 dark:text-zinc-400">
+          <span className="text-muted-foreground">
             {currentLength} / {maxLength} characters
           </span>
           {currentLength > maxLength * 0.9 && (
-            <span className="text-amber-600 dark:text-amber-400">
+            <span className="text-amber-700 dark:text-amber-300">
               Approaching character limit
             </span>
           )}

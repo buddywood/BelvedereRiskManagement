@@ -6,6 +6,7 @@ import { useAssessmentStore } from '@/lib/assessment/store';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Assessment Completion Page
@@ -62,18 +63,19 @@ export default function AssessmentCompletePage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
-        <div className="max-w-2xl mx-auto px-6">
-          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-12 text-center space-y-6">
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="max-w-2xl mx-auto w-full">
+          <Card>
+            <CardContent className="space-y-6 p-8 text-center sm:p-12">
             <div className="flex justify-center">
               <AlertCircle className="h-16 w-16 text-red-500" />
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
+              <h1 className="text-3xl font-semibold text-foreground">
                 Calculation Error
               </h1>
-              <p className="text-zinc-600 dark:text-zinc-400">
+              <p className="text-muted-foreground">
                 {error}
               </p>
             </div>
@@ -109,29 +111,32 @@ export default function AssessmentCompletePage() {
                 Return to Assessment
               </Button>
             </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
-      <div className="max-w-2xl mx-auto px-6">
-        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-12 text-center space-y-6">
+    <div className="min-h-[70vh] flex items-center justify-center">
+      <div className="max-w-2xl mx-auto w-full">
+        <Card>
+          <CardContent className="space-y-6 p-8 text-center sm:p-12">
           <div className="flex justify-center">
             {isCalculating ? (
-              <Loader2 className="h-16 w-16 text-blue-500 animate-spin" />
+              <Loader2 className="h-16 w-16 text-brand animate-spin" />
             ) : (
-              <CheckCircle className="h-16 w-16 text-green-500" />
+              <CheckCircle className="h-16 w-16 text-emerald-500" />
             )}
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <p className="editorial-kicker">Assessment Processing</p>
+            <h1 className="text-3xl font-semibold text-foreground">
               {isCalculating ? 'Calculating Your Results' : 'Assessment Complete'}
             </h1>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted-foreground">
               {isCalculating
                 ? 'Analyzing your governance structure and generating recommendations...'
                 : 'Your results are ready.'}
@@ -139,26 +144,27 @@ export default function AssessmentCompletePage() {
           </div>
 
           {isCalculating && (
-            <div className="space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center justify-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <div className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
                 <span>Calculating overall governance score</span>
               </div>
               <div className="flex items-center justify-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '150ms' }} />
+                <div className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" style={{ animationDelay: '150ms' }} />
                 <span>Identifying risk drivers</span>
               </div>
               <div className="flex items-center justify-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" style={{ animationDelay: '300ms' }} />
+                <div className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" style={{ animationDelay: '300ms' }} />
                 <span>Generating action plan</span>
               </div>
             </div>
           )}
 
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 pt-4">
+          <p className="text-xs text-muted-foreground pt-4">
             This will only take a moment...
           </p>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

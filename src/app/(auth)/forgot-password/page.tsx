@@ -2,6 +2,11 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { AuthPanel } from "@/components/auth/AuthPanel";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -15,7 +20,7 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
+      await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -35,77 +40,61 @@ export default function ForgotPasswordPage() {
 
   if (isSubmitted) {
     return (
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8 max-w-md">
-        <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">
-          Check Your Email
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-          If an account exists with that email, we&apos;ve sent a reset link.
-          Check your inbox and follow the instructions.
-        </p>
-        <p className="text-sm text-zinc-500 dark:text-zinc-500 mb-6">
-          The link will expire in 15 minutes. If you don&apos;t see the email,
-          check your spam folder.
-        </p>
-        <Link
-          href="/signin"
-          className="inline-block text-sm text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
-        >
-          Return to sign in
-        </Link>
-      </div>
+      <AuthPanel
+        eyebrow="Password Recovery"
+        title="Check your email"
+        description="If an account exists with that email, we have sent a reset link. Check your inbox and follow the instructions."
+        footer={
+          <Link href="/signin" className="font-semibold text-foreground hover:underline">
+            Return to sign in
+          </Link>
+        }
+      >
+        <Alert variant="info">
+          <AlertDescription>
+            The reset link expires in 15 minutes. If you do not see the email,
+            check your spam folder or request another link.
+          </AlertDescription>
+        </Alert>
+      </AuthPanel>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8 max-w-md">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-        Forgot Password
-      </h1>
-      <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-        Enter your email address and we&apos;ll send you a link to reset your
-        password.
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
-          >
-            Email
-          </label>
-          <input
+    <AuthPanel
+      eyebrow="Password Recovery"
+      title="Forgot password"
+      description="Enter the email address associated with your account and we will send a secure reset link."
+      footer={
+        <Link href="/signin" className="font-semibold text-foreground hover:underline">
+          Return to sign in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            autoComplete="email"
+            placeholder="name@familyoffice.com"
           />
         </div>
 
-        {error && (
-          <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
-        )}
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full px-4 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
           {isLoading ? "Sending..." : "Send Reset Link"}
-        </button>
+        </Button>
       </form>
-
-      <div className="mt-4 text-center">
-        <Link
-          href="/signin"
-          className="text-sm text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
-        >
-          Return to sign in
-        </Link>
-      </div>
-    </div>
+    </AuthPanel>
   );
 }

@@ -7,13 +7,7 @@
  * business involvement, and documentation.
  */
 
-import {
-  Question,
-  Pillar,
-  SubCategory,
-  QuestionOption,
-  QuestionType,
-} from './types';
+import { Question, Pillar } from './types';
 
 // ============================================================================
 // SUB-CATEGORY 1: DECISION-MAKING AUTHORITY (8 questions)

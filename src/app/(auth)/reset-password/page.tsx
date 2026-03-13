@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, FormEvent, useEffect, Suspense } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { AuthPanel } from "@/components/auth/AuthPanel";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -18,21 +23,23 @@ function ResetPasswordForm() {
   // Validate URL parameters
   if (!token || !email) {
     return (
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8 max-w-md">
-        <h1 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4">
-          Invalid Reset Link
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-          This password reset link is invalid or incomplete. Please request a
-          new reset link.
-        </p>
-        <Link
-          href="/forgot-password"
-          className="inline-block text-sm text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
-        >
-          Request new reset link
-        </Link>
-      </div>
+      <AuthPanel
+        eyebrow="Password Recovery"
+        title="Invalid reset link"
+        description="This password reset link is invalid or incomplete. Request a new reset email to continue."
+        footer={
+          <Link href="/forgot-password" className="font-semibold text-foreground hover:underline">
+            Request new reset link
+          </Link>
+        }
+      >
+        <Alert variant="destructive">
+          <AlertDescription>
+            For your security, password reset links can only be used with the
+            original email and a valid token.
+          </AlertDescription>
+        </Alert>
+      </AuthPanel>
     );
   }
 
@@ -78,100 +85,77 @@ function ResetPasswordForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8 max-w-md">
-        <h1 className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">
-          Password Reset Successfully
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-          Your password has been reset. You can now sign in with your new
-          password.
-        </p>
-        <Link
-          href="/signin"
-          className="inline-block px-6 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-        >
-          Sign In
-        </Link>
-      </div>
+      <AuthPanel
+        eyebrow="Password Recovery"
+        title="Password reset successfully"
+        description="Your password has been updated. You can now return to the workspace and sign in with your new credentials."
+      >
+        <Button asChild size="lg" className="w-full">
+          <Link href="/signin">Return to Sign In</Link>
+        </Button>
+      </AuthPanel>
     );
   }
 
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8 max-w-md">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-        Reset Password
-      </h1>
-      <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-        Enter your new password below.
-      </p>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
-          >
-            New Password
-          </label>
-          <input
+    <AuthPanel
+      eyebrow="Password Recovery"
+      title="Reset password"
+      description="Choose a new password for your account. Use a strong, unique passphrase for best protection."
+      footer={
+        <Link href="/signin" className="font-semibold text-foreground hover:underline">
+          Return to sign in
+        </Link>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="password">New password</Label>
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            autoComplete="new-password"
+            placeholder="Enter a new password"
           />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Must be at least 8 characters with uppercase, lowercase, number, and
-            special character
+          <p className="text-sm text-muted-foreground">
+            Must be at least 8 characters with uppercase, lowercase, number,
+            and special character.
           </p>
         </div>
 
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
-          >
-            Confirm Password
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm password</Label>
+          <Input
             id="confirmPassword"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            autoComplete="new-password"
+            placeholder="Repeat your new password"
           />
         </div>
 
-        {error && (
-          <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
-        )}
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full px-4 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
           {isLoading ? "Resetting..." : "Reset Password"}
-        </button>
+        </Button>
       </form>
-
-      <div className="mt-4 text-center">
-        <Link
-          href="/signin"
-          className="text-sm text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
-        >
-          Return to sign in
-        </Link>
-      </div>
-    </div>
+    </AuthPanel>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="text-center">Loading...</div>}>
+    <Suspense fallback={<div className="py-12 text-center text-sm text-muted-foreground">Loading reset flow...</div>}>
       <ResetPasswordForm />
     </Suspense>
   );

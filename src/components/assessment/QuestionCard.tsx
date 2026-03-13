@@ -14,6 +14,7 @@ import {
 } from "./AnswerOptions";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 /**
  * QuestionCard Component
@@ -110,20 +111,23 @@ export function QuestionCard({
 
   // Render appropriate answer component based on question type
   const renderAnswerComponent = () => {
-    const props = {
-      value: currentAnswer as any,
-      onChange: handleAnswerChange,
-    };
+    const base = { onChange: handleAnswerChange };
 
     switch (question.type) {
       case 'yes-no':
-        return <YesNoCards {...props} />;
+        return (
+          <YesNoCards
+            {...base}
+            value={currentAnswer != null ? String(currentAnswer) : null}
+          />
+        );
 
       case 'single-choice':
         return (
           <SingleChoiceCards
             options={question.options || []}
-            {...props}
+            {...base}
+            value={currentAnswer != null ? (currentAnswer as string | number) : null}
           />
         );
 
@@ -131,19 +135,30 @@ export function QuestionCard({
         return (
           <MaturityScale
             options={question.options || []}
-            {...props}
+            {...base}
+            value={currentAnswer != null ? Number(currentAnswer) : null}
           />
         );
 
       case 'numeric':
-        return <NumericInput {...props} />;
+        return (
+          <NumericInput
+            {...base}
+            value={currentAnswer != null ? Number(currentAnswer) : null}
+          />
+        );
 
       case 'short-text':
-        return <ShortTextInput {...props} />;
+        return (
+          <ShortTextInput
+            {...base}
+            value={currentAnswer != null ? String(currentAnswer) : ''}
+          />
+        );
 
       default:
         return (
-          <div className="text-zinc-500">
+          <div className="text-muted-foreground">
             Unknown question type: {question.type}
           </div>
         );
@@ -151,44 +166,50 @@ export function QuestionCard({
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* Question Text */}
-      <div className="space-y-4">
-        <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100 leading-tight">
-          {question.text}
-        </h2>
+    <div className="max-w-3xl mx-auto space-y-8">
+      <div className="space-y-5">
+        <div className="space-y-3">
+          <p className="editorial-kicker">
+            {question.required ? "Required Question" : "Optional Question"}
+          </p>
+          <h2 className="text-3xl font-semibold leading-tight text-balance text-foreground sm:text-4xl">
+            {question.text}
+          </h2>
+        </div>
 
-        {/* Inline Help */}
+        {question.subCategory ? (
+          <p className="text-sm uppercase tracking-[0.14em] text-muted-foreground">
+            {question.subCategory.replace(/-/g, " ")}
+          </p>
+        ) : null}
+
         <InlineHelp
           helpText={question.helpText}
           learnMore={question.learnMore}
         />
       </div>
 
-      {/* Answer Component */}
       <div className="mt-8">
         {renderAnswerComponent()}
       </div>
 
-      {/* Validation Error */}
       {errors.answer && (
-        <div className="rounded-md bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 p-3">
-          <p className="text-sm text-red-800 dark:text-red-200">
-            {errors.answer.message as string}
-          </p>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{errors.answer.message as string}</AlertDescription>
+        </Alert>
       )}
 
-      {/* Skip Link for Optional Questions */}
       {!question.required && onSkip && (
-        <div className="text-center pt-4">
+        <div className="text-center pt-2">
           <Button
             variant="ghost"
             onClick={onSkip}
-            className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+            className="text-muted-foreground hover:text-foreground"
           >
             Skip this question
-            <span className="text-xs ml-2 text-zinc-500">(answering improves accuracy)</span>
+            <span className="text-xs ml-2 text-muted-foreground">
+              (answering improves accuracy)
+            </span>
           </Button>
         </div>
       )}

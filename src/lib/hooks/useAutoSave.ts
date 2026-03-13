@@ -73,7 +73,7 @@ export function useAutoSave(assessmentId: string | null): UseAutoSaveReturn {
     if (debouncedAnswer) {
       mutation.mutate(debouncedAnswer);
     }
-  }, [debouncedAnswer]);
+  }, [debouncedAnswer, mutation]);
 
   const saveAnswer = (params: SaveAnswerParams) => {
     // Update Zustand store immediately for optimistic UI

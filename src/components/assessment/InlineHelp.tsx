@@ -28,21 +28,19 @@ export function InlineHelp({ helpText, learnMore }: InlineHelpProps) {
 
   return (
     <div className="space-y-3">
-      {/* Always-visible help text */}
       {helpText && (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+        <p className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-3 text-sm leading-6 text-muted-foreground">
           {helpText}
         </p>
       )}
 
-      {/* Expandable "Learn More" section */}
       {learnMore && (
-        <div className="border-l-2 border-zinc-200 dark:border-zinc-700 pl-4">
+        <div className="rounded-[1.25rem] border section-divider bg-card/50 px-4 py-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="h-auto p-0 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100 font-normal"
+            className="h-auto p-0 text-foreground hover:text-foreground font-medium"
           >
             <span className="flex items-center gap-1">
               {isExpanded ? (
@@ -62,7 +60,7 @@ export function InlineHelp({ helpText, learnMore }: InlineHelpProps) {
               isExpanded ? "max-h-96 opacity-100 mt-2" : "max-h-0 opacity-0"
             )}
           >
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-6">
               {learnMore}
             </p>
           </div>

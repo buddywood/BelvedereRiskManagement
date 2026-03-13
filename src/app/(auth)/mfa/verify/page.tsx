@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { AuthPanel } from "@/components/auth/AuthPanel";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function MFAVerifyForm() {
   const router = useRouter();
@@ -14,6 +19,7 @@ function MFAVerifyForm() {
   const [recoveryCode, setRecoveryCode] = useState("");
   const [error, setError] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   async function handleTOTPSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,108 +90,97 @@ function MFAVerifyForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-2">Two-Factor Authentication</h1>
-        <p className="text-sm text-gray-600 mb-6">
-          Enter the code from your authenticator app to continue
-        </p>
+    <AuthPanel
+      eyebrow="Multi-Factor Authentication"
+      title="Verify your identity"
+      description={
+        useRecovery
+          ? "Use one of your saved recovery codes to continue securely."
+          : "Enter the current code from your authenticator app to access the workspace."
+      }
+      footer={
+        <Button
+          type="button"
+          variant="ghost"
+          className="h-auto p-0"
+          disabled={signingOut}
+          onClick={async () => {
+            setSigningOut(true);
+            await signOut({ callbackUrl: "/" });
+          }}
+        >
+          {signingOut ? "Signing out..." : "Sign out"}
+        </Button>
+      }
+    >
+      {!useRecovery ? (
+        <form onSubmit={handleTOTPSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="token">Authentication code</Label>
+            <Input
+              type="text"
+              id="token"
+              value={token}
+              onChange={(e) =>
+                setToken(e.target.value.replace(/\D/g, "").slice(0, 6))
+              }
+              placeholder="000000"
+              maxLength={6}
+              required
+              autoFocus
+              className="text-center font-mono text-2xl tracking-[0.45em]"
+            />
+          </div>
 
-        {!useRecovery ? (
-          <form onSubmit={handleTOTPSubmit}>
-            <div className="mb-4">
-              <label htmlFor="token" className="block text-sm font-medium mb-2">
-                Authentication Code
-              </label>
-              <input
-                type="text"
-                id="token"
-                value={token}
-                onChange={(e) =>
-                  setToken(e.target.value.replace(/\D/g, "").slice(0, 6))
-                }
-                placeholder="000000"
-                maxLength={6}
-                required
-                autoFocus
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center text-2xl tracking-widest font-mono"
-              />
-            </div>
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                {error}
-              </div>
-            )}
+          <Button type="submit" size="lg" className="w-full" disabled={verifying || token.length !== 6}>
+            {verifying ? "Verifying..." : "Verify"}
+          </Button>
 
-            <button
-              type="submit"
-              disabled={verifying || token.length !== 6}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 mb-3"
-            >
-              {verifying ? "Verifying..." : "Verify"}
-            </button>
+          <Button type="button" variant="ghost" className="w-full" onClick={() => setUseRecovery(true)}>
+            Use a recovery code instead
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={handleRecoverySubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="recovery">Recovery code</Label>
+            <Input
+              type="text"
+              id="recovery"
+              value={recoveryCode}
+              onChange={(e) => setRecoveryCode(e.target.value.toLowerCase())}
+              placeholder="Enter recovery code"
+              required
+              autoFocus
+              className="font-mono"
+            />
+            <p className="text-sm text-muted-foreground">
+              Recovery codes are single-use and will be consumed after successful verification.
+            </p>
+          </div>
 
-            <button
-              type="button"
-              onClick={() => setUseRecovery(true)}
-              className="w-full text-sm text-gray-600 hover:text-gray-900"
-            >
-              Use a recovery code instead
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleRecoverySubmit}>
-            <div className="mb-4">
-              <label htmlFor="recovery" className="block text-sm font-medium mb-2">
-                Recovery Code
-              </label>
-              <input
-                type="text"
-                id="recovery"
-                value={recoveryCode}
-                onChange={(e) => setRecoveryCode(e.target.value.toLowerCase())}
-                placeholder="Enter recovery code"
-                required
-                autoFocus
-                className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
-              />
-              <p className="mt-2 text-xs text-gray-500">
-                Recovery codes are single-use and will be consumed after verification
-              </p>
-            </div>
+          {error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
 
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
-                {error}
-              </div>
-            )}
+          <Button type="submit" size="lg" className="w-full" disabled={verifying || !recoveryCode}>
+            {verifying ? "Verifying..." : "Verify Recovery Code"}
+          </Button>
 
-            <button
-              type="submit"
-              disabled={verifying || !recoveryCode}
-              className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400 mb-3"
-            >
-              {verifying ? "Verifying..." : "Verify Recovery Code"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setUseRecovery(false)}
-              className="w-full text-sm text-gray-600 hover:text-gray-900"
-            >
-              Use authenticator app instead
-            </button>
-          </form>
-        )}
-
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
-            Sign out
-          </Link>
-        </div>
-      </div>
-    </div>
+          <Button type="button" variant="ghost" className="w-full" onClick={() => setUseRecovery(false)}>
+            Use authenticator app instead
+          </Button>
+        </form>
+      )}
+    </AuthPanel>
   );
 }
 
@@ -193,8 +188,8 @@ export default function MFAVerifyPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          <p className="text-gray-600">Loading...</p>
+        <div className="py-12 text-center text-sm text-muted-foreground">
+          Loading verification screen...
         </div>
       }
     >

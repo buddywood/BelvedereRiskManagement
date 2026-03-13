@@ -24,49 +24,50 @@ export function NavigationButtons({
   onNext,
   canGoBack,
   isLastQuestion,
-  isValid,
+  isValid: _isValid,
   isSaving,
 }: NavigationButtonsProps) {
   return (
-    <div className="flex items-center justify-between pt-8 border-t border-zinc-200 dark:border-zinc-800">
-      {/* Back Button */}
-      <Button
-        variant="outline"
-        onClick={onBack}
-        disabled={!canGoBack}
-        className="min-w-[120px]"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        Back
-      </Button>
+    <div className="flex flex-col gap-4 border-t section-divider pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <div className="order-2 sm:order-1">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          disabled={!canGoBack}
+          className="w-full sm:min-w-[140px]"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Back
+        </Button>
+      </div>
 
-      {/* Saving Indicator */}
-      <div className="flex items-center gap-2">
-        {isSaving && (
-          <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+      <div className="order-1 flex min-h-6 items-center justify-center gap-2 sm:order-2">
+        {isSaving ? (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span>Saving...</span>
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Next Button */}
-      <Button
-        onClick={onNext}
-        className="min-w-[120px]"
-      >
-        {isLastQuestion ? (
-          <>
-            Complete Section
-            <ChevronRight className="h-4 w-4" />
-          </>
-        ) : (
-          <>
-            Next
-            <ChevronRight className="h-4 w-4" />
-          </>
-        )}
-      </Button>
+      <div className="order-3">
+        <Button
+          onClick={onNext}
+          className="w-full sm:min-w-[160px]"
+        >
+          {isLastQuestion ? (
+            <>
+              Complete Section
+              <ChevronRight className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              Continue
+              <ChevronRight className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

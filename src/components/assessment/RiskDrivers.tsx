@@ -15,7 +15,6 @@ interface RiskDriversProps {
 }
 
 export function RiskDrivers({ missingControls, riskLevel }: RiskDriversProps) {
-  // Contextual intro based on risk level
   const introText = {
     LOW: "Your assessment indicates strong governance practices overall. Continue monitoring these areas for ongoing excellence:",
     MEDIUM: "Your assessment identified several governance areas that would benefit from attention:",
@@ -25,15 +24,15 @@ export function RiskDrivers({ missingControls, riskLevel }: RiskDriversProps) {
 
   const severityConfig = {
     high: {
-      color: "bg-red-100 text-red-800 border-red-200",
+      badge: "outline" as const,
       label: "High Priority",
     },
     medium: {
-      color: "bg-orange-100 text-orange-800 border-orange-200",
+      badge: "warning" as const,
       label: "Medium Priority",
     },
     low: {
-      color: "bg-amber-100 text-amber-800 border-amber-200",
+      badge: "secondary" as const,
       label: "Monitor",
     },
   };
@@ -41,14 +40,14 @@ export function RiskDrivers({ missingControls, riskLevel }: RiskDriversProps) {
   if (missingControls.length === 0) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-zinc-900">
+        <h3 className="text-2xl font-semibold text-foreground">
           Key Risk Drivers
         </h3>
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-          <p className="text-green-800 font-medium">
+        <div className="rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/10 p-6 text-center">
+          <p className="font-medium text-emerald-900 dark:text-emerald-100">
             No critical governance gaps identified.
           </p>
-          <p className="text-green-700 text-sm mt-2">
+          <p className="mt-2 text-sm text-emerald-800 dark:text-emerald-200">
             Your current governance practices are well-established. Continue regular reviews to maintain this standard.
           </p>
         </div>
@@ -58,10 +57,10 @@ export function RiskDrivers({ missingControls, riskLevel }: RiskDriversProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-zinc-900">
+      <h3 className="text-2xl font-semibold text-foreground">
         Areas Requiring Attention
       </h3>
-      <p className="text-sm text-zinc-600">{introText[riskLevel]}</p>
+      <p className="text-sm leading-6 text-muted-foreground">{introText[riskLevel]}</p>
 
       <div className="space-y-4">
         {missingControls.map((control, index) => {
@@ -70,22 +69,22 @@ export function RiskDrivers({ missingControls, riskLevel }: RiskDriversProps) {
           return (
             <div
               key={control.questionId}
-              className="border border-zinc-200 rounded-lg p-4 space-y-3"
+              className="rounded-[1.5rem] border section-divider bg-background/60 p-5 space-y-3"
             >
               <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-orange-500 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
                 <div className="flex-1 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-semibold text-zinc-900 text-sm">
+                    <h4 className="font-semibold text-foreground text-sm">
                       {index + 1}. {control.category.split("-").map(word =>
                         word.charAt(0).toUpperCase() + word.slice(1)
                       ).join(" ")}
                     </h4>
-                    <Badge variant="outline" className={`${config.color} text-xs flex-shrink-0`}>
+                    <Badge variant={config.badge} className="text-xs flex-shrink-0">
                       {config.label}
                     </Badge>
                   </div>
-                  <p className="text-sm text-zinc-700 leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-6">
                     {control.description}
                   </p>
                 </div>

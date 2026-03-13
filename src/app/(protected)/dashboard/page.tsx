@@ -3,8 +3,9 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { formatDistanceToNow, format } from "date-fns";
 import { allQuestions } from "@/lib/assessment/questions";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export default async function DashboardPage() {
@@ -31,203 +32,206 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">
-          Welcome back, {session?.user?.email?.split("@")[0]}
-        </h2>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          Manage your family governance risk assessments
-        </p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Your Assessments Section */}
-        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-          <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
-            Your Assessments
-          </h3>
-
-          {assessments.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-zinc-600 dark:text-zinc-400 mb-4">
-                No assessments yet. Start your first risk assessment to get personalized governance recommendations.
-              </p>
-              <Link
-                href="/assessment"
-                className="inline-block px-6 py-3 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
-              >
-                Start Assessment
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {assessments.map((assessment) => {
-                const isCompleted = assessment.status === 'COMPLETED';
-                const responseCount = assessment._count.responses;
-                const progressPercentage = (responseCount / totalQuestions) * 100;
-                const latestScore = assessment.scores[0];
-
-                return (
-                  <Card key={assessment.id} className="border-zinc-200 dark:border-zinc-700">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg font-semibold">
-                          Family Governance Assessment
-                        </CardTitle>
-                        <Badge
-                          variant={isCompleted ? 'success' : 'info'}
-                          className="ml-2"
-                        >
-                          {isCompleted ? 'Completed' : 'In Progress'}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      {!isCompleted ? (
-                        <>
-                          {/* In-progress state */}
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-zinc-600 dark:text-zinc-400">
-                                Progress
-                              </span>
-                              <span className="text-zinc-900 dark:text-zinc-50 font-medium">
-                                {responseCount} of {totalQuestions} questions answered
-                              </span>
-                            </div>
-                            <Progress value={progressPercentage} className="h-2" />
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                              {Math.round(progressPercentage)}% complete
-                            </p>
-                          </div>
-
-                          {/* Pillar-by-pillar completion */}
-                          <div className="pt-3 border-t border-zinc-200 dark:border-zinc-700">
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-                              Section Status
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-700">
-                                <div
-                                  className="h-full rounded-full bg-blue-500 transition-all"
-                                  style={{ width: `${progressPercentage}%` }}
-                                />
-                              </div>
-                              <span className="text-xs text-zinc-600 dark:text-zinc-400">
-                                Family Governance
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                            Last updated {formatDistanceToNow(new Date(assessment.updatedAt), { addSuffix: true })}
-                          </div>
-
-                          <Link
-                            href="/assessment"
-                            className="inline-block w-full px-4 py-2 text-center bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors font-medium"
-                          >
-                            Continue Assessment
-                          </Link>
-                        </>
-                      ) : (
-                        <>
-                          {/* Completed state */}
-                          {latestScore && (
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                                    Overall Score
-                                  </p>
-                                  <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-                                    {latestScore.score.toFixed(1)} / 10
-                                  </p>
-                                </div>
-                                <Badge
-                                  variant={
-                                    latestScore.riskLevel === 'LOW' ? 'success' :
-                                    latestScore.riskLevel === 'MEDIUM' ? 'warning' :
-                                    latestScore.riskLevel === 'HIGH' ? 'warning' :
-                                    'default'
-                                  }
-                                  className="text-xs"
-                                >
-                                  {latestScore.riskLevel} Risk
-                                </Badge>
-                              </div>
-
-                              <div className="text-xs text-zinc-500 dark:text-zinc-400">
-                                Completed on {format(new Date(assessment.completedAt || assessment.updatedAt), 'MMM d, yyyy')}
-                              </div>
-
-                              <div className="pt-2 border-t border-zinc-200 dark:border-zinc-700 text-xs text-zinc-600 dark:text-zinc-400">
-                                <p className="mb-1 font-medium">Comprehensive Assessment Status</p>
-                                <div className="flex items-center justify-between">
-                                  <span>Questions Answered:</span>
-                                  <span className="font-medium">{responseCount} / {totalQuestions}</span>
-                                </div>
-                                <div className="mt-1 text-green-600 dark:text-green-400 font-medium">
-                                  Assessment Complete - Results Available
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-2">
-                                <Link
-                                  href="/assessment/results"
-                                  className="inline-block px-4 py-2 text-center bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors font-medium text-sm"
-                                >
-                                  View Results
-                                </Link>
-                                <Link
-                                  href="/assessment"
-                                  className="inline-block px-4 py-2 text-center text-zinc-900 dark:text-zinc-50 border border-zinc-300 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors font-medium text-sm"
-                                >
-                                  Start New
-                                </Link>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Account Settings Section */}
-        <div className="bg-white dark:bg-zinc-800 rounded-lg shadow p-6">
-          <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-4">
-            Account Settings
-          </h3>
+      <section className="hero-surface rounded-[1.75rem] p-6 sm:p-8">
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-700">
-              <span className="text-zinc-700 dark:text-zinc-300">Email</span>
-              <span className="text-zinc-900 dark:text-zinc-50 font-medium">
-                {session?.user?.email}
-              </span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-zinc-200 dark:border-zinc-700">
-              <span className="text-zinc-700 dark:text-zinc-300">Two-Factor Auth</span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                session?.user?.mfaEnabled
-                  ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100"
-                  : "bg-zinc-100 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200"
-              }`}>
-                {session?.user?.mfaEnabled ? "Enabled" : "Disabled"}
-              </span>
-            </div>
-            <Link
-              href="/settings"
-              className="inline-block mt-4 px-4 py-2 text-sm text-zinc-900 dark:text-zinc-50 border border-zinc-300 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors"
-            >
-              Manage Settings
-            </Link>
+            <p className="editorial-kicker">Client Dashboard</p>
+            <h2 className="text-4xl font-semibold text-balance sm:text-5xl">
+              Welcome back, {session?.user?.email?.split("@")[0]}
+            </h2>
+            <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+              Review assessment progress, access results, and manage account security
+              from a workspace designed for discretion and clarity.
+            </p>
           </div>
+
+          <Card className="bg-background/60">
+            <CardContent className="grid gap-4 pt-6 sm:grid-cols-3">
+              <div>
+                <p className="editorial-kicker">Assessments</p>
+                <p className="mt-2 text-3xl font-semibold">{assessments.length}</p>
+              </div>
+              <div>
+                <p className="editorial-kicker">MFA</p>
+                <p className="mt-2 text-3xl font-semibold">
+                  {session?.user?.mfaEnabled ? "On" : "Off"}
+                </p>
+              </div>
+              <div>
+                <p className="editorial-kicker">Latest Status</p>
+                <p className="mt-2 text-xl font-semibold">
+                  {assessments[0]?.status === "COMPLETED" ? "Results Ready" : assessments.length ? "In Progress" : "Ready to Start"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl">Your Assessments</CardTitle>
+            <CardDescription>
+              Monitor progress and continue or review the latest family governance assessment.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {assessments.length === 0 ? (
+              <div className="rounded-[1.5rem] border section-divider bg-background/55 px-6 py-10 text-center">
+                <p className="mx-auto mb-5 max-w-2xl text-sm leading-7 text-muted-foreground">
+                  No assessments yet. Start your first risk assessment to receive
+                  personalized governance recommendations.
+                </p>
+                <Button asChild size="lg">
+                  <Link href="/assessment">Start Assessment</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {assessments.map((assessment) => {
+                  const isCompleted = assessment.status === 'COMPLETED';
+                  const responseCount = assessment._count.responses;
+                  const progressPercentage = (responseCount / totalQuestions) * 100;
+                  const latestScore = assessment.scores[0];
+
+                  return (
+                    <Card key={assessment.id} className="bg-background/55">
+                      <CardHeader className="pb-3">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="space-y-1">
+                            <CardTitle className="text-2xl">
+                              Family Governance Assessment
+                            </CardTitle>
+                            <CardDescription>
+                              Updated {formatDistanceToNow(new Date(assessment.updatedAt), { addSuffix: true })}
+                            </CardDescription>
+                          </div>
+                          <Badge
+                            variant={isCompleted ? 'success' : 'info'}
+                            className="w-fit"
+                          >
+                            {isCompleted ? 'Completed' : 'In Progress'}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-5">
+                        {!isCompleted ? (
+                          <>
+                            <div className="space-y-3">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Progress</span>
+                                <span className="font-medium text-foreground">
+                                  {responseCount} of {totalQuestions} questions answered
+                                </span>
+                              </div>
+                              <Progress value={progressPercentage} className="h-2.5" />
+                              <p className="text-xs text-muted-foreground">
+                                {Math.round(progressPercentage)}% complete
+                              </p>
+                            </div>
+
+                            <div className="rounded-[1.25rem] border section-divider bg-card/50 px-4 py-4">
+                              <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                                Section Status
+                              </p>
+                              <div className="mt-3 flex items-center gap-3">
+                                <div className="flex-1">
+                                  <Progress value={progressPercentage} className="h-2" />
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                  Family Governance
+                                </span>
+                              </div>
+                            </div>
+
+                            <Button asChild className="w-full" size="lg">
+                              <Link href="/assessment">Continue Assessment</Link>
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            {latestScore && (
+                              <div className="space-y-4">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                                  <div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Overall Score
+                                    </p>
+                                    <p className="text-4xl font-semibold">
+                                      {latestScore.score.toFixed(1)} / 10
+                                    </p>
+                                  </div>
+                                  <Badge
+                                    variant={
+                                      latestScore.riskLevel === 'LOW' ? 'success' :
+                                      latestScore.riskLevel === 'MEDIUM' ? 'warning' :
+                                      latestScore.riskLevel === 'HIGH' ? 'warning' :
+                                      'outline'
+                                    }
+                                    className="w-fit"
+                                  >
+                                    {latestScore.riskLevel} Risk
+                                  </Badge>
+                                </div>
+
+                                <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4 text-sm text-muted-foreground">
+                                  Completed on {format(new Date(assessment.completedAt || assessment.updatedAt), 'MMM d, yyyy')}
+                                </div>
+
+                                <div className="grid gap-3 sm:grid-cols-2">
+                                  <Button asChild size="lg">
+                                    <Link href="/assessment/results">View Results</Link>
+                                  </Button>
+                                  <Button asChild size="lg" variant="outline">
+                                    <Link href="/assessment">Start New</Link>
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl">Account Settings</CardTitle>
+            <CardDescription>
+              Review identity and account protection details.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4">
+              <p className="editorial-kicker">Email</p>
+              <p className="mt-2 text-base font-semibold">{session?.user?.email}</p>
+            </div>
+
+            <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="editorial-kicker">Two-Factor Auth</p>
+                  <p className="mt-2 text-base font-semibold">
+                    {session?.user?.mfaEnabled ? "Enabled" : "Disabled"}
+                  </p>
+                </div>
+                <Badge variant={session?.user?.mfaEnabled ? "success" : "secondary"}>
+                  {session?.user?.mfaEnabled ? "Protected" : "Recommended"}
+                </Badge>
+              </div>
+            </div>
+
+            <Button asChild variant="outline" size="lg" className="w-full">
+              <Link href="/settings">Manage Settings</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

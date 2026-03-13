@@ -4,6 +4,11 @@ import { useState, FormEvent, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AuthPanel } from "@/components/auth/AuthPanel";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function SignInForm() {
   const router = useRouter();
@@ -43,85 +48,68 @@ function SignInForm() {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-8">
-      <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-6">
-        Sign In
-      </h1>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
-          >
-            Email
-          </label>
-          <input
+    <AuthPanel
+      eyebrow="Client Access"
+      title="Sign in"
+      description="Continue your assessment workspace with a streamlined, security-conscious sign-in flow."
+      footer={
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span>
+            Don&apos;t have an account?{" "}
+            <Link href="/signup" className="font-semibold text-foreground hover:underline">
+              Sign up
+            </Link>
+          </span>
+          <Link href="/forgot-password" className="font-semibold text-foreground hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            autoComplete="email"
+            placeholder="name@familyoffice.com"
           />
         </div>
 
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
-          >
-            Password
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-zinc-500"
+            autoComplete="current-password"
+            placeholder="Enter your password"
           />
         </div>
 
-        {error && (
-          <div className="text-red-600 dark:text-red-400 text-sm">{error}</div>
-        )}
+        {error ? (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full px-4 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
           {isLoading ? "Signing in..." : "Sign In"}
-        </button>
+        </Button>
       </form>
-
-      <div className="mt-4 text-center space-y-2">
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          <Link
-            href="/forgot-password"
-            className="text-zinc-900 dark:text-zinc-50 font-medium hover:underline"
-          >
-            Forgot password?
-          </Link>
-        </p>
-      </div>
-    </div>
+    </AuthPanel>
   );
 }
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="text-center">Loading...</div>}>
+    <Suspense fallback={<div className="py-12 text-center text-sm text-muted-foreground">Loading sign-in experience...</div>}>
       <SignInForm />
     </Suspense>
   );

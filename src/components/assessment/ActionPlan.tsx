@@ -56,15 +56,15 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
   if (missingControls.length === 0) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-zinc-900">
+        <h3 className="text-2xl font-semibold text-foreground">
           Recommended Actions
         </h3>
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-emerald-500/20 bg-emerald-500/10">
           <CardContent className="pt-6">
-            <p className="text-green-800 font-medium">
+            <p className="font-medium text-emerald-900 dark:text-emerald-100">
               Your governance framework is well-established.
             </p>
-            <p className="text-green-700 text-sm mt-2">
+            <p className="mt-2 text-sm text-emerald-800 dark:text-emerald-200">
               Continue regular reviews and updates to maintain strong governance practices.
             </p>
           </CardContent>
@@ -75,25 +75,25 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
 
   const priorityConfig = {
     high: {
-      color: "bg-red-100 text-red-800 border-red-200",
+      badge: "outline" as const,
       label: "High Priority",
     },
     medium: {
-      color: "bg-orange-100 text-orange-800 border-orange-200",
+      badge: "warning" as const,
       label: "Medium Priority",
     },
     low: {
-      color: "bg-amber-100 text-amber-800 border-amber-200",
+      badge: "secondary" as const,
       label: "Low Priority",
     },
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-zinc-900">
+      <h3 className="text-2xl font-semibold text-foreground">
         Recommended Actions
       </h3>
-      <p className="text-sm text-zinc-600">
+      <p className="text-sm leading-6 text-muted-foreground">
         Prioritized recommendations based on your {pillarName} assessment responses.
       </p>
 
@@ -104,19 +104,19 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
           const ownership = getOwnership(control.category);
 
           return (
-            <Card key={control.questionId} className="border-zinc-200">
+            <Card key={control.questionId} className="bg-background/60">
               <CardContent className="pt-6 space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <h4 className="font-semibold text-zinc-900 flex items-center gap-2">
-                      <Target className="w-4 h-4 text-zinc-500" />
+                    <h4 className="font-semibold text-foreground flex items-center gap-2">
+                      <Target className="w-4 h-4 text-brand" />
                       Action {index + 1}: {control.recommendation}
                     </h4>
-                    <Badge variant="outline" className={`${priority.color} text-xs flex-shrink-0`}>
+                    <Badge variant={priority.badge} className="text-xs flex-shrink-0">
                       {priority.label}
                     </Badge>
                   </div>
-                  <p className="text-sm text-zinc-600 pl-6">
+                  <p className="text-sm text-muted-foreground pl-6">
                     Addresses: {control.category.split("-").map(word =>
                       word.charAt(0).toUpperCase() + word.slice(1)
                     ).join(" ")}
@@ -125,18 +125,18 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
 
                 <div className="flex items-center gap-6 pl-6 text-sm">
                   <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-zinc-400" />
-                    <span className="text-zinc-600">
-                      <span className="font-medium text-zinc-700">{effort}</span>
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      <span className="font-medium text-foreground">{effort}</span>
                       {effort === "Quick Win" && " (days)"}
                       {effort === "Standard" && " (weeks)"}
                       {effort === "Strategic" && " (months)"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-zinc-400" />
-                    <span className="text-zinc-600">
-                      <span className="font-medium text-zinc-700">{ownership}</span>
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      <span className="font-medium text-foreground">{ownership}</span>
                     </span>
                   </div>
                 </div>
@@ -146,8 +146,8 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
         })}
       </div>
 
-      <div className="mt-6 p-4 bg-zinc-50 border border-zinc-200 rounded-lg">
-        <p className="text-xs text-zinc-600">
+      <div className="mt-6 rounded-[1.25rem] border section-divider bg-background/55 p-4">
+        <p className="text-xs text-muted-foreground">
           These recommendations are based on your assessment responses. Consult with your advisors for implementation guidance.
         </p>
       </div>

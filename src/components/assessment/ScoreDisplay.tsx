@@ -22,25 +22,24 @@ export function ScoreDisplay({
   breakdown,
   answeredPercentage,
 }: ScoreDisplayProps) {
-  // Map risk level to color and label
   const riskLevelConfig = {
     LOW: {
-      color: "bg-green-100 text-green-800 border-green-200",
+      badge: "success" as const,
       label: "Low Risk",
       progressColor: "bg-green-600",
     },
     MEDIUM: {
-      color: "bg-amber-100 text-amber-800 border-amber-200",
+      badge: "warning" as const,
       label: "Moderate Risk",
       progressColor: "bg-amber-500",
     },
     HIGH: {
-      color: "bg-orange-100 text-orange-800 border-orange-200",
+      badge: "warning" as const,
       label: "High Risk",
       progressColor: "bg-orange-600",
     },
     CRITICAL: {
-      color: "bg-red-100 text-red-800 border-red-200",
+      badge: "outline" as const,
       label: "Critical Risk",
       progressColor: "bg-red-600",
     },
@@ -50,23 +49,22 @@ export function ScoreDisplay({
 
   return (
     <div className="space-y-8">
-      {/* Score and Risk Level */}
       <div className="text-center space-y-4">
+        <p className="editorial-kicker">Assessment Summary</p>
         <div>
-          <div className="text-5xl font-bold text-zinc-900">
+          <div className="text-5xl font-bold text-foreground sm:text-6xl">
             {score.toFixed(1)}
-            <span className="text-3xl text-zinc-500"> / 10</span>
+            <span className="text-3xl text-muted-foreground"> / 10</span>
           </div>
-          <p className="text-lg text-zinc-600 mt-2">Governance Maturity Score</p>
+          <p className="mt-2 text-lg text-muted-foreground">Governance Maturity Score</p>
         </div>
 
         <div className="flex justify-center">
-          <Badge variant="outline" className={`${config.color} px-4 py-2 text-sm font-medium`}>
+          <Badge variant={config.badge} className="px-4 py-2 text-sm font-medium">
             {config.label}
           </Badge>
         </div>
 
-        {/* Severity Bar */}
         <div className="max-w-2xl mx-auto">
           <Progress
             value={(score / 10) * 100}
@@ -75,28 +73,26 @@ export function ScoreDisplay({
           />
         </div>
 
-        {/* Completion Note */}
         {answeredPercentage < 100 && (
-          <p className="text-sm text-zinc-500 italic">
+          <p className="text-sm italic text-muted-foreground">
             Based on {Math.round(answeredPercentage)}% of questions answered.
             Complete remaining questions for full accuracy.
           </p>
         )}
       </div>
 
-      {/* Category Breakdown */}
-      <div className="border-t pt-6">
-        <h3 className="text-lg font-semibold text-zinc-900 mb-4">
+      <div className="border-t section-divider pt-6">
+        <h3 className="text-2xl font-semibold text-foreground mb-4">
           Governance Category Assessment
         </h3>
         <div className="space-y-4">
           {breakdown.map((category) => (
-            <div key={category.categoryId} className="space-y-2">
+            <div key={category.categoryId} className="space-y-2 rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4">
               <div className="flex justify-between items-baseline">
-                <span className="text-sm font-medium text-zinc-700">
+                <span className="text-sm font-medium text-foreground">
                   {category.categoryName}
                 </span>
-                <span className="text-sm font-semibold text-zinc-900">
+                <span className="text-sm font-semibold text-foreground">
                   {category.score.toFixed(1)} / {category.maxScore}
                 </span>
               </div>

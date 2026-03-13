@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Clock } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import type { Pillar, RiskLevel } from "@/lib/assessment/types";
 
 /**
@@ -60,29 +60,29 @@ export function PillarCard({
 
   return (
     <Card
-      className="cursor-pointer transition-all hover:shadow-md hover:border-zinc-400 dark:hover:border-zinc-600"
+      className="cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40"
       onClick={onClick}
     >
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{pillar.name}</CardTitle>
+        <div className="flex justify-between items-start gap-4">
+          <CardTitle className="text-2xl">{pillar.name}</CardTitle>
           <Badge variant={statusConfig[status].variant}>
             {statusConfig[status].label}
           </Badge>
         </div>
-        <CardDescription className="text-sm">
+        <CardDescription className="max-w-2xl text-sm leading-6">
           {pillar.description}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
           <span>~{pillar.estimatedMinutes} min</span>
         </div>
 
         {status === 'in-progress' && (
           <div className="space-y-2">
-            <div className="flex justify-between text-xs text-zinc-600 dark:text-zinc-400">
+            <div className="flex justify-between text-xs text-muted-foreground">
               <span>Progress</span>
               <span>
                 {questionsAnswered} / {totalQuestions} questions
@@ -93,9 +93,9 @@ export function PillarCard({
         )}
 
         {status === 'completed' && score !== undefined && riskLevel && (
-          <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-zinc-700">
+          <div className="flex items-center justify-between gap-4 pt-4 border-t section-divider">
             <div className="text-sm">
-              <span className="text-zinc-600 dark:text-zinc-400">Score: </span>
+              <span className="text-muted-foreground">Score: </span>
               <span className="font-semibold">{score.toFixed(1)}</span>
             </div>
             <Badge variant={riskConfig[riskLevel].variant}>
@@ -103,6 +103,17 @@ export function PillarCard({
             </Badge>
           </div>
         )}
+
+        <div className="flex items-center justify-between pt-2 text-sm text-muted-foreground">
+          <span>
+            {status === "completed"
+              ? "Review results and recommendations"
+              : status === "in-progress"
+                ? "Continue from your last saved response"
+                : "Begin the assessment"}
+          </span>
+          <ArrowRight className="h-4 w-4" />
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js commit:*)",
+      "Bash(test:*)",
+      "Skill(gsd:execute-phase)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm test:*)",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js roadmap get-phase \"01\")",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify artifacts /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-01-PLAN.md)",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify artifacts /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-02-PLAN.md)",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify artifacts /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-03-PLAN.md)",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify key-links /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-01-PLAN.md)",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify key-links /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-02-PLAN.md)",
+      "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify key-links /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-03-PLAN.md)"
+    ]
+  }
+}

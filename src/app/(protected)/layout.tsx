@@ -1,5 +1,7 @@
 import { auth, signOut } from "@/lib/auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default async function ProtectedLayout({
   children,
@@ -14,37 +16,54 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900">
-      <header className="bg-white dark:bg-zinc-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
-              Belvedere Risk Management
-            </h1>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-zinc-600 dark:text-zinc-400">
-                {session.user.email}
-              </span>
-              <form
-                action={async () => {
-                  "use server";
-                  await signOut({ redirectTo: "/" });
-                }}
-              >
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+    <div className="min-h-screen py-4 sm:py-6">
+      <div className="page-shell">
+        <div className="hero-surface overflow-hidden rounded-[2rem]">
+          <header className="border-b section-divider bg-background/55">
+            <div className="flex flex-col gap-6 px-5 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between lg:px-10">
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <p className="editorial-kicker">Belvedere Risk Management</p>
+                  <h1 className="text-3xl font-semibold leading-none">
+                    Governance Assessment Workspace
+                  </h1>
+                </div>
+                <nav className="flex flex-wrap gap-2">
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/assessment">Assessment</Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="sm">
+                    <Link href="/settings">Settings</Link>
+                  </Button>
+                </nav>
+              </div>
+
+              <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+                <div className="rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground">
+                  Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
+                </div>
+                <form
+                  action={async () => {
+                    "use server";
+                    await signOut({ redirectTo: "/" });
+                  }}
                 >
-                  Sign Out
-                </button>
-              </form>
+                  <Button type="submit" variant="outline">
+                    Sign Out
+                  </Button>
+                </form>
+              </div>
             </div>
-          </div>
+          </header>
+
+          <main className="px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+            {children}
+          </main>
         </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      </div>
     </div>
   );
 }

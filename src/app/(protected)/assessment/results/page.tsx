@@ -16,6 +16,8 @@ import { ActionPlan } from "@/components/assessment/ActionPlan";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface ScoreData {
   score: number;
@@ -91,10 +93,10 @@ export default function AssessmentResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-zinc-600 mx-auto" />
-          <p className="text-zinc-600">Calculating your governance assessment results...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" />
+          <p className="text-muted-foreground">Calculating your governance assessment results...</p>
         </div>
       </div>
     );
@@ -102,10 +104,12 @@ export default function AssessmentResultsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-red-50 border border-red-200 rounded-lg p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-red-900">Unable to Load Results</h2>
-          <p className="text-sm text-red-700">{error}</p>
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div className="max-w-2xl w-full space-y-4">
+          <Alert variant="destructive">
+            <AlertTitle>Unable to load results</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
           <div className="flex gap-3">
             <Button
               onClick={() => router.push("/assessment")}
@@ -142,59 +146,78 @@ export default function AssessmentResultsPage() {
   const answeredPercentage = (answeredCount / totalQuestions) * 100;
 
   return (
-    <div className="min-h-screen bg-zinc-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-zinc-900">
-            Family Governance Assessment Results
-          </h1>
-          <p className="text-sm text-zinc-600">
-            Completed on {format(new Date(scoreData.completedAt), "MMMM d, yyyy 'at' h:mm a")}
-          </p>
-        </div>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <section className="hero-surface rounded-[1.75rem] p-6 sm:p-8">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div className="space-y-3">
+            <p className="editorial-kicker">Assessment Complete</p>
+            <h1 className="text-4xl font-semibold text-balance sm:text-5xl">
+              Family Governance Assessment Results
+            </h1>
+            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+              Completed on {format(new Date(scoreData.completedAt), "MMMM d, yyyy 'at' h:mm a")}
+            </p>
+          </div>
 
-        {/* Score Display */}
-        <div className="bg-white rounded-lg border border-zinc-200 p-8">
+          <Card className="bg-background/60">
+            <CardContent className="grid gap-4 pt-6 sm:grid-cols-2">
+              <div>
+                <p className="editorial-kicker">Overall Score</p>
+                <p className="mt-2 text-3xl font-semibold">{scoreData.score.toFixed(1)} / 10</p>
+              </div>
+              <div>
+                <p className="editorial-kicker">Completion</p>
+                <p className="mt-2 text-3xl font-semibold">{Math.round(answeredPercentage)}%</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <Card>
+        <CardContent className="pt-8">
           <ScoreDisplay
             score={scoreData.score}
             riskLevel={scoreData.riskLevel}
             breakdown={scoreData.breakdown}
             answeredPercentage={answeredPercentage}
           />
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Risk Drivers */}
-        <div className="bg-white rounded-lg border border-zinc-200 p-8">
-          <RiskDrivers
-            missingControls={scoreData.missingControls}
-            riskLevel={scoreData.riskLevel}
-          />
-        </div>
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <Card>
+          <CardContent className="pt-8">
+            <RiskDrivers
+              missingControls={scoreData.missingControls}
+              riskLevel={scoreData.riskLevel}
+            />
+          </CardContent>
+        </Card>
 
-        {/* Action Plan */}
-        <div className="bg-white rounded-lg border border-zinc-200 p-8">
-          <ActionPlan
-            missingControls={scoreData.missingControls}
-            pillarName="Family Governance"
-          />
-        </div>
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center pt-6 border-t">
-          <Button
-            onClick={() => router.push("/assessment")}
-            variant="outline"
-          >
-            Review Answers
-          </Button>
-          <Button
-            onClick={() => router.push("/dashboard")}
-          >
-            Return to Dashboard
-          </Button>
-        </div>
+        <Card>
+          <CardContent className="pt-8">
+            <ActionPlan
+              missingControls={scoreData.missingControls}
+              pillarName="Family Governance"
+            />
+          </CardContent>
+        </Card>
       </div>
+
+      <section className="flex flex-col gap-3 border-t section-divider pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <Button
+          onClick={() => router.push("/assessment")}
+          variant="outline"
+        >
+          Review Answers
+        </Button>
+        <Button
+          onClick={() => router.push("/dashboard")}
+        >
+          Return to Dashboard
+        </Button>
+      </section>
     </div>
   );
 }

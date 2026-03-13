@@ -1,0 +1,56 @@
+"use client";
+
+import { ReactNode } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+
+interface AuthPanelProps {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  footer?: ReactNode;
+  className?: string;
+  contentClassName?: string;
+}
+
+export function AuthPanel({
+  eyebrow,
+  title,
+  description,
+  children,
+  footer,
+  className,
+  contentClassName,
+}: AuthPanelProps) {
+  return (
+    <Card className={cn("overflow-hidden", className)}>
+      <CardHeader className="space-y-4 border-b section-divider pb-6">
+        {eyebrow ? <p className="editorial-kicker">{eyebrow}</p> : null}
+        <div className="space-y-2">
+          <CardTitle className="text-3xl font-semibold break-words text-balance sm:text-4xl">
+            {title}
+          </CardTitle>
+          {description ? (
+            <CardDescription className="max-w-xl break-words text-sm leading-6 text-muted-foreground sm:text-base">
+              {description}
+            </CardDescription>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent className={cn("pt-8", contentClassName)}>{children}</CardContent>
+      {footer ? (
+        <CardFooter className="border-t section-divider pt-6 text-sm text-muted-foreground">
+          {footer}
+        </CardFooter>
+      ) : null}
+    </Card>
+  );
+}
