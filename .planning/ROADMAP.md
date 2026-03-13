@@ -64,10 +64,11 @@ Plans:
   1. System presents only relevant questions based on prior answers (e.g., skip trustee questions if no trusts)
   2. User completes assessment in 12-15 minutes with branching logic active
   3. System validates all conditional paths work correctly without orphaned data
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD during phase planning
+- [ ] 03-01-PLAN.md -- Branching engine enhancements: change detection, orphan handling, branching-aware scoring
+- [ ] 03-02-PLAN.md -- UI integration: auto-navigation on gate changes, real-time scoring, seamless review mode
 
 ### Phase 4: Reports & Templates
 **Goal**: Users receive professional PDF reports and customized governance policy templates
@@ -93,5 +94,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Authentication & Security | 0/3 | Planned | - |
 | 2. Assessment Engine & Core Scoring | 0/6 | Planned | - |
-| 3. Branching Logic | 0/0 | Not started | - |
+| 3. Branching Logic | 0/2 | Planned | - |
 | 4. Reports & Templates | 0/0 | Not started | - |
