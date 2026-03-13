@@ -24,7 +24,7 @@ export default async function ProtectedLayout({
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <p className="editorial-kicker">Belvedere Risk Management</p>
-                  <h1 className="text-2xl font-semibold leading-none sm:text-3xl">
+                  <h1 className="text-xl font-semibold leading-none sm:text-3xl">
                     Governance Assessment Workspace
                   </h1>
                 </div>
@@ -47,19 +47,22 @@ export default async function ProtectedLayout({
               </div>
 
               <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-                  <Button asChild variant="ghost" size="sm">
+                <nav className="grid grid-cols-2 gap-2 md:flex md:grid-cols-4">
+                  <Button asChild variant="ghost" size="sm" className="w-full">
                     <Link href="/dashboard">Dashboard</Link>
                   </Button>
-                  <Button asChild variant="ghost" size="sm">
+                  <Button asChild variant="ghost" size="sm" className="w-full">
                     <Link href="/assessment">Assessment</Link>
                   </Button>
-                  <Button asChild variant="ghost" size="sm">
+                  <Button asChild variant="ghost" size="sm" className="w-full">
+                    <Link href="/profiles">Profiles</Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="sm" className="w-full">
                     <Link href="/settings">Settings</Link>
                   </Button>
                 </nav>
 
-                <div className="rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground lg:hidden md:max-w-[24rem]">
+                <div className="hidden rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground md:block lg:hidden md:max-w-[24rem]">
                   Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
                 </div>
               </div>
