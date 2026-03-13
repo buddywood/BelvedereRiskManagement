@@ -8,6 +8,7 @@
  */
 
 import { Question, Pillar } from './types';
+import { hasMultipleGenerations, hasSuccessors, getMembersByRole } from './personalization';
 
 // ============================================================================
 // SUB-CATEGORY 1: DECISION-MAKING AUTHORITY (8 questions)
@@ -103,6 +104,12 @@ const decisionMakingQuestions: Question[] = [
     subCategory: 'decision-making-authority',
     weight: 4,
     scoreMap: { 0: 0, 1: 4, 2: 7, 3: 10 },
+    textTemplate: (p) => {
+      const dm = getMembersByRole(p, 'DECISION_MAKER')[0];
+      return dm
+        ? `How does ${dm.fullName} communicate major financial decisions to the family?`
+        : 'How does the primary decision maker communicate major financial decisions to the family?';
+    },
   },
   {
     id: 'dma-06',
@@ -355,6 +362,7 @@ const trustEstateQuestions: Question[] = [
       dependsOn: 'teg-01',
       showIf: (answer) => answer === 'yes',
     },
+    profileCondition: (p) => p.members.some(m => m.governanceRoles.includes('TRUSTEE')),
   },
   {
     id: 'teg-04',
@@ -676,6 +684,13 @@ const successionPlanningQuestions: Question[] = [
     branchingRule: {
       dependsOn: 'sp-01',
       showIf: (answer) => answer === 'yes',
+    },
+    profileCondition: (p) => hasMultipleGenerations(p) || hasSuccessors(p),
+    textTemplate: (p) => {
+      const successor = getMembersByRole(p, 'SUCCESSOR')[0];
+      return successor
+        ? `How prepared is ${successor.fullName} for leadership responsibility?`
+        : 'How prepared is your primary successor for leadership responsibility?';
     },
   },
   {

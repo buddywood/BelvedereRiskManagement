@@ -11,6 +11,7 @@ import {
 } from "./branching";
 import { allQuestions } from "./questions";
 import type { Question } from "./types";
+import type { HouseholdProfile } from "./personalization";
 
 // Test data using simple mock questions for basic functionality
 const questionNoBranch: Question = {
@@ -44,6 +45,48 @@ const mockQuestions: Question[] = [
   { ...questionWithBranch, id: "q2", branchingRule: { dependsOn: "q1", showIf: (a) => a === "yes" } },
   { id: "q3", text: "Q3?", type: "yes-no", required: true, pillar: "test", subCategory: "cat1", weight: 1, scoreMap: {} },
 ];
+
+// Test profile data
+const testProfile: HouseholdProfile = {
+  members: [
+    {
+      id: '1',
+      fullName: 'John Smith',
+      age: 45,
+      relationship: 'spouse',
+      governanceRoles: ['DECISION_MAKER'],
+      isResident: true,
+    },
+    {
+      id: '2',
+      fullName: 'Tommy Smith',
+      age: 16,
+      relationship: 'child',
+      governanceRoles: ['SUCCESSOR'],
+      isResident: true,
+    },
+    {
+      id: '3',
+      fullName: 'Robert Smith Sr',
+      age: 75,
+      relationship: 'parent',
+      governanceRoles: ['TRUSTEE'],
+      isResident: false,
+    }
+  ]
+};
+
+const questionWithProfileCondition: Question = {
+  id: "q-profile",
+  text: "Show only for families with trustees?",
+  type: "yes-no",
+  required: true,
+  pillar: "test",
+  subCategory: "cat1",
+  weight: 1,
+  scoreMap: { yes: 1, no: 0 },
+  profileCondition: (p) => p.members.some(m => m.governanceRoles.includes('TRUSTEE')),
+};
 
 // Helper function to get dependent question IDs for each gate
 function getDependentQuestionIds(gateId: string): string[] {
@@ -288,5 +331,103 @@ describe("calculateCompletionPercentage with mixed visible/hidden answers", () =
 
     const percentage = calculateCompletionPercentage(answers, allQuestions);
     expect(percentage).toBeGreaterThan(0); // Should work with just the always-visible questions
+  });
+});
+
+describe("shouldShowQuestion with profile awareness", () => {
+  it("with profile=undefined behaves identically to before (backward compat)", () => {
+    const question = questionWithBranch;
+    const answers = { "has-trust": "yes" };
+
+    // Test with explicit undefined
+    expect(shouldShowQuestion(question, answers, undefined)).toBe(true);
+    // Test with no profile parameter (implicit undefined)
+    expect(shouldShowQuestion(question, answers)).toBe(true);
+
+    // Test with dependency not met
+    expect(shouldShowQuestion(question, {}, undefined)).toBe(false);
+    expect(shouldShowQuestion(question, {})).toBe(false);
+  });
+
+  it("with profile=null behaves identically to before", () => {
+    const question = questionWithBranch;
+    const answers = { "has-trust": "yes" };
+
+    expect(shouldShowQuestion(question, answers, null)).toBe(true);
+    expect(shouldShowQuestion(question, {}, null)).toBe(false);
+  });
+
+  it("hides question when profileCondition returns false", () => {
+    const profileWithoutTrustee: HouseholdProfile = {
+      members: [
+        {
+          id: '1',
+          fullName: 'John Smith',
+          age: 45,
+          relationship: 'spouse',
+          governanceRoles: ['DECISION_MAKER'],
+          isResident: true,
+        }
+      ]
+    };
+
+    expect(shouldShowQuestion(questionWithProfileCondition, {}, profileWithoutTrustee)).toBe(false);
+  });
+
+  it("shows question when profileCondition returns true", () => {
+    expect(shouldShowQuestion(questionWithProfileCondition, {}, testProfile)).toBe(true);
+  });
+
+  it("evaluates both branchingRule AND profileCondition (both must pass)", () => {
+    const questionWithBoth: Question = {
+      ...questionWithProfileCondition,
+      branchingRule: {
+        dependsOn: 'prerequisite',
+        showIf: (answer) => answer === 'yes',
+      },
+    };
+
+    // Both conditions must be true
+    expect(shouldShowQuestion(questionWithBoth, { prerequisite: 'yes' }, testProfile)).toBe(true);
+
+    // Fails if branchingRule fails
+    expect(shouldShowQuestion(questionWithBoth, { prerequisite: 'no' }, testProfile)).toBe(false);
+
+    // Fails if profileCondition fails
+    const profileWithoutTrustee: HouseholdProfile = { members: [{ id: '1', fullName: 'Test', age: 30, relationship: 'spouse', governanceRoles: [], isResident: true }] };
+    expect(shouldShowQuestion(questionWithBoth, { prerequisite: 'yes' }, profileWithoutTrustee)).toBe(false);
+  });
+});
+
+describe("getVisibleQuestions with profile", () => {
+  const questionsWithProfile = [
+    questionNoBranch,
+    questionWithProfileCondition,
+    { ...questionNoBranch, id: "q-always" },
+  ];
+
+  it("filters correctly with profile", () => {
+    const visible = getVisibleQuestions({}, questionsWithProfile, testProfile);
+    expect(visible).toHaveLength(3); // All should be visible with testProfile
+    expect(visible.map(q => q.id)).toContain(questionWithProfileCondition.id);
+  });
+
+  it("filters correctly without profile", () => {
+    const profileWithoutTrustee: HouseholdProfile = {
+      members: [{ id: '1', fullName: 'Test', age: 30, relationship: 'spouse', governanceRoles: [], isResident: true }]
+    };
+    const visible = getVisibleQuestions({}, questionsWithProfile, profileWithoutTrustee);
+    expect(visible).toHaveLength(2); // Should exclude profile-conditioned question
+    expect(visible.map(q => q.id)).not.toContain(questionWithProfileCondition.id);
+  });
+
+  it("without profile returns same results as before", () => {
+    const visibleWithoutProfile = getVisibleQuestions({}, questionsWithProfile);
+    const visibleWithUndefined = getVisibleQuestions({}, questionsWithProfile, undefined);
+    const visibleWithNull = getVisibleQuestions({}, questionsWithProfile, null);
+
+    expect(visibleWithoutProfile).toEqual(visibleWithUndefined);
+    expect(visibleWithoutProfile).toEqual(visibleWithNull);
+    expect(visibleWithoutProfile).toHaveLength(3); // All visible when no profile filtering
   });
 });

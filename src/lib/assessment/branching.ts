@@ -9,33 +9,40 @@
  */
 
 import { Question } from './types';
+import { HouseholdProfile } from './personalization';
 
 /**
- * Determine if a question should be shown based on current answers
+ * Determine if a question should be shown based on current answers and optional profile
  *
  * @param question - Question to evaluate
  * @param answers - Current user answers
+ * @param profile - Optional household profile for profile-based conditions
  * @returns true if question should be shown, false if skipped
  */
 export function shouldShowQuestion(
   question: Question,
-  answers: Record<string, unknown>
+  answers: Record<string, unknown>,
+  profile?: HouseholdProfile | null
 ): boolean {
-  // If no branching rule, always show
-  if (!question.branchingRule) {
-    return true;
+  // Existing answer-based branching (unchanged)
+  if (question.branchingRule) {
+    const { dependsOn, showIf } = question.branchingRule;
+    const dependencyAnswer = answers[dependsOn];
+    if (dependencyAnswer === undefined || dependencyAnswer === null) {
+      return false;
+    }
+    if (!showIf(dependencyAnswer)) {
+      return false;
+    }
   }
 
-  const { dependsOn, showIf } = question.branchingRule;
-  const dependencyAnswer = answers[dependsOn];
-
-  // If dependency not answered yet, don't show this question
-  if (dependencyAnswer === undefined || dependencyAnswer === null) {
-    return false;
+  // NEW: Profile-based condition (only when profile exists)
+  if (question.profileCondition && profile) {
+    return question.profileCondition(profile);
   }
 
-  // Evaluate showIf condition
-  return showIf(dependencyAnswer);
+  // Default: show question (backward compat — no profile = show everything)
+  return true;
 }
 
 /**
@@ -44,12 +51,14 @@ export function shouldShowQuestion(
  * @param currentId - Current question ID (or null for first question)
  * @param answers - Current user answers
  * @param allQuestions - All questions in order
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Next visible question ID, or null if end of assessment
  */
 export function getNextQuestion(
   currentId: string | null,
   answers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): string | null {
   // If no current question, return first question
   if (currentId === null) {
@@ -70,7 +79,7 @@ export function getNextQuestion(
   // Find next visible question
   for (let i = currentIndex + 1; i < allQuestions.length; i++) {
     const question = allQuestions[i];
-    if (shouldShowQuestion(question, answers)) {
+    if (shouldShowQuestion(question, answers, profile)) {
       return question.id;
     }
   }
@@ -87,12 +96,14 @@ export function getNextQuestion(
  * @param currentId - Current question ID
  * @param answers - Current user answers
  * @param allQuestions - All questions in order
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Previous visible question ID, or null if at beginning
  */
 export function getPreviousQuestion(
   currentId: string,
   answers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): string | null {
   // Find current question index
   const currentIndex = allQuestions.findIndex(q => q.id === currentId);
@@ -105,7 +116,7 @@ export function getPreviousQuestion(
   // Find previous visible question
   for (let i = currentIndex - 1; i >= 0; i--) {
     const question = allQuestions[i];
-    if (shouldShowQuestion(question, answers)) {
+    if (shouldShowQuestion(question, answers, profile)) {
       return question.id;
     }
   }
@@ -119,13 +130,15 @@ export function getPreviousQuestion(
  *
  * @param answers - Current user answers
  * @param allQuestions - All questions
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Filtered array of visible questions
  */
 export function getVisibleQuestions(
   answers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): Question[] {
-  return allQuestions.filter(question => shouldShowQuestion(question, answers));
+  return allQuestions.filter(question => shouldShowQuestion(question, answers, profile));
 }
 
 /**
@@ -133,13 +146,15 @@ export function getVisibleQuestions(
  *
  * @param answers - Current user answers
  * @param allQuestions - All questions
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Percentage complete (0-100)
  */
 export function calculateCompletionPercentage(
   answers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): number {
-  const visibleQuestions = getVisibleQuestions(answers, allQuestions);
+  const visibleQuestions = getVisibleQuestions(answers, allQuestions, profile);
 
   if (visibleQuestions.length === 0) {
     return 0;
@@ -160,13 +175,15 @@ export function calculateCompletionPercentage(
  *
  * @param answers - Current user answers
  * @param allQuestions - All questions
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Array of required question IDs that are unanswered
  */
 export function getUnansweredRequiredQuestions(
   answers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): string[] {
-  const visibleQuestions = getVisibleQuestions(answers, allQuestions);
+  const visibleQuestions = getVisibleQuestions(answers, allQuestions, profile);
 
   return visibleQuestions
     .filter(q => {
@@ -189,22 +206,24 @@ export function getUnansweredRequiredQuestions(
  * @param previousAnswers - Answer state before the change
  * @param currentAnswers - Answer state after the change
  * @param allQuestions - All question definitions
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Object with newly visible, newly hidden, and unchanged question IDs
  */
 export function detectBranchingChanges(
   previousAnswers: Record<string, unknown>,
   currentAnswers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): {
   newlyVisible: string[];
   newlyHidden: string[];
   unchanged: string[];
 } {
   const previousVisible = new Set(
-    getVisibleQuestions(previousAnswers, allQuestions).map(q => q.id)
+    getVisibleQuestions(previousAnswers, allQuestions, profile).map(q => q.id)
   );
   const currentVisible = new Set(
-    getVisibleQuestions(currentAnswers, allQuestions).map(q => q.id)
+    getVisibleQuestions(currentAnswers, allQuestions, profile).map(q => q.id)
   );
 
   const newlyVisible: string[] = [];
@@ -218,7 +237,7 @@ export function detectBranchingChanges(
     ...Array.from(currentVisible),
   ]);
 
-  for (const questionId of allQuestionIds) {
+  for (const questionId of Array.from(allQuestionIds)) {
     const wasVisible = previousVisible.has(questionId);
     const isVisible = currentVisible.has(questionId);
 
@@ -247,14 +266,16 @@ export function detectBranchingChanges(
  *
  * @param answers - Current user answers
  * @param allQuestions - All question definitions
+ * @param profile - Optional household profile for profile-based conditions
  * @returns Array of question IDs that are answered but currently hidden
  */
 export function getOrphanedAnswerIds(
   answers: Record<string, unknown>,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  profile?: HouseholdProfile | null
 ): string[] {
   const visibleQuestionIds = new Set(
-    getVisibleQuestions(answers, allQuestions).map(q => q.id)
+    getVisibleQuestions(answers, allQuestions, profile).map(q => q.id)
   );
 
   const orphanedIds: string[] = [];
