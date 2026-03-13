@@ -179,9 +179,15 @@ export default async function DashboardPage() {
                                   Completed on {format(new Date(assessment.completedAt || assessment.updatedAt), 'MMM d, yyyy')}
                                 </div>
 
-                                <div className="grid gap-3 sm:grid-cols-2">
+                                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                                   <Button asChild size="lg">
                                     <Link href="/assessment/results">View Results</Link>
+                                  </Button>
+                                  <Button asChild size="lg" variant="outline">
+                                    <a href={`/api/reports/${assessment.id}/pdf`} download>Download Report</a>
+                                  </Button>
+                                  <Button asChild size="lg" variant="outline">
+                                    <Link href="/assessment/results">Get Templates</Link>
                                   </Button>
                                   <Button asChild size="lg" variant="outline">
                                     <Link href="/assessment">Start New</Link>

@@ -13,6 +13,8 @@ import { useAssessmentStore } from "@/lib/assessment/store";
 import { ScoreDisplay } from "@/components/assessment/ScoreDisplay";
 import { RiskDrivers } from "@/components/assessment/RiskDrivers";
 import { ActionPlan } from "@/components/assessment/ActionPlan";
+import { DownloadSection } from "@/components/reports/DownloadSection";
+import { TemplateList } from "@/components/reports/TemplateList";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
@@ -130,7 +132,7 @@ export default function AssessmentResultsPage() {
     );
   }
 
-  if (!scoreData) {
+  if (!scoreData || !assessmentId) {
     return null;
   }
 
@@ -201,6 +203,19 @@ export default function AssessmentResultsPage() {
               missingControls={scoreData.missingControls}
               pillarName="Family Governance"
             />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <Card>
+          <CardContent className="pt-8">
+            <DownloadSection assessmentId={assessmentId} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-8">
+            <TemplateList assessmentId={assessmentId} />
           </CardContent>
         </Card>
       </div>
