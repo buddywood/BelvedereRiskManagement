@@ -98,7 +98,7 @@ export default function MFASetupPage() {
               Important: Save these codes in a secure location
             </p>
             <p className="text-sm text-yellow-700">
-              Each code can only be used once. You'll need these if you lose access to your authenticator app.
+              Each code can only be used once. You&apos;ll need these if you lose access to your authenticator app.
             </p>
           </div>
 
@@ -125,7 +125,7 @@ export default function MFASetupPage() {
             disabled={!confirmed && recoveryCodes.length > 0}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
-            I've Saved My Codes
+            I&apos;ve Saved My Codes
           </button>
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function MFASetupPage() {
 
           <details className="mb-4">
             <summary className="text-sm text-gray-600 cursor-pointer hover:text-gray-900">
-              Can't scan? Enter manually
+              Can&apos;t scan? Enter manually
             </summary>
             <div className="mt-2 p-3 bg-gray-50 border rounded">
               <p className="text-xs text-gray-500 mb-1">Secret Key:</p>

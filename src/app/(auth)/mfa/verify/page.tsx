@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function MFAVerifyForm() {
@@ -179,9 +180,9 @@ function MFAVerifyForm() {
         )}
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-sm text-gray-600 hover:text-gray-900">
+          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
             Sign out
-          </a>
+          </Link>
         </div>
       </div>
     </div>

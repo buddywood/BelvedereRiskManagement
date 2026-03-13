@@ -67,7 +67,7 @@ export default async function SettingsPage() {
               </p>
               {recoveryCodesRemaining <= 2 && (
                 <p className="text-sm text-orange-600 mt-2">
-                  Warning: You're running low on recovery codes. Consider generating new ones.
+                  Warning: You&apos;re running low on recovery codes. Consider generating new ones.
                 </p>
               )}
             </div>
@@ -105,7 +105,7 @@ export default async function SettingsPage() {
                 <strong>Recommended:</strong> Enable two-factor authentication to add an extra layer of security to your account.
               </p>
               <p className="text-sm text-blue-800">
-                You'll need an authenticator app like Google Authenticator, Authy, or 1Password.
+                You&apos;ll need an authenticator app like Google Authenticator, Authy, or 1Password.
               </p>
             </div>
 

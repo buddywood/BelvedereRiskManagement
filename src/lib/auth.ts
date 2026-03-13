@@ -39,42 +39,39 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return true;
     },
     async jwt({ token, user }) {
-      if (user) {
+      if (user?.id) {
         token.id = user.id;
+      }
+      // Store MFA fields in JWT so middleware (Edge) can read them without Prisma
+      const userId = token.id as string;
+      if (userId) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { mfaEnabled: true },
+        });
+        token.mfaEnabled = dbUser?.mfaEnabled ?? false;
+        if (token.mfaEnabled) {
+          const [session] = await prisma.session.findMany({
+            where: {
+              userId,
+              expires: { gt: new Date() },
+            },
+            orderBy: { expires: "desc" },
+            take: 1,
+            select: { mfaVerified: true },
+          });
+          token.mfaVerified = session?.mfaVerified ?? false;
+        } else {
+          token.mfaVerified = true;
+        }
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-
-        // Fetch fresh user data and session MFA verification status
-        const user = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { mfaEnabled: true },
-        });
-
-        if (user) {
-          session.user.mfaEnabled = user.mfaEnabled;
-
-          // Check if this session has verified MFA (for users with MFA enabled)
-          if (user.mfaEnabled) {
-            // Find the most recent active session
-            const userSessions = await prisma.session.findMany({
-              where: {
-                userId: token.id as string,
-                expires: { gt: new Date() },
-              },
-              orderBy: { expires: "desc" },
-              take: 1,
-            });
-
-            session.user.mfaVerified = userSessions.length > 0 ? userSessions[0].mfaVerified : false;
-          } else {
-            // If MFA is not enabled, mark as verified
-            session.user.mfaVerified = true;
-          }
-        }
+        session.user.mfaEnabled = Boolean(token.mfaEnabled);
+        session.user.mfaVerified = Boolean(token.mfaVerified);
       }
       return session;
     },
