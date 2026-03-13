@@ -61,8 +61,23 @@
 
 ## Traceability
 
-*This section will be populated during roadmap creation to map requirements to phases and success criteria.*
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| PROFILE-01 | Phase 5 | Pending |
+| PROFILE-02 | Phase 5 | Pending |
+| PROFILE-03 | Phase 5 | Pending |
+| PROFILE-04 | Phase 5 | Pending |
+| PROFILE-05 | Phase 5 | Pending |
+| ASSESS-01 | Phase 6 | Pending |
+| ASSESS-02 | Phase 6 | Pending |
+| ASSESS-03 | Phase 6 | Pending |
+| ASSESS-04 | Phase 6 | Pending |
+| ASSESS-05 | Phase 6 | Pending |
+| REPORT-01 | Phase 7 | Pending |
+| REPORT-02 | Phase 7 | Pending |
+| REPORT-03 | Phase 7 | Pending |
+| REPORT-04 | Phase 7 | Pending |
 
 ---
 *Requirements defined: 2026-03-12*
-*Total requirements: 13 (v1.1)*
+*Total requirements: 14 (v1.1)*

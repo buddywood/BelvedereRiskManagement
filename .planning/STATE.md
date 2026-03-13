@@ -2,111 +2,75 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-17)
+**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
 
-**Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
-**Current focus:** Phase 2 - Assessment Engine & Core Scoring
+**Current Focus:** v1.1 Household Profile Integration - Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables.
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-12 — Milestone v1.1 started
-
-Progress: [░░░░░░░░░░░░░░░░] 0% (preparing new milestone)
+**Milestone:** v1.1 Household Profile Integration
+**Phase:** 5 - Profile Foundation
+**Plan:** Not yet created
+**Status:** Planning
+**Progress:** ████████████████████████████████████████ 0% (0/14 requirements complete)
 
 ## Performance Metrics
 
-**Velocity:**
+**Milestones completed:** 1 (v1.0 MVP shipped 2026-03-13)
+**Current milestone progress:** 0% (0/14 requirements complete)
+**Phase completion rate:** N/A (first phase of milestone)
+
+**Previous velocity (v1.0):**
 - Total plans completed: 14
 - Average duration: 4.2 minutes
 - Total execution time: 1.0 hours
 
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 01 | 3 | 15.5 min | 5.2 min |
-| 02 | 6 | 25.0 min | 4.2 min |
-| 03 | 2 | 10.0 min | 5.0 min |
-| 04 | 3 | 10.5 min | 3.5 min |
-
-**Recent Trend:**
-- Last 5 plans: 02-04 (4.0 min), 02-05 (3.5 min), 02-06 (4.3 min), 01-03 (5.2 min)
-- Trend: Stable
-
-*Updated after each plan completion*
-| Phase 01 P03 | 5.2 | 2 tasks | 11 files |
-| Phase 03 P01 | 6.5 | 2 tasks | 5 files |
-| Phase 03 P02 | 3.3 | 2 tasks | 4 files |
-| Phase 04 P01 | 4.0 | 2 tasks | 8 files |
-| Phase 04 P02 | 4.0 | 2 tasks | 12 files |
-| Phase 04 P03 | 2.5 | 2 tasks | 4 files |
-
 ## Accumulated Context
 
-### Decisions
+### Key Decisions Made
+- Phase structure derived from natural requirement groupings (Profile Foundation → Assessment Integration → Household Reporting)
+- Backward compatibility maintained for existing assessments without profiles
+- Quick depth applied resulting in 3 focused phases covering all 14 requirements
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+### Known Requirements
+- **Profile Foundation:** 5 requirements for basic household member management
+- **Assessment Integration:** 5 requirements for personalized question branching
+- **Household Reporting:** 4 requirements for customized deliverables
+- Total coverage: 14/14 requirements mapped to phases
 
-- 0-10 scoring scale where 10 = best governance (02-02): More intuitive than 'risk score' where high = bad. Aligns with maturity model mental framework.
-- Simple 1-level branching (02-02): Skip trust/business/succession sections if not applicable. Deeper nesting deferred based on research recommendation to monitor completion rates.
-- 68 questions across 8 sub-categories (02-02): Balances comprehensive coverage with 15-minute completion target. Distributed based on risk impact.
-- localStorage as optimistic cache, server API as source of truth (02-03): Zustand persist provides fast local state, but loadFromServer() rehydrates from API on mount. Ensures save/resume works after browser restart or localStorage clear.
-- pillar-based progress tracking (02-03): Show pillar completion progress, not question counts (e.g., "X of Y questions" per pillar, not "Question 3 of 80"). Research shows total counts are demoralizing.
-- Hierarchical weighted scoring model (02-01): Question -> Sub-Category -> Pillar structure enables granular risk analysis. Bottom-up score aggregation supports flexible weighting algorithms.
-- JSON fields for assessment flexibility (02-01): answer, breakdown, missingControls use Json type for schema evolution. Type safety enforced in TypeScript layer, not DB constraints.
-- shadcn/ui component library (02-01): Radix UI primitives with zinc color scheme. Owned components avoid library lock-in, provide accessibility out of the box.
-- In-memory rate limiting for MVP (01-02): In-memory Map storage sufficient for single-instance MVP with 60s cleanup. Production needs Redis/Upstash for multi-instance.
-- SHA-256 token hashing (01-02): Reset tokens hashed with SHA-256 before database storage. Prevents token theft if database compromised. 15-minute expiry, single-use.
-- Generic success messages for forgot-password (01-02): Always return 'If an account exists...' message to prevent email enumeration attacks.
-- JWT session strategy over database sessions (01-01): Auth.js v5 with credentials provider doesn't auto-create database sessions. JWT with server-side lookup avoids manual session creation complexity.
-- Prisma 7 with pg adapter (01-01): Prisma 7 requires explicit connection adapters. pg adapter with connection pooling provides production-ready PostgreSQL connectivity.
-- Argon2id for password hashing (01-01): Most secure password hashing algorithm with OWASP-recommended parameters (65536 KiB memory, 3 iterations).
-- [Phase 02-02]: 68 questions across 8 sub-categories: Balances comprehensive coverage with 15-minute completion target. Distributed based on risk impact.
-- [Phase 02-02]: Simple 1-level branching: Skip trust/business/succession sections if not applicable. Deeper nesting deferred based on research recommendation to monitor completion rates.
-- [Phase 02-02]: 0-10 scoring scale where 10 = best governance: More intuitive than 'risk score' where high = bad. Aligns with maturity model mental framework.
-- [Phase 02-04]: Card-based answer selections with shadcn Card components for premium feel
-- [Phase 02-04]: 1000ms debounce for auto-save balances responsiveness and server load
-- [Phase 02-05]: 50% minimum completion threshold for scoring: Prevents misleading scores from insufficient data. Better to block scoring than give false confidence.
-- [Phase 02-05]: Exclude unanswered questions from calculations (never default to low risk): Unknown risk is not low risk. Defaulting to safe scores would create false sense of security.
-- [Phase 02-05]: Professional advisory tone throughout (no gamification): Family governance is serious business. Clean numeric scores and severity bars provide clarity without trivialization.
-- [Phase 02-06]: Dashboard shows comprehensive completion status with pillar-by-pillar progress: Users want detailed progress for in-progress and full completion context. Transparency builds trust.
-- [Phase 02-06]: Smart resume navigates to exact next unanswered question using branching logic: Respects user's branching choices. More accurate than simple index-based resume.
-- [Phase 01-03]: AES-256-GCM encryption for MFA secrets using Web Crypto API: Edge Runtime compatible encryption for secure TOTP secret storage. Base64 encoding for database storage.
-- [Phase 01-03]: TOTP with 30-second time window and 1-step tolerance: Standard authenticator app compatibility with otplib. Balances security and usability.
-- [Phase 01-03]: Rate limiting: 5 attempts per 5 minutes on MFA endpoints: Prevents brute force attacks on TOTP codes while allowing for user error.
-- [Phase 01-03]: SHA-256 hashed recovery codes for single-use security: Recovery codes are hashed before storage and marked as used to prevent replay attacks.
-- [Phase 03-01]: Backward compatibility preserved with optional visibleQuestionIds parameter
-- [Phase 03-01]: Subcategories with zero visible questions excluded from score weighting
-- [Phase 03-01]: 50% completion threshold now based on visible questions, not total questions
-- [Phase 03-02]: Orphaned answers preserved in store (not deleted) for potential gate answer reversals
-- [Phase 03-02]: Auto-navigation triggers on first newly-visible question when gate answers change
-- [Phase 03-02]: Current question auto-adjusts when hidden by branching to nearest valid position
-- [Phase 04]: Professional Helvetica typography for enterprise credibility
-- [Phase 04]: Multi-page document composition (cover, summary, breakdown, recommendations)
-- [Phase 04]: Professional Helvetica typography for enterprise credibility
-- [Phase 04]: Multi-page document composition (cover, summary, breakdown, recommendations)
+### Technical Context
+- Building on existing v1.0 MVP with Next.js 15, TypeScript, PostgreSQL stack
+- Household profiles integrate with existing assessment flow and scoring algorithm
+- Research indicates profile-aware branching logic as highest risk integration point
 
-### Pending Todos
+### Open Questions
+- None identified during roadmap creation
+- Phase planning will reveal specific implementation questions
 
-None yet.
+### Blockers
+- None identified
 
-### Blockers/Concerns
-
-**Phase 3 (Branching Logic):** Research flagged as HIGH RISK due to state management complexity. Conditional validation patterns and comprehensive path testing will require careful implementation. Consider `/gsd:research-phase` during Phase 3 planning.
-
-**Scoring methodology:** Specific weights and categories for family governance require domain expertise. Consult family office governance expert during Phase 2 to calibrate weights.
-
-**User validation gap:** Differentiator features (branching logic, policy templates) need validation with actual family office users. Conduct 5-10 user interviews before finalizing Phase 3-4 scope.
+### TODOs
+- [ ] Plan Phase 5: Profile Foundation via `/gsd:plan-phase 5`
+- [ ] Research profile-aware branching patterns for Phase 6
+- [ ] Validate household scoring methodology before Phase 6 implementation
 
 ## Session Continuity
 
-Last session: 2026-03-13
-Stopped at: Completed 04-03-PLAN.md - Results page and dashboard download integration
-Resume file: .planning/phases/04-reports-templates/04-03-SUMMARY.md
+**Last milestone activity:** Roadmap creation for v1.1
+**Last phase completed:** Phase 4 (v1.0 Reports & Templates on 2026-03-12)
+**Context for next session:** Ready to plan Phase 5 - Profile Foundation implementation
 
-**Phase 04 Status:** COMPLETE (3 of 3 plans executed)
-**Next milestone:** Project complete - all phases executed
+### Artifacts Created
+- `.planning/ROADMAP.md` - Complete phase structure with success criteria
+- `.planning/STATE.md` - This project state tracking
+- Updated `.planning/REQUIREMENTS.md` with phase mappings
+
+### Next Actions
+1. Plan Phase 5 using `/gsd:plan-phase 5`
+2. Begin implementation with household member profile creation
+3. Validate profile data structure before assessment integration
+
+---
+*State updated: 2026-03-12*
+*Ready for: Phase planning*
