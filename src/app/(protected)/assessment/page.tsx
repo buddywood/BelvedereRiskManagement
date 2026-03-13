@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAssessmentStore } from '@/lib/assessment/store';
+import { useHouseholdProfile } from '@/lib/hooks/useHouseholdProfile';
 import { PillarCard } from '@/components/assessment/PillarCard';
 import { OverallProgress } from '@/components/assessment/ProgressBar';
 import { Button } from '@/components/ui/button';
@@ -47,6 +48,9 @@ export default function AssessmentHubPage() {
   const router = useRouter();
   const store = useAssessmentStore();
   const [isInitializing, setIsInitializing] = useState(true);
+
+  // Household profile for personalization
+  const { profile } = useHouseholdProfile();
 
   // Fetch assessment data from server for rehydration
   const { data: assessmentData } = useQuery({
@@ -124,7 +128,7 @@ export default function AssessmentHubPage() {
 
     // Smart resume: Find next unanswered question using branching logic
     const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
-    const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions);
+    const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions, profile);
 
     // Find first unanswered question
     let nextQuestionIndex = 0;
@@ -156,7 +160,7 @@ export default function AssessmentHubPage() {
 
   // Calculate accurate question count using branching logic
   const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
-  const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions);
+  const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions, profile);
   const questionsAnswered = visibleQuestions.filter((q) => {
     const answer = store.answers[q.id];
     return answer !== undefined && answer !== null;

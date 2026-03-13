@@ -41,13 +41,13 @@ export function useAssessmentNavigation(
   questionIndex: number
 ): UseAssessmentNavigationReturn {
   const router = useRouter();
-  const { answers, setCurrentPosition } = useAssessmentStore();
+  const { answers, setCurrentPosition, householdProfile } = useAssessmentStore();
 
   // Filter questions for current pillar
   const pillarQuestions = allQuestions.filter((q) => q.pillar === pillarSlug);
 
   // Get visible questions based on branching rules
-  const visibleQuestions = getVisibleQuestions(answers, pillarQuestions);
+  const visibleQuestions = getVisibleQuestions(answers, pillarQuestions, householdProfile);
 
   // Track previous answers for branching change detection
   const previousAnswersRef = useRef<Record<string, unknown>>(answers);
@@ -61,7 +61,7 @@ export function useAssessmentNavigation(
       return null;
     }
 
-    return detectBranchingChanges(previousAnswers, answers, pillarQuestions);
+    return detectBranchingChanges(previousAnswers, answers, pillarQuestions, householdProfile);
   }, [answers, pillarQuestions]);
 
   // Update previous answers ref after change detection

@@ -4,6 +4,8 @@ import { use, useEffect } from 'react';
 import { useAssessmentStore } from '@/lib/assessment/store';
 import { useAssessmentNavigation } from '@/lib/hooks/useAssessmentNavigation';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
+import { useHouseholdProfile } from '@/lib/hooks/useHouseholdProfile';
+import { getPersonalizedText } from '@/lib/assessment/personalization';
 import { QuestionCard } from '@/components/assessment/QuestionCard';
 import { NavigationButtons } from '@/components/assessment/NavigationButtons';
 import { SectionProgress } from '@/components/assessment/ProgressBar';
@@ -38,7 +40,10 @@ export default function QuestionPage({ params }: QuestionPageProps) {
   const questionIndex = parseInt(resolvedParams.questionIndex, 10);
 
   // Assessment state
-  const { assessmentId, answers } = useAssessmentStore();
+  const { assessmentId, answers, setHouseholdProfile } = useAssessmentStore();
+
+  // Household profile for personalization
+  const { profile } = useHouseholdProfile();
 
   // Navigation logic
   const {
@@ -51,6 +56,11 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     visibleQuestions,
     branchingChange,
   } = useAssessmentNavigation(pillarSlug, questionIndex);
+
+  // Store profile in zustand on load
+  useEffect(() => {
+    setHouseholdProfile(profile);
+  }, [profile, setHouseholdProfile]);
 
   // Auto-save
   const { saveAnswer, isSaving } = useAutoSave(assessmentId);
@@ -86,6 +96,11 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
   // Get current answer from store
   const currentAnswer = answers[currentQuestion.id];
+
+  // Compute personalized text for current question
+  const personalizedText = currentQuestion
+    ? getPersonalizedText(currentQuestion, profile)
+    : undefined;
 
   // Handle answer selection
   const handleAnswer = (answer: unknown) => {
@@ -192,6 +207,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
         <CardContent className="space-y-6 pt-6 sm:space-y-8 sm:pt-8">
           <QuestionCard
             question={currentQuestion}
+            personalizedText={personalizedText}
             currentAnswer={currentAnswer}
             onAnswer={handleAnswer}
             onSkip={!currentQuestion.required ? handleSkip : undefined}

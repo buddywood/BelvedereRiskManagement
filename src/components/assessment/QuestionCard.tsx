@@ -26,6 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface QuestionCardProps {
   question: Question;
+  personalizedText?: string; // Personalized question text (overrides question.text)
   currentAnswer: unknown;
   onAnswer: (answer: unknown) => void;
   onSkip?: () => void;
@@ -33,6 +34,7 @@ interface QuestionCardProps {
 
 export function QuestionCard({
   question,
+  personalizedText,
   currentAnswer,
   onAnswer,
   onSkip,
@@ -173,7 +175,7 @@ export function QuestionCard({
             {question.required ? "Required Question" : "Optional Question"}
           </p>
           <h2 className="text-2xl font-semibold leading-tight text-balance text-foreground sm:text-4xl">
-            {question.text}
+            {personalizedText || question.text}
           </h2>
         </div>
 
