@@ -1,212 +1,153 @@
 # Project Research Summary
 
-**Project:** Belvedere Risk Management - Family Governance Risk Assessment Platform with Household Profile Integration
-**Domain:** Family Office Risk Assessment Web Application + Household Profile Management
-**Researched:** 2026-02-17 (Updated: 2026-03-12)
-**Confidence:** HIGH
+**Project:** Family Governance Risk Assessment Platform Evolution
+**Domain:** Financial Services + Audio Collection + Advisor Portal Integration
+**Researched:** 2026-03-13
+**Confidence:** MEDIUM-HIGH
 
 ## Executive Summary
 
-This project integrates household profile management into an existing family governance risk assessment platform that sits between high-cost consultants ($10K-50K) and generic family office software ($500-2K/year). The proven platform achieves 80%+ completion rates with a 12-15 minute assessment using intelligent branching logic, multi-factor authentication, and PDF report generation. The research reveals that successful family governance platforms require sophisticated household data management beyond basic demographics to include governance roles, decision-making hierarchy, and multi-generational perspectives.
+This is a specialized wealth management platform integrating family risk assessment with audio-based intake interviews and advisor oversight capabilities. Research shows this domain requires proven financial services stack patterns (Next.js + PostgreSQL + enterprise auth) combined with modern audio recording infrastructure and role-based access control. The recommended approach layers new audio and advisor features onto existing assessment architecture while preserving the validated TurboTax-style user experience.
 
-The recommended approach prioritizes maintaining the existing assessment completion flow while progressively building household context. The technology stack of Next.js 15+, React 19, TypeScript, and PostgreSQL with Drizzle ORM provides a solid foundation for household data integration. New additions for household management include react-international-phone for global contact validation and react-day-picker for birth date handling, both integrating seamlessly with the existing React Hook Form + Zod validation architecture.
+The primary risk is audio recording infrastructure complexity interacting with multi-tenant advisor permissions, requiring careful phasing to establish reliable audio foundation before adding advisor workflows. Mitigation involves chunked audio recording with progressive upload, browser compatibility testing, and explicit advisor-client relationship management extending the existing ownership-based security model.
 
-Key risks center on assessment completion disruption (most critical), data fragmentation between profiles and assessments, permission complexity for multi-member households, and scoring algorithm complications from conflicting family perspectives. These can be mitigated through progressive profile building during assessment flow, architectural integration from day one, family office-style role-based access patterns, and clear household scoring methodologies established before implementation.
+Key business value comes from transforming text-only assessments into rich audio interviews while enabling advisor oversight - a clear competitive differentiator in family governance assessment that builds naturally on existing household profile features.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The research confirms the existing technology stack is well-suited for household profile integration. The proven foundation of Next.js 15+ with React 19, TypeScript 5.7+, PostgreSQL via Neon serverless, and Drizzle ORM provides strong architectural support for household relationship modeling and multi-member data management.
+Modern financial services applications in 2026 use Next.js 15+ with React 19, PostgreSQL with serverless scaling, and TypeScript for enterprise reliability. The recommended stack adds specialized audio recording (RecordRTC), transcription (OpenAI Whisper), and multi-step interview capabilities (rhf-wizard) to proven foundations.
 
-**Core technologies (validated):**
-- **Next.js 15.5+**: Full-stack framework with built-in API routes and Server Actions — proven for existing assessment system, ideal for household profile integration
-- **React Hook Form 7.54+ with useFieldArray**: Form management essential for dynamic household member arrays — extends existing form patterns seamlessly
-- **Drizzle ORM**: 7.4KB bundle with full TypeScript safety — ideal for household relationship modeling with self-referencing tables
-- **PostgreSQL 16+ via Neon**: ACID compliance critical for family data — supports both structured relationships and flexible JSONB profile data
-- **Zod 3.24+**: Schema validation with TypeScript inference — extends existing validation to complex household member schemas
-- **react-international-phone 4.3+**: International phone validation — TypeScript-native with React Hook Form compatibility for global families
-- **react-day-picker 9.1.3+**: Date picker for member birth dates — WCAG compliant, integrates with existing date-fns, TypeScript native
-
-**Critical integration notes:**
-- All new household dependencies integrate with existing React Hook Form + Zod validation architecture
-- useFieldArray provides performance-optimized dynamic member management
-- PostgreSQL self-referencing tables support complex family relationship modeling
+**Core technologies:**
+- Next.js 15+ with App Router — Industry standard for financial services apps, built-in API routes reduce complexity
+- PostgreSQL 16 with Neon serverless — ACID compliance critical for assessment data, scale-to-zero reduces hosting costs
+- TypeScript 5.7+ — Eliminates runtime errors essential for multi-advisor platform reliability
+- React Hook Form + Zod — Handles complex interview workflows with validation, 12KB vs 44KB Formik
+- RecordRTC + OpenAI Whisper — Browser audio recording with $0.006/minute transcription, best price/accuracy ratio
+- rhf-wizard — Multi-step interview forms integrating with existing React Hook Form patterns
 
 ### Expected Features
 
-Household profile research reveals sophisticated feature expectations beyond basic demographics, driven by governance-focused personalization requirements and family office operational complexity.
+Audio-enhanced family governance assessments with advisor oversight represent emerging best practices in wealth management platforms. Users expect seamless audio collection, real-time transcription, and secure advisor collaboration.
 
 **Must have (table stakes):**
-- **Basic member profiles (name, role, contact)** — standard across family platforms for household-aware features
-- **Household composition tracking** — required for assessment personalization and governance context understanding
-- **Profile-based question branching integration** — core value proposition extending proven 68-question assessment logic
-- **Member governance role identification** — necessary for governance-specific recommendations and succession planning context
-- **Individual privacy controls** — 2026 standard for family platforms with controlled family-level data sharing
-- **Auto-save during profile creation** — extends existing assessment auto-save functionality to prevent data loss
+- Structured intake interview flow — Industry standard for advisor-guided onboarding
+- Audio response recording with transcription — Expected for qualitative assessment in 2026
+- Secure advisor portal with approval workflow — Required for advisor oversight of assessments
+- Mobile-responsive design — Advisors access portals from any device
+- Assessment customization — Advisors expect to tailor assessments per family
 
-**Should have (competitive advantage):**
-- **Governance role assessment (decision authority, influence mapping)** — differentiator for family office sophistication level
-- **Cultural governance profiling (communication styles, preferences)** — enhanced personalization for family dynamics understanding
-- **Profile-driven report personalization** — tailored PDF sections based on individual member roles and responsibilities
-- **Advisor ecosystem mapping** — professional network integration unique to governance focus
-- **Multigenerational wealth perspective** — family office level sophistication for succession planning
+**Should have (competitive):**
+- AI-powered emotional analysis — Extract sentiment from audio responses for deeper insights
+- Real-time family member integration — Dynamic question personalization using existing household data
+- Advanced analytics dashboard — Assessment completion rates and response pattern analysis
 
 **Defer (v2+):**
-- **Family conflict risk prediction** — advanced ML/AI feature requiring established profile data patterns first
-- **Member-specific policy recommendations** — complex rules engine expansion better suited for future phases
-- **Cross-generational perspective analysis** — high complexity requiring validation of simpler profile patterns
-
-**Anti-features (avoid building):**
-- Real-time location tracking (privacy invasion, not governance-focused)
-- Social media integration (dilutes professional focus, introduces security risks)
-- Family calendar/event scheduling (feature creep, competitive with existing tools)
-- Financial account aggregation (regulated, complex, highly competitive market)
-- Gamification elements (undermines serious governance tone required for HNW clients)
+- Automated risk area curation — Requires significant AI training and family data volume
+- Predictive family dynamics analysis — Complex ML feature needing large dataset
+- White-label portal customization — When serving multiple advisor firms
 
 ### Architecture Approach
 
-The integration follows a profile-context architecture where household profiles become first-class assessment context rather than separate features. This extends the proven hierarchical scoring architecture (question → sub-category → pillar → overall) to include household composition as scoring context, while maintaining the established wizard-based intake pattern with enhanced member-aware branching logic.
+The platform extends existing Next.js assessment architecture with audio recording components, advisor role management, and multi-step interview workflows. Integration preserves the current user ownership security model while adding explicit advisor-client relationships and profile-aware question branching.
 
-**Major components (integrated):**
-1. **Profile Services + Enhanced Branching** — Extends existing branching logic engine to consider both user answers AND household composition for question routing
-2. **Assessment Logic + Profile Context** — Enhanced Zustand store managing both assessment state and household member data with synchronized updates
-3. **Template Engine + Profile Data** — Composed template generation from scores, user data, and household member profiles for personalized reporting
-
-**Key integration patterns:**
-- **Profile-aware question branching**: Extend shouldShowQuestion() to consider household composition alongside existing answer-based conditions
-- **Profile-context state management**: Enhanced Zustand store including profile data alongside assessment state for unified UI context
-- **Template data composition**: Compose template data from multiple sources (scores + profile + members) for rich personalization
-
-**Database schema integration:**
-```typescript
-// New models integrate with existing User/Assessment tables
-HouseholdProfile: userId -> User, has many HouseholdMember
-HouseholdMember: profileId -> HouseholdProfile, relationship/role data
-Assessment: enhanced with profileId -> HouseholdProfile (optional for backward compatibility)
-```
+**Major components:**
+1. Audio Recording Infrastructure — Browser-based recording with chunked upload and transcription pipeline
+2. Advisor Permission System — Role-based access extending existing auth patterns without middleware vulnerabilities
+3. Interview-Assessment Integration — Multi-step workflows preserving existing 12-15 minute assessment completion time
+4. Profile-Aware Customization — Assessment personalization using household member data with advisor oversight
 
 ### Critical Pitfalls
 
-Research identified five critical pitfalls from household profile integration failures, plus existing assessment platform risks that must be preserved.
+1. **Audio Recording Infrastructure Failure** — Browser compatibility issues, upload timeouts, and storage explosion. Avoid with chunked upload, browser compatibility matrix testing, and progressive encoding.
 
-**New household-specific pitfalls:**
-1. **Assessment completion rate disruption** — Adding household profiles breaks proven 12-15 minute completion flow; avoid positioning profile setup as prerequisite, use progressive building during assessment
-2. **Data fragmentation and integration failures** — Profile data lives in isolation from assessment responses; design household profiles as first-class assessment context from day one
-3. **Permission structure complexity** — Multi-member households create permission nightmares; implement role-based access aligned with family office principles from start
-4. **Assessment personalization mistakes from stale data** — Profile-driven personalization creates embarrassing mistakes with outdated information; implement profile validation within assessment flow
-5. **Scoring algorithm complexity from conflicting perspectives** — Different family members' responses create conflicting risk assessments; establish clear household scoring methodology before building profiles
+2. **Advisor Portal Permission Leakage** — Inconsistent access control leading to cross-client data exposure. Avoid with explicit advisor-client relationships extending existing ownership patterns and comprehensive audit logging.
 
-**Existing platform pitfalls (must preserve mitigation):**
-- **Questionnaire fatigue killing completion rates** — Maintain aggressive branching logic, 15-20 minute max completion time
-- **Branching logic state management bugs** — Continue comprehensive testing, schema-based validation with conditional fields
-- **Opaque scoring algorithm** — Preserve transparent score breakdown by category, weight display, methodology documentation
+3. **Interview State Management Disrupting Assessment Flow** — Adding interviews breaks validated 12-15 minute completion time. Avoid with interview completion gates and isolated state management preserving existing auto-save behavior.
+
+4. **Assessment Customization Complexity Explosion** — Advisor customization making system unmaintainable. Avoid with customization overlays rather than core logic replacement and limited scope to question emphasis, not visibility.
+
+5. **Audio Data Privacy Compliance Failures** — Sensitive family audio lacking proper encryption and retention policies. Avoid with at-rest encryption, automated retention policies, and explicit client consent workflows.
 
 ## Implications for Roadmap
 
-Based on combined research, updated phase structure maintains existing assessment platform stability while progressively adding household capabilities:
+Based on research, suggested phase structure emphasizes audio foundation before advisor complexity:
 
-### Phase 1: Household Foundation (NEW)
-**Rationale:** Must establish basic household data structure without disrupting proven 80%+ assessment completion rates
-**Delivers:** Core household profile database schema, basic member management, backward-compatible assessment integration
-**Addresses:** Basic member profiles, household composition tracking from table stakes features
-**Avoids:** Assessment completion rate disruption by implementing progressive profile building during assessment flow
-**Stack elements:** Enhanced Drizzle schema with HouseholdProfile/HouseholdMember models, React Hook Form useFieldArray patterns
-**Research flag:** Standard database patterns and CRUD operations, no additional research needed
+### Phase 1: Audio Infrastructure Foundation
+**Rationale:** Must establish reliable audio recording and compliance framework before any advisor workflows or complex integrations
+**Delivers:** Browser audio recording, chunked upload, transcription pipeline, basic interview flow
+**Addresses:** Structured intake interview flow, audio response recording from must-have features
+**Avoids:** Audio infrastructure failure and privacy compliance pitfalls through upfront foundation work
 
-### Phase 2: Assessment Integration (ENHANCED)
-**Rationale:** Core value proposition requires profile data to meaningfully enhance assessment personalization without breaking existing scoring
-**Delivers:** Profile-aware question branching, enhanced assessment state management, member-specific question rendering, backward-compatible scoring
-**Uses:** Enhanced shouldShowQuestion() with profile context, Zustand store extensions, existing hierarchical scoring engine
-**Implements:** Profile-context state management integrating with existing assessment store
-**Addresses:** Profile-based question branching (core value proposition), member governance role identification
-**Avoids:** Data fragmentation by architectural integration from day one, scoring algorithm complexity through clear methodology
-**Research flag:** **HIGH RISK** - Complex state management, conditional validation patterns, comprehensive testing strategy for branching paths. Consider `/gsd:research-phase` for profile-aware branching patterns
+### Phase 2: Advisor Permission Architecture
+**Rationale:** Secure multi-tenant access must be established before building advisor workflows or client management features
+**Delivers:** Advisor-client relationship model, role-based permissions, audit logging, basic advisor portal
+**Uses:** NextAuth.js patterns extended for advisor roles, PostgreSQL with explicit relationship tables
+**Implements:** Advisor permission system component extending existing auth without middleware vulnerabilities
 
-### Phase 3: Enhanced Personalization (NEW)
-**Rationale:** Builds on proven profile-assessment integration to deliver governance-specific differentiation
-**Delivers:** Governance role assessment, cultural profiling, advisor ecosystem mapping, profile validation
-**Addresses:** Competitive advantage features that differentiate from generic family platforms
-**Avoids:** Personalization mistakes through robust profile validation and conflict resolution patterns
-**Stack elements:** react-international-phone for global contacts, enhanced profile validation logic
-**Research flag:** Cultural governance profiling patterns need domain-specific validation for family office contexts
+### Phase 3: Interview-Assessment Integration
+**Rationale:** Complex workflow integration requires both audio foundation and advisor permissions to be stable
+**Delivers:** Multi-step interview with assessment integration, progress tracking, advisor approval workflows
+**Addresses:** Assessment customization and approval workflow from must-have features
+**Avoids:** Interview state management disruption through careful integration preserving existing UX
 
-### Phase 4: Household Reporting (ENHANCED)
-**Rationale:** Enhances existing PDF generation with household context, leveraging proven template infrastructure
-**Delivers:** Member-specific report sections, household composition in PDFs, personalized governance recommendations
-**Uses:** Enhanced template data composition, existing @react-pdf/renderer infrastructure, proven async PDF generation
-**Implements:** Profile-rich template engine extending existing template patterns
-**Addresses:** Profile-driven report personalization (differentiator), household-aware visualizations
-**Avoids:** Report quality issues through professional template design, member attribution clarity
-**Research flag:** Profile-driven PDF template architecture requires technical research for complex data composition
-
-### Phase 5: Advanced Family Features (NEW)
-**Rationale:** After household integration validated, add advanced family office sophistication features
-**Delivers:** Multigenerational mapping, cross-generational perspective analysis, advanced family conflict assessment
-**Addresses:** Family office level sophistication, succession planning enhancement
-**Stack elements:** Enhanced data models for extended family relationships, complex scoring algorithms
-**Research flag:** Advanced family relationship modeling patterns need validation
+### Phase 4: Assessment Customization Framework
+**Rationale:** Advanced advisor features require stable foundation of audio, permissions, and workflow integration
+**Delivers:** Advisor-driven assessment customization, advanced analytics, emotional analysis capabilities
+**Uses:** Profile-aware customization architecture building on household member integration
+**Implements:** Customization overlay system avoiding complexity explosion pitfall
 
 ### Phase Ordering Rationale
 
-- **Foundation first**: Household schema must exist before assessment integration; maintains backward compatibility with existing assessments
-- **Progressive integration**: Assessment integration builds on profile foundation; avoids "big bang" changes that could break existing user flows
-- **Risk management**: Profile-aware branching (Phase 2) is highest-risk integration point; defer until foundation solid
-- **Value delivery**: Each phase delivers meaningful user value; Phases 1-4 constitute enhanced launchable product
+- Audio foundation first because recording infrastructure complexity affects all subsequent features - failure here breaks entire value proposition
+- Advisor permissions second because multi-tenant security must be proven before advisor workflows - permission leakage creates compliance risks
+- Interview integration third because it requires both audio stability and advisor oversight capabilities
+- Customization last because it builds on all prior components and represents advanced advisor tooling
 
 ### Research Flags
 
-**Phases likely needing deeper research during planning:**
-- **Phase 2 (Assessment Integration):** Profile-aware branching logic, conditional validation patterns, state management for household context
-- **Phase 3 (Enhanced Personalization):** Cultural governance profiling patterns for family office appropriateness
-- **Phase 4 (Household Reporting):** Profile-driven PDF template architecture and complex data composition patterns
+Phases likely needing deeper research during planning:
+- **Phase 1:** Audio recording needs browser compatibility testing and transcription API evaluation - niche audio engineering domain
+- **Phase 2:** Advisor permission patterns need financial services compliance review - regulatory requirements vary by jurisdiction
 
-**Phases with standard patterns (skip research-phase):**
-- **Phase 1:** Standard database schema and CRUD patterns well-documented
-- **Phase 5:** Can leverage patterns established in earlier phases
+Phases with standard patterns (skip research-phase):
+- **Phase 3:** Interview workflows use established React Hook Form patterns documented in stack research
+- **Phase 4:** Assessment customization uses proven configuration-over-code patterns
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All recommendations verified with official documentation and compatibility matrices; household additions integrate seamlessly |
-| Features | MEDIUM | Table stakes validated across family platforms, differentiators based on family office research; household-specific patterns need validation |
-| Architecture | HIGH | Integration patterns align with existing proven assessment architecture; profile-context approach is well-documented |
-| Pitfalls | HIGH | Household-specific pitfalls documented across family office platform failures; existing platform risks well-understood |
+| Stack | HIGH | All core recommendations verified with official documentation, established patterns for financial services |
+| Features | MEDIUM | Good coverage of advisor workflow requirements, some inference on advanced AI features |
+| Architecture | HIGH | Clear integration patterns building on existing assessment architecture |
+| Pitfalls | MEDIUM | Strong audio and permission pitfalls from domain experience, some inference on customization complexity |
 
-**Overall confidence:** HIGH
-
-Research provides strong foundation for household profile integration decisions. Stack recommendations maintain compatibility with proven assessment platform. Architecture patterns preserve existing strengths while enabling household enhancement.
+**Overall confidence:** MEDIUM-HIGH
 
 ### Gaps to Address
 
-**Household feature validation gap:** Basic profile features confirmed, but governance-specific features (cultural profiling, advisor mapping) need validation with actual family office users. Recommendation: Include household profile validation in existing user interview process during Phase 1.
-
-**Multi-member scoring methodology gap:** Research confirms need for handling conflicting family perspectives, but specific approaches require domain expertise. Recommendation: Consult family office governance expert during Phase 2 to establish household scoring rules before implementation.
-
-**Profile-assessment integration complexity:** While patterns exist, specific implementation of profile-aware branching with existing 68-question assessment needs careful validation. Recommendation: Prototype key integration points before Phase 2 implementation.
-
-**International family considerations:** Global families have specific requirements (phone formats, cultural considerations) that standard US family patterns don't address. Recommendation: Research international family office requirements if global expansion planned.
+- **Audio quality requirements:** Research focused on technical implementation - need to validate audio quality expectations for family governance interviews during Phase 1 planning
+- **Regulatory compliance specifics:** General privacy patterns identified - need specific financial services regulation review during Phase 2 planning
+- **Assessment customization scope:** General complexity warnings identified - need specific advisor customization requirements during Phase 4 planning
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- **Next.js 15 Documentation** - Version 15 features, App Router patterns, TypeScript integration, household profile API patterns
-- **React Hook Form useFieldArray Documentation** - Dynamic member management patterns, performance optimization
-- **Drizzle ORM Relations Documentation** - Self-referencing tables, family relationship modeling
-- **Zod Conditional Validation** - Schema patterns for dynamic household member validation
+- Next.js 15 Upgrade Guide, Auth.js Next.js Reference — Stack verification with official documentation
+- React Hook Form + Zod integration patterns — Form architecture compatibility confirmed
+- Drizzle ORM PostgreSQL patterns — Database architecture verified
 
 ### Secondary (MEDIUM confidence)
-- **Family Office Software Comparison 2026** - Household management feature analysis, professional platform expectations
-- **Google Family Groups Analysis** - Consumer family platform patterns, household composition handling
-- **Best Family Office Software (Masttro)** - Professional feature expectations, role-based access patterns
-- **Family Platform Feature Research** - Household data collection patterns, privacy control requirements
+- RecordRTC GitHub documentation — Audio recording capabilities and browser support matrix
+- OpenAI Transcription pricing analysis — Cost-effectiveness compared to alternatives
+- Financial advisor workflow integration guides — Domain pattern validation
 
-### Tertiary (LOW confidence, needs validation)
-- **Cultural Governance Profiling Patterns** - Limited domain-specific documentation, requires expert validation during implementation
-- **International Family Requirements** - Inferred from general international platform requirements, needs family office context validation
+### Tertiary (LOW confidence)
+- AI emotional analysis capabilities — Future feature speculation, needs validation
+- Complex assessment customization requirements — Inferred from general SaaS customization patterns
 
 ---
-*Research completed: 2026-02-17*
-*Updated for household profiles: 2026-03-12*
+*Research completed: 2026-03-13*
 *Ready for roadmap: yes*

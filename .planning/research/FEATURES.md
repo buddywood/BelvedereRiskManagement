@@ -1,190 +1,171 @@
 # Feature Research
 
-**Domain:** Household Profile Management for Family Governance Assessment Platform
-**Researched:** 2026-03-12
+**Domain:** Family Governance Assessment with Intake Interview, Audio Collection, and Advisor Portal
+**Researched:** 2026-03-13
 **Confidence:** MEDIUM
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist for household profile management. Missing these = product feels incomplete.
+Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Basic member profiles | Standard across family platforms | LOW | Name, role, age, contact info, relationship to head of household |
-| Household composition tracking | Core requirement for family assessment personalization | LOW | Number of members, living arrangements, decision-making hierarchy |
-| Profile-based question branching | Users expect personalized experience in 2026 | MEDIUM | Integrate with existing 68-question assessment logic |
-| Member role identification | Essential for governance-focused platform | MEDIUM | Primary decision maker, next-gen, board members, dependents |
-| Individual privacy controls | 2026 standard for family platforms | MEDIUM | Separate member data with controlled family-level sharing |
-| Mobile-responsive profile forms | Mobile-first expectation | LOW | Progressive enhancement of existing responsive design |
-| Auto-save during profile creation | Extends existing assessment auto-save | LOW | Prevent data loss during profile building |
-| Profile completion guidance | Users expect progress indicators | LOW | Visual progress, required vs optional fields |
+| Structured intake interview flow | Industry standard for advisor-guided onboarding | MEDIUM | 15-30 minute questionnaire with branching logic |
+| Audio response recording | Expected for qualitative assessment in 2026 | MEDIUM | Web-based recording with auto-transcription |
+| Real-time auto-save | Users expect no data loss during sessions | LOW | Already implemented in existing assessment |
+| Mobile-responsive design | Advisors access portals from any device | LOW | Critical for advisor workflow flexibility |
+| Secure client portal | Standard for wealth management platforms | MEDIUM | Document sharing, meeting agendas, encrypted communication |
+| Assessment customization | Advisors expect to tailor assessments per family | HIGH | Custom question sets, branding, role-based filtering |
+| Approval workflow | Required for advisor oversight of assessments | MEDIUM | Multi-step approval with audit trails |
+| Basic analytics dashboard | Advisors need progress tracking and insights | MEDIUM | Assessment completion rates, response patterns |
+| TOTP/MFA authentication | Security baseline for financial services | LOW | Already implemented |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set the product apart from generic family platforms. Not required, but valuable for governance focus.
+Features that set the product apart. Not required, but valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Governance role assessment | Unique to family governance risk platforms | MEDIUM | Decision-making authority, influence mapping, succession readiness |
-| Multigenerational wealth perspective | Family office level sophistication | HIGH | Extended family relationships, cross-generational influence patterns |
-| Profile-driven report personalization | Tailored governance recommendations per member | HIGH | Customize PDF sections based on individual member profiles |
-| Family conflict risk prediction | Proactive governance risk identification | HIGH | Use profile data to predict potential friction points and communication breakdowns |
-| Advisor ecosystem mapping | Professional network integration | MEDIUM | Track external advisors, their client relationships, communication preferences |
-| Cultural governance profiling | Values-based risk assessment | MEDIUM | Communication styles, decision preferences, cultural factors affecting governance |
-| Cross-generational perspective analysis | Unique family office insight | HIGH | Compare perspectives across age groups for succession planning |
-| Member-specific policy recommendations | Personalized governance guidance | HIGH | Tailor policy templates based on individual roles and responsibilities |
+| AI-powered emotional analysis | Extract sentiment/emotion from audio responses | HIGH | Voice AI can identify complex emotional states and conflict |
+| Real-time family member integration | Dynamic question personalization using household data | MEDIUM | Builds on existing household member features |
+| Automated risk area curation | AI suggests focus areas based on intake responses | HIGH | Reduces advisor prep time, improves assessment relevance |
+| Multi-language audio support | Serves diverse wealthy families | MEDIUM | Transcription and translation capabilities |
+| Advisor coaching recommendations | Suggest conversation topics based on responses | HIGH | Transforms assessment into coaching tool |
+| Advanced workflow automation | Smart routing of tasks based on response content | HIGH | Auto-route insights to appropriate team members |
+| Predictive family dynamics analysis | Identify potential governance challenges early | HIGH | Pattern recognition across family member responses |
+| White-label portal customization | Advisor firms can brand the entire experience | MEDIUM | Full UI customization with firm branding |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good for household management but create problems for governance focus.
+Features that seem good but create problems.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Real-time location tracking | "Family safety" feature request | Privacy invasion, liability, not governance-focused | Focus on communication preferences and availability schedules |
-| Social media integration | "Modern family connection" | Dilutes professional focus, introduces security risks | Maintain governance-only professional scope |
-| Family calendar/event scheduling | "Complete family management" | Feature creep, competitive with existing tools | Integration with external calendar platforms via export |
-| Financial account aggregation | "Complete wealth picture per member" | Regulated, complex, highly competitive market | Partner with established wealth management platforms |
-| Family chat/messaging system | "Improve family communication" | Not differentiated, high maintenance overhead | Email notifications with external communication tools |
-| Photo sharing and family albums | "Personal touch for profiles" | Consumer feature creep, storage costs, liability | Professional headshots only for governance context |
-| Gamification elements | "Engagement boost" | Undermines serious governance tone required for HNW clients | Simple progress indicators without game mechanics |
-| Public family profiles | "Family transparency" | Privacy and security risks unacceptable for HNW families | Keep all data private and secure with controlled sharing |
+| Video recording capability | "More engaging than audio" | Privacy concerns, storage costs, limited value over audio | High-quality audio with transcript |
+| Complex role-based permissions | "Need granular control" | Over-engineering for family use case | Simple advisor/family member distinction |
+| Real-time chat/messaging | "Better communication" | Scope creep beyond assessment tool | Existing secure communication methods |
+| Advanced financial modeling | "One-stop solution" | Outside core competency, many tools exist | Integrate with existing advisor tools |
+| Social collaboration features | "Family engagement" | Families prefer private governance discussions | Advisor-mediated communication |
+| Mobile app development | "Better user experience" | Maintenance overhead, web-first more flexible | Progressive web app with mobile optimization |
 
 ## Feature Dependencies
 
 ```
-Basic Member Profiles
-    └──requires──> Household Composition Tracking
-                       └──requires──> Member Role Identification
-                                          └──requires──> Governance Role Assessment
+Intake Interview Flow
+    └──requires──> Assessment Customization
+                       └──requires──> Approval Workflow
 
-Profile-Based Question Branching
-    └──requires──> Basic Member Profiles
-    └──enhances──> Existing 68-Question Assessment System
-    └──requires──> Existing Branching Logic Engine
+Audio Collection
+    └──requires──> Intake Interview Flow
+    └──enables──> AI Emotional Analysis
 
-Profile-Driven Report Personalization
-    └──requires──> Member Role Identification
-    └──requires──> Profile-Based Question Branching
-    └──requires──> Existing PDF Generation System
+Advisor Portal
+    └──requires──> Secure Authentication (existing)
+    └──enables──> Client Management
 
-Family Conflict Risk Prediction
-    └──requires──> Governance Role Assessment
-    └──requires──> Cultural Governance Profiling
-    └──conflicts──> Simple MVP approach
+Real-time Family Integration ──enhances──> Assessment Customization
+    └──requires──> Household Profile System (existing)
 
-Multigenerational Mapping
-    └──requires──> Extended Family Profile Collection
-    └──enhances──> Succession Planning Assessment
-    └──conflicts──> Privacy Controls (complexity)
+AI Features ──conflict──> Privacy Requirements
 ```
 
 ### Dependency Notes
 
-- **Profile-based branching requires basic profiles:** Cannot personalize assessment questions without foundational member data
-- **Report personalization requires role identification:** PDF customization depends on governance roles and responsibilities
-- **Conflict prediction requires cultural profiling:** Algorithm needs behavioral and communication preference data
-- **Multigenerational mapping conflicts with privacy:** Extended family tracking increases complexity of privacy controls
+- **Audio Collection requires Intake Interview Flow:** Audio responses need structured questions to respond to
+- **Assessment Customization requires Approval Workflow:** Custom assessments need advisor oversight before deployment
+- **AI Features conflict with Privacy Requirements:** Advanced AI analysis may conflict with family privacy expectations
+- **Real-time Family Integration enhances Assessment Customization:** Builds on existing household profile features for dynamic personalization
 
 ## MVP Definition
 
 ### Launch With (v1)
 
-Minimum viable household profile features — what's needed to validate profile-driven personalization.
+Minimum viable product — what's needed to validate the concept.
 
-- [ ] Basic member profiles (name, age, relationship, contact) — Essential foundation for any household-aware features
-- [ ] Household composition tracking (structure, living arrangements) — Required to understand family dynamics
-- [ ] Profile-based question branching integration — Core value proposition extending existing assessment
-- [ ] Member governance role identification — Necessary for governance-specific recommendations
+- [ ] Structured intake interview flow — Foundation for advisor-guided experience
+- [ ] Audio response recording — Core differentiator from text-only assessments
+- [ ] Basic approval workflow — Essential for advisor oversight
+- [ ] Secure advisor portal — Required for advisor access and client management
+- [ ] Assessment customization (basic) — Advisors need to tailor for families
 
 ### Add After Validation (v1.x)
 
-Features to add once core profile functionality is working and validated.
+Features to add once core is working.
 
-- [ ] Governance role assessment (decision authority, influence) — Add when member roles prove valuable for personalization
-- [ ] Cultural governance profiling (communication styles, preferences) — Add when users request deeper personalization
-- [ ] Advisor ecosystem mapping — Add when professional network integration is requested
-- [ ] Profile completion analytics — Track which profiles are most/least complete
+- [ ] AI emotional analysis — When audio data volume justifies AI training
+- [ ] Advanced analytics dashboard — When usage patterns are established
+- [ ] Multi-language support — When serving diverse client base
+- [ ] Advanced workflow automation — When core workflows prove successful
 
 ### Future Consideration (v2+)
 
-Features to defer until household profile product-market fit is established.
+Features to defer until product-market fit is established.
 
-- [ ] Profile-driven report personalization — Complex implementation requiring PDF template rewrite
-- [ ] Multigenerational wealth mapping — High complexity, niche use case validation needed
-- [ ] Family conflict risk prediction — Requires ML/AI investment, validate simpler features first
-- [ ] Member-specific policy recommendations — Advanced feature requiring rules engine expansion
+- [ ] Automated risk curation — Requires significant AI training and family data
+- [ ] Predictive family dynamics — Complex ML feature, needs large dataset
+- [ ] White-label customization — When serving multiple advisor firms
+- [ ] Advisor coaching recommendations — Advanced AI feature requiring extensive training
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Basic member profiles | HIGH | LOW | P1 |
-| Household composition tracking | HIGH | LOW | P1 |
-| Profile-based question branching | HIGH | MEDIUM | P1 |
-| Member role identification | HIGH | MEDIUM | P1 |
-| Governance role assessment | MEDIUM | MEDIUM | P2 |
-| Cultural governance profiling | MEDIUM | MEDIUM | P2 |
-| Advisor ecosystem mapping | MEDIUM | MEDIUM | P2 |
-| Profile-driven report personalization | MEDIUM | HIGH | P2 |
-| Multigenerational mapping | LOW | HIGH | P3 |
-| Family conflict risk prediction | LOW | HIGH | P3 |
-| Member-specific policy recommendations | LOW | HIGH | P3 |
+| Intake interview flow | HIGH | MEDIUM | P1 |
+| Audio recording | HIGH | MEDIUM | P1 |
+| Approval workflow | HIGH | LOW | P1 |
+| Assessment customization | HIGH | HIGH | P1 |
+| Advisor portal | HIGH | MEDIUM | P1 |
+| AI emotional analysis | MEDIUM | HIGH | P2 |
+| Analytics dashboard | MEDIUM | MEDIUM | P2 |
+| Multi-language support | LOW | MEDIUM | P3 |
+| Advanced workflow automation | LOW | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for launch (extends existing assessment value)
-- P2: Should have, add when possible (enhances personalization)
-- P3: Nice to have, future consideration (advanced features)
+- P1: Must have for launch
+- P2: Should have, add when possible
+- P3: Nice to have, future consideration
 
 ## Competitor Feature Analysis
 
-| Feature | Google Family Groups | Family Office Software | Our Approach |
-|---------|---------------------|------------------------|--------------|
-| Member profiles | Basic names and device management | Comprehensive wealth/investment profiles | Governance-focused profiles with risk assessment integration |
-| Household structure | Simple family connections | Complex entity structures and ownership | Family governance hierarchy with decision-making mapping |
-| Personalization | Content recommendations | Investment reporting customization | Governance assessment question branching |
-| Privacy controls | Individual account spaces | Sophisticated access controls | Member-level privacy with family governance insights |
-| Role management | Parent/child designations | Investment roles and permissions | Governance roles with succession planning context |
+| Feature | TurboTax Style Tools | Wealth Management Platforms | Our Approach |
+|---------|---------------------|----------------------------|--------------|
+| Audio Collection | Text-only guided experience | Limited audio capabilities | Core audio-first assessment |
+| Family Integration | Individual-focused | Basic family account linking | Deep household member integration |
+| Advisor Oversight | Self-service only | Complex approval chains | Streamlined advisor-guided flow |
+| Assessment Customization | Fixed question sets | Heavy customization overhead | Balanced customization with templates |
 
 ## Integration with Existing Features
 
 ### Assessment System Integration
-- Extend existing 68-question branching logic to consider household member profiles
-- Personalize questions based on member roles (e.g., different questions for next-gen vs. current leaders)
-- Maintain existing auto-save functionality across profile and assessment data
+- Extend existing 68-question branching logic to include intake interview responses
+- Use audio responses to inform assessment personalization
+- Maintain existing auto-save functionality across intake and assessment flows
 
-### PDF Report Integration
-- Include household composition summary in existing PDF reports
-- Add member-specific sections while maintaining overall family assessment structure
-- Leverage existing PDF generation infrastructure
+### Household Profile Integration
+- Leverage existing household member profiles for intake personalization
+- Use member roles and relationships to customize intake questions
+- Build on existing member-aware question branching
 
 ### Security and Privacy Integration
-- Extend existing MFA and encryption to household member data
-- Maintain SOC 2 compliance with additional member data collection
-- Use existing audit logging for household profile activities
+- Extend existing TOTP/MFA to advisor portal access
+- Maintain SOC 2 compliance with audio data collection
+- Use existing audit logging for advisor approval workflows
 
 ## Sources
 
-### Family Platform Research
-- [Google Family Group - Stay Connected with a Family Account](https://families.google/intl/en_us/families/)
-- [Best Family Office Software Platforms in 2026](https://aleta.io/knowledge-hub/best-family-office-software-platforms-in-2026)
-- [Masttro: Family Office Software, Built by a Family Office](https://masttro.com/)
-- [The Best Password Managers for Families of 2026](https://www.passwordmanager.com/best-password-managers-for-families/)
-
-### Household Data Collection
-- [Family Details Form Template | Jotform](https://www.jotform.com/form-templates/family-details-form)
-- [Free Family Survey Template | 10 Important Questions](https://www.supersurvey.com/LPC-family-survey)
-- [Family Survey | 50+ Must Ask Questions for Better Insights](https://www.poll-maker.com/family-questions)
-
-### Personalization and User Experience
-- [How to Reach Families Effectively Through Personalization](https://www.ringringmarketing.com/funeral/the-power-of-personalization-how-to-reach-families-more-effectively-in-2026/)
-- [Family Roles and Relationships Quiz — Discover Your Role in Family Dynamics](https://elwio.com/quiz/family-roles-and-relationships-quiz-discover-your-role)
-
-### Family Tracking and Management
-- [5 Best Family Tracking Apps in 2026](https://cybernews.com/best-parental-control-apps/best-family-tracking-apps/)
-- [Best Family Office Software for 2026: Features, Pricing, and Use Cases – Masttro](https://masttro.com/insights/best-family-office-software)
+- [AI Video Interviewing in 2026: Best Practices & Platforms](https://www.humanly.io/blog/ai-video-interviewing-best-practices-2026)
+- [Conducting Intake Effectively: 22 Forms, Questions, & Apps](https://quenza.com/blog/intake-form-counseling/)
+- [Best User Feedback Collection Systems in 2026: Complete Guide](https://blog.buildbetter.ai/best-user-feedback-collection-systems-2026-guide/)
+- [Voice AI in User Research: Conducting Audio-Based Studies](https://innerview.co/blog/revolutionizing-user-research-harnessing-voice-ai-for-audio-based-studies)
+- [Agentforce for Financial Services: 2026 Complete Guide](https://vantagepoint.io/blog/sf/agentforce-for-financial-services-2026-guide)
+- [InvestGlass Approval Workflow Software for Banks](https://www.investglass.com/revolutionising-financial-operations-the-power-of-investglass-approval-workflow-software-for-banks-and-brokerage-firms/)
+- [The Top 25 SaaS Assessment Software in 2026](https://topbusinesssoftware.com/categories/assessment/saas/)
+- [Best Learning Management System Features in 2026](https://leveluplms.com/the-best-learning-management-system-features-you-should-look-for-in-2026/)
+- [Family Governance for High Net Worth Families: A Practical Guide](https://www.selectadvisorsinstitute.com/our-perspective/family-governance-for-high-net-worth-families)
+- [Virtual Family Office: Modern Wealth Management](https://masttro.com/insights/virtual-family-office/)
 
 ---
-*Feature research for: Household Profile Management (Subsequent Milestone)*
-*Researched: 2026-03-12*
+*Feature research for: Family Governance Assessment with Intake Interview, Audio Collection, and Advisor Portal*
+*Researched: 2026-03-13*

@@ -1,7 +1,7 @@
 # Stack Research
 
-**Domain:** Family Governance Risk Assessment Web Application + Household Profile Management
-**Researched:** 2026-02-17 (Updated: 2026-03-12)
+**Domain:** Family Governance Risk Assessment Web Application + Household Profile Management + Intake Interview & Advisor Portal
+**Researched:** 2026-02-17 (Updated: 2026-03-12, 2026-03-13)
 **Confidence:** HIGH
 
 ## Recommended Stack
@@ -40,6 +40,32 @@
 | react-international-phone | ^4.3.0 | International phone number input | For household member contact info; TypeScript-native, React Hook Form compatible with proper validation |
 | react-day-picker | ^9.1.3 | Date picker for birth dates | For member date of birth; integrates with existing date-fns, WCAG compliant, TypeScript native |
 
+## NEW: Intake Interview & Audio Recording Stack Additions
+
+### Core New Technologies
+
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| RecordRTC | 5.6.x | Browser audio recording | Most maintained WebRTC library with Chrome/Firefox/Safari support, handles format conversion, 15KB minified |
+| OpenAI Whisper API | v1 | Audio transcription | Best price/accuracy ratio at $0.006/minute, 103 languages, reliable uptime, streaming support |
+| rhf-wizard | 1.2.x | Multi-step form wizard | Integrates with existing React Hook Form, handles step validation, progress tracking |
+
+### Supporting Libraries for New Features
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| react-audio-visualize | 2.x | Audio waveform display | Recording feedback and playback visualization during interviews |
+| @radix-ui/react-dialog | 1.x | Modal/overlay components | Advisor portal overlays, recording confirmation dialogs, step transitions |
+| lucide-react | 0.x | Icon library | Recording controls, step indicators, advisor portal navigation |
+
+## NEW: Advisor Portal Stack Additions
+
+### Role-Based Access Control
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| Custom RBAC with Auth.js | - | Role-based permissions | Advisor vs client role checking, built on existing auth, no additional dependencies needed |
+
 ### Development Tools
 
 | Tool | Purpose | Notes |
@@ -48,6 +74,7 @@
 | Prettier | Code formatting | Integrate with ESLint via `eslint-config-prettier` |
 | Husky | Git hooks | Pre-commit linting and type checking |
 | TypeScript Strict Mode | Type safety | Enable `strict: true` in tsconfig.json |
+| @types/dom-mediacapture-record | Type definitions for MediaRecorder API | Essential for TypeScript audio recording |
 
 ## Installation
 
@@ -63,18 +90,22 @@ npm install next-auth@beta
 npm install resend react-email @react-email/components
 npm install @react-pdf/renderer
 
-# NEW: Household profile dependencies
+# Household profile dependencies
 npm install react-international-phone react-day-picker
+
+# NEW: Intake interview & audio recording
+npm install recordrtc rhf-wizard react-audio-visualize
+npm install @radix-ui/react-dialog lucide-react
 
 # UI components (via shadcn CLI)
 npx shadcn@latest init
-npx shadcn@latest add form input button select textarea
+npx shadcn@latest add form input button select textarea dialog
 
 # Dev dependencies
 npm install -D vitest @vitejs/plugin-react
 npm install -D prettier eslint-config-prettier
 npm install -D husky lint-staged
-npm install -D @types/react-day-picker
+npm install -D @types/react-day-picker @types/dom-mediacapture-record
 ```
 
 ## Alternatives Considered
@@ -89,7 +120,16 @@ npm install -D @types/react-day-picker
 | Vitest | Jest | Use Jest if React Native is in roadmap (required for Expo). Otherwise Vitest superior: 10-20x faster, native ESM/TS, modern API. |
 | Vercel | VPS (Railway/Render) | Use VPS if cost-sensitive after 1M pageviews. Vercel $20/month Pro can hit $500+/month with bandwidth overages. Railway/Render $5-8/month unlimited. Trade: Manual scaling, ops overhead. Vercel better for MVP (zero config). |
 
-### NEW: Household Profile Alternatives
+### NEW: Audio Recording & Interview Alternatives
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| RecordRTC | Native MediaRecorder API | Simple recording without format conversion needs, smaller bundle |
+| OpenAI Whisper | Google Speech-to-Text | Enterprise environments with existing Google Cloud setup |
+| rhf-wizard | React Albus | Complex state machine requirements beyond forms |
+| react-audio-visualize | Custom canvas solution | Highly specialized visualization needs |
+
+### Household Profile Alternatives
 
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
@@ -109,7 +149,16 @@ npm install -D @types/react-day-picker
 | Sequelize | Legacy ORM. Poor TypeScript support. No longer actively maintained. Slower than modern alternatives. | Drizzle or Prisma |
 | npm | Slower than modern alternatives. Inconsistent lockfile behavior. | pnpm (3x faster installs) or yarn |
 
-### NEW: Household Profile Anti-Patterns
+### NEW: Audio Recording Anti-Patterns
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Recorder.js | Not maintained since 2016, no TypeScript support | RecordRTC |
+| Assembly AI | 5x more expensive ($0.55/hour vs $0.006/minute) | OpenAI Whisper |
+| Vanilla wizard libs | Manual form state management overhead | rhf-wizard with React Hook Form |
+| CASL for RBAC | Server component compatibility issues in Next.js | Custom role checking with existing Auth.js setup |
+
+### Household Profile Anti-Patterns
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
@@ -124,12 +173,14 @@ npm install -D @types/react-day-picker
 - Use Neon free tier (100 CU-hours sufficient for low traffic)
 - Deploy on Vercel free tier (limited to hobby projects)
 - Use Resend free tier (100 emails/day)
+- OpenAI Whisper free tier ($5 credits for ~833 minutes)
 - Total: $0/month for MVP validation
 
 **If expecting high traffic (1M+ pageviews/month):**
 - Use Railway or Render VPS ($8-17/month) instead of Vercel
 - Self-host Postgres on VPS or use Neon Scale plan
 - Consider Cloudflare Pages for static assets (free unlimited bandwidth)
+- Budget $20-30/month for transcription at scale
 
 **If team unfamiliar with Next.js:**
 - Still use Next.js. Learning curve < 1 week for React developers
@@ -141,7 +192,23 @@ npm install -D @types/react-day-picker
 - Accept higher cold start times (2-5 seconds)
 - Consider background job queue for large reports
 
-### NEW: Household Profile Patterns
+### NEW: Audio Recording Patterns
+
+**If simple recording only:**
+- Use native MediaRecorder API
+- Because minimal dependencies for basic audio capture
+
+**If real-time transcription needed:**
+- Use WebSocket with streaming APIs
+- Because batch transcription adds UX friction
+
+### NEW: Advisor Portal Patterns
+
+**If complex advisor workflows:**
+- Build on existing Auth.js role system
+- Because granular permissions without additional dependencies
+
+### Household Profile Patterns
 
 **For dynamic household member arrays:**
 - Use react-hook-form useFieldArray
@@ -167,7 +234,15 @@ npm install -D @types/react-day-picker
 | Tailwind CSS 4.x | PostCSS 8+ | Requires modern browsers (Chrome 115+, Safari 16.4+). Uses CSS nesting, cascade layers. |
 | Vitest 2.x | Vite 5+ | If using Vite for dev server. Next.js users run Vitest standalone. |
 
-### NEW: Household Profile Compatibility
+### NEW: Audio Recording & Interview Compatibility
+
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| RecordRTC@5.6.x | Next.js 15 | SSR-safe, use dynamic imports |
+| rhf-wizard@1.x | react-hook-form@7.x | Requires useFormContext |
+| OpenAI API | Node.js 18+ | Server-side only, use API routes |
+
+### Household Profile Compatibility
 
 | Package A | Compatible With | Notes |
 |-----------|-----------------|-------|
@@ -209,7 +284,48 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
 });
 ```
 
-### NEW: Household Profile Schema Pattern
+### NEW: Audio Recording Setup
+```typescript
+// Dynamic import for SSR safety
+import dynamic from 'next/dynamic';
+
+const AudioRecorder = dynamic(
+  () => import('@/components/AudioRecorder'),
+  { ssr: false }
+);
+
+// RecordRTC configuration
+const options = {
+  type: 'audio',
+  mimeType: 'audio/webm;codecs=opus',
+  bitsPerSecond: 128000,
+  audioBitsPerSecond: 128000,
+  sampleRate: 44100,
+};
+```
+
+### NEW: Multi-Step Interview Pattern
+```typescript
+import { useForm } from 'react-hook-form';
+import { useWizard } from 'rhf-wizard';
+
+const interviewSchema = z.object({
+  step1: z.object({ /* step 1 fields */ }),
+  step2: z.object({ /* step 2 fields */ }),
+  step3: z.object({ /* step 3 fields */ }),
+});
+
+const { wizard, nextStep, prevStep, currentStep } = useWizard({
+  steps: ['step1', 'step2', 'step3'],
+});
+
+const form = useForm({
+  resolver: zodResolver(interviewSchema),
+  mode: 'onChange',
+});
+```
+
+### Household Profile Schema Pattern
 ```typescript
 const householdMemberSchema = z.object({
   name: z.string().min(1, "Name required"),
@@ -232,7 +348,8 @@ const { fields, append, remove } = useFieldArray({
 });
 ```
 
-### NEW: Database Schema Extension
+### NEW: Database Schema Extensions
+
 ```typescript
 // Drizzle schema for household profiles
 export const householdProfiles = pgTable('household_profiles', {
@@ -243,17 +360,24 @@ export const householdProfiles = pgTable('household_profiles', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const householdMembers = pgTable('household_members', {
+// NEW: Interview recordings table
+export const interviewRecordings = pgTable('interview_recordings', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-  profileId: text('profile_id').notNull().references(() => householdProfiles.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
-  dateOfBirth: date('date_of_birth'),
-  occupation: text('occupation'),
-  phone: text('phone'),
-  email: text('email'),
-  relationship: text('relationship').notNull(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  questionId: text('question_id').notNull(),
+  audioUrl: text('audio_url'), // S3/blob storage URL
+  transcription: text('transcription'),
+  duration: integer('duration'), // seconds
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// NEW: Advisor-client relationships
+export const advisorClients = pgTable('advisor_clients', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  advisorId: text('advisor_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  clientId: text('client_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  status: text('status').notNull().default('active'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 ```
 
@@ -285,8 +409,18 @@ export default async function DashboardPage() {
 - [shadcn/ui Tailwind v4](https://ui.shadcn.com/docs/tailwind-v4) - Component compatibility
 - [Drizzle ORM](https://orm.drizzle.team/) - ORM documentation
 
-### NEW: Household Profile Sources
+### NEW: Audio Recording & Transcription Sources
+- [RecordRTC GitHub](https://github.com/muaz-khan/RecordRTC) - Browser compatibility, features
+- [OpenAI Transcription Pricing](https://costgoat.com/pricing/openai-transcription) - Cost comparison
+- [Using the MediaStream Recording API - MDN](https://developer.mozilla.org/en-US/docs/Web/API/MediaStream_Recording_API/Using_the_MediaStream_Recording_API) - Web standards
+- [rhf-wizard GitHub](https://github.com/kennyhei/rhf-wizard) - Multi-step form patterns
+
+### NEW: Interview & Form Wizard Sources
 - [React Hook Form useFieldArray Documentation](https://react-hook-form.com/docs/usefieldarray) - Field array best practices
+- [Build a Multistep Form With React Hook Form](https://claritydev.net/blog/build-a-multistep-form-with-react-hook-form) - Implementation guide
+- [The best React form libraries of 2026](https://blog.croct.com/post/best-react-form-libraries) - Library comparison
+
+### Household Profile Sources
 - [React Hook Form + Zod Integration Guide 2026](https://dev.to/marufrahmanlive/react-hook-form-with-zod-complete-guide-for-2026-1em1) - Resolver integration patterns
 - [Zod Object and Array Validation](https://tecktol.com/zod-array/) - Nested schema patterns
 - [React International Phone Libraries 2026](https://blog.croct.com/post/best-react-phone-number-input-libraries) - Phone input comparison
@@ -301,7 +435,6 @@ export default async function DashboardPage() {
 
 ### Web Search - MEDIUM Confidence (Multiple Sources Agree)
 - [React Hook Form vs Formik 2025](https://www.digitalogy.co/blog/react-hook-form-vs-formik/) - Performance benchmarks
-- [Best React Form Libraries 2026](https://blog.croct.com/post/best-react-form-libraries) - Ecosystem comparison
 - [Top PDF Generation Libraries 2025](https://pdfbolt.com/blog/top-nodejs-pdf-generation-libraries) - PDF library comparison
 - [Drizzle vs Prisma 2025](https://www.bytebase.com/blog/drizzle-vs-prisma/) - ORM comparison
 - [Vitest vs Jest 2025](https://medium.com/@ruverd/jest-vs-vitest-which-test-runner-should-you-use-in-2025-5c85e4f2bda9) - Testing framework comparison
@@ -310,7 +443,8 @@ export default async function DashboardPage() {
 - [PostgreSQL Hosting Pricing](https://www.bytebase.com/blog/postgres-hosting-options-pricing-comparison/) - Database hosting costs
 
 ---
-*Stack research for: Family Governance Risk Assessment Web Application + Household Profile Management*
+*Stack research for: Family Governance Risk Assessment Web Application + Household Profile Management + Intake Interview & Advisor Portal*
 *Original research: 2026-02-17*
 *Household profile additions: 2026-03-12*
+*Intake interview & advisor portal additions: 2026-03-13*
 *Overall confidence: HIGH - All core recommendations verified with official documentation or multiple authoritative sources*
