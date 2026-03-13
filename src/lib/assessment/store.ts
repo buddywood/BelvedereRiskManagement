@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getOrphanedAnswerIds } from './branching';
 import { allQuestions } from './questions';
+import type { HouseholdProfile } from './personalization';
 
 /**
  * Assessment Store
@@ -35,6 +36,7 @@ interface AssessmentState {
   isLoading: boolean;
   isHydrated: boolean;
   orphanedAnswerIds: string[];
+  householdProfile: HouseholdProfile | null;
 
   // Actions
   setAssessmentId: (id: string) => void;
@@ -47,6 +49,7 @@ interface AssessmentState {
   setHydrated: (hydrated: boolean) => void;
   setLoading: (loading: boolean) => void;
   cleanOrphanedAnswers: () => void;
+  setHouseholdProfile: (profile: HouseholdProfile | null) => void;
 }
 
 const initialState = {
@@ -60,6 +63,7 @@ const initialState = {
   isLoading: false,
   isHydrated: false,
   orphanedAnswerIds: [],
+  householdProfile: null,
 };
 
 export const useAssessmentStore = create<AssessmentState>()(
@@ -73,7 +77,7 @@ export const useAssessmentStore = create<AssessmentState>()(
       setAnswer: (questionId: string, answer: unknown) =>
         set((state) => {
           const newAnswers = { ...state.answers, [questionId]: answer };
-          const newOrphanedIds = getOrphanedAnswerIds(newAnswers, allQuestions);
+          const newOrphanedIds = getOrphanedAnswerIds(newAnswers, allQuestions, state.householdProfile);
 
           return {
             answers: newAnswers,
@@ -135,8 +139,11 @@ export const useAssessmentStore = create<AssessmentState>()(
 
       cleanOrphanedAnswers: () =>
         set((state) => ({
-          orphanedAnswerIds: getOrphanedAnswerIds(state.answers, allQuestions),
+          orphanedAnswerIds: getOrphanedAnswerIds(state.answers, allQuestions, state.householdProfile),
         })),
+
+      setHouseholdProfile: (profile: HouseholdProfile | null) =>
+        set({ householdProfile: profile }),
     }),
     {
       name: 'belvedere-assessment',

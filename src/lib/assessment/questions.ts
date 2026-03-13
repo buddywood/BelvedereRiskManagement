@@ -105,6 +105,7 @@ const decisionMakingQuestions: Question[] = [
     weight: 4,
     scoreMap: { 0: 0, 1: 4, 2: 7, 3: 10 },
     textTemplate: (p) => {
+      if (!p) return 'How does the primary decision maker communicate major financial decisions to the family?';
       const dm = getMembersByRole(p, 'DECISION_MAKER')[0];
       return dm
         ? `How does ${dm.fullName} communicate major financial decisions to the family?`
@@ -687,6 +688,7 @@ const successionPlanningQuestions: Question[] = [
     },
     profileCondition: (p) => hasMultipleGenerations(p) || hasSuccessors(p),
     textTemplate: (p) => {
+      if (!p) return 'How prepared is your primary successor for leadership responsibility?';
       const successor = getMembersByRole(p, 'SUCCESSOR')[0];
       return successor
         ? `How prepared is ${successor.fullName} for leadership responsibility?`

@@ -1,7 +1,12 @@
 'use server';
 
 import { auth } from '@/lib/auth';
-import { prisma } from '@/lib/db';
+import {
+  createHouseholdMemberRecord,
+  deleteHouseholdMemberRecord,
+  updateHouseholdMemberRecord,
+  listHouseholdMembers,
+} from '@/lib/data/household-members';
 import { householdMemberSchema, updateHouseholdMemberSchema } from '@/lib/schemas/profile';
 import { revalidatePath } from 'next/cache';
 
@@ -12,23 +17,6 @@ async function getAuthUserId() {
     throw new Error('Not authenticated');
   }
   return session.user.id;
-}
-
-// Get all household members for the authenticated user
-export async function getHouseholdMembers() {
-  try {
-    const userId = await getAuthUserId();
-
-    const members = await prisma.householdMember.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'asc' },
-    });
-
-    return { success: true, members };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to fetch household members';
-    return { success: false, error: message };
-  }
 }
 
 // Create a new household member
@@ -44,12 +32,7 @@ export async function createHouseholdMember(data: unknown) {
       };
     }
 
-    const member = await prisma.householdMember.create({
-      data: {
-        ...validatedFields.data,
-        userId,
-      },
-    });
+    const member = await createHouseholdMemberRecord(userId, validatedFields.data);
 
     revalidatePath('/profiles');
     return { success: true, member };
@@ -72,10 +55,11 @@ export async function updateHouseholdMember(id: string, data: unknown) {
       };
     }
 
-    const member = await prisma.householdMember.update({
-      where: { id, userId }, // Ensure ownership
-      data: validatedFields.data,
-    });
+    const member = await updateHouseholdMemberRecord(userId, id, validatedFields.data);
+
+    if (!member) {
+      return { success: false, error: 'Household member not found' };
+    }
 
     revalidatePath('/profiles');
     return { success: true, member };
@@ -85,14 +69,28 @@ export async function updateHouseholdMember(id: string, data: unknown) {
   }
 }
 
+// Get all household members for current user
+export async function getHouseholdMembers() {
+  try {
+    const userId = await getAuthUserId();
+    const members = await listHouseholdMembers(userId);
+
+    return { success: true, members };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get household members';
+    return { success: false, error: message, members: null };
+  }
+}
+
 // Delete a household member
 export async function deleteHouseholdMember(id: string) {
   try {
     const userId = await getAuthUserId();
+    const deleted = await deleteHouseholdMemberRecord(userId, id);
 
-    await prisma.householdMember.delete({
-      where: { id, userId }, // Ensure ownership
-    });
+    if (!deleted) {
+      return { success: false, error: 'Household member not found' };
+    }
 
     revalidatePath('/profiles');
     return { success: true };
