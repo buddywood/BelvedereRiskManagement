@@ -1,7 +1,7 @@
 # Stack Research
 
-**Domain:** Family Governance Risk Assessment Web Application
-**Researched:** 2026-02-17
+**Domain:** Family Governance Risk Assessment Web Application + Household Profile Management
+**Researched:** 2026-02-17 (Updated: 2026-03-12)
 **Confidence:** HIGH
 
 ## Recommended Stack
@@ -31,6 +31,15 @@
 | TanStack Query | 5.x | Server state | API data caching. Automatic background refetching. Optimistic updates. Reduces boilerplate. Better than useState + fetch. |
 | Vitest | 2.x | Testing framework | Unit tests. 10-20x faster than Jest in watch mode. Native ESM and TypeScript. Vite compatibility. Drop-in Jest replacement. |
 
+## NEW: Household Profile Management Stack Additions
+
+### Required for Household Features
+
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| react-international-phone | ^4.3.0 | International phone number input | For household member contact info; TypeScript-native, React Hook Form compatible with proper validation |
+| react-day-picker | ^9.1.3 | Date picker for birth dates | For member date of birth; integrates with existing date-fns, WCAG compliant, TypeScript native |
+
 ### Development Tools
 
 | Tool | Purpose | Notes |
@@ -54,6 +63,9 @@ npm install next-auth@beta
 npm install resend react-email @react-email/components
 npm install @react-pdf/renderer
 
+# NEW: Household profile dependencies
+npm install react-international-phone react-day-picker
+
 # UI components (via shadcn CLI)
 npx shadcn@latest init
 npx shadcn@latest add form input button select textarea
@@ -62,6 +74,7 @@ npx shadcn@latest add form input button select textarea
 npm install -D vitest @vitejs/plugin-react
 npm install -D prettier eslint-config-prettier
 npm install -D husky lint-staged
+npm install -D @types/react-day-picker
 ```
 
 ## Alternatives Considered
@@ -76,6 +89,14 @@ npm install -D husky lint-staged
 | Vitest | Jest | Use Jest if React Native is in roadmap (required for Expo). Otherwise Vitest superior: 10-20x faster, native ESM/TS, modern API. |
 | Vercel | VPS (Railway/Render) | Use VPS if cost-sensitive after 1M pageviews. Vercel $20/month Pro can hit $500+/month with bandwidth overages. Railway/Render $5-8/month unlimited. Trade: Manual scaling, ops overhead. Vercel better for MVP (zero config). |
 
+### NEW: Household Profile Alternatives
+
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| react-international-phone | react-phone-number-input | If you need more extensive formatting options, but comes with larger bundle size |
+| react-day-picker | react-datepicker | If you need time selection; react-day-picker is lighter and date-fns integrated |
+| useFieldArray (react-hook-form) | Custom state management | Never; useFieldArray handles performance and validation edge cases properly |
+
 ## What NOT to Use
 
 | Avoid | Why | Use Instead |
@@ -87,6 +108,15 @@ npm install -D husky lint-staged
 | PDFKit | Low-level canvas API. Not React-friendly. Manual positioning tedious. Harder to maintain than declarative components. | @react-pdf/renderer for React components |
 | Sequelize | Legacy ORM. Poor TypeScript support. No longer actively maintained. Slower than modern alternatives. | Drizzle or Prisma |
 | npm | Slower than modern alternatives. Inconsistent lockfile behavior. | pnpm (3x faster installs) or yarn |
+
+### NEW: Household Profile Anti-Patterns
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| formik | Performance issues with large dynamic forms | react-hook-form already integrated |
+| yup | Less TypeScript-native than Zod | zod already integrated with better inference |
+| Custom phone validation | Regex patterns miss international edge cases | react-international-phone with proper libphonenumber validation |
+| Material UI Date Picker | Adds entire MUI dependency for one component | react-day-picker with existing shadcn/ui styling |
 
 ## Stack Patterns by Variant
 
@@ -111,6 +141,20 @@ npm install -D husky lint-staged
 - Accept higher cold start times (2-5 seconds)
 - Consider background job queue for large reports
 
+### NEW: Household Profile Patterns
+
+**For dynamic household member arrays:**
+- Use react-hook-form useFieldArray
+- Because it handles key management, validation timing, and performance optimization automatically
+
+**For complex family relationships:**
+- Use Drizzle self-relations with explicit relationship types
+- Because it maintains referential integrity while supporting flexible family structures
+
+**For international users:**
+- Use react-international-phone for all contact fields
+- Because domestic phone validation breaks for international families
+
 ## Version Compatibility
 
 | Package A | Compatible With | Notes |
@@ -122,6 +166,14 @@ npm install -D husky lint-staged
 | NextAuth.js 5.x | Next.js 15+ | v5 beta is production-ready. Breaking changes from v4. Uses Web Crypto API. |
 | Tailwind CSS 4.x | PostCSS 8+ | Requires modern browsers (Chrome 115+, Safari 16.4+). Uses CSS nesting, cascade layers. |
 | Vitest 2.x | Vite 5+ | If using Vite for dev server. Next.js users run Vitest standalone. |
+
+### NEW: Household Profile Compatibility
+
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| react-hook-form@^7.54 | zod@^3.24 | Stable integration through @hookform/resolvers@^3.9 |
+| react-day-picker@^9.1.3 | date-fns@^4.1.0 | Uses same date library as existing project |
+| react-international-phone@^4.3.0 | react@19.2.3 | Tested with React 19, TypeScript 5+ |
 
 ## Configuration Notes
 
@@ -157,6 +209,54 @@ const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
 });
 ```
 
+### NEW: Household Profile Schema Pattern
+```typescript
+const householdMemberSchema = z.object({
+  name: z.string().min(1, "Name required"),
+  dateOfBirth: z.date().optional(),
+  occupation: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().email().optional(),
+  relationship: z.enum(["self", "spouse", "child", "parent", "sibling", "other"])
+});
+
+const householdProfileSchema = z.object({
+  householdName: z.string().optional(),
+  members: z.array(householdMemberSchema).min(1, "At least one member required")
+});
+
+// Use with useFieldArray
+const { fields, append, remove } = useFieldArray({
+  control,
+  name: "members"
+});
+```
+
+### NEW: Database Schema Extension
+```typescript
+// Drizzle schema for household profiles
+export const householdProfiles = pgTable('household_profiles', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  householdName: text('household_name'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const householdMembers = pgTable('household_members', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  profileId: text('profile_id').notNull().references(() => householdProfiles.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  dateOfBirth: date('date_of_birth'),
+  occupation: text('occupation'),
+  phone: text('phone'),
+  email: text('email'),
+  relationship: text('relationship').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+```
+
 ### NextAuth.js Data Access Layer Pattern (Post-CVE Fix)
 ```typescript
 // Never use middleware for auth checks (vulnerable)
@@ -185,6 +285,13 @@ export default async function DashboardPage() {
 - [shadcn/ui Tailwind v4](https://ui.shadcn.com/docs/tailwind-v4) - Component compatibility
 - [Drizzle ORM](https://orm.drizzle.team/) - ORM documentation
 
+### NEW: Household Profile Sources
+- [React Hook Form useFieldArray Documentation](https://react-hook-form.com/docs/usefieldarray) - Field array best practices
+- [React Hook Form + Zod Integration Guide 2026](https://dev.to/marufrahmanlive/react-hook-form-with-zod-complete-guide-for-2026-1em1) - Resolver integration patterns
+- [Zod Object and Array Validation](https://tecktol.com/zod-array/) - Nested schema patterns
+- [React International Phone Libraries 2026](https://blog.croct.com/post/best-react-phone-number-input-libraries) - Phone input comparison
+- [React Date Picker Accessibility](https://daypicker.dev/guides/accessibility) - WCAG compliance
+
 ### Web Search - HIGH Confidence (Official/Recent Sources)
 - [React & Next.js in 2025 Best Practices](https://strapi.io/blog/react-and-nextjs-in-2025-modern-best-practices) - Architecture patterns
 - [Next.js 15 Best Practices](https://www.antanaskovic.com/en/blog/nextjs-15-best-practices) - Performance optimization
@@ -203,6 +310,7 @@ export default async function DashboardPage() {
 - [PostgreSQL Hosting Pricing](https://www.bytebase.com/blog/postgres-hosting-options-pricing-comparison/) - Database hosting costs
 
 ---
-*Stack research for: Family Governance Risk Assessment Web Application*
-*Researched: 2026-02-17*
+*Stack research for: Family Governance Risk Assessment Web Application + Household Profile Management*
+*Original research: 2026-02-17*
+*Household profile additions: 2026-03-12*
 *Overall confidence: HIGH - All core recommendations verified with official documentation or multiple authoritative sources*

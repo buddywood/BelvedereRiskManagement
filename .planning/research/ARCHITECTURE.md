@@ -1,579 +1,357 @@
-# Architecture Research
+# Architecture Integration: Household Profile Features
 
-**Domain:** Risk Assessment and Scoring Systems
-**Researched:** 2026-02-17
+**Domain:** Household Profile Management for Risk Assessment Platform
+**Researched:** 2026-03-12
 **Confidence:** HIGH
 
-## Standard Architecture
+## Integration Architecture
 
-### System Overview
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    PRESENTATION LAYER                        │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
-│  │ Wizard  │  │ Progress│  │ Review  │  │ Results │        │
-│  │ UI      │  │ Tracker │  │ Summary │  │ Display │        │
-│  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘        │
-│       │            │            │            │              │
-├───────┴────────────┴────────────┴────────────┴──────────────┤
-│                    APPLICATION LAYER                         │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │          State Management & Orchestration           │    │
-│  │  • Form State    • Scoring State   • Session State  │    │
-│  └─────────────────────────────────────────────────────┘    │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │  Branching   │  │   Scoring    │  │  Template    │      │
-│  │  Logic       │  │   Engine     │  │  Engine      │      │
-│  │  Engine      │  │              │  │              │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-├─────────────────────────────────────────────────────────────┤
-│                      DATA LAYER                              │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
-│  │ Assessment│  │  Scoring │  │ Templates│  │ Audit    │    │
-│  │ Store    │  │  Config  │  │          │  │ Log      │    │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| Wizard UI | Multi-step form navigation, conditional rendering | React with form state machine or step array |
-| Progress Tracker | Visual progress, step validation, save/resume | Component with session storage backup |
-| Branching Logic Engine | Question routing based on answers, skip logic | Rule engine with condition evaluator |
-| Scoring Engine | Weighted calculations, aggregation (question → sub-category → pillar) | Backend service with configurable weights |
-| Template Engine | PDF generation, policy document assembly | Template library (Carbone, PDFKit) with data binding |
-| Assessment Store | Draft persistence, session management | Database with tenant_id isolation |
-| Audit Log | Event tracking, state history | Append-only event store |
-
-## Recommended Project Structure
+### System Overview with Profile Integration
 
 ```
-src/
-├── client/                 # Frontend (React/Next.js)
-│   ├── components/
-│   │   ├── wizard/        # Multi-step form components
-│   │   ├── scoring/       # Score display, charts
-│   │   └── shared/        # Reusable UI components
-│   ├── hooks/             # Custom hooks for state/persistence
-│   ├── state/             # State management (Zustand/Context)
-│   └── lib/               # Client utilities
-├── server/                # Backend (Node.js/Express)
-│   ├── api/               # REST/GraphQL endpoints
-│   │   ├── assessments/   # Assessment CRUD
-│   │   ├── scoring/       # Scoring calculations
-│   │   └── reports/       # PDF/template generation
-│   ├── engines/
-│   │   ├── branching/     # Question routing logic
-│   │   ├── scoring/       # Weighted calculation engine
-│   │   └── templates/     # Document generation
-│   ├── models/            # Data models
-│   └── middleware/        # Auth, validation, logging
-├── shared/                # Shared TypeScript types
-│   ├── types/             # Assessment, scoring interfaces
-│   └── schemas/           # Validation schemas (Zod)
-└── config/                # Configuration, scoring weights
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PRESENTATION LAYER                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │ Profile UI  │  │Assessment UI│  │ Report UI   │  │ Auth UI     │         │
+│  │ Components  │  │ Components  │  │ Components  │  │ Components  │         │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘         │
+│         │                │                │                │                  │
+├─────────┴────────────────┴────────────────┴────────────────┴──────────────────┤
+│                      BUSINESS LOGIC LAYER                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐           │
+│  │ Profile Services │  │ Assessment Logic │  │ Template Engine  │           │
+│  │ + Branching     │  │ + Profile Context│  │ + Profile Data   │           │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                         STATE MANAGEMENT                                    │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                       │
+│  │ Profile Store│  │Assessment    │  │ Session      │                       │
+│  │ (Zustand)    │  │ Store        │  │ Store        │                       │
+│  └──────────────┘  └──────────────┘  └──────────────┘                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                         DATA LAYER                                          │
+│  ┌────────────────────────────────────────────────────────────────────────┐  │
+│  │ PostgreSQL + Prisma ORM + Row-Level Security                          │  │
+│  │ User → HouseholdProfile → Assessment → Responses → PillarScores       │  │
+│  └────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Structure Rationale
+### Component Integration Points
 
-- **client/wizard/:** Encapsulates multi-step form complexity, makes wizard reusable across different assessment types
-- **server/engines/:** Separates business logic from HTTP layer, enables testing scoring/branching independently
-- **shared/types/:** Single source of truth for data shapes, prevents frontend/backend drift
-- **config/:** Externalizes scoring weights and question trees, allows non-developer updates
+| Component | Current System | Profile Integration | Communication Pattern |
+|-----------|----------------|-------------------|---------------------|
+| Branching Logic | `shouldShowQuestion()` → answers only | Profile data + answers → enhanced context | Service layer injection |
+| Assessment Store | User answers + session state | Profile data + answers + member context | Extended Zustand store |
+| Template Generator | Score data + user email | Score + profile + member data | Data mapper enhancement |
+| Question Components | Static question rendering | Dynamic member-specific questions | Props + context |
+| Progress Tracking | Question completion % | Profile-aware completion tracking | Store computed values |
+
+## Database Schema Integration
+
+### New Models Required
+
+```typescript
+model HouseholdProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  familyName      String?
+  estimatedNetWorth Float?
+  numberOfHeirs   Int?
+  hasSpouse       Boolean  @default(false)
+  hasTrusts       Boolean  @default(false)
+  hasFamilyBusiness Boolean @default(false)
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  members         HouseholdMember[]
+  assessments     Assessment[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model HouseholdMember {
+  id              String   @id @default(cuid())
+  profileId       String
+  name            String
+  relationship    String   // spouse, child, dependent, etc.
+  age             Int?
+  hasSpecialNeeds Boolean  @default(false)
+  isSuccessor     Boolean  @default(false)
+
+  profile         HouseholdProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([profileId])
+}
+```
+
+### Existing Model Updates
+
+```typescript
+model Assessment {
+  // Add household profile relationship
+  profileId       String?
+  profile         HouseholdProfile? @relation(fields: [profileId], references: [id])
+
+  // Enhance context tracking
+  profileSnapshot Json?  // Snapshot of profile data when assessment started
+}
+
+model AssessmentResponse {
+  // Add member context for personalized questions
+  targetMemberId  String?
+  memberContext   Json?   // Which household member this response relates to
+}
+```
 
 ## Architectural Patterns
 
-### Pattern 1: Wizard State Machine
+### Pattern 1: Profile-Aware Question Branching
 
-**What:** Multi-step forms modeled as state machines with defined transitions between steps
-
-**When to use:** Forms with 3+ steps, conditional navigation, need for progress tracking
-
-**Trade-offs:**
-- **Pros:** Predictable navigation, easy to visualize flow, supports skip logic naturally
-- **Cons:** Can be overkill for linear forms, requires upfront modeling
+**What:** Extend existing branching logic to consider both user answers AND profile data
+**When to use:** When questions should appear/disappear based on household composition
+**Trade-offs:** Increased complexity, better user experience, more accurate assessments
 
 **Example:**
 ```typescript
-// Step definition with navigation logic
-interface WizardStep {
-  id: string;
-  component: React.ComponentType;
-  shouldSkip?: (data: FormData) => boolean;
-  onNext?: (data: FormData) => void;
+// Enhanced branching rule
+interface ProfileAwareBranchingRule extends BranchingRule {
+  profileCondition?: (profile: HouseholdProfile) => boolean;
+  memberCondition?: (members: HouseholdMember[]) => boolean;
 }
 
-const steps: WizardStep[] = [
-  {
-    id: 'governance',
-    component: GovernanceQuestions,
-    shouldSkip: (data) => !data.hasFamily,
-  },
-  {
-    id: 'succession',
-    component: SuccessionQuestions,
-    onNext: (data) => saveProgress(data),
-  },
-];
-```
+// Updated logic
+export function shouldShowQuestion(
+  question: Question,
+  answers: Record<string, unknown>,
+  profile?: HouseholdProfile,
+  members?: HouseholdMember[]
+): boolean {
+  // Existing answer-based logic
+  if (!evaluateAnswerCondition(question, answers)) {
+    return false;
+  }
 
-### Pattern 2: Hierarchical Scoring Aggregation
+  // New profile-based logic
+  if (question.branchingRule?.profileCondition && profile) {
+    return question.branchingRule.profileCondition(profile);
+  }
 
-**What:** Scores aggregate bottom-up: questions → sub-categories → pillars → overall
+  if (question.branchingRule?.memberCondition && members) {
+    return question.branchingRule.memberCondition(members);
+  }
 
-**When to use:** Multi-level weighted scoring, need to show breakdown at different granularities
-
-**Trade-offs:**
-- **Pros:** Transparency (show score components), flexible weighting, easy to explain
-- **Cons:** Requires careful weight calibration, more complex to change structure
-
-**Example:**
-```typescript
-interface ScoringConfig {
-  pillars: Pillar[];
-}
-
-interface Pillar {
-  id: string;
-  weight: number;
-  subCategories: SubCategory[];
-}
-
-interface SubCategory {
-  id: string;
-  weight: number;
-  questions: Question[];
-}
-
-// Calculate pillar score
-function calculatePillarScore(pillar: Pillar, answers: Answers): number {
-  const subCategoryScores = pillar.subCategories.map(sub => {
-    const questionScores = sub.questions.map(q =>
-      answers[q.id] * q.weight
-    );
-    return sum(questionScores) * sub.weight;
-  });
-  return sum(subCategoryScores) * pillar.weight;
+  return true;
 }
 ```
 
-### Pattern 3: Template-Based Report Generation
+### Pattern 2: Profile-Context State Management
 
-**What:** Separate data from presentation using templates with placeholders
-
-**When to use:** Multiple output formats, non-developers need to edit layouts, brand customization
-
-**Trade-offs:**
-- **Pros:** Non-technical users can update templates, consistent styling, easy A/B testing
-- **Cons:** Template syntax learning curve, debugging can be harder than code
+**What:** Extend Zustand store to include profile data alongside assessment state
+**When to use:** When UI components need both assessment and profile data
+**Trade-offs:** Single source of truth, potential store bloat for large families
 
 **Example:**
 ```typescript
-// Using template engine (Carbone-style)
-const reportData = {
-  client: { name: 'Smith Family', date: new Date() },
-  scores: {
-    governance: 85,
-    succession: 72,
-    financialControls: 90,
-  },
-  recommendations: [
-    'Establish family council',
-    'Document succession plan',
-  ],
-};
+interface EnhancedAssessmentState extends AssessmentState {
+  // Profile context
+  currentProfile: HouseholdProfile | null;
+  householdMembers: HouseholdMember[];
 
-// Template: report-template.docx with placeholders
-// {client.name}, {scores.governance}, {d.recommendations:forEach}
+  // Profile actions
+  setProfile: (profile: HouseholdProfile) => void;
+  updateMember: (memberId: string, updates: Partial<HouseholdMember>) => void;
 
-generatePDF({
-  template: 'report-template.docx',
-  data: reportData,
-  output: 'risk-assessment.pdf',
-});
+  // Enhanced answer tracking with member context
+  setMemberAnswer: (questionId: string, answer: unknown, memberId?: string) => void;
+}
 ```
 
-### Pattern 4: Progressive State Persistence
+### Pattern 3: Template Data Composition
 
-**What:** Save form state incrementally (per-step or per-change) to allow resume
-
-**When to use:** Long forms (10+ min), high-value conversions, mobile users
-
-**Trade-offs:**
-- **Pros:** Reduces abandonment, better UX, enables "save and email" feature
-- **Cons:** More backend writes, state reconciliation complexity, GDPR considerations
+**What:** Compose template data from multiple sources (scores + profile + members)
+**When to use:** When generating personalized reports and documents
+**Trade-offs:** Rich personalization, complex data mapping, template dependencies
 
 **Example:**
 ```typescript
-// Save on step completion
-function useWizardPersistence(assessmentId: string) {
-  const saveStep = async (stepData: StepData) => {
-    await api.patch(`/assessments/${assessmentId}`, {
-      currentStep: stepData.stepId,
-      data: stepData.answers,
-      lastUpdated: new Date(),
-    });
+interface EnhancedTemplateData {
+  // Existing score data
+  assessment: ScoreResult;
+  userEmail: string;
+
+  // New profile data
+  household: {
+    familyName: string;
+    totalMembers: number;
+    estimatedNetWorth: string;
+    hasSuccessors: boolean;
   };
 
-  // Restore on mount
-  useEffect(() => {
-    const draft = await api.get(`/assessments/${assessmentId}`);
-    if (draft.currentStep) {
-      restoreToStep(draft.currentStep, draft.data);
-    }
-  }, []);
-
-  return { saveStep };
+  // Member-specific sections
+  memberProfiles: {
+    id: string;
+    name: string;
+    relationship: string;
+    riskFactors: string[];
+    recommendations: string[];
+  }[];
 }
 ```
 
-## Data Flow
+## Data Flow Integration
 
-### Assessment Flow
-
-```
-[User starts assessment]
-    ↓
-[Create draft] → [DB: assessments table]
-    ↓
-[Present question 1]
-    ↓
-[User answers] → [Evaluate branching logic] → [Determine next question]
-    ↓
-[Save answer] → [DB: update draft]
-    ↓
-[Repeat until complete]
-    ↓
-[Calculate scores] → [Scoring Engine] → [Weight × sum aggregation]
-    ↓
-[Generate reports] → [Template Engine] → [PDF + policy templates]
-    ↓
-[Mark assessment complete] → [DB: status = 'completed']
-```
-
-### Scoring Calculation Flow
+### Profile-Aware Assessment Flow
 
 ```
-[Form submission]
-    ↓
-[Collect all answers] → {questionId: value}
-    ↓
-[Load scoring config] → Pillars + weights from DB/config
-    ↓
-[Calculate question scores] → answer × question.weight
-    ↓
-[Aggregate to sub-categories] → sum(questions) × sub-category.weight
-    ↓
-[Aggregate to pillars] → sum(sub-categories) × pillar.weight
-    ↓
-[Calculate overall score] → weighted average of pillars
-    ↓
-[Identify risks] → Scores below thresholds
-    ↓
-[Return score breakdown + recommendations]
+[Profile Setup] → [Assessment Start] → [Profile-Enhanced Questions] → [Member-Specific Responses] → [Personalized Scoring] → [Profile-Rich Reports]
+       ↓                ↓                        ↓                            ↓                        ↓                    ↓
+[Profile Store] → [Assessment Store] → [Enhanced Branching] → [Member Context] → [Score Calculator] → [Template Engine]
 ```
 
-### State Management
+### State Synchronization
 
 ```
-[Client State]
-    ↓ (on user interaction)
-[Local State Update] → React state/Zustand
+[Profile Changes]
     ↓
-[Debounced Save] → API call every 5s or on blur
-    ↓
-[Server State] → Database (draft record)
-    ↓
-[Audit Event] → Append-only log (optional for compliance)
-    ↓
-[Optimistic UI Update] ← Show saved indicator
+[Invalidate Assessment Cache] → [Recalculate Visible Questions] → [Update Progress] → [Refresh UI]
+    ↓                              ↓                               ↓                   ↓
+[Database Update] → [Zustand Store Update] → [Component Re-render] → [User Sees Changes]
 ```
 
-### Key Data Flows
+## Integration Anti-Patterns
 
-1. **Conditional Navigation:** Answer → Branching Logic Engine → Next step determination → UI update
-2. **Auto-save:** Form change → Debounce timer → API PATCH → Success/error toast
-3. **Score Display:** Completed assessment → Scoring calculation → Cache result → Display with breakdown
-4. **Report Generation:** Assessment ID → Fetch data → Populate template → Generate PDF → Return download link
+### Anti-Pattern 1: Profile Data in Assessment Store
+
+**What people do:** Store all household profile data in assessment store
+**Why it's wrong:** Violates separation of concerns, creates tight coupling, bloats assessment logic
+**Do this instead:** Keep profile store separate, inject profile context only when needed for branching/scoring
+
+### Anti-Pattern 2: Deep Member Nesting in Questions
+
+**What people do:** Create separate question variants for each household member
+**Why it's wrong:** Exponential question explosion, maintenance nightmare, poor UX
+**Do this instead:** Use dynamic question rendering with member context injection
+
+### Anti-Pattern 3: Profile Snapshots Everywhere
+
+**What people do:** Store profile snapshots in every response record
+**Why it's wrong:** Data duplication, stale data issues, storage bloat
+**Do this instead:** Store profile snapshot only at assessment level, reference member IDs in responses
+
+## Build Order Dependencies
+
+### Phase 1: Database Foundation
+1. **HouseholdProfile** model with basic fields
+2. **HouseholdMember** model with relationships
+3. Database migration scripts
+4. Updated Assessment model with profile relationship
+
+**Critical Integration Point:** Must maintain backward compatibility with existing assessments
+
+### Phase 2: Core Profile Services
+1. Profile CRUD operations (create, read, update, delete)
+2. Member management services
+3. Profile validation logic
+4. API routes for profile management
+
+**Critical Integration Point:** Profile service interfaces must align with existing auth patterns
+
+### Phase 3: Enhanced Branching Logic
+1. Profile-aware branching rule interfaces
+2. Updated `shouldShowQuestion()` function
+3. Member-context question filtering
+4. Integration with existing assessment store
+
+**Critical Integration Point:** Branching logic changes require extensive testing to avoid breaking existing assessments
+
+### Phase 4: Assessment Integration
+1. Profile store creation (Zustand)
+2. Assessment store enhancement with profile context
+3. Question component updates for member-specific rendering
+4. Progress tracking with profile awareness
+
+**Critical Integration Point:** State management changes must preserve existing auto-save functionality
+
+### Phase 5: Template Personalization
+1. Enhanced template data mapper
+2. Profile-aware document generation
+3. Member-specific report sections
+4. Template registry updates for household features
+
+**Critical Integration Point:** Template changes must maintain backward compatibility with existing reports
+
+## Critical Integration Points
+
+| Integration Point | Risk Level | Mitigation Strategy |
+|------------------|------------|-------------------|
+| Branching Logic Migration | HIGH | Feature flags, gradual rollout, extensive testing |
+| Assessment Store Changes | MEDIUM | Backward compatibility, data migration scripts |
+| Template Data Breaking Changes | MEDIUM | Versioned template interfaces, graceful degradation |
+| Database Schema Evolution | LOW | Standard Prisma migration workflow |
+
+## Recommended Project Structure Updates
+
+```
+src/
+├── lib/
+│   ├── profile/           # NEW: Profile management
+│   │   ├── types.ts       # Profile and member interfaces
+│   │   ├── services.ts    # CRUD operations
+│   │   ├── store.ts       # Zustand profile store
+│   │   └── validation.ts  # Profile data validation
+│   ├── assessment/        # ENHANCED: Existing assessment logic
+│   │   ├── branching.ts   # Updated with profile awareness
+│   │   ├── store.ts       # Enhanced with profile context
+│   │   └── scoring.ts     # Profile-aware scoring
+│   └── templates/         # ENHANCED: Template generation
+│       ├── data-mapper.ts # Enhanced with profile data
+│       └── generator.ts   # Profile-aware generation
+├── components/
+│   ├── profile/           # NEW: Profile UI components
+│   │   ├── ProfileForm.tsx
+│   │   ├── MemberList.tsx
+│   │   └── ProfileSummary.tsx
+│   ├── assessment/        # ENHANCED: Existing components
+│   │   ├── QuestionCard.tsx # Member-aware rendering
+│   │   └── ProgressBar.tsx  # Profile-aware progress
+│   └── ui/                # Existing shared components
+└── app/
+    ├── api/
+    │   ├── profile/       # NEW: Profile API routes
+    │   │   └── route.ts
+    │   ├── assessment/    # ENHANCED: Profile-aware endpoints
+    │   │   └── [id]/score/route.ts # Profile data included
+    │   └── templates/     # ENHANCED: Profile data injection
+    └── (protected)/
+        ├── profile/       # NEW: Profile management pages
+        └── assessment/    # ENHANCED: Profile-aware assessment
+```
 
 ## Scaling Considerations
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0-100 users | Monolith (Next.js full-stack), SQLite/Postgres, in-memory scoring, synchronous PDF generation |
-| 100-10k users | Separate frontend/backend, Postgres with indexes on tenant_id, Redis cache for scoring configs, async PDF generation (queue) |
-| 10k+ users | CDN for static assets, database read replicas, job queue (BullMQ/SQS) for reports, consider multi-region deployment |
-
-### Scaling Priorities
-
-1. **First bottleneck:** PDF generation blocks responses
-   - **Fix:** Move to background job queue, return job ID immediately, notify via webhook/polling
-
-2. **Second bottleneck:** Scoring calculations slow with many assessments
-   - **Fix:** Cache scoring configs in Redis, denormalize pillar scores to avoid recalculation, add database indexes
-
-3. **Third bottleneck:** Database writes from auto-save
-   - **Fix:** Batch updates, use JSONB columns for flexible schema, implement database connection pooling
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Client-Side Only Scoring
-
-**What people do:** Calculate scores entirely in browser JavaScript
-
-**Why it's wrong:**
-- Exposes scoring algorithm (clients can reverse-engineer weights)
-- No audit trail of how scores were calculated
-- Can't change algorithm without forcing client updates
-- Vulnerable to manipulation
-
-**Do this instead:** Calculate scores server-side, return results via API. Client displays results but doesn't calculate.
-
-### Anti-Pattern 2: Storing All Answers in Single JSON Blob
-
-**What people do:** `answers: { question1: 'yes', question2: 4, ... }` as single JSONB column
-
-**Why it's wrong:**
-- Can't query by specific answers
-- Hard to generate analytics across assessments
-- Makes branching logic queries impossible
-- No referential integrity
-
-**Do this instead:** Hybrid approach - structured tables for critical data, JSONB for flexible extensions:
-
-```sql
-CREATE TABLE assessment_answers (
-  id UUID PRIMARY KEY,
-  assessment_id UUID REFERENCES assessments(id),
-  question_id VARCHAR NOT NULL,
-  question_text TEXT,
-  answer_value TEXT,
-  answer_numeric DECIMAL,
-  created_at TIMESTAMP
-);
-
--- Index for analytics
-CREATE INDEX idx_answers_question_value ON assessment_answers(question_id, answer_value);
-```
-
-### Anti-Pattern 3: Synchronous PDF Generation in Request Handler
-
-**What people do:**
-```typescript
-app.post('/api/generate-report', async (req, res) => {
-  const pdf = await generatePDF(req.body); // Takes 5-15 seconds
-  res.send(pdf);
-});
-```
-
-**Why it's wrong:**
-- Request timeouts (especially with API gateways)
-- Blocks worker threads
-- Poor UX (user waits with spinner)
-- Can't show progress
-
-**Do this instead:** Async job pattern:
-```typescript
-app.post('/api/generate-report', async (req, res) => {
-  const job = await queue.add('generate-pdf', req.body);
-  res.json({ jobId: job.id, status: 'processing' });
-});
-
-app.get('/api/reports/:jobId', async (req, res) => {
-  const job = await queue.getJob(req.params.jobId);
-  if (job.isCompleted) {
-    res.json({ status: 'complete', url: job.result.url });
-  } else {
-    res.json({ status: 'processing', progress: job.progress });
-  }
-});
-```
-
-### Anti-Pattern 4: Hard-Coding Question Logic in Components
-
-**What people do:**
-```typescript
-function WizardStep3() {
-  if (answers.hasChildren === 'yes') {
-    return <SuccessionQuestions />;
-  }
-  return <SkipToStep4 />;
-}
-```
-
-**Why it's wrong:**
-- Can't change logic without code deployment
-- Business users can't update assessment flow
-- Hard to test all paths
-- Duplicates logic across components
-
-**Do this instead:** Data-driven configuration:
-```typescript
-// config/assessment-flow.json
-{
-  "steps": [
-    {
-      "id": "step-3",
-      "component": "SuccessionQuestions",
-      "showIf": {
-        "question": "hasChildren",
-        "operator": "equals",
-        "value": "yes"
-      }
-    }
-  ]
-}
-
-// Dynamic renderer
-function WizardRenderer({ config, answers }) {
-  const visibleSteps = config.steps.filter(step =>
-    evaluateCondition(step.showIf, answers)
-  );
-  return visibleSteps.map(step => renderComponent(step.component));
-}
-```
-
-## Integration Points
-
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Email (SendGrid/SES) | Async via queue | For report delivery, assessment reminders |
-| Storage (S3/CloudFlare R2) | Direct upload from server | Store generated PDFs, templates |
-| PDF Engine (Carbone/PDFKit) | Library integration | Self-hosted, no external API dependency |
-| Analytics (PostHog/Mixpanel) | Client + server events | Track assessment completion, drop-off points |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| Frontend ↔ Backend | REST API (JSON) | Consider GraphQL if frontend needs vary widely |
-| Scoring Engine ↔ Database | Direct SQL queries | Keep scoring engine stateless |
-| Template Engine ↔ Storage | Write-then-read pattern | Generate PDF → upload to S3 → return URL |
-| Application ↔ Audit Log | Fire-and-forget events | Don't block on audit writes; use queue if needed |
-
-## Database Schema Considerations
-
-### Multi-Tenant Isolation
-
-For family office SaaS, use **shared database, shared schema** with `tenant_id` (or `family_id`):
-
-```sql
-CREATE TABLE assessments (
-  id UUID PRIMARY KEY,
-  family_id UUID NOT NULL,  -- Tenant isolation
-  name VARCHAR(255),
-  status VARCHAR(50),
-  current_step VARCHAR(100),
-  created_at TIMESTAMP,
-  completed_at TIMESTAMP
-);
-
--- Critical: Index on tenant column
-CREATE INDEX idx_assessments_family ON assessments(family_id);
-
--- Row-level security (Postgres)
-ALTER TABLE assessments ENABLE ROW LEVEL SECURITY;
-CREATE POLICY tenant_isolation ON assessments
-  USING (family_id = current_setting('app.current_family_id')::uuid);
-```
-
-**Why not database-per-tenant:** Overkill for MVP (100-1000 families), adds operational complexity, harder to run analytics across all tenants.
-
-### Scoring Configuration
-
-Store weights in database for runtime updates:
-
-```sql
-CREATE TABLE scoring_configs (
-  id UUID PRIMARY KEY,
-  version INTEGER NOT NULL,
-  config JSONB NOT NULL,  -- Full scoring tree
-  effective_from TIMESTAMP,
-  created_at TIMESTAMP
-);
-
--- Example config structure
-{
-  "version": 2,
-  "pillars": [
-    {
-      "id": "governance",
-      "weight": 0.35,
-      "subCategories": [
-        {
-          "id": "decision-making",
-          "weight": 0.5,
-          "questions": [
-            {"id": "q1", "weight": 0.3},
-            {"id": "q2", "weight": 0.7}
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Build Order Implications
-
-Based on component dependencies, recommended build sequence:
-
-### Phase 1: Foundation
-1. **Database schema** (assessments, answers, families)
-2. **Authentication** (family/user login)
-3. **Basic API** (CRUD for assessments)
-
-### Phase 2: Core Assessment
-4. **Wizard UI** (multi-step form without branching)
-5. **Progress persistence** (auto-save, resume)
-6. **Simple scoring** (flat calculation, no hierarchy yet)
-
-### Phase 3: Intelligence
-7. **Branching logic engine** (conditional question display)
-8. **Hierarchical scoring** (pillar → sub-category → question)
-9. **Results display** (score breakdown, visualizations)
-
-### Phase 4: Deliverables
-10. **Template engine** (PDF report generation)
-11. **Policy template assembly** (based on identified risks)
-12. **Async job processing** (background PDF generation)
-
-### Phase 5: Polish
-13. **Audit logging** (compliance trail)
-14. **Analytics integration** (usage tracking)
-15. **Email delivery** (send reports)
-
-**Critical path:** Steps 1-6 are MVP. Steps 7-9 add value. Steps 10-12 complete core offering. Steps 13-15 are nice-to-have.
-
-**Parallelization opportunities:**
-- UI components (step 4) can be built while backend (steps 1-3) is in progress
-- Template design (step 10) can start early, integrated later
-- Analytics (step 14) can be added anytime without blocking other work
+| Scale | Profile-Specific Considerations |
+|-------|-------------------------------|
+| 0-1k families | Store member data as JSONB, simple profile queries |
+| 1k-10k families | Normalize member relationships, index on profile_id |
+| 10k+ families | Consider member data archival, profile search optimization |
 
 ## Sources
 
-- [A Guide to Risk Scoring: Best Practices and Strategies](https://www.flagright.com/post/how-to-do-risk-scoring)
-- [The Modern Risk Prioritization Framework for 2026](https://safe.security/resources/blog/the-modern-risk-prioritization-framework-for-2026/)
-- [Multi-Tenant Database Architecture Patterns Explained](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/)
-- [Multi-Tenant Application Database Design - GeeksforGeeks](https://www.geeksforgeeks.org/dbms/multi-tenant-application-database-design/)
-- [Guidance for Multi-Tenant Architectures on AWS](https://aws.amazon.com/solutions/guidance/multi-tenant-architectures-on-aws/)
-- [Carbone - Open Source Report and Document Generator](https://carbone.io/)
-- [State Management in 2026: Modern Frontend Guide](https://www.elearningsolutions.co.in/state-management-in-2026-2/)
-- [Frontend System Design: The Complete Guide 2026](https://www.systemdesignhandbook.com/guides/frontend-system-design/)
-- [Survey Branching Logic: A Complete Guide for Researchers (2026)](https://lensym.com/blog/survey-branching-logic-guide)
-- [Event Sourcing pattern - Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
-- [Is the audit log a proper architecture driver for Event Sourcing?](https://event-driven.io/en/audit_log_event_sourcing/)
-- [React: Building a Multi-Step Form with Wizard Pattern](https://medium.com/@vandanpatel29122001/react-building-a-multi-step-form-with-wizard-pattern-85edec21f793)
-- [Multistep Forms in React with Awesome UX – Persistent State](https://andyfry.co/multi-step-form-persistent-state/)
-- [Scoring approach for 2026 benchmarks - World Benchmarking Alliance](https://archive.worldbenchmarkingalliance.org/research/scoring-approach-2026-benchmarks/)
+- [Next.js Authentication Patterns for 2026](https://workos.com/blog/top-authentication-solutions-nextjs-2026)
+- [SaaS Architecture Patterns with Next.js](https://vladimirsiedykh.com/blog/saas-architecture-patterns-nextjs)
+- [Prisma Schema Relations Documentation](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations)
+- [Profile-Driven Document Generation](https://apryse.com/blog/docx-generation-from-templates-react)
+- [React PDF Generation Libraries 2025](https://dev.to/ansonch/6-open-source-pdf-generation-and-modification-libraries-every-react-dev-should-know-in-2025-13g0)
+- [Multi-Tenant Database Patterns](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/)
 
 ---
-*Architecture research for: Belvedere Risk Management - Family Governance Risk Assessment*
-*Researched: 2026-02-17*
+*Architecture research for: Household Profile Integration*
+*Researched: 2026-03-12*

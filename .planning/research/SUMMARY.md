@@ -1,297 +1,212 @@
 # Project Research Summary
 
-**Project:** Belvedere Risk Management - Family Governance Risk Assessment Platform
-**Domain:** Family Office Risk Assessment Web Application
-**Researched:** 2026-02-17
+**Project:** Belvedere Risk Management - Family Governance Risk Assessment Platform with Household Profile Integration
+**Domain:** Family Office Risk Assessment Web Application + Household Profile Management
+**Researched:** 2026-02-17 (Updated: 2026-03-12)
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This is a family governance risk assessment platform that sits between high-cost consultants ($10K-50K) and generic family office software ($500-2K/year). Experts build these as guided assessment tools with intelligent branching logic that compress 60-minute interviews into 12-minute self-service flows, coupled with weighted scoring engines that produce transparent, actionable risk reports. The recommended approach uses Next.js 15+ full-stack architecture with Drizzle ORM and Neon serverless Postgres for cost-effective scale-to-zero hosting, React Hook Form with Zod for complex multi-step forms, and shadcn/ui for rapid professional UI development.
+This project integrates household profile management into an existing family governance risk assessment platform that sits between high-cost consultants ($10K-50K) and generic family office software ($500-2K/year). The proven platform achieves 80%+ completion rates with a 12-15 minute assessment using intelligent branching logic, multi-factor authentication, and PDF report generation. The research reveals that successful family governance platforms require sophisticated household data management beyond basic demographics to include governance roles, decision-making hierarchy, and multi-generational perspectives.
 
-The key risks center on user experience and data integrity. First, questionnaire fatigue kills completion rates - users abandon if assessments exceed 15-20 minutes or show irrelevant questions. Second, branching logic creates fragile state management where conditional paths can orphan data or break validation. Third, opaque scoring algorithms erode trust with HNW clients who need transparency to justify action. Mitigation requires aggressive branching to skip irrelevant questions, comprehensive dependency testing with schema-based validation, transparent score breakdowns showing category weights, and algorithm versioning to preserve historical data integrity.
+The recommended approach prioritizes maintaining the existing assessment completion flow while progressively building household context. The technology stack of Next.js 15+, React 19, TypeScript, and PostgreSQL with Drizzle ORM provides a solid foundation for household data integration. New additions for household management include react-international-phone for global contact validation and react-day-picker for birth date handling, both integrating seamlessly with the existing React Hook Form + Zod validation architecture.
 
-The architecture follows standard risk assessment patterns: wizard UI drives multi-step forms through a branching logic engine, responses flow to a hierarchical scoring engine (question → sub-category → pillar → overall), and results populate template-based PDF reports with actionable policy recommendations. Critical is separating business logic (engines) from HTTP layer for testability, storing raw responses separately from calculated scores for versioning, and implementing progressive state persistence to prevent abandonment.
+Key risks center on assessment completion disruption (most critical), data fragmentation between profiles and assessments, permission complexity for multi-member households, and scoring algorithm complications from conflicting family perspectives. These can be mitigated through progressive profile building during assessment flow, architectural integration from day one, family office-style role-based access patterns, and clear household scoring methodologies established before implementation.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Modern full-stack JavaScript/TypeScript architecture dominates 2025 family office software. Next.js 15+ with App Router provides Server Components and Server Actions that simplify data fetching while maintaining type safety end-to-end. React 19 brings automatic optimizations, and Turbopack (now default) significantly accelerates development builds.
+The research confirms the existing technology stack is well-suited for household profile integration. The proven foundation of Next.js 15+ with React 19, TypeScript 5.7+, PostgreSQL via Neon serverless, and Drizzle ORM provides strong architectural support for household relationship modeling and multi-member data management.
 
-**Core technologies:**
-- **Next.js 15.5+**: Full-stack framework with built-in API routes and Server Actions - reduces architecture complexity for MVP
-- **TypeScript 5.7+**: Type safety eliminates runtime errors - critical for multi-developer teams and long-term maintainability
-- **PostgreSQL 16+ via Neon**: Serverless Postgres with scale-to-zero reduces hosting costs to $0-10/month for MVP; branching enables safe migrations
-- **Drizzle ORM**: Lightweight (7.4KB) SQL-like API with full type safety - instant type updates without generation step (vs Prisma)
-- **React Hook Form + Zod**: Form management with 12KB bundle and zero dependencies - required for 12-minute assessment workflow with complex validation
-- **shadcn/ui**: Copy-paste component library built on Radix primitives - significantly faster than building UI from scratch
-- **NextAuth.js 5.x**: Zero marginal cost authentication - use Data Access Layer pattern not middleware post-CVE-2025-29927
-- **@react-pdf/renderer**: Pure React components for PDFs - lighter than Puppeteer for structured reports
+**Core technologies (validated):**
+- **Next.js 15.5+**: Full-stack framework with built-in API routes and Server Actions — proven for existing assessment system, ideal for household profile integration
+- **React Hook Form 7.54+ with useFieldArray**: Form management essential for dynamic household member arrays — extends existing form patterns seamlessly
+- **Drizzle ORM**: 7.4KB bundle with full TypeScript safety — ideal for household relationship modeling with self-referencing tables
+- **PostgreSQL 16+ via Neon**: ACID compliance critical for family data — supports both structured relationships and flexible JSONB profile data
+- **Zod 3.24+**: Schema validation with TypeScript inference — extends existing validation to complex household member schemas
+- **react-international-phone 4.3+**: International phone validation — TypeScript-native with React Hook Form compatibility for global families
+- **react-day-picker 9.1.3+**: Date picker for member birth dates — WCAG compliant, integrates with existing date-fns, TypeScript native
 
-**Critical version notes:**
-- Next.js 15.5+ requires React 19.2+ for App Router
-- NextAuth.js v5 has breaking changes from v4 but is production-ready
-- Tailwind CSS 4.x requires modern browsers (Chrome 115+, Safari 16.4+)
-
-**Avoid:**
-- MongoDB (unnecessary flexibility, lacks relational integrity for structured assessments)
-- Pages Router (deprecated pattern, App Router is future)
-- Formik (abandoned, 3.6x larger than React Hook Form)
-- CSS-in-JS libraries (runtime overhead, poor SSR performance)
+**Critical integration notes:**
+- All new household dependencies integrate with existing React Hook Form + Zod validation architecture
+- useFieldArray provides performance-optimized dynamic member management
+- PostgreSQL self-referencing tables support complex family relationship modeling
 
 ### Expected Features
 
-Family governance assessment platforms have clear feature expectations driven by HNW client privacy concerns and professional deliverable requirements.
+Household profile research reveals sophisticated feature expectations beyond basic demographics, driven by governance-focused personalization requirements and family office operational complexity.
 
 **Must have (table stakes):**
-- **Guided assessment questionnaire (60-80 questions)** - standard for professional tools, eliminates blank-page anxiety
-- **Risk scoring/rating system** - users need quantifiable output to justify action to family members
-- **PDF report generation** - required deliverable for presentation to advisors
-- **Secure document storage with MFA** - handling sensitive family/financial data
-- **Progress saving** - 12-minute assessment may be interrupted
-- **Multi-device access** - users start on desktop, review on mobile
-- **User dashboard** - need to see completed assessments, reports
+- **Basic member profiles (name, role, contact)** — standard across family platforms for household-aware features
+- **Household composition tracking** — required for assessment personalization and governance context understanding
+- **Profile-based question branching integration** — core value proposition extending proven 68-question assessment logic
+- **Member governance role identification** — necessary for governance-specific recommendations and succession planning context
+- **Individual privacy controls** — 2026 standard for family platforms with controlled family-level data sharing
+- **Auto-save during profile creation** — extends existing assessment auto-save functionality to prevent data loss
 
 **Should have (competitive advantage):**
-- **TurboTax-style branching logic** - reduces 60-minute questionnaire to 12 minutes, eliminates cognitive overload
-- **Actionable policy templates** - moves from "what's wrong" to "here's how to fix it"
-- **Maturity model scoring** - shows current state + roadmap to improvement (not just problems)
-- **Risk area visualizations** - makes abstract governance concepts concrete for visual learners
-- **Family-specific recommendations** - tailored guidance drives action (generic advice ignored)
-- **Conflict resolution assessment** - 60% of wealth transfer failures are communication/trust breakdowns
-- **Next-gen readiness assessment** - addresses #1 family office concern
+- **Governance role assessment (decision authority, influence mapping)** — differentiator for family office sophistication level
+- **Cultural governance profiling (communication styles, preferences)** — enhanced personalization for family dynamics understanding
+- **Profile-driven report personalization** — tailored PDF sections based on individual member roles and responsibilities
+- **Advisor ecosystem mapping** — professional network integration unique to governance focus
+- **Multigenerational wealth perspective** — family office level sophistication for succession planning
 
 **Defer (v2+):**
-- **Succession planning deep-dive module** - requires legal/estate planning expertise to do properly
-- **Cybersecurity assessment module** - specialized domain, needs dedicated research
-- **Multi-language support** - only if international demand emerges
-- **White-label version for advisors** - different business model, defer until B2C proven
-- **Native mobile app** - responsive web sufficient until heavy mobile usage proven
+- **Family conflict risk prediction** — advanced ML/AI feature requiring established profile data patterns first
+- **Member-specific policy recommendations** — complex rules engine expansion better suited for future phases
+- **Cross-generational perspective analysis** — high complexity requiring validation of simpler profile patterns
 
 **Anti-features (avoid building):**
-- Real-time collaboration (creates governance conflicts about who has final say)
-- Comprehensive financial integration (massive scope creep, security liability)
-- AI-generated recommendations (black box loses trust with HNW clients)
-- Social features (family forums/chat create moderation burden and liability)
-- Custom question builder (breaks scoring consistency, QA nightmare)
+- Real-time location tracking (privacy invasion, not governance-focused)
+- Social media integration (dilutes professional focus, introduces security risks)
+- Family calendar/event scheduling (feature creep, competitive with existing tools)
+- Financial account aggregation (regulated, complex, highly competitive market)
+- Gamification elements (undermines serious governance tone required for HNW clients)
 
 ### Architecture Approach
 
-Risk assessment systems follow hierarchical scoring architecture with wizard-based intake. The presentation layer uses multi-step form components with progress tracking and conditional rendering. The application layer contains three core engines: branching logic for question routing, scoring for weighted calculations, and template generation for PDF/policy documents. The data layer stores assessment drafts, scoring configurations, and audit logs with tenant isolation.
+The integration follows a profile-context architecture where household profiles become first-class assessment context rather than separate features. This extends the proven hierarchical scoring architecture (question → sub-category → pillar → overall) to include household composition as scoring context, while maintaining the established wizard-based intake pattern with enhanced member-aware branching logic.
 
-**Major components:**
-1. **Wizard State Machine** - multi-step forms modeled as state machines with defined transitions, supports skip logic naturally
-2. **Branching Logic Engine** - rule-based question routing with condition evaluator, determines next question based on prior answers
-3. **Hierarchical Scoring Engine** - bottom-up aggregation (questions → sub-categories → pillars → overall) with transparent weights
-4. **Template Engine** - separate data from presentation using templates with placeholders, enables non-technical updates
-5. **Progressive State Persistence** - save form state incrementally (per-step or per-change) to allow resume
+**Major components (integrated):**
+1. **Profile Services + Enhanced Branching** — Extends existing branching logic engine to consider both user answers AND household composition for question routing
+2. **Assessment Logic + Profile Context** — Enhanced Zustand store managing both assessment state and household member data with synchronized updates
+3. **Template Engine + Profile Data** — Composed template generation from scores, user data, and household member profiles for personalized reporting
 
-**Key architectural patterns:**
-- **Data-driven configuration**: Question logic lives in JSON/database, not hardcoded in components - enables business users to update flows
-- **Schema-based validation**: Use Zod with conditional validation for dynamic forms - handles optional fields based on branching paths
-- **Async job pattern**: Move PDF generation to background queue, return job ID immediately - prevents request timeouts
-- **Algorithm versioning**: Tag each assessment with scoring methodology version used - preserves historical data integrity
-- **Multi-tenant isolation**: Shared database/schema with `tenant_id` (family_id) and row-level security - sufficient for 100-1000 families
+**Key integration patterns:**
+- **Profile-aware question branching**: Extend shouldShowQuestion() to consider household composition alongside existing answer-based conditions
+- **Profile-context state management**: Enhanced Zustand store including profile data alongside assessment state for unified UI context
+- **Template data composition**: Compose template data from multiple sources (scores + profile + members) for rich personalization
 
-**Project structure:**
-```
-src/
-├── client/components/wizard/     # Multi-step form components
-├── client/components/scoring/    # Score display, charts
-├── server/engines/branching/     # Question routing logic
-├── server/engines/scoring/       # Weighted calculation engine
-├── server/engines/templates/     # Document generation
-└── shared/types/                 # Single source of truth for data shapes
+**Database schema integration:**
+```typescript
+// New models integrate with existing User/Assessment tables
+HouseholdProfile: userId -> User, has many HouseholdMember
+HouseholdMember: profileId -> HouseholdProfile, relationship/role data
+Assessment: enhanced with profileId -> HouseholdProfile (optional for backward compatibility)
 ```
 
 ### Critical Pitfalls
 
-1. **Opaque Scoring Algorithm ("Black Box" Problem)** - Users receive risk scores without understanding how they were calculated. Show score breakdown by category, provide score explanation page showing which question responses contributed most, display weights transparently. Address in Phase 2 (Core Assessment Engine) by building transparency into scoring from start.
+Research identified five critical pitfalls from household profile integration failures, plus existing assessment platform risks that must be preserved.
 
-2. **Questionnaire Fatigue Killing Completion Rates** - Users abandon assessment because it's too long or contains irrelevant questions. Target 15-20 minutes max completion time, implement aggressive branching logic to skip irrelevant sections, show progress indicator prominently, allow save-and-resume. Address in Phase 1 (Guided Intake) and Phase 3 (Branching Logic).
+**New household-specific pitfalls:**
+1. **Assessment completion rate disruption** — Adding household profiles breaks proven 12-15 minute completion flow; avoid positioning profile setup as prerequisite, use progressive building during assessment
+2. **Data fragmentation and integration failures** — Profile data lives in isolation from assessment responses; design household profiles as first-class assessment context from day one
+3. **Permission structure complexity** — Multi-member households create permission nightmares; implement role-based access aligned with family office principles from start
+4. **Assessment personalization mistakes from stale data** — Profile-driven personalization creates embarrassing mistakes with outdated information; implement profile validation within assessment flow
+5. **Scoring algorithm complexity from conflicting perspectives** — Different family members' responses create conflicting risk assessments; establish clear household scoring methodology before building profiles
 
-3. **Branching Logic State Management Bugs** - Conditional logic creates cascading failures where Question D expects Answer A that was skipped. Map all question dependencies before implementation, use schema-based validation with conditional fields, implement "question lifecycle" concept (visible/hidden/answered/skipped), test all branching paths systematically. Address in Phase 3 (Branching Logic) - highest-risk phase requiring robust state management.
-
-4. **Historical Data Invalidation After Scoring Changes** - You update question weights, now previous assessments show different scores when recalculated. Store raw question responses separately from calculated scores, version the scoring algorithm (v1, v2), tag each assessment with algorithm version used, never recalculate historical scores with new methodology. Address in Phase 2 (Core Assessment Engine) by designing data model with versioning from start.
-
-5. **Poor Stakeholder Engagement in Family Office Context** - Built for "family principal" but used by family office staff, features solve imagined problems not real pain points. Interview 5-10 family office professionals before Phase 1, test prototypes with real family office staff, create advisory group of 2-3 family office professionals for ongoing feedback. Address pre-Phase 1 (Research/Discovery) and ongoing validation at each phase.
-
-6. **Automated Report Generation Quality Issues** - Generated reports look unprofessional, templates break on edge cases, reports require manual editing before sending to clients. Design report templates with professional designer not just developers, test with edge cases (very low scores, incomplete data), build report preview before final generation. Address in Phase 4 (Report Generation) - budget 30% more time than estimated.
-
-7. **Insufficient Risk Assessment Granularity** - Risk scores too broad to be actionable, reports identify problems but provide no path forward. Break overall score into 5-8 meaningful categories, provide sub-scores within categories, generate specific actionable recommendations based on score patterns, include "quick wins" vs "long-term improvements". Address in Phase 2 (Core Assessment Engine) by designing multi-dimensional scoring from start.
+**Existing platform pitfalls (must preserve mitigation):**
+- **Questionnaire fatigue killing completion rates** — Maintain aggressive branching logic, 15-20 minute max completion time
+- **Branching logic state management bugs** — Continue comprehensive testing, schema-based validation with conditional fields
+- **Opaque scoring algorithm** — Preserve transparent score breakdown by category, weight display, methodology documentation
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure follows architecture dependencies and pitfall mitigation:
+Based on combined research, updated phase structure maintains existing assessment platform stability while progressively adding household capabilities:
 
-### Phase 1: Foundation & Basic Intake
-**Rationale:** Must establish authentication, data persistence, and linear questionnaire before adding complexity. This validates core concept without branching logic risk.
+### Phase 1: Household Foundation (NEW)
+**Rationale:** Must establish basic household data structure without disrupting proven 80%+ assessment completion rates
+**Delivers:** Core household profile database schema, basic member management, backward-compatible assessment integration
+**Addresses:** Basic member profiles, household composition tracking from table stakes features
+**Avoids:** Assessment completion rate disruption by implementing progressive profile building during assessment flow
+**Stack elements:** Enhanced Drizzle schema with HouseholdProfile/HouseholdMember models, React Hook Form useFieldArray patterns
+**Research flag:** Standard database patterns and CRUD operations, no additional research needed
 
-**Delivers:** User authentication, basic multi-step form (30-50 questions linear), progress saving/resume, assessment draft persistence.
+### Phase 2: Assessment Integration (ENHANCED)
+**Rationale:** Core value proposition requires profile data to meaningfully enhance assessment personalization without breaking existing scoring
+**Delivers:** Profile-aware question branching, enhanced assessment state management, member-specific question rendering, backward-compatible scoring
+**Uses:** Enhanced shouldShowQuestion() with profile context, Zustand store extensions, existing hierarchical scoring engine
+**Implements:** Profile-context state management integrating with existing assessment store
+**Addresses:** Profile-based question branching (core value proposition), member governance role identification
+**Avoids:** Data fragmentation by architectural integration from day one, scoring algorithm complexity through clear methodology
+**Research flag:** **HIGH RISK** - Complex state management, conditional validation patterns, comprehensive testing strategy for branching paths. Consider `/gsd:research-phase` for profile-aware branching patterns
 
-**Addresses:**
-- Progress saving (table stakes from FEATURES.md)
-- Secure authentication (table stakes from FEATURES.md)
-- User dashboard to view assessments (table stakes from FEATURES.md)
+### Phase 3: Enhanced Personalization (NEW)
+**Rationale:** Builds on proven profile-assessment integration to deliver governance-specific differentiation
+**Delivers:** Governance role assessment, cultural profiling, advisor ecosystem mapping, profile validation
+**Addresses:** Competitive advantage features that differentiate from generic family platforms
+**Avoids:** Personalization mistakes through robust profile validation and conflict resolution patterns
+**Stack elements:** react-international-phone for global contacts, enhanced profile validation logic
+**Research flag:** Cultural governance profiling patterns need domain-specific validation for family office contexts
 
-**Avoids:**
-- Questionnaire fatigue (by targeting 15-20 min completion, testing with real users)
-- Poor stakeholder engagement (requires pre-phase user interviews with 5-10 family office professionals)
+### Phase 4: Household Reporting (ENHANCED)
+**Rationale:** Enhances existing PDF generation with household context, leveraging proven template infrastructure
+**Delivers:** Member-specific report sections, household composition in PDFs, personalized governance recommendations
+**Uses:** Enhanced template data composition, existing @react-pdf/renderer infrastructure, proven async PDF generation
+**Implements:** Profile-rich template engine extending existing template patterns
+**Addresses:** Profile-driven report personalization (differentiator), household-aware visualizations
+**Avoids:** Report quality issues through professional template design, member attribution clarity
+**Research flag:** Profile-driven PDF template architecture requires technical research for complex data composition
 
-**Stack elements:** Next.js 15+ App Router, NextAuth.js 5.x, Drizzle ORM with Neon Postgres, React Hook Form + Zod for forms.
-
-**Research flag:** Standard authentication and form patterns, no additional research needed.
-
-### Phase 2: Core Scoring Engine
-**Rationale:** Must implement scoring with transparency and versioning before branching complicates data model. Establishes foundation for all future features.
-
-**Delivers:** Hierarchical scoring system (question → sub-category → pillar → overall), transparent score breakdown by category, algorithm versioning, score calculation API.
-
-**Addresses:**
-- Risk scoring/rating system (table stakes from FEATURES.md)
-- Maturity model scoring (differentiator from FEATURES.md)
-
-**Implements:**
-- Hierarchical Scoring Engine (from ARCHITECTURE.md)
-- Algorithm versioning pattern (from ARCHITECTURE.md)
-
-**Avoids:**
-- Opaque scoring algorithm (build transparency from start: score breakdowns, weight display, methodology documentation)
-- Historical data invalidation (implement versioning in data model, store raw responses separately)
-- Insufficient granularity (design 5-8 meaningful categories with sub-scores)
-
-**Stack elements:** Scoring calculation in Server Actions, PostgreSQL with JSON columns for flexible scoring config, TanStack Query for client-side caching.
-
-**Research flag:** Standard scoring patterns well-documented, no additional research needed.
-
-### Phase 3: Branching Logic & Adaptive Questionnaire
-**Rationale:** Highest-risk phase due to state management complexity. Must have solid foundation from Phases 1-2 before adding conditional logic.
-
-**Delivers:** Dynamic question routing based on answers, skip logic for irrelevant sections, reduced completion time from 30+ min to 12-15 min, comprehensive branching path testing.
-
-**Addresses:**
-- TurboTax-style branching logic (key differentiator from FEATURES.md)
-- Questionnaire fatigue mitigation (skip irrelevant questions)
-
-**Implements:**
-- Branching Logic Engine with rule evaluator (from ARCHITECTURE.md)
-- Data-driven configuration pattern (from ARCHITECTURE.md)
-
-**Avoids:**
-- Branching logic state management bugs (map dependencies, schema-based validation with conditional fields, comprehensive path testing)
-- Questionnaire fatigue (aggressive branching reduces time, improves completion rates)
-
-**Stack elements:** JSON-based branching rules, Zod conditional validation, comprehensive Vitest test suite for all paths.
-
-**Research flag:** HIGH RISK - needs dedicated QA strategy and state management research. May warrant `/gsd:research-phase` for conditional validation patterns.
-
-### Phase 4: PDF Reports & Policy Templates
-**Rationale:** Can't generate reports without scoring (Phase 2). Reports are table stakes deliverable - required for launch but can be added after core assessment works.
-
-**Delivers:** Professional PDF reports with score breakdown and visualizations, policy template library (5-7 templates), template selection based on risk profile, async PDF generation with job queue.
-
-**Addresses:**
-- PDF report generation (table stakes from FEATURES.md)
-- Actionable policy templates (differentiator from FEATURES.md)
-- Risk area visualizations (differentiator from FEATURES.md)
-
-**Implements:**
-- Template Engine with data binding (from ARCHITECTURE.md)
-- Async job pattern for PDF generation (from ARCHITECTURE.md)
-
-**Avoids:**
-- Report generation quality issues (professional designer for templates, test edge cases, build preview step)
-- Synchronous PDF generation blocking requests (use background queue)
-
-**Stack elements:** @react-pdf/renderer for PDFs, Resend for email delivery, BullMQ or similar for job queue.
-
-**Research flag:** Standard PDF generation patterns, no additional research needed. Budget 30% extra time for edge case testing.
-
-### Phase 5: Enhanced Reporting & Analytics
-**Rationale:** After core features working, add assessment history comparison, enhanced visualizations, recommendation engine. Non-blocking improvements.
-
-**Delivers:** Assessment history and comparison over time, conflict resolution assessment module, next-gen readiness assessment module, family-specific recommendations engine.
-
-**Addresses:**
-- Conflict resolution assessment (differentiator from FEATURES.md)
-- Next-gen readiness assessment (differentiator from FEATURES.md)
-- Family-specific recommendations (differentiator from FEATURES.md)
-
-**Avoids:**
-- Insufficient granularity (enhanced recommendations are specific and actionable)
-
-**Stack elements:** Chart libraries for enhanced visualizations, recommendation rules engine.
-
-**Research flag:** May need research phase for recommendation rules engine patterns if going beyond simple if-then logic.
+### Phase 5: Advanced Family Features (NEW)
+**Rationale:** After household integration validated, add advanced family office sophistication features
+**Delivers:** Multigenerational mapping, cross-generational perspective analysis, advanced family conflict assessment
+**Addresses:** Family office level sophistication, succession planning enhancement
+**Stack elements:** Enhanced data models for extended family relationships, complex scoring algorithms
+**Research flag:** Advanced family relationship modeling patterns need validation
 
 ### Phase Ordering Rationale
 
-- **Sequential dependency**: Phase 2 scoring requires Phase 1 data model; Phase 3 branching requires Phase 2 scoring to be versioned; Phase 4 reports require Phase 2 scores and Phase 3 complete assessments.
-- **Risk management**: Phase 3 branching is highest-risk (state management bugs) - defer until foundation solid. Phase 4 report generation has quality risks - isolate from core assessment.
-- **MVP definition**: Phases 1-4 constitute launchable product (guided assessment + scoring + reports). Phase 5 adds competitive features after validation.
-- **Parallel work potential**: Phase 4 template design can start during Phase 3 implementation. Phase 5 modules can be built independently.
+- **Foundation first**: Household schema must exist before assessment integration; maintains backward compatibility with existing assessments
+- **Progressive integration**: Assessment integration builds on profile foundation; avoids "big bang" changes that could break existing user flows
+- **Risk management**: Profile-aware branching (Phase 2) is highest-risk integration point; defer until foundation solid
+- **Value delivery**: Each phase delivers meaningful user value; Phases 1-4 constitute enhanced launchable product
 
 ### Research Flags
 
 **Phases likely needing deeper research during planning:**
-- **Phase 3 (Branching Logic):** Complex state management, conditional validation patterns, comprehensive testing strategy for branching paths. Consider `/gsd:research-phase` for Zod conditional validation and state machine patterns.
-- **Phase 5 (Recommendation Engine):** If going beyond simple rules, may need research on recommendation engine architectures and pattern matching.
+- **Phase 2 (Assessment Integration):** Profile-aware branching logic, conditional validation patterns, state management for household context
+- **Phase 3 (Enhanced Personalization):** Cultural governance profiling patterns for family office appropriateness
+- **Phase 4 (Household Reporting):** Profile-driven PDF template architecture and complex data composition patterns
 
 **Phases with standard patterns (skip research-phase):**
-- **Phase 1:** Standard Next.js authentication and form patterns, well-documented
-- **Phase 2:** Hierarchical scoring is established pattern with clear implementations
-- **Phase 4:** PDF generation with @react-pdf/renderer has extensive examples
+- **Phase 1:** Standard database schema and CRUD patterns well-documented
+- **Phase 5:** Can leverage patterns established in earlier phases
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All recommendations verified with official documentation (Next.js 15, React 19, Drizzle, Neon) and multiple authoritative sources. Version compatibility confirmed. |
-| Features | MEDIUM | Based on family office software reports (Simple, Masttro) and governance frameworks (Bedrock, Northern Trust, EY). Table stakes features clear; differentiators inferred from industry reports on pain points. |
-| Architecture | HIGH | Risk assessment architecture patterns verified across multiple domains (healthcare, cybersecurity, compliance). Multi-tenant isolation, scoring engines, wizard patterns all well-documented. |
-| Pitfalls | MEDIUM | Synthesized from cross-domain research (risk assessment failures, form UX, algorithmic bias). Family office context from industry reports; technical pitfalls from standard web application failures. Some pitfalls adapted from adjacent domains. |
+| Stack | HIGH | All recommendations verified with official documentation and compatibility matrices; household additions integrate seamlessly |
+| Features | MEDIUM | Table stakes validated across family platforms, differentiators based on family office research; household-specific patterns need validation |
+| Architecture | HIGH | Integration patterns align with existing proven assessment architecture; profile-context approach is well-documented |
+| Pitfalls | HIGH | Household-specific pitfalls documented across family office platform failures; existing platform risks well-understood |
 
 **Overall confidence:** HIGH
 
-Research provides strong foundation for roadmap decisions. Stack recommendations are production-ready and version-compatible. Architecture patterns are proven across similar domains. Feature expectations validated through industry reports and expert frameworks.
+Research provides strong foundation for household profile integration decisions. Stack recommendations maintain compatibility with proven assessment platform. Architecture patterns preserve existing strengths while enabling household enhancement.
 
 ### Gaps to Address
 
-**Feature validation gap:** Table stakes features confirmed via industry reports, but differentiator features (branching logic, maturity model, policy templates) need validation with actual family office users during Phase 1 implementation. Recommendation: Conduct 5-10 user interviews before finalizing Phase 3-5 scope.
+**Household feature validation gap:** Basic profile features confirmed, but governance-specific features (cultural profiling, advisor mapping) need validation with actual family office users. Recommendation: Include household profile validation in existing user interview process during Phase 1.
 
-**Scoring methodology gap:** Research confirms need for hierarchical weighted scoring, but specific weights and categories for family governance require domain expertise. Family office best practices identify governance areas (succession, communication, decision-making, conflict resolution, financial controls, cybersecurity) but not relative importance. Recommendation: Consult family office governance expert during Phase 2 to calibrate weights. Consider advisory board of 2-3 family office professionals for validation.
+**Multi-member scoring methodology gap:** Research confirms need for handling conflicting family perspectives, but specific approaches require domain expertise. Recommendation: Consult family office governance expert during Phase 2 to establish household scoring rules before implementation.
 
-**Branching logic complexity gap:** Research confirms TurboTax-style branching as differentiator and questionnaire fatigue mitigation strategy, but specific branching rules depend on family governance domain expertise (e.g., "skip succession planning if no next generation"). Recommendation: Map question dependencies with governance expert during Phase 2, before Phase 3 implementation.
+**Profile-assessment integration complexity:** While patterns exist, specific implementation of profile-aware branching with existing 68-question assessment needs careful validation. Recommendation: Prototype key integration points before Phase 2 implementation.
 
-**Compliance requirements gap:** Research identifies HNW clients have heightened privacy concerns and need enterprise-grade security (SOC 2, encryption, MFA, audit logs), but doesn't specify exact compliance requirements. Recommendation: During Phase 1, clarify if targeting enterprise family offices (require SOC 2 Type II) vs. individual wealthy families (basic security sufficient). This affects hosting decisions and timeline.
+**International family considerations:** Global families have specific requirements (phone formats, cultural considerations) that standard US family patterns don't address. Recommendation: Research international family office requirements if global expansion planned.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- **Next.js 15 Documentation** - Version 15 features, App Router patterns, TypeScript integration
-- **React 19 Documentation** - Server Components, automatic optimizations, compatibility
-- **Auth.js/NextAuth.js 5.x** - Post-CVE patterns, Data Access Layer approach
-- **Drizzle ORM Documentation** - Type-safe queries, serverless compatibility
-- **Neon Documentation** - Serverless Postgres pricing, branching, scale-to-zero
-- **React Hook Form Documentation** - Form management patterns, Zod integration
-- **Zod Documentation** - Schema validation, conditional validation patterns
+- **Next.js 15 Documentation** - Version 15 features, App Router patterns, TypeScript integration, household profile API patterns
+- **React Hook Form useFieldArray Documentation** - Dynamic member management patterns, performance optimization
+- **Drizzle ORM Relations Documentation** - Self-referencing tables, family relationship modeling
+- **Zod Conditional Validation** - Schema patterns for dynamic household member validation
 
 ### Secondary (MEDIUM confidence)
-- **Family Office Software & Technology Report 2025 (Simple)** - Industry trends, technology adoption, key concerns
-- **Best Family Office Software 2026 (Masttro)** - Feature expectations, pricing benchmarks
-- **KPMG Global Family Business Report 2025** - Governance challenges, succession statistics
-- **Family Office Governance Frameworks** - Bedrock Group, Northern Trust, John A. Davis & Family Business Consulting Group
-- **Risk Assessment Methodologies** - EY, Alvarez & Marsal, FundCount on family office risk management
-- **Multi-Tenant Architecture Patterns** - AWS guidance, Bytebase, GeeksforGeeks
-- **Frontend System Design** - SystemDesignHandbook 2026, State Management Guide 2026
-- **Risk Scoring Best Practices** - Flagright, Splunk, RiskWatch, LightBox on weighted scoring models
+- **Family Office Software Comparison 2026** - Household management feature analysis, professional platform expectations
+- **Google Family Groups Analysis** - Consumer family platform patterns, household composition handling
+- **Best Family Office Software (Masttro)** - Professional feature expectations, role-based access patterns
+- **Family Platform Feature Research** - Household data collection patterns, privacy control requirements
 
 ### Tertiary (LOW confidence, needs validation)
-- **TurboTax UX patterns** - Inferred from reviews and onboarding analysis, not official documentation
-- **Questionnaire completion benchmarks** - 80%+ target from survey best practices, not family office specific
-- **Branching logic complexity estimates** - 12-minute completion time extrapolated from general form optimization research
+- **Cultural Governance Profiling Patterns** - Limited domain-specific documentation, requires expert validation during implementation
+- **International Family Requirements** - Inferred from general international platform requirements, needs family office context validation
 
 ---
 *Research completed: 2026-02-17*
+*Updated for household profiles: 2026-03-12*
 *Ready for roadmap: yes*
