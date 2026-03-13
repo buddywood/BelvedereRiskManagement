@@ -4,6 +4,7 @@
 
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-03-13)
 - ✅ **v1.1 Household Profile Integration** — Phases 5-7 (shipped 2026-03-13)
+- 🚧 **v1.2 Intake & Triage System** — Phases 8-10 (in progress)
 
 ## Phases
 
@@ -30,6 +31,55 @@
 
 </details>
 
+### 🚧 v1.2 Intake & Triage System (In Progress)
+
+**Milestone Goal:** Transform platform from self-service to advisor-guided experience with professional intake interview and risk area curation.
+
+#### Phase 8: Audio Interview Foundation
+**Goal**: Users can complete audio-enhanced intake interviews with transcription
+**Depends on**: v1.1 household system, existing auth
+**Requirements**: INTAKE-01, INTAKE-02, INTAKE-03, INTAKE-04, INTAKE-05
+**Success Criteria** (what must be TRUE):
+  1. User can navigate step-by-step intake interview without losing progress
+  2. User can record audio response to each interview question
+  3. User receives confirmation when interview is completed and submitted
+  4. System automatically transcribes audio responses for advisor review
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: TBD
+- [ ] 08-02: TBD
+
+#### Phase 9: Advisor Portal Access
+**Goal**: Advisors can securely review and manage client intake responses
+**Depends on**: Phase 8 (audio interview data)
+**Requirements**: ADVISOR-01, ADVISOR-02, ADVISOR-03, ADVISOR-04, ADVISOR-05, ADVISOR-06
+**Success Criteria** (what must be TRUE):
+  1. Advisor can access secure portal showing assigned client intakes
+  2. Advisor can view transcribed responses and play back original audio
+  3. Advisor can identify focus risk areas based on intake responses
+  4. Advisor can approve client for customized assessment
+  5. Advisor receives notifications when new intakes are ready for review
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+- [ ] 09-02: TBD
+
+#### Phase 10: Assessment Customization
+**Goal**: Assessments adapt based on advisor-selected focus areas while maintaining completion time
+**Depends on**: Phase 9 (advisor approval workflow)
+**Requirements**: ASSESS-01, ASSESS-02, ASSESS-03, ASSESS-04
+**Success Criteria** (what must be TRUE):
+  1. Assessment shows only advisor-selected risk categories for approved clients
+  2. Assessment emphasizes questions in advisor-identified focus areas
+  3. User sees clear indication when assessment is customized by advisor
+  4. Assessment completion remains within 12-15 minute target despite customization
+**Plans**: TBD
+
+Plans:
+- [ ] 10-01: TBD
+
 ## Progress
 
 | Phase             | Milestone | Plans Complete | Status      | Completed  |
@@ -41,3 +91,6 @@
 | 5. Profile Foundation | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 6. Assessment Integration | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 7. Household Reporting | v1.1      | 2/2            | Complete    | 2026-03-13 |
+| 8. Audio Interview Foundation | v1.2      | 0/TBD          | Not started | - |
+| 9. Advisor Portal Access | v1.2      | 0/TBD          | Not started | - |
+| 10. Assessment Customization | v1.2      | 0/TBD          | Not started | - |

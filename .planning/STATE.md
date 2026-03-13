@@ -5,92 +5,64 @@
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
-**Current focus:** v1.2 Intake & Triage System
+**Current focus:** v1.2 Intake & Triage System - Transform platform from self-service to advisor-guided experience
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-13 — Milestone v1.2 started
+Phase: 8 of 10 (Audio Interview Foundation)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-03-13 — v1.2 roadmap created with 3 phases
+
+Progress: ██████░░░░ 70% (7/10 phases complete across all milestones)
 
 ## Performance Metrics
 
-**Milestones completed:** 1 (v1.0 MVP shipped 2026-03-13)
-**Current milestone progress:** 100% (15/15 requirements complete - Phase 6 finished, Phase 7 complete)
-**Phase completion rate:** N/A (first phase of milestone)
+**Velocity:**
+- **v1.0:** 4 phases, 14 plans (shipped 2026-03-13)
+- **v1.1:** 3 phases, 6 plans (shipped 2026-03-13)
+- **v1.2:** 3 phases planned (starting 2026-03-13)
 
-**Previous velocity (v1.0):**
-- Total plans completed: 14
-- Average duration: 4.2 minutes
-- Total execution time: 1.0 hours
+**By Milestone:**
+
+| Milestone | Phases | Status | Completed |
+|-----------|--------|--------|-----------|
+| v1.0 MVP | 4 | Complete | 2026-03-13 |
+| v1.1 Household | 3 | Complete | 2026-03-13 |
+| v1.2 Intake | 3 | Ready | - |
+
+**Recent Trend:**
+- Rapid delivery: Two milestones shipped same day
+- Strong foundation: 130k+ lines TypeScript, enterprise security
+- Next: Audio infrastructure foundation
 
 ## Accumulated Context
 
-### Key Decisions Made
-- Phase structure derived from natural requirement groupings (Profile Foundation → Assessment Integration → Household Reporting)
-- Backward compatibility maintained for existing assessments without profiles
-- Quick depth applied resulting in 3 focused phases covering all 14 requirements
-- Used array of GovernanceRole enums to allow multiple roles per household member
-- Enforced ownership through compound where clauses (id, userId) in update/delete operations
-- Client-server component split pattern for profiles page: server component for data fetching, client component for interactivity
-- Governance role badges with variant='secondary' for visual distinction from relationship badges
-- Responsive navigation grid (2x2 on mobile, 4x1 on desktop) to accommodate new Profiles link
-- Profile parameter made optional everywhere for 100% backward compatibility in assessment branching
-- ProfileCondition only evaluated when profile exists (null/undefined = show all questions)
-- TextTemplate functions receive profile|null to handle both cases gracefully
-- Profile data cached for 5 minutes via TanStack Query for assessment session duration
-- Personalized text passed as separate prop to QuestionCard for clean separation of concerns
-- Profile stored in Zustand store but excluded from persistence (fetched fresh each session)
-- PDF reports render household sections conditionally based on member data existence
-- Governance recommendations grouped by role with personalized member references in PDF reports
-- Household composition table displays professional formatting with member details and summary statistics
-- Template data fields use comma-joined strings instead of arrays for cleaner docxtemplater output
-- nullGetter pattern prevents template corruption when household data is missing
-- formatEnumValue helper converts database enums to user-friendly display text in policy documents
+### Decisions
 
-### Known Requirements
-- **Profile Foundation:** 6 requirements for basic household member management and extended family tracking
-- **Assessment Integration:** 5 requirements for personalized question branching
-- **Household Reporting:** 4 requirements for customized deliverables
-- Total coverage: 15/15 requirements mapped to phases
+Recent decisions affecting current work:
 
-### Technical Context
-- Building on existing v1.0 MVP with Next.js 15, TypeScript, PostgreSQL stack
-- Household profiles integrate with existing assessment flow and scoring algorithm
-- Research indicates profile-aware branching logic as highest risk integration point
+- Audio foundation must come before advisor complexity (research validated)
+- RecordRTC + OpenAI Whisper recommended for audio pipeline
+- Assessment completion time (12-15 minutes) must be preserved
+- Advisor-client relationship model extends existing ownership patterns
+- Quick depth setting resulted in 3 focused phases covering all 15 v1.2 requirements
 
-### Open Questions
-- None identified during roadmap creation
-- Phase planning will reveal specific implementation questions
+### Pending Todos
 
-### Blockers
-- None identified
+None yet.
 
-### TODOs
-- [x] Plan Phase 5: Profile Foundation via `/gsd:plan-phase 5`
-- [x] Complete Phase 5 Plan 01: Household member data layer
-- [x] Complete Phase 5 Plan 02: Household member UI layer
-- [ ] Plan Phase 6: Assessment Integration via `/gsd:plan-phase 6`
-- [ ] Research profile-aware branching patterns for Phase 6
-- [ ] Validate household scoring methodology before Phase 6 implementation
+### Blockers/Concerns
+
+- Audio recording infrastructure complexity (browser compatibility, chunked upload)
+- Advisor portal permission leakage risks (multi-tenant security model)
+- Assessment customization without disrupting existing 12-15 minute UX
 
 ## Session Continuity
 
-**Last milestone activity:** v1.1 Milestone COMPLETE - Household Profile Integration
-**Last phase completed:** Phase 7 Plan 2 (Customized deliverable generation with household member placeholders on 2026-03-13)
-**Context for next session:** v1.1 milestone complete - Ready to begin next milestone or project phase
-
-### Artifacts Created
-- `.planning/ROADMAP.md` - Complete phase structure with success criteria
-- `.planning/STATE.md` - This project state tracking
-- Updated `.planning/REQUIREMENTS.md` with phase mappings
-
-### Next Actions
-1. v1.1 Household Profile Integration milestone COMPLETE
-2. Plan next milestone or development phase
-3. Consider user feedback integration and next feature priorities
+Last session: 2026-03-13
+Stopped at: v1.2 roadmap creation complete, 15/15 requirements mapped to 3 phases
+Resume file: None
 
 ---
-*State updated: 2026-03-13*
-*Ready for: Next milestone planning*
+*State updated: 2026-03-13 after v1.2 roadmap creation*

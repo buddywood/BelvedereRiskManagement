@@ -73,27 +73,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INTAKE-01 | TBD | Pending |
-| INTAKE-02 | TBD | Pending |
-| INTAKE-03 | TBD | Pending |
-| INTAKE-04 | TBD | Pending |
-| INTAKE-05 | TBD | Pending |
-| ADVISOR-01 | TBD | Pending |
-| ADVISOR-02 | TBD | Pending |
-| ADVISOR-03 | TBD | Pending |
-| ADVISOR-04 | TBD | Pending |
-| ADVISOR-05 | TBD | Pending |
-| ADVISOR-06 | TBD | Pending |
-| ASSESS-01 | TBD | Pending |
-| ASSESS-02 | TBD | Pending |
-| ASSESS-03 | TBD | Pending |
-| ASSESS-04 | TBD | Pending |
+| INTAKE-01 | Phase 8 | Pending |
+| INTAKE-02 | Phase 8 | Pending |
+| INTAKE-03 | Phase 8 | Pending |
+| INTAKE-04 | Phase 8 | Pending |
+| INTAKE-05 | Phase 8 | Pending |
+| ADVISOR-01 | Phase 9 | Pending |
+| ADVISOR-02 | Phase 9 | Pending |
+| ADVISOR-03 | Phase 9 | Pending |
+| ADVISOR-04 | Phase 9 | Pending |
+| ADVISOR-05 | Phase 9 | Pending |
+| ADVISOR-06 | Phase 9 | Pending |
+| ASSESS-01 | Phase 10 | Pending |
+| ASSESS-02 | Phase 10 | Pending |
+| ASSESS-03 | Phase 10 | Pending |
+| ASSESS-04 | Phase 10 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15 ⚠️
+- Mapped to phases: 15
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-13*
-*Last updated: 2026-03-13 after initial definition*
+*Last updated: 2026-03-13 after roadmap creation*
