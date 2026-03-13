@@ -7,6 +7,7 @@ import { useAutoSave } from '@/lib/hooks/useAutoSave';
 import { QuestionCard } from '@/components/assessment/QuestionCard';
 import { NavigationButtons } from '@/components/assessment/NavigationButtons';
 import { SectionProgress } from '@/components/assessment/ProgressBar';
+import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -48,6 +49,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     isLastQuestion,
     progress,
     visibleQuestions,
+    branchingChange,
   } = useAssessmentNavigation(pillarSlug, questionIndex);
 
   // Auto-save
@@ -74,9 +76,9 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="text-zinc-500">Loading question...</div>
+          <div className="text-muted-foreground">Loading question...</div>
         </div>
       </div>
     );
@@ -95,6 +97,20 @@ export default function QuestionPage({ params }: QuestionPageProps) {
       currentQuestionIndex: questionIndex,
     });
   };
+
+  // Auto-navigation on branching changes
+  useEffect(() => {
+    if (branchingChange && branchingChange.newlyVisible.length > 0) {
+      // Find the first newly-visible question in the current pillar's visible questions
+      const firstNewlyVisibleId = branchingChange.newlyVisible[0];
+      const newlyVisibleIndex = visibleQuestions.findIndex(q => q.id === firstNewlyVisibleId);
+
+      if (newlyVisibleIndex !== -1) {
+        // Navigate to the first newly-visible question
+        router.push(`/assessment/${pillarSlug}/${newlyVisibleIndex}`);
+      }
+    }
+  }, [branchingChange, visibleQuestions, pillarSlug, router]);
 
   // Handle skip
   const handleSkip = () => {
@@ -126,19 +142,42 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     (currentAnswer !== null && currentAnswer !== undefined);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Section Progress */}
-        <div className="mb-8">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <section className="hero-surface rounded-[1.75rem] p-6 sm:p-8">
+        <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <SectionProgress
             answeredCount={progress.answered}
             totalCount={progress.total}
             pillarName="Family Governance"
           />
-        </div>
 
-        {/* Question Card */}
-        <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-800 p-8">
+          <Card className="bg-background/60">
+            <CardContent className="grid gap-3 pt-6 sm:grid-cols-3">
+              <div>
+                <p className="editorial-kicker">Question</p>
+                <p className="mt-2 text-xl font-semibold">
+                  {questionIndex + 1} / {visibleQuestions.length}
+                </p>
+              </div>
+              <div>
+                <p className="editorial-kicker">Status</p>
+                <p className="mt-2 text-xl font-semibold">
+                  {currentQuestion.required ? 'Required' : 'Optional'}
+                </p>
+              </div>
+              <div>
+                <p className="editorial-kicker">Autosave</p>
+                <p className="mt-2 text-xl font-semibold">
+                  {isSaving ? 'Saving' : 'Active'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      <Card className="overflow-hidden">
+        <CardContent className="space-y-8 pt-8">
           <QuestionCard
             question={currentQuestion}
             currentAnswer={currentAnswer}
@@ -146,7 +185,6 @@ export default function QuestionPage({ params }: QuestionPageProps) {
             onSkip={!currentQuestion.required ? handleSkip : undefined}
           />
 
-          {/* Navigation */}
           <NavigationButtons
             onBack={goBack}
             onNext={handleNext}
@@ -155,8 +193,8 @@ export default function QuestionPage({ params }: QuestionPageProps) {
             isValid={isValid}
             isSaving={isSaving}
           />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

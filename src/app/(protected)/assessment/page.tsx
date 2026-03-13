@@ -14,6 +14,7 @@ import type { Pillar } from '@/lib/assessment/types';
 import { getVisibleQuestions } from '@/lib/assessment/branching';
 import { allQuestions } from '@/lib/assessment/questions';
 import { formatDistanceToNow } from 'date-fns';
+import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Assessment Hub Page
@@ -48,7 +49,7 @@ export default function AssessmentHubPage() {
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Fetch assessment data from server for rehydration
-  const { data: assessmentData, isLoading: isLoadingAssessment } = useQuery({
+  const { data: assessmentData } = useQuery({
     queryKey: ['assessment', store.assessmentId],
     queryFn: async () => {
       if (!store.assessmentId) return null;
@@ -83,7 +84,9 @@ export default function AssessmentHubPage() {
       store.setHydrated(true);
     }
 
-    setIsInitializing(false);
+    // Defer to avoid synchronous setState in effect (react-hooks/set-state-in-effect)
+    const t = setTimeout(() => setIsInitializing(false), 0);
+    return () => clearTimeout(t);
   }, [assessmentData, store]);
 
   // Create new assessment mutation
@@ -116,6 +119,9 @@ export default function AssessmentHubPage() {
   };
 
   const handleContinueAssessment = () => {
+    // Clean orphaned answers before resuming
+    store.cleanOrphanedAnswers();
+
     // Smart resume: Find next unanswered question using branching logic
     const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
     const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions);
@@ -160,40 +166,81 @@ export default function AssessmentHubPage() {
   // Show loading skeleton until hydrated
   if (isInitializing || (store.assessmentId && !store.isHydrated)) {
     return (
-      <div className="container max-w-4xl py-8 space-y-8">
+      <div className="mx-auto max-w-6xl space-y-8">
         <div className="space-y-4">
-          <div className="h-8 w-64 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-          <div className="h-4 w-96 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+          <div className="h-8 w-64 rounded bg-secondary animate-pulse" />
+          <div className="h-4 w-96 rounded bg-secondary animate-pulse" />
         </div>
-        <div className="h-24 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
-        <div className="h-64 bg-zinc-200 dark:bg-zinc-800 rounded animate-pulse" />
+        <div className="h-24 rounded-[1.5rem] bg-secondary animate-pulse" />
+        <div className="h-64 rounded-[1.5rem] bg-secondary animate-pulse" />
       </div>
     );
   }
 
   return (
-    <div className="container max-w-4xl py-8 space-y-8">
-      {/* Header */}
-      <div className="space-y-4">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">
-          Family Governance Assessment
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          A guided evaluation of your family's governance structures and risk management practices.
-          Complete the assessment to receive personalized recommendations.
-        </p>
-      </div>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <section className="hero-surface rounded-[1.75rem] p-6 sm:p-8">
+        <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          <div className="space-y-5">
+            <div className="space-y-3">
+              <p className="editorial-kicker">Assessment Workspace</p>
+              <h1 className="text-4xl font-semibold text-balance sm:text-5xl">
+                Family Governance Assessment
+              </h1>
+              <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
+                A guided evaluation of governance structure, succession planning,
+                communication, and decision-making practices designed for families
+                operating with institutional rigor.
+              </p>
+            </div>
 
-      {/* Welcome Back Banner (In-progress state) */}
+            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+              <div className="rounded-full border section-divider bg-background/65 px-4 py-2">
+                Personalized recommendations
+              </div>
+              <div className="rounded-full border section-divider bg-background/65 px-4 py-2">
+                Autosave enabled
+              </div>
+              <div className="rounded-full border section-divider bg-background/65 px-4 py-2">
+                Advisory-style results
+              </div>
+            </div>
+          </div>
+
+          <Card className="bg-background/60">
+            <CardContent className="grid gap-4 pt-6 sm:grid-cols-3">
+              <div>
+                <p className="editorial-kicker">Section</p>
+                <p className="mt-2 text-xl font-semibold">1 Pillar</p>
+              </div>
+              <div>
+                <p className="editorial-kicker">Duration</p>
+                <p className="mt-2 text-xl font-semibold">~25 min</p>
+              </div>
+              <div>
+                <p className="editorial-kicker">Status</p>
+                <p className="mt-2 text-xl font-semibold">
+                  {pillarStatus === 'not-started'
+                    ? 'Ready'
+                    : pillarStatus === 'in-progress'
+                      ? 'In Progress'
+                      : 'Completed'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {pillarStatus === 'in-progress' && store.assessmentId && (
-        <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950">
-          <AlertTitle className="text-lg font-semibold text-blue-900 dark:text-blue-100">
-            Welcome Back!
+        <Alert variant="info">
+          <AlertTitle className="text-lg font-semibold">
+            Welcome back
           </AlertTitle>
-          <AlertDescription className="text-blue-800 dark:text-blue-200 space-y-2">
+          <AlertDescription className="space-y-2">
             <p>
-              You've completed <strong>{questionsAnswered}</strong> of <strong>{totalQuestions}</strong> questions.
-              Pick up where you left off.
+              You&apos;ve completed <strong>{questionsAnswered}</strong> of <strong>{totalQuestions}</strong> visible questions.
+              Continue from where you left off.
             </p>
             {store.lastSaved && (
               <p className="text-sm flex items-center gap-2">
@@ -205,20 +252,24 @@ export default function AssessmentHubPage() {
         </Alert>
       )}
 
-      {/* Overall Progress */}
       {store.assessmentId && (
-        <OverallProgress
-          completedPillars={store.completedPillars}
-          totalPillars={1}
-          currentPillar={store.currentPillar || undefined}
-        />
+        <Card className="bg-background/55">
+          <CardContent className="pt-6">
+            <OverallProgress
+              completedPillars={store.completedPillars}
+              totalPillars={1}
+              currentPillar={store.currentPillar || undefined}
+            />
+          </CardContent>
+        </Card>
       )}
 
-      {/* Pillar Cards */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Assessment Sections
-        </h2>
+      <section className="space-y-4">
+        <div className="space-y-2">
+          <p className="editorial-kicker">Assessment Section</p>
+          <h2 className="text-3xl font-semibold">Structured review</h2>
+        </div>
+
         <div className="grid gap-4">
           <PillarCard
             pillar={FAMILY_GOVERNANCE_PILLAR}
@@ -228,59 +279,73 @@ export default function AssessmentHubPage() {
             onClick={pillarStatus === 'not-started' ? handleStartAssessment : handleContinueAssessment}
           />
         </div>
-      </div>
+      </section>
 
-      {/* CTA Section */}
-      <div className="flex flex-col items-center gap-4 pt-8 border-t border-zinc-200 dark:border-zinc-700">
-        {pillarStatus === 'not-started' ? (
-          <>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-              Ready to begin? This assessment will take approximately {FAMILY_GOVERNANCE_PILLAR.estimatedMinutes} minutes.
-              Your progress will be saved automatically.
-            </p>
-            <Button
-              size="lg"
-              onClick={handleStartAssessment}
-              disabled={createAssessmentMutation.isPending}
-            >
-              {createAssessmentMutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Starting...
-                </>
-              ) : (
-                'Begin Assessment'
-              )}
-            </Button>
-          </>
-        ) : pillarStatus === 'in-progress' ? (
-          <>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-              Continue with your assessment to receive personalized governance recommendations.
-            </p>
-            <Button size="lg" onClick={handleContinueAssessment}>
-              Continue Assessment
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/assessment/family-governance/0')}
-              className="mt-2"
-            >
-              Review Answers from Beginning
-            </Button>
-          </>
-        ) : (
-          <>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-center">
-              Assessment complete! View your results and recommendations.
-            </p>
-            <Button size="lg" onClick={() => router.push('/assessment/results')}>
-              View Results
-            </Button>
-          </>
-        )}
-      </div>
+      <section className="hero-surface rounded-[1.75rem] border-t section-divider p-6 sm:p-8">
+        <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl space-y-2">
+            <p className="editorial-kicker">Next Step</p>
+            {pillarStatus === 'not-started' ? (
+              <p className="text-base leading-7 text-muted-foreground">
+                Ready to begin? This assessment will take approximately {FAMILY_GOVERNANCE_PILLAR.estimatedMinutes} minutes and saves progress automatically.
+              </p>
+            ) : pillarStatus === 'in-progress' ? (
+              <p className="text-base leading-7 text-muted-foreground">
+                Continue your assessment to receive tailored governance recommendations and a scored summary.
+              </p>
+            ) : (
+              <p className="text-base leading-7 text-muted-foreground">
+                Your assessment is complete. Review your results, risk drivers, and recommended actions.
+              </p>
+            )}
+          </div>
+
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            {pillarStatus === 'not-started' ? (
+              <Button
+                size="lg"
+                onClick={handleStartAssessment}
+                disabled={createAssessmentMutation.isPending}
+              >
+                {createAssessmentMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Starting...
+                  </>
+                ) : (
+                  'Begin Assessment'
+                )}
+              </Button>
+            ) : pillarStatus === 'in-progress' ? (
+              <>
+                <Button size="lg" onClick={handleContinueAssessment}>
+                  Continue Assessment
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => router.push('/assessment/family-governance/0')}
+                >
+                  Review from Start
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button size="lg" onClick={() => router.push('/assessment/results')}>
+                  View Results
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => router.push('/dashboard')}
+                >
+                  Return to Dashboard
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
