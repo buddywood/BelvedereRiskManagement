@@ -4,6 +4,8 @@ import { ReportCover } from './ReportCover'
 import { ExecutiveSummary } from './ExecutiveSummary'
 import { CategoryBreakdown } from './CategoryBreakdown'
 import { RecommendationsSection } from './RecommendationsSection'
+import { HouseholdComposition } from './HouseholdComposition'
+import { GovernanceRecommendations } from './GovernanceRecommendations'
 
 interface CategoryScore {
   name: string
@@ -31,11 +33,22 @@ interface AssessmentReportData {
   missingControlsCount: number
 }
 
-interface AssessmentReportProps {
-  data: AssessmentReportData
+interface HouseholdProfile {
+  members: Array<{
+    fullName: string
+    relationship: string
+    age: number | null
+    governanceRoles: string[]
+    isResident: boolean
+  }>
 }
 
-export function AssessmentReport({ data }: AssessmentReportProps) {
+interface AssessmentReportProps {
+  data: AssessmentReportData
+  householdProfile?: HouseholdProfile
+}
+
+export function AssessmentReport({ data, householdProfile }: AssessmentReportProps) {
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -65,11 +78,21 @@ export function AssessmentReport({ data }: AssessmentReportProps) {
         missingControlsCount={data.missingControlsCount}
       />
 
-      {/* Page 3: Category Breakdown */}
+      {/* Page 3: Household Composition (if household profile exists) */}
+      {householdProfile && householdProfile.members.length > 0 && (
+        <HouseholdComposition members={householdProfile.members} />
+      )}
+
+      {/* Page 4: Category Breakdown */}
       <CategoryBreakdown breakdown={data.breakdown} />
 
-      {/* Page 4+: Recommendations */}
+      {/* Page 5+: Recommendations */}
       <RecommendationsSection missingControls={data.missingControls} />
+
+      {/* Page 6+: Governance Recommendations (if household profile has governance roles) */}
+      {householdProfile && householdProfile.members.some(m => m.governanceRoles.length > 0) && (
+        <GovernanceRecommendations members={householdProfile.members} missingControls={data.missingControls} />
+      )}
 
       {/* Footer on all pages */}
       {[...Array(4)].map((_, pageIndex) => (

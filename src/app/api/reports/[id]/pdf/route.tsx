@@ -93,16 +93,39 @@ export async function GET(
       );
     }
 
-    // 4. Load user email for report header
+    // 4. Load household members for household profile
+    const householdMembers = await prisma.householdMember.findMany({
+      where: { userId: session.user.id },
+      select: {
+        fullName: true,
+        relationship: true,
+        age: true,
+        governanceRoles: true,
+        isResident: true,
+      },
+    });
+
+    // 5. Load user email for report header
     const userEmail = session.user.email || "Unknown User";
 
-    // 5. Calculate completion percentage
+    // 6. Calculate completion percentage
     const totalResponses = responseCount;
     // Estimate based on typical assessment size - in production would get from visible questions
     const estimatedTotalQuestions = 68; // Based on research findings
     const completionPercentage = Math.min(100, Math.round((totalResponses / estimatedTotalQuestions) * 100));
 
-    // 6. Pre-process data into plain objects
+    // 7. Build household profile object
+    const householdProfile = householdMembers.length > 0 ? {
+      members: householdMembers.map(m => ({
+        fullName: m.fullName,
+        relationship: m.relationship,
+        age: m.age,
+        governanceRoles: m.governanceRoles as string[],
+        isResident: m.isResident,
+      })),
+    } : undefined;
+
+    // 8. Pre-process data into plain objects
     const breakdown = pillarScore.breakdown as unknown as CategoryScore[];
     const missingControls = pillarScore.missingControls as unknown as MissingControl[];
 
@@ -137,12 +160,12 @@ export async function GET(
       missingControlsCount: missingControls.length,
     };
 
-    // 7. Generate PDF buffer
+    // 9. Generate PDF buffer
     const pdfBuffer = await renderToBuffer(
-      <AssessmentReport data={reportData} />
+      <AssessmentReport data={reportData} householdProfile={householdProfile} />
     );
 
-    // 8. Return PDF with appropriate headers
+    // 10. Return PDF with appropriate headers
     return new NextResponse(pdfBuffer as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
