@@ -16,15 +16,15 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <div className="min-h-screen py-4 sm:py-6">
+    <div className="min-h-screen py-3 sm:py-6">
       <div className="page-shell">
         <div className="hero-surface overflow-hidden rounded-[2rem]">
           <header className="border-b section-divider bg-background/55">
-            <div className="px-5 py-4 sm:px-8 lg:px-10">
+            <div className="px-4 py-3 sm:px-8 sm:py-4 lg:px-10">
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
+                <div className="space-y-0.5 sm:space-y-1">
                   <p className="editorial-kicker">Belvedere Risk Management</p>
-                  <h1 className="text-xl font-semibold leading-none sm:text-3xl">
+                  <h1 className="text-lg font-semibold leading-tight tracking-[-0.03em] sm:text-3xl sm:leading-none">
                     Governance Assessment Workspace
                   </h1>
                 </div>
@@ -39,25 +39,25 @@ export default async function ProtectedLayout({
                       await signOut({ redirectTo: "/" });
                     }}
                   >
-                    <Button type="submit" variant="outline" size="sm">
+                    <Button type="submit" variant="outline" size="sm" className="px-3 sm:px-4">
                       Sign Out
                     </Button>
                   </form>
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
                 <nav className="grid grid-cols-2 gap-2 md:flex md:grid-cols-4">
-                  <Button asChild variant="ghost" size="sm" className="w-full">
+                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/dashboard">Dashboard</Link>
                   </Button>
-                  <Button asChild variant="ghost" size="sm" className="w-full">
+                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/assessment">Assessment</Link>
                   </Button>
-                  <Button asChild variant="ghost" size="sm" className="w-full">
+                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/profiles">Profiles</Link>
                   </Button>
-                  <Button asChild variant="ghost" size="sm" className="w-full">
+                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/settings">Settings</Link>
                   </Button>
                 </nav>
@@ -69,7 +69,7 @@ export default async function ProtectedLayout({
             </div>
           </header>
 
-          <main className="px-4 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+          <main className="px-4 py-5 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
             {children}
           </main>
         </div>

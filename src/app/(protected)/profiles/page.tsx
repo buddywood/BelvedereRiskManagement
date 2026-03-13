@@ -19,17 +19,17 @@ export default async function ProfilesPage() {
   );
 
   return (
-    <div className="space-y-8">
-      <section className="hero-surface overflow-hidden px-6 py-7 sm:px-8 sm:py-8">
-        <div className="app-grid gap-8 xl:grid-cols-[minmax(0,1.4fr)_minmax(22rem,0.85fr)]">
-          <div className="space-y-5">
-            <div className="space-y-3">
+    <div className="space-y-6 sm:space-y-8">
+      <section className="hero-surface overflow-hidden px-4 py-5 sm:px-8 sm:py-8">
+        <div className="app-grid gap-5 sm:gap-8 xl:grid-cols-[minmax(0,1.4fr)_minmax(22rem,0.85fr)]">
+          <div className="space-y-4 sm:space-y-5">
+            <div className="space-y-2 sm:space-y-3">
               <p className="editorial-kicker">Profiles & Roles</p>
-              <div className="space-y-3">
-                <h1 className="text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
+              <div className="space-y-2 sm:space-y-3">
+                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
                   Household member profiles built for governance planning.
                 </h1>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+                <p className="max-w-2xl text-sm leading-5 text-muted-foreground sm:text-base sm:leading-6">
                   Capture the people in your household, clarify how they participate in
                   governance, and keep an up-to-date operating picture for the rest of the
                   assessment workflow.
@@ -43,7 +43,7 @@ export default async function ProfilesPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
+          <div className="hidden gap-4 sm:grid sm:grid-cols-3 xl:grid-cols-1">
             <div className="rounded-[1.5rem] border border-border/70 bg-background/85 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur">
               <p className="editorial-kicker">Coverage</p>
               <p className="mt-3 text-3xl font-semibold tracking-[-0.04em]">{members.length}</p>
@@ -73,7 +73,7 @@ export default async function ProfilesPage() {
 
       <div className="space-y-2">
         <p className="editorial-kicker">Household Directory</p>
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+        <p className="max-w-2xl text-sm leading-5 text-muted-foreground sm:text-base sm:leading-6">
           Maintain core details, contact context, and governance responsibilities in one place.
         </p>
       </div>
