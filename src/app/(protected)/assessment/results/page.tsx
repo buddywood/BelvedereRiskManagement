@@ -47,8 +47,18 @@ export default function AssessmentResultsPage() {
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isReadyForRedirects, setIsReadyForRedirects] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => setIsReadyForRedirects(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isReadyForRedirects) {
+      return;
+    }
+
     async function loadScore() {
       if (!assessmentId) {
         router.push("/assessment");
@@ -91,9 +101,9 @@ export default function AssessmentResultsPage() {
     }
 
     loadScore();
-  }, [assessmentId, router, markPillarComplete]);
+  }, [assessmentId, router, markPillarComplete, isReadyForRedirects]);
 
-  if (isLoading) {
+  if (isLoading || !isReadyForRedirects) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-4">

@@ -20,8 +20,18 @@ export default function AssessmentCompletePage() {
   const { assessmentId } = useAssessmentStore();
   const [isCalculating, setIsCalculating] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isReadyForRedirects, setIsReadyForRedirects] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => setIsReadyForRedirects(true), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!isReadyForRedirects) {
+      return;
+    }
+
     if (!assessmentId) {
       router.push('/assessment');
       return;
@@ -53,7 +63,7 @@ export default function AssessmentCompletePage() {
     };
 
     calculateScore();
-  }, [assessmentId, router]);
+  }, [assessmentId, router, isReadyForRedirects]);
 
   const handleRetry = () => {
     setError(null);
@@ -113,6 +123,17 @@ export default function AssessmentCompletePage() {
             </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isReadyForRedirects) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-brand mx-auto" />
+          <p className="text-sm text-muted-foreground">Preparing your assessment summary...</p>
         </div>
       </div>
     );
