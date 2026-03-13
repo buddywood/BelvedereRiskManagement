@@ -80,10 +80,12 @@ Plans:
   3. Report includes specific recommendations addressing identified governance gaps
   4. User can download 5-7 core governance policy templates pre-filled with their data
   5. User can immediately download all deliverables (report and templates) after assessment
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD during phase planning
+- [ ] 04-01-PLAN.md -- PDF report generation with @react-pdf/renderer (executive summary, score breakdown, recommendations)
+- [ ] 04-02-PLAN.md -- Word template generation with docxtemplater (7 governance policy templates, pre-filled from assessment)
+- [ ] 04-03-PLAN.md -- Results dashboard enhancement with download actions and template browsing
 
 ## Progress
 
@@ -95,4 +97,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Authentication & Security | 0/3 | Planned | - |
 | 2. Assessment Engine & Core Scoring | 0/6 | Planned | - |
 | 3. Branching Logic | 0/2 | Planned | - |
-| 4. Reports & Templates | 0/0 | Not started | - |
+| 4. Reports & Templates | 0/3 | Planned | - |
