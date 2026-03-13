@@ -1,84 +1,99 @@
-# Requirements: v1.1 Household Profile Integration
+# Requirements: Belvedere Risk Management
 
-**Milestone:** v1.1 Household Profile Integration
-**Goal:** Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables. Supports structured 45-minute intake sessions that systematically capture household composition, governance roles, and family dynamics before transitioning to quantified risk assessment.
+**Defined:** 2026-03-13
+**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
 
-## Milestone v1.1 Requirements
+## v1.2 Requirements
 
-### Profile Foundation
+Requirements for Intake & Triage System milestone. Each maps to roadmap phases.
 
-- [ ] **PROFILE-01**: User can create household member profiles with full name, age, occupation/career, and primary contact information (phone and email)
-- [ ] **PROFILE-02**: User can specify family relationship for each household member (spouse, child, parent, etc.)
-- [ ] **PROFILE-03**: User can assign governance roles to household members (decision maker, advisor, successor, etc.)
-- [ ] **PROFILE-04**: User can edit and update existing household member profiles after initial creation
-- [ ] **PROFILE-05**: User can remove household members from their profile when family composition changes
-- [ ] **PROFILE-06**: User can track extended family members not living in the home (adult children, grandchildren) with basic contact information
+### Intake Interview System
 
-### Assessment Integration
+- [ ] **INTAKE-01**: User can complete step-by-step intake interview with comprehensive question set
+- [ ] **INTAKE-02**: User can record audio response to each interview question
+- [ ] **INTAKE-03**: User receives confirmation when interview is completed and submitted
+- [ ] **INTAKE-04**: System automatically transcribes audio responses for advisor review
+- [ ] **INTAKE-05**: User can navigate between interview questions without losing progress
 
-- [ ] **ASSESS-01**: Assessment questions branch based on household composition (number of members, ages, roles)
-- [ ] **ASSESS-02**: Assessment displays personalized questions using household member names and roles
-- [ ] **ASSESS-03**: Assessment auto-saves household profile data during profile creation and updates
-- [ ] **ASSESS-04**: Assessment maintains backward compatibility with existing assessments that have no household profiles
-- [ ] **ASSESS-05**: Assessment preserves existing scoring algorithm when household profiles are incomplete
+### Advisor Portal
 
-### Household Reporting
+- [ ] **ADVISOR-01**: Advisor can access secure portal to review assigned client intakes
+- [ ] **ADVISOR-02**: Advisor can view transcribed audio responses from client interview
+- [ ] **ADVISOR-03**: Advisor can play back original audio recordings from client interview
+- [ ] **ADVISOR-04**: Advisor can identify focus risk areas based on intake responses
+- [ ] **ADVISOR-05**: Advisor can approve client for customized assessment
+- [ ] **ADVISOR-06**: Advisor receives notification when new client intake is ready for review
 
-- [ ] **REPORT-01**: PDF reports include household composition section with member names, roles, and relationships
-- [ ] **REPORT-02**: PDF reports display family-specific governance recommendations based on household member roles
-- [ ] **REPORT-03**: PDF reports maintain professional formatting when household information is included
-- [ ] **REPORT-04**: Policy templates pre-populate with household member names and governance role assignments
+### Assessment Customization
 
-## Future Requirements (Deferred)
+- [ ] **ASSESS-01**: Assessment shows only advisor-selected risk categories for approved clients
+- [ ] **ASSESS-02**: Assessment emphasizes questions in advisor-identified focus areas
+- [ ] **ASSESS-03**: User sees indication when assessment is customized by advisor
+- [ ] **ASSESS-04**: Assessment completion remains within 12-15 minute target despite customization
 
-### Enhanced Personalization (v1.2+)
-- Governance role assessment with detailed authority mapping
-- Cultural governance profiling for family dynamics
-- Advisor ecosystem integration and professional network mapping
-- Profile validation and conflict resolution for multiple perspectives
+## v2 Requirements
 
-### Advanced Household Features (v1.3+)
-- Individual privacy controls with member-level data access
-- Member-aware assessment state with unified profile management
-- Member-specific PDF report sections tailored to individual roles
+Deferred to future release. Tracked but not in current roadmap.
 
-### Multi-Family Support (v2.0+)
-- Multiple family organization support within single account
-- Cross-family governance comparison and benchmarking
-- Advanced reporting customization with family-specific branding
+### Advanced Audio Features
+
+- **AUDIO-01**: Real-time transcription during interview recording
+- **AUDIO-02**: AI-powered emotional analysis from audio responses
+- **AUDIO-03**: Audio quality optimization and background noise filtering
+
+### Enhanced Advisor Capabilities
+
+- **ADVISOR-07**: Advisor can assign clients to other advisors
+- **ADVISOR-08**: Advisor can collaborate with other advisors on client reviews
+- **ADVISOR-09**: Advisor dashboard shows client completion analytics
+- **ADVISOR-10**: Advisor can customize interview questions for specific clients
+
+### Advanced Assessment Features
+
+- **ASSESS-05**: Personalized question text using intake responses and household data
+- **ASSESS-06**: Dynamic branching logic based on advisor-identified focus areas
+- **ASSESS-07**: Predictive risk area curation using AI analysis of intake responses
 
 ## Out of Scope
 
-**Explicitly excluded with reasoning:**
+Explicitly excluded. Documented to prevent scope creep.
 
-- **Real-time location tracking** — Privacy invasion, not governance-focused
-- **Social media integration** — Dilutes professional focus, introduces security risks
-- **Family calendar/event scheduling** — Feature creep, competitive with existing tools
-- **Financial account aggregation** — Regulated, complex, highly competitive market
-- **Gamification elements** — Undermines serious governance tone required for HNW clients
-- **Real-time collaboration features** — Single-user assessment model validated in v1.0
-- **Mobile native app development** — Responsive web sufficient for target users
+| Feature | Reason |
+|---------|--------|
+| Resume interview capability | Not needed for focused 15-minute interview experience |
+| White-label advisor branding | Single tenant sufficient for v1.2 |
+| Real-time advisor-client collaboration | Complex feature, defer to future |
+| Client assignment automation | Manual assignment sufficient for pilot |
+| Video recording capability | Audio provides sufficient qualitative data |
+| Advanced analytics dashboard | Basic approval workflow sufficient for v1.2 |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROFILE-01 | Phase 5 | Pending |
-| PROFILE-02 | Phase 5 | Pending |
-| PROFILE-03 | Phase 5 | Pending |
-| PROFILE-04 | Phase 5 | Pending |
-| PROFILE-05 | Phase 5 | Pending |
-| PROFILE-06 | Phase 5 | Pending |
-| ASSESS-01 | Phase 6 | Pending |
-| ASSESS-02 | Phase 6 | Pending |
-| ASSESS-03 | Phase 6 | Pending |
-| ASSESS-04 | Phase 6 | Pending |
-| ASSESS-05 | Phase 6 | Pending |
-| REPORT-01 | Phase 7 | Pending |
-| REPORT-02 | Phase 7 | Pending |
-| REPORT-03 | Phase 7 | Pending |
-| REPORT-04 | Phase 7 | Pending |
+| INTAKE-01 | TBD | Pending |
+| INTAKE-02 | TBD | Pending |
+| INTAKE-03 | TBD | Pending |
+| INTAKE-04 | TBD | Pending |
+| INTAKE-05 | TBD | Pending |
+| ADVISOR-01 | TBD | Pending |
+| ADVISOR-02 | TBD | Pending |
+| ADVISOR-03 | TBD | Pending |
+| ADVISOR-04 | TBD | Pending |
+| ADVISOR-05 | TBD | Pending |
+| ADVISOR-06 | TBD | Pending |
+| ASSESS-01 | TBD | Pending |
+| ASSESS-02 | TBD | Pending |
+| ASSESS-03 | TBD | Pending |
+| ASSESS-04 | TBD | Pending |
+
+**Coverage:**
+- v1.2 requirements: 15 total
+- Mapped to phases: 0
+- Unmapped: 15 ⚠️
 
 ---
-*Requirements defined: 2026-03-12*
-*Total requirements: 15 (v1.1)*
+*Requirements defined: 2026-03-13*
+*Last updated: 2026-03-13 after initial definition*
