@@ -36,6 +36,12 @@ Plans:
 
 **Dependencies:** Phase 5 (Profile Foundation)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Profile-aware personalization engine and extended branching logic (TDD)
+- [ ] 06-02-PLAN.md — Assessment UI integration with household profile data
+
 **Requirements:**
 - ASSESS-01: Assessment questions branch based on household composition (number of members, ages, roles)
 - ASSESS-02: Assessment displays personalized questions using household member names and roles
