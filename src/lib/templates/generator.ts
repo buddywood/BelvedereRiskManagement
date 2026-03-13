@@ -25,7 +25,19 @@ export function generateTemplate(templateId: TemplateId, data: TemplateData): Bu
   const zip = new PizZip(content);
   const doc = new Docxtemplater(zip, {
     paragraphLoop: true,
-    linebreaks: true
+    linebreaks: true,
+    nullGetter(part: any) {
+      // Return empty string for missing household placeholders instead of throwing
+      if (part.module === 'loop' || part.value?.startsWith('household') ||
+          part.value?.startsWith('decisionMaker') || part.value?.startsWith('successor') ||
+          part.value?.startsWith('trustee') || part.value?.startsWith('advisor') ||
+          part.value?.startsWith('beneficiar') || part.value?.startsWith('executor') ||
+          part.value?.startsWith('householdHead')) {
+        return '';
+      }
+      // For non-household placeholders, preserve existing behavior
+      return `{${part.value}}`;
+    }
   });
 
   // Render template with data

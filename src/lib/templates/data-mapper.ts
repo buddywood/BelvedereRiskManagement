@@ -1,18 +1,32 @@
 import { TemplateId, TemplateData, TEMPLATE_REGISTRY } from './types';
 import { ScoreResult, MissingControl, CategoryScore } from '../assessment/types';
 import { getRiskLevel } from '../assessment/scoring';
+import { HouseholdProfile } from '../assessment/personalization';
+
+/**
+ * Helper function to format enum values from SCREAMING_SNAKE_CASE to Title Case
+ */
+function formatEnumValue(value: string): string {
+  return value
+    .split('_')
+    .map(word => word.toLowerCase())
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
 
 /**
  * Map assessment data to template data for document generation
  * @param templateId - Template to generate data for
  * @param scoreData - Assessment score result
  * @param userEmail - User email for family name derivation
+ * @param householdProfile - Optional household profile data
  * @returns Template data with placeholder values
  */
 export function mapAssessmentToTemplate(
   templateId: TemplateId,
   scoreData: ScoreResult,
-  userEmail: string
+  userEmail: string,
+  householdProfile?: HouseholdProfile | null
 ): TemplateData {
   // Find template metadata
   const template = TEMPLATE_REGISTRY.find(t => t.id === templateId);
@@ -56,7 +70,8 @@ export function mapAssessmentToTemplate(
     .map((control: MissingControl) => control.recommendation || '')
     .filter((rec: string) => rec.length > 0);
 
-  return {
+  // Build base template data
+  const templateData: TemplateData = {
     familyName,
     assessmentDate,
     overallScore: scoreData.score || 0,
@@ -67,6 +82,59 @@ export function mapAssessmentToTemplate(
     strengths,
     recommendations
   };
+
+  // Add household member data if profile exists
+  if (householdProfile && householdProfile.members.length > 0) {
+    const members = householdProfile.members;
+
+    // Map household members with formatted relationships and governance roles
+    templateData.householdMembers = members.map(member => ({
+      fullName: member.fullName,
+      relationship: formatEnumValue(member.relationship),
+      governanceRoles: member.governanceRoles.map(formatEnumValue)
+    }));
+
+    // Extract members by governance roles (comma-joined strings)
+    templateData.decisionMakers = members
+      .filter(m => m.governanceRoles.some(role => role.toUpperCase() === 'DECISION_MAKER'))
+      .map(m => m.fullName)
+      .join(', ');
+
+    templateData.successors = members
+      .filter(m => m.governanceRoles.some(role => role.toUpperCase() === 'SUCCESSOR'))
+      .map(m => m.fullName)
+      .join(', ');
+
+    templateData.trustees = members
+      .filter(m => m.governanceRoles.some(role => role.toUpperCase() === 'TRUSTEE'))
+      .map(m => m.fullName)
+      .join(', ');
+
+    templateData.advisors = members
+      .filter(m => m.governanceRoles.some(role => role.toUpperCase() === 'ADVISOR'))
+      .map(m => m.fullName)
+      .join(', ');
+
+    templateData.beneficiaries = members
+      .filter(m => m.governanceRoles.some(role => role.toUpperCase() === 'BENEFICIARY'))
+      .map(m => m.fullName)
+      .join(', ');
+
+    templateData.executors = members
+      .filter(m => m.governanceRoles.some(role => role.toUpperCase() === 'EXECUTOR'))
+      .map(m => m.fullName)
+      .join(', ');
+
+    // Set household head: first decision maker or first member as fallback
+    const decisionMakers = members.filter(m =>
+      m.governanceRoles.some(role => role.toUpperCase() === 'DECISION_MAKER')
+    );
+    templateData.householdHead = decisionMakers.length > 0
+      ? decisionMakers[0].fullName
+      : members[0].fullName;
+  }
+
+  return templateData;
 }
 
 /**

@@ -29,6 +29,20 @@ export interface TemplateData {
   }>;
   strengths: string[];
   recommendations: string[];
+
+  // Household member data (empty arrays/strings when no profile)
+  householdMembers?: Array<{
+    fullName: string;
+    relationship: string;
+    governanceRoles: string[];
+  }>;
+  decisionMakers?: string;    // Names of members with DECISION_MAKER role (comma-joined)
+  successors?: string;        // Names of members with SUCCESSOR role (comma-joined)
+  trustees?: string;          // Names of members with TRUSTEE role (comma-joined)
+  advisors?: string;          // Names of members with ADVISOR role (comma-joined)
+  beneficiaries?: string;     // Names of members with BENEFICIARY role (comma-joined)
+  executors?: string;         // Names of members with EXECUTOR role (comma-joined)
+  householdHead?: string;     // Primary decision maker or first member name
 }
 
 export const TEMPLATE_REGISTRY: TemplateMetadata[] = [
