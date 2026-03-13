@@ -1,140 +1,68 @@
-# Requirements: Belvedere Risk Management
+# Requirements: v1.1 Household Profile Integration
 
-**Defined:** 2026-02-17
-**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
+**Milestone:** v1.1 Household Profile Integration
+**Goal:** Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables.
 
-## v1 Requirements
+## Milestone v1.1 Requirements
 
-Requirements for MVP demo. Each maps to roadmap phases.
+### Profile Foundation
 
-### Authentication & Security
+- [ ] **PROFILE-01**: User can create household member profiles with full name, age, and primary contact information (phone and email)
+- [ ] **PROFILE-02**: User can specify family relationship for each household member (spouse, child, parent, etc.)
+- [ ] **PROFILE-03**: User can assign governance roles to household members (decision maker, advisor, successor, etc.)
+- [ ] **PROFILE-04**: User can edit and update existing household member profiles after initial creation
+- [ ] **PROFILE-05**: User can remove household members from their profile when family composition changes
 
-- [ ] **AUTH-01**: User can create account with email and password
-- [ ] **AUTH-02**: User can log in and stay logged in across sessions
-- [ ] **AUTH-03**: User can reset password via email link
-- [ ] **AUTH-04**: User session data is encrypted and secure
-- [ ] **AUTH-05**: System requires multi-factor authentication for data access
+### Assessment Integration
 
-### Assessment Engine
+- [ ] **ASSESS-01**: Assessment questions branch based on household composition (number of members, ages, roles)
+- [ ] **ASSESS-02**: Assessment displays personalized questions using household member names and roles
+- [ ] **ASSESS-03**: Assessment auto-saves household profile data during profile creation and updates
+- [ ] **ASSESS-04**: Assessment maintains backward compatibility with existing assessments that have no household profiles
+- [ ] **ASSESS-05**: Assessment preserves existing scoring algorithm when household profiles are incomplete
 
-- [ ] **ASMT-01**: User can start guided Family Governance assessment
-- [ ] **ASMT-02**: System presents 60-80 questions with progress indicator
-- [ ] **ASMT-03**: System implements branching logic to skip irrelevant questions
-- [ ] **ASMT-04**: User can save progress and resume assessment later
-- [ ] **ASMT-05**: System validates responses and prevents incomplete submissions
-- [ ] **ASMT-06**: Assessment completes in target 12-15 minutes with branching
+### Household Reporting
 
-### Risk Scoring
+- [ ] **REPORT-01**: PDF reports include household composition section with member names, roles, and relationships
+- [ ] **REPORT-02**: PDF reports display family-specific governance recommendations based on household member roles
+- [ ] **REPORT-03**: PDF reports maintain professional formatting when household information is included
+- [ ] **REPORT-04**: Policy templates pre-populate with household member names and governance role assignments
 
-- [ ] **SCOR-01**: System calculates weighted risk scores from responses
-- [ ] **SCOR-02**: System aggregates scores from questions → sub-categories → pillar score
-- [ ] **SCOR-03**: System displays risk score with transparent breakdown by category
-- [ ] **SCOR-04**: System identifies top 3-5 specific missing controls
-- [ ] **SCOR-05**: System shows risk level (Low/Medium/High) with clear criteria
+## Future Requirements (Deferred)
 
-### Report Generation
+### Enhanced Personalization (v1.2+)
+- Governance role assessment with detailed authority mapping
+- Cultural governance profiling for family dynamics
+- Advisor ecosystem integration and professional network mapping
+- Profile validation and conflict resolution for multiple perspectives
 
-- [ ] **REPT-01**: System generates executive summary of risk assessment
-- [ ] **REPT-02**: System creates detailed PDF report with professional formatting
-- [ ] **REPT-03**: Report includes risk breakdown by governance category
-- [ ] **REPT-04**: Report includes specific recommendations for identified gaps
-- [ ] **REPT-05**: User can download branded PDF report immediately
+### Advanced Household Features (v1.3+)
+- Household composition tracking with extended family not living in home
+- Individual privacy controls with member-level data access
+- Member-aware assessment state with unified profile management
+- Member-specific PDF report sections tailored to individual roles
 
-### Policy Templates
-
-- [ ] **TMPL-01**: System provides 5-7 core governance policy templates
-- [ ] **TMPL-02**: System pre-fills templates based on risk assessment results
-- [ ] **TMPL-03**: Templates address decision-making authority and access controls
-- [ ] **TMPL-04**: Templates include succession planning and family behavior standards
-- [ ] **TMPL-05**: User can download customized policy templates (Word/PDF)
-
-### User Interface
-
-- [ ] **UI-01**: Assessment interface feels conversational (TurboTax-style)
-- [ ] **UI-02**: Progress indicator shows completion status throughout
-- [ ] **UI-03**: Interface provides inline help and definitions for complex terms
-- [ ] **UI-04**: Results dashboard displays scores and recommendations clearly
-- [ ] **UI-05**: System works responsively across desktop and tablet devices
-
-## v2 Requirements
-
-Deferred to future release. Tracked but not in current roadmap.
-
-### Enhanced Analytics
-
-- **ANAL-01**: User can view assessment history and score trends over time
-- **ANAL-02**: System provides maturity model scoring and progression roadmap
-- **ANAL-03**: System generates risk area visualizations and charts
-
-### Advanced Modules
-
-- **MDUL-01**: System includes conflict resolution assessment module
-- **MDUL-02**: System includes next-generation readiness assessment
-- **MDUL-03**: System provides succession planning deep-dive assessment
-
-### Collaboration Features
-
-- **CLAB-01**: Multiple family members can review assessment results
-- **CLAB-02**: User can share reports with advisors via secure link
-- **CLAB-03**: System tracks review and approval workflow
+### Multi-Family Support (v2.0+)
+- Multiple family organization support within single account
+- Cross-family governance comparison and benchmarking
+- Advanced reporting customization with family-specific branding
 
 ## Out of Scope
 
-Explicitly excluded. Documented to prevent scope creep.
+**Explicitly excluded with reasoning:**
 
-| Feature | Reason |
-|---------|--------|
-| Real-time collaboration | Creates governance conflicts; complicates security for MVP |
-| AI-generated recommendations | Black box approach loses HNW client trust; liability concerns |
-| Comprehensive financial integration | Massive scope creep; not needed for governance assessment |
-| Other risk pillars (Financial, Operational) | Family Governance focus for MVP validation |
-| Custom question builder | Breaks scoring consistency; MVP uses proven question set |
-| Mobile native app | Responsive web sufficient; defer until usage patterns proven |
-| Social features (forums/chat) | Liability and moderation burden; external communication preferred |
+- **Real-time location tracking** — Privacy invasion, not governance-focused
+- **Social media integration** — Dilutes professional focus, introduces security risks
+- **Family calendar/event scheduling** — Feature creep, competitive with existing tools
+- **Financial account aggregation** — Regulated, complex, highly competitive market
+- **Gamification elements** — Undermines serious governance tone required for HNW clients
+- **Real-time collaboration features** — Single-user assessment model validated in v1.0
+- **Mobile native app development** — Responsive web sufficient for target users
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
-| ASMT-01 | Phase 2 | Pending |
-| ASMT-02 | Phase 2 | Pending |
-| ASMT-03 | Phase 3 | Pending |
-| ASMT-04 | Phase 2 | Pending |
-| ASMT-05 | Phase 2 | Pending |
-| ASMT-06 | Phase 3 | Pending |
-| SCOR-01 | Phase 2 | Pending |
-| SCOR-02 | Phase 2 | Pending |
-| SCOR-03 | Phase 4 | Pending |
-| SCOR-04 | Phase 2 | Pending |
-| SCOR-05 | Phase 4 | Pending |
-| REPT-01 | Phase 4 | Pending |
-| REPT-02 | Phase 4 | Pending |
-| REPT-03 | Phase 4 | Pending |
-| REPT-04 | Phase 4 | Pending |
-| REPT-05 | Phase 4 | Pending |
-| TMPL-01 | Phase 4 | Pending |
-| TMPL-02 | Phase 4 | Pending |
-| TMPL-03 | Phase 4 | Pending |
-| TMPL-04 | Phase 4 | Pending |
-| TMPL-05 | Phase 4 | Pending |
-| UI-01 | Phase 2 | Pending |
-| UI-02 | Phase 2 | Pending |
-| UI-03 | Phase 2 | Pending |
-| UI-04 | Phase 4 | Pending |
-| UI-05 | Phase 2 | Pending |
-
-**Coverage:**
-- v1 requirements: 31 total
-- Mapped to phases: 31
-- Unmapped: 0 ✓
+*This section will be populated during roadmap creation to map requirements to phases and success criteria.*
 
 ---
-*Requirements defined: 2026-02-17*
-*Last updated: 2026-02-17 after roadmap creation*
+*Requirements defined: 2026-03-12*
+*Total requirements: 13 (v1.1)*
