@@ -27,13 +27,25 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - ✓ Extended family tracking for non-resident members — v1.1
 - ✓ 100% backward compatibility for assessments without profiles — v1.1
 
+## Current Milestone: v1.2 Intake & Triage System
+
+**Goal:** Transform platform from self-service to advisor-guided experience with professional intake interview and risk area curation.
+
+**Target features:**
+- Step-by-step intake interview with audio response capability
+- New advisor portal for reviewing client responses and risk identification
+- Assessment customization based on advisor-selected risk focus areas
+- Third-party audio integration for recording and playback
+- Advisor approval workflow connecting intake to curated assessment
+
 ### Active
 
-- [ ] User testing and feedback collection system
-- [ ] Assessment analytics and completion tracking
-- [ ] Multi-family organization support
-- [ ] Advanced reporting customization options
-- [ ] Integration with external advisory platforms
+- [ ] Step-by-step intake interview system with comprehensive question set
+- [ ] Audio response recording and playback via third-party integration
+- [ ] Advisor portal for client intake review and management
+- [ ] Risk area identification and approval workflow for advisors
+- [ ] Assessment category filtering based on advisor-selected focus areas
+- [ ] User journey transformation from self-service to advisor-guided flow
 
 ### Out of Scope
 
@@ -81,4 +93,4 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - **Scope**: Family Governance pillar only — validated as sufficient for MVP
 
 ---
-*Last updated: 2026-03-13 after v1.1 milestone completion*
+*Last updated: 2026-03-13 after v1.2 milestone started*

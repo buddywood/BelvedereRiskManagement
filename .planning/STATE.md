@@ -5,15 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-03-13)
 
 **Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
-**Current focus:** Planning next milestone
+**Current focus:** v1.2 Intake & Triage System
 
 ## Current Position
 
-**Milestone:** v1.1 Household Profile Integration
-**Phase:** 7 - Household Reporting
-**Plan:** 2 of 2 COMPLETED
-**Status:** v1.1 milestone complete
-**Progress:** [██████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-13 — Milestone v1.2 started
 
 ## Performance Metrics
 
