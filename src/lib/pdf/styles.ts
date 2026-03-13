@@ -158,4 +158,24 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1a1a2e',
   },
+
+  householdTable: {
+    width: '100%',
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    marginVertical: 16,
+  },
+
+  roleSection: {
+    marginBottom: 24,
+    paddingLeft: 12,
+    borderLeft: '3 solid #1a1a2e',
+  },
+
+  roleMemberList: {
+    marginBottom: 8,
+  },
 })
