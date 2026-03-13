@@ -36,7 +36,6 @@ export const styles = StyleSheet.create({
   },
 
   table: {
-    display: 'table',
     width: '100%',
     borderStyle: 'solid',
     borderWidth: 1,
@@ -136,7 +135,6 @@ export const styles = StyleSheet.create({
   },
 
   metricGrid: {
-    display: 'flex',
     flexDirection: 'row',
     marginVertical: 20,
   },

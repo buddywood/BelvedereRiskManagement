@@ -1,0 +1,108 @@
+import { Page, Text, View } from '@react-pdf/renderer'
+import { styles } from '../styles'
+
+interface CategoryScore {
+  name: string
+  score: number
+  maxScore: number
+  subcategoryCount: number
+}
+
+interface CategoryBreakdownProps {
+  breakdown: CategoryScore[]
+}
+
+export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
+  const getScoreColor = (score: number, maxScore: number) => {
+    const percentage = (score / maxScore) * 100
+    if (percentage >= 75) return '#10b981' // green
+    if (percentage >= 50) return '#f59e0b' // amber
+    if (percentage >= 25) return '#f97316' // orange
+    return '#ef4444' // red
+  }
+
+  return (
+    <Page size="A4" style={styles.page}>
+      <Text style={styles.header}>Category Score Breakdown</Text>
+
+      <Text style={styles.paragraph}>
+        This section provides detailed scoring for each governance category assessed.
+        Scores reflect the maturity and effectiveness of controls within each area.
+      </Text>
+
+      <View style={styles.table}>
+        {/* Table Header */}
+        <View style={[styles.tableRow, styles.tableHeader]}>
+          <View style={[styles.tableCol, { flex: 3 }]}>
+            <Text>Category</Text>
+          </View>
+          <View style={[styles.tableCol, { flex: 1 }]}>
+            <Text>Score</Text>
+          </View>
+          <View style={[styles.tableCol, { flex: 2 }]}>
+            <Text>Progress</Text>
+          </View>
+        </View>
+
+        {/* Table Rows */}
+        {breakdown.map((category, index) => {
+          const percentage = (category.score / category.maxScore) * 100
+          const scoreColor = getScoreColor(category.score, category.maxScore)
+
+          return (
+            <View key={index} style={styles.tableRow}>
+              <View style={[styles.tableCol, { flex: 3 }]}>
+                <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
+                  {category.name}
+                </Text>
+                <Text style={{ fontSize: 9, color: '#6b7280' }}>
+                  {category.subcategoryCount} subcategories assessed
+                </Text>
+              </View>
+              <View style={[styles.tableCol, { flex: 1 }]}>
+                <Text style={{ fontWeight: 'bold', color: scoreColor }}>
+                  {category.score.toFixed(1)}/{category.maxScore}
+                </Text>
+                <Text style={{ fontSize: 9, color: '#6b7280' }}>
+                  ({percentage.toFixed(0)}%)
+                </Text>
+              </View>
+              <View style={[styles.tableCol, { flex: 2 }]}>
+                <View style={styles.progressBar}>
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: `${percentage}%`,
+                        backgroundColor: scoreColor,
+                      },
+                    ]}
+                  />
+                </View>
+                <Text style={{ fontSize: 9, color: '#6b7280', marginTop: 2 }}>
+                  {percentage >= 75
+                    ? 'Strong'
+                    : percentage >= 50
+                    ? 'Moderate'
+                    : percentage >= 25
+                    ? 'Weak'
+                    : 'Critical'}
+                </Text>
+              </View>
+            </View>
+          )
+        })}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.subheader}>Scoring Methodology</Text>
+        <Text style={styles.paragraph}>
+          Category scores are calculated using a weighted average of subcategory assessments.
+          Each question contributes to its subcategory score, which then rolls up to the category level
+          based on relative importance and risk impact. The 0-10 scale represents governance maturity,
+          where 10 indicates best-practice controls and 0 represents significant gaps.
+        </Text>
+      </View>
+    </Page>
+  )
+}
