@@ -5,6 +5,8 @@
  * Defines questions, scoring, branching logic, and results.
  */
 
+import { HouseholdProfile } from './personalization';
+
 // Question Types
 export type QuestionType =
   | 'single-choice'
@@ -42,6 +44,8 @@ export interface Question {
   weight: number;
   scoreMap: Record<string | number, number>;
   branchingRule?: BranchingRule;
+  textTemplate?: (profile: HouseholdProfile | null) => string;
+  profileCondition?: (profile: HouseholdProfile) => boolean;
 }
 
 // Sub-Category Definition
