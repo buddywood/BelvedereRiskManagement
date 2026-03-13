@@ -24,26 +24,39 @@ import {
  * 2. Aggregate sub-categories using their weights
  * 3. Unanswered questions are excluded (not treated as 0)
  * 4. Track percentage answered for completeness indicator
+ * 5. When visibleQuestionIds provided, only consider those questions (excludes orphaned answers)
  *
  * @param answers - User answers keyed by questionId
  * @param pillar - Pillar definition with sub-categories
  * @param allQuestions - All question definitions
+ * @param visibleQuestionIds - Optional array of question IDs that should be included in scoring
  * @returns ScoreResult with score (0-10), risk level, breakdown, and missing controls
  */
 export function calculatePillarScore(
   answers: Record<string, unknown>,
   pillar: Pillar,
-  allQuestions: Question[]
+  allQuestions: Question[],
+  visibleQuestionIds?: string[]
 ): ScoreResult {
   const categoryScores: CategoryScore[] = [];
   let totalWeightedScore = 0;
   let totalWeight = 0;
 
+  // Filter questions to only those that should be included in scoring
+  const questionsToScore = visibleQuestionIds
+    ? allQuestions.filter(q => visibleQuestionIds.includes(q.id))
+    : allQuestions;
+
   // Calculate score for each sub-category
   for (const subCategory of pillar.subCategories) {
-    const categoryQuestions = allQuestions.filter(
+    const categoryQuestions = questionsToScore.filter(
       q => q.subCategory === subCategory.id
     );
+
+    // Skip subcategories that have no visible questions
+    if (categoryQuestions.length === 0) {
+      continue;
+    }
 
     let categoryWeightedScore = 0;
     let categoryWeight = 0;
@@ -80,7 +93,7 @@ export function calculatePillarScore(
       maxScore: 10,
     });
 
-    // Accumulate for pillar score
+    // Accumulate for pillar score (only include subcategories with visible questions)
     totalWeightedScore += categoryScore * subCategory.weight;
     totalWeight += subCategory.weight;
   }
@@ -93,8 +106,8 @@ export function calculatePillarScore(
   // Determine risk level
   const riskLevel = getRiskLevel(pillarScore);
 
-  // Identify missing controls
-  const missingControls = identifyMissingControls(answers, allQuestions);
+  // Identify missing controls (only from visible questions)
+  const missingControls = identifyMissingControls(answers, allQuestions, visibleQuestionIds);
 
   return {
     score: Math.round(pillarScore * 100) / 100, // Round to 2 decimals
@@ -131,18 +144,26 @@ export function getRiskLevel(score: number): RiskLevel {
  *
  * Finds questions where answer indicates absence of control (score <= 2 on 0-10 scale).
  * Returns top 5 sorted by severity (weight * deficit).
+ * Only considers visible questions to avoid identifying missing controls from hidden branching paths.
  *
  * @param answers - User answers keyed by questionId
  * @param questions - Question definitions to check
+ * @param visibleQuestionIds - Optional array of question IDs that should be considered (excludes hidden questions)
  * @returns Array of missing controls sorted by severity
  */
 export function identifyMissingControls(
   answers: Record<string, unknown>,
-  questions: Question[]
+  questions: Question[],
+  visibleQuestionIds?: string[]
 ): MissingControl[] {
   const controls: Array<MissingControl & { severityScore: number }> = [];
 
-  for (const question of questions) {
+  // Filter questions to only those that should be included
+  const questionsToCheck = visibleQuestionIds
+    ? questions.filter(q => visibleQuestionIds.includes(q.id))
+    : questions;
+
+  for (const question of questionsToCheck) {
     const answer = answers[question.id];
 
     // Skip unanswered questions
@@ -184,7 +205,7 @@ export function identifyMissingControls(
   controls.sort((a, b) => b.severityScore - a.severityScore);
 
   // Remove severityScore from output (internal calculation only)
-  return controls.slice(0, 5).map(({ severityScore, ...control }) => control);
+  return controls.slice(0, 5).map(({ severityScore: _s, ...control }) => control);
 }
 
 /**

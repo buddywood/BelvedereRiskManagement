@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Prisma, RiskLevel as PrismaRiskLevel } from "@prisma/client";
-import { calculatePillarScore, identifyMissingControls } from "@/lib/assessment/scoring";
+import { calculatePillarScore } from "@/lib/assessment/scoring";
+import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
 
 /**
@@ -151,38 +152,43 @@ export async function POST(
       },
     });
 
-    // Check minimum completion threshold (50%)
-    const totalQuestions = allQuestions.length;
-    const answeredCount = responses.length;
-    const completionPercentage = (answeredCount / totalQuestions) * 100;
-
-    if (completionPercentage < 50) {
-      return NextResponse.json(
-        {
-          error: `Incomplete assessment cannot be scored. Please answer at least 50% of questions. Currently: ${Math.round(completionPercentage)}% (${answeredCount}/${totalQuestions})`,
-        },
-        { status: 400 }
-      );
-    }
-
     // Convert responses to answers Record
     const answers: Record<string, unknown> = {};
     responses.forEach((response) => {
       answers[response.questionId] = response.answer;
     });
 
-    // Calculate pillar score
+    // Get visible questions based on branching logic
+    const visibleQuestions = getVisibleQuestions(answers, allQuestions);
+    const visibleIds = visibleQuestions.map(q => q.id);
+
+    // Check minimum completion threshold (50% of visible questions)
+    const totalVisibleQuestions = visibleQuestions.length;
+    const answeredCount = responses.length;
+    const completionPercentage = (answeredCount / totalVisibleQuestions) * 100;
+
+    if (completionPercentage < 50) {
+      return NextResponse.json(
+        {
+          error: `Incomplete assessment cannot be scored. Please answer at least 50% of applicable questions. Currently: ${Math.round(completionPercentage)}% (${answeredCount}/${totalVisibleQuestions})`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Calculate pillar score using only visible questions
     const scoreResult = calculatePillarScore(
       answers,
       familyGovernancePillar,
-      allQuestions
+      allQuestions,
+      visibleIds
     );
 
     // Map risk level to Prisma enum
     const prismaRiskLevel = mapRiskLevelToPrisma(scoreResult.riskLevel);
 
     // Upsert PillarScore and update Assessment status in transaction
-    const [pillarScore, updatedAssessment] = await prisma.$transaction([
+    const [pillarScore] = await prisma.$transaction([
       prisma.pillarScore.upsert({
         where: {
           assessmentId_pillar: {
