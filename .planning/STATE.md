@@ -2,16 +2,17 @@
 
 ## Project Reference
 
-**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
+See: .planning/PROJECT.md (updated 2026-03-13)
 
-**Current Focus:** v1.1 Household Profile Integration - Enhance assessment personalization through comprehensive household member profiles that drive intelligent question branching and customized deliverables.
+**Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
+**Current focus:** Planning next milestone
 
 ## Current Position
 
 **Milestone:** v1.1 Household Profile Integration
 **Phase:** 7 - Household Reporting
 **Plan:** 2 of 2 COMPLETED
-**Status:** COMPLETE
+**Status:** v1.1 milestone complete
 **Progress:** [██████████] 100%
 
 ## Performance Metrics

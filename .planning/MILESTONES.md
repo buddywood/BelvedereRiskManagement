@@ -19,3 +19,13 @@
 
 ---
 
+
+## v1.1 Household Profile Integration (Shipped: 2026-03-13)
+
+**Phases completed:** 7 phases, 20 plans, 24 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
