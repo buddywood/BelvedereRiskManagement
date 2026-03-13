@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { getOrphanedAnswerIds } from './branching';
+import { allQuestions } from './questions';
 
 /**
  * Assessment Store
@@ -32,6 +34,7 @@ interface AssessmentState {
   lastSaved: string | null;
   isLoading: boolean;
   isHydrated: boolean;
+  orphanedAnswerIds: string[];
 
   // Actions
   setAssessmentId: (id: string) => void;
@@ -43,6 +46,7 @@ interface AssessmentState {
   resetAssessment: () => void;
   setHydrated: (hydrated: boolean) => void;
   setLoading: (loading: boolean) => void;
+  cleanOrphanedAnswers: () => void;
 }
 
 const initialState = {
@@ -55,6 +59,7 @@ const initialState = {
   lastSaved: null,
   isLoading: false,
   isHydrated: false,
+  orphanedAnswerIds: [],
 };
 
 export const useAssessmentStore = create<AssessmentState>()(
@@ -66,11 +71,17 @@ export const useAssessmentStore = create<AssessmentState>()(
         set({ assessmentId: id }),
 
       setAnswer: (questionId: string, answer: unknown) =>
-        set((state) => ({
-          answers: { ...state.answers, [questionId]: answer },
-          skippedQuestions: state.skippedQuestions.filter((id) => id !== questionId),
-          lastSaved: new Date().toISOString(),
-        })),
+        set((state) => {
+          const newAnswers = { ...state.answers, [questionId]: answer };
+          const newOrphanedIds = getOrphanedAnswerIds(newAnswers, allQuestions);
+
+          return {
+            answers: newAnswers,
+            skippedQuestions: state.skippedQuestions.filter((id) => id !== questionId),
+            orphanedAnswerIds: newOrphanedIds,
+            lastSaved: new Date().toISOString(),
+          };
+        }),
 
       skipQuestion: (questionId: string) =>
         set((state) => ({
@@ -121,6 +132,11 @@ export const useAssessmentStore = create<AssessmentState>()(
 
       setLoading: (loading: boolean) =>
         set({ isLoading: loading }),
+
+      cleanOrphanedAnswers: () =>
+        set((state) => ({
+          orphanedAnswerIds: getOrphanedAnswerIds(state.answers, allQuestions),
+        })),
     }),
     {
       name: 'belvedere-assessment',
@@ -132,6 +148,7 @@ export const useAssessmentStore = create<AssessmentState>()(
         skippedQuestions: state.skippedQuestions,
         completedPillars: state.completedPillars,
         lastSaved: state.lastSaved,
+        orphanedAnswerIds: state.orphanedAnswerIds,
       }),
     }
   )

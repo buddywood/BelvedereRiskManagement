@@ -1,6 +1,7 @@
 import { useRouter } from 'next/navigation';
+import { useRef, useEffect, useMemo } from 'react';
 import { useAssessmentStore } from '@/lib/assessment/store';
-import { getVisibleQuestions } from '@/lib/assessment/branching';
+import { getVisibleQuestions, detectBranchingChanges } from '@/lib/assessment/branching';
 import { allQuestions } from '@/lib/assessment/questions';
 import { Question } from '@/lib/assessment/types';
 
@@ -17,6 +18,12 @@ export interface NavigationProgress {
   percentage: number;
 }
 
+export interface BranchingChange {
+  newlyVisible: string[];
+  newlyHidden: string[];
+  unchanged: string[];
+}
+
 export interface UseAssessmentNavigationReturn {
   currentQuestion: Question | null;
   currentIndex: number;
@@ -26,6 +33,7 @@ export interface UseAssessmentNavigationReturn {
   isLastQuestion: boolean;
   progress: NavigationProgress;
   visibleQuestions: Question[];
+  branchingChange: BranchingChange | null;
 }
 
 export function useAssessmentNavigation(
@@ -41,8 +49,37 @@ export function useAssessmentNavigation(
   // Get visible questions based on branching rules
   const visibleQuestions = getVisibleQuestions(answers, pillarQuestions);
 
-  // Get current question by index
-  const currentQuestion = visibleQuestions[questionIndex] || null;
+  // Track previous answers for branching change detection
+  const previousAnswersRef = useRef<Record<string, unknown>>(answers);
+
+  // Detect branching changes
+  const branchingChange = useMemo(() => {
+    const previousAnswers = previousAnswersRef.current;
+
+    // Only calculate if answers have actually changed
+    if (JSON.stringify(previousAnswers) === JSON.stringify(answers)) {
+      return null;
+    }
+
+    return detectBranchingChanges(previousAnswers, answers, pillarQuestions);
+  }, [answers, pillarQuestions]);
+
+  // Update previous answers ref after change detection
+  useEffect(() => {
+    previousAnswersRef.current = answers;
+  }, [answers]);
+
+  // Get current question by index, auto-adjust if current question is hidden
+  let adjustedIndex = questionIndex;
+
+  // If current question is hidden due to branching, find nearest visible question
+  const currentQuestionAtIndex = visibleQuestions[questionIndex];
+  if (!currentQuestionAtIndex && visibleQuestions.length > 0) {
+    // Current question is hidden, adjust to nearest visible question
+    adjustedIndex = Math.min(questionIndex, visibleQuestions.length - 1);
+  }
+
+  const currentQuestion = visibleQuestions[adjustedIndex] || null;
 
   // Calculate progress
   const answeredCount = visibleQuestions.filter((q) => {
@@ -58,23 +95,23 @@ export function useAssessmentNavigation(
       : 0,
   };
 
-  // Navigation state
-  const canGoBack = questionIndex > 0;
-  const isLastQuestion = questionIndex >= visibleQuestions.length - 1;
+  // Navigation state - use adjusted index
+  const canGoBack = adjustedIndex > 0;
+  const isLastQuestion = adjustedIndex >= visibleQuestions.length - 1;
 
-  // Navigation functions
+  // Navigation functions - use adjusted index
   const goNext = () => {
     if (!currentQuestion) return;
 
     // Update store position
-    setCurrentPosition(pillarSlug, questionIndex + 1);
+    setCurrentPosition(pillarSlug, adjustedIndex + 1);
 
     if (isLastQuestion) {
       // Last question in pillar - navigate to completion page
       router.push('/assessment/complete');
     } else {
       // Navigate to next visible question
-      const nextIndex = questionIndex + 1;
+      const nextIndex = adjustedIndex + 1;
       router.push(`/assessment/${pillarSlug}/${nextIndex}`);
     }
   };
@@ -82,7 +119,7 @@ export function useAssessmentNavigation(
   const goBack = () => {
     if (!canGoBack) return;
 
-    const prevIndex = questionIndex - 1;
+    const prevIndex = adjustedIndex - 1;
 
     // Update store position
     setCurrentPosition(pillarSlug, prevIndex);
@@ -93,12 +130,13 @@ export function useAssessmentNavigation(
 
   return {
     currentQuestion,
-    currentIndex: questionIndex,
+    currentIndex: adjustedIndex,
     goNext,
     goBack,
     canGoBack,
     isLastQuestion,
     progress,
     visibleQuestions,
+    branchingChange,
   };
 }
