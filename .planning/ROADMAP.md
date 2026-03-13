@@ -60,6 +60,12 @@ Plans:
 
 **Dependencies:** Phase 6 (Assessment Integration)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07-01-PLAN.md — PDF report household composition section and role-based governance recommendations
+- [ ] 07-02-PLAN.md — Word policy template pre-population with household member names and roles
+
 **Requirements:**
 - REPORT-01: PDF reports include household composition section with member names, roles, and relationships
 - REPORT-02: PDF reports display family-specific governance recommendations based on household member roles
@@ -85,9 +91,9 @@ Plans:
 ## Previous Milestones
 
 ### v1.0 MVP (Shipped: 2026-03-13)
-- ✅ Phase 1: Authentication & Security (3/3 plans)
-- ✅ Phase 2: Assessment Engine & Core Scoring (6/6 plans)
-- ✅ Phase 3: Branching Logic (2/2 plans)
-- ✅ Phase 4: Reports & Templates (3/3 plans)
+- Phase 1: Authentication & Security (3/3 plans)
+- Phase 2: Assessment Engine & Core Scoring (6/6 plans)
+- Phase 3: Branching Logic (2/2 plans)
+- Phase 4: Reports & Templates (3/3 plans)
 
 **What shipped:** Complete 12-minute TurboTax-style Family Governance assessment with secure authentication, intelligent branching logic, and professional PDF reports with governance policy templates.
