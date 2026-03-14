@@ -82,23 +82,50 @@ export async function POST(
         });
       }
 
-      // Send to OpenAI Whisper API
+      // Send to OpenAI Whisper API with timeout
       const formData = new FormData();
       const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
       formData.append('file', audioBlob, `${questionId}.webm`);
       formData.append('model', 'whisper-1');
 
-      const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        },
-        body: formData,
-      });
+      // Create abort controller for 30 second timeout
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 30000);
+
+      let whisperResponse;
+      try {
+        whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          },
+          body: formData,
+          signal: abortController.signal,
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          console.error('[Transcribe]', { interviewId, questionId, error: 'Request timed out' });
+
+          await saveIntakeResponse(interviewId, questionId, {
+            audioUrl: existingResponse.audioUrl,
+            audioDuration: existingResponse.audioDuration ?? undefined,
+            transcriptionStatus: 'FAILED',
+          });
+
+          return NextResponse.json({
+            success: true,
+            transcription: "[Transcription timed out - will be retried later]",
+          });
+        }
+        throw fetchError;
+      }
 
       if (!whisperResponse.ok) {
         const errorText = await whisperResponse.text();
-        console.error('Whisper API error:', whisperResponse.status, errorText);
+        console.error('[Transcribe]', { interviewId, questionId, error: 'Whisper API error', status: whisperResponse.status, details: errorText });
 
         await saveIntakeResponse(interviewId, questionId, {
           audioUrl: existingResponse.audioUrl,
@@ -106,10 +133,10 @@ export async function POST(
           transcriptionStatus: 'FAILED',
         });
 
-        return NextResponse.json(
-          { success: false, error: 'Transcription service unavailable' },
-          { status: 500 }
-        );
+        return NextResponse.json({
+          success: true,
+          transcription: "[Transcription failed - will be retried later]",
+        });
       }
 
       const transcriptionData = await whisperResponse.json();
@@ -129,20 +156,22 @@ export async function POST(
       });
 
     } catch (fileError) {
-      console.error('Error reading audio file:', fileError);
+      console.error('[Transcribe]', { interviewId, questionId, error: 'File read error', details: fileError });
 
       await saveIntakeResponse(interviewId, questionId, {
+        audioUrl: existingResponse.audioUrl,
+        audioDuration: existingResponse.audioDuration ?? undefined,
         transcriptionStatus: 'FAILED',
       });
 
-      return NextResponse.json(
-        { success: false, error: 'Audio file not found or corrupted' },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: true,
+        transcription: "[Audio file not found - will be retried later]",
+      });
     }
 
   } catch (error) {
-    console.error('Transcription error:', error);
+    console.error('[Transcribe]', { interviewId: (await params).id, error: 'General transcription error', details: error });
     return NextResponse.json(
       { success: false, error: 'Failed to process transcription' },
       { status: 500 }
