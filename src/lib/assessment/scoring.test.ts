@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   getRiskLevel,
   calculatePillarScore,
+  calculateCustomizedPillarScore,
   identifyMissingControls,
 } from "./scoring";
 import { getVisibleQuestions } from "./branching";
@@ -208,6 +209,123 @@ describe("identifyMissingControls", () => {
     // Should have fewer missing controls when q3 is excluded
     expect(resultFiltered.length).toBeLessThanOrEqual(resultWithAll.length);
     expect(resultFiltered.every(control => control.questionId !== 'q3')).toBe(true);
+  });
+});
+
+describe("calculateCustomizedPillarScore", () => {
+  it("produces identical results to calculatePillarScore when all multipliers = 1.0", () => {
+    const answers = { q1: 4, q2: 3, q3: 3 };
+    const visibleIds = ['q1', 'q2', 'q3'];
+    const noEmphasisMultipliers = { cat1: 1.0, cat2: 1.0 };
+
+    const standardResult = calculatePillarScore(answers, minimalPillar, minimalQuestions, visibleIds);
+    const customizedResult = calculateCustomizedPillarScore(
+      answers,
+      minimalPillar,
+      minimalQuestions,
+      visibleIds,
+      noEmphasisMultipliers
+    );
+
+    expect(customizedResult.score).toBe(standardResult.score);
+    expect(customizedResult.riskLevel).toBe(standardResult.riskLevel);
+    expect(customizedResult.breakdown).toEqual(standardResult.breakdown);
+  });
+
+  it("applies 1.5x multiplier to emphasized subcategory weight", () => {
+    // Set up answers where cat1 has good score, cat2 has poor score
+    const answers = { q1: 4, q2: 4, q3: 0 }; // cat1 good (weight 1), cat2 poor (weight 2)
+    const visibleIds = ['q1', 'q2', 'q3'];
+
+    // No emphasis
+    const noEmphasisMultipliers = { cat1: 1.0, cat2: 1.0 };
+    const baselineResult = calculateCustomizedPillarScore(
+      answers,
+      minimalPillar,
+      minimalQuestions,
+      visibleIds,
+      noEmphasisMultipliers
+    );
+
+    // Emphasize cat1 (good performance) - should increase overall score
+    const emphasizeCat1Multipliers = { cat1: 1.5, cat2: 1.0 };
+    const emphasizedResult = calculateCustomizedPillarScore(
+      answers,
+      minimalPillar,
+      minimalQuestions,
+      visibleIds,
+      emphasizeCat1Multipliers
+    );
+
+    // When cat1 (good) is emphasized, overall score should be higher
+    expect(emphasizedResult.score).toBeGreaterThan(baselineResult.score);
+  });
+
+  it("does not change individual category scores, only their weighted contribution", () => {
+    const answers = { q1: 4, q2: 3, q3: 2 };
+    const visibleIds = ['q1', 'q2', 'q3'];
+    const emphasisMultipliers = { cat1: 1.5, cat2: 1.0 };
+
+    const result = calculateCustomizedPillarScore(
+      answers,
+      minimalPillar,
+      minimalQuestions,
+      visibleIds,
+      emphasisMultipliers
+    );
+
+    // Individual category scores in breakdown should be unaffected
+    const cat1Score = result.breakdown.find(b => b.categoryId === 'cat1')?.score;
+    const cat2Score = result.breakdown.find(b => b.categoryId === 'cat2')?.score;
+
+    // These should be the same as standard scoring would produce
+    expect(cat1Score).toBeDefined();
+    expect(cat2Score).toBeDefined();
+
+    // The individual scores are determined by the questions in each category,
+    // not by the emphasis multiplier (which only affects aggregation)
+    const standardResult = calculatePillarScore(answers, minimalPillar, minimalQuestions, visibleIds);
+    const standardCat1 = standardResult.breakdown.find(b => b.categoryId === 'cat1')?.score;
+    const standardCat2 = standardResult.breakdown.find(b => b.categoryId === 'cat2')?.score;
+
+    expect(cat1Score).toBe(standardCat1);
+    expect(cat2Score).toBe(standardCat2);
+  });
+
+  it("handles empty emphasisMultipliers by using 1.0 default", () => {
+    const answers = { q1: 4, q2: 3, q3: 3 };
+    const visibleIds = ['q1', 'q2', 'q3'];
+    const emptyMultipliers = {};
+
+    const result = calculateCustomizedPillarScore(
+      answers,
+      minimalPillar,
+      minimalQuestions,
+      visibleIds,
+      emptyMultipliers
+    );
+
+    // Should behave like standard scoring (all multipliers default to 1.0)
+    const standardResult = calculatePillarScore(answers, minimalPillar, minimalQuestions, visibleIds);
+    expect(result.score).toBe(standardResult.score);
+  });
+
+  it("handles subcategory with no visible questions by skipping it", () => {
+    const answers = { q1: 4, q2: 3, q3: 3 };
+    const visibleIds = ['q1', 'q2']; // Exclude q3 (cat2)
+    const emphasisMultipliers = { cat1: 1.5, cat2: 2.0 }; // cat2 multiplier shouldn't matter
+
+    const result = calculateCustomizedPillarScore(
+      answers,
+      minimalPillar,
+      minimalQuestions,
+      visibleIds,
+      emphasisMultipliers
+    );
+
+    // Should only include cat1 in breakdown (cat2 has no visible questions)
+    expect(result.breakdown).toHaveLength(1);
+    expect(result.breakdown[0].categoryId).toBe('cat1');
   });
 });
 
