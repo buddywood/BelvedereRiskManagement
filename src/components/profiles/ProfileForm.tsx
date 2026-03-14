@@ -7,22 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RoleSelector } from './RoleSelector';
-import { householdMemberSchema, RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
+import { householdMemberSchema, HouseholdMemberFormData, RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
 
 type GovernanceRole = keyof typeof GOVERNANCE_ROLE_LABELS;
 
-// Create a form-compatible type that doesn't rely on Zod defaults
-type FormData = {
-  fullName: string;
-  age?: number;
-  occupation?: string;
-  phone?: string;
-  email?: string;
-  relationship: keyof typeof RELATIONSHIP_LABELS;
-  governanceRoles: GovernanceRole[];
-  isResident: boolean;
-  notes?: string;
-};
+type FormData = HouseholdMemberFormData;
 
 interface ProfileFormProps {
   defaultValues?: Partial<FormData>;

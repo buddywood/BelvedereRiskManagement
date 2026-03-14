@@ -3,10 +3,10 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 /**
- * Edge-compatible middleware using getToken (no NextAuth config in Edge).
+ * Edge-compatible proxy using getToken (no NextAuth config in Edge).
  * Protects routes and enforces MFA redirect using JWT claims only.
  */
-export default async function middleware(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
@@ -32,7 +32,9 @@ export default async function middleware(req: NextRequest) {
 
   if (isAuthenticated && !isMFARoute && isProtectedRoute) {
     const mfaEnabled = Boolean((token as { mfaEnabled?: boolean })?.mfaEnabled);
-    const mfaVerified = Boolean((token as { mfaVerified?: boolean })?.mfaVerified);
+    const mfaVerified = Boolean(
+      (token as { mfaVerified?: boolean })?.mfaVerified
+    );
     if (mfaEnabled && !mfaVerified) {
       const mfaVerifyUrl = new URL("/mfa/verify", req.url);
       mfaVerifyUrl.searchParams.set("callbackUrl", pathname);

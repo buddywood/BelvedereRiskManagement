@@ -12,8 +12,8 @@ export const householdMemberSchema = z.object({
   phone: z.string().max(20, 'Phone number must be 20 characters or less').optional(),
   email: z.string().email('Invalid email address').optional().or(z.literal('')),
   relationship: z.enum(['SPOUSE', 'CHILD', 'PARENT', 'SIBLING', 'GRANDCHILD', 'GRANDPARENT', 'OTHER']),
-  governanceRoles: z.array(z.enum(['DECISION_MAKER', 'ADVISOR', 'SUCCESSOR', 'BENEFICIARY', 'TRUSTEE', 'EXECUTOR', 'OTHER'])).default([]),
-  isResident: z.boolean().default(true),
+  governanceRoles: z.array(z.enum(['DECISION_MAKER', 'ADVISOR', 'SUCCESSOR', 'BENEFICIARY', 'TRUSTEE', 'EXECUTOR', 'OTHER'])),
+  isResident: z.boolean(),
   notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
 });
 

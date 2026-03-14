@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
+import { HouseholdMemberFormData, RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
 import {
   BriefcaseBusiness,
   Mail,
@@ -22,8 +22,8 @@ type HouseholdMember = {
   occupation: string | null;
   phone: string | null;
   email: string | null;
-  relationship: keyof typeof RELATIONSHIP_LABELS;
-  governanceRoles: (keyof typeof GOVERNANCE_ROLE_LABELS)[];
+  relationship: HouseholdMemberFormData['relationship'];
+  governanceRoles: HouseholdMemberFormData['governanceRoles'];
   isResident: boolean;
   notes: string | null;
   userId: string;

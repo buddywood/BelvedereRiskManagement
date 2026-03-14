@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { MemberCard } from '@/components/profiles/MemberCard';
 import { ProfileForm } from '@/components/profiles/ProfileForm';
 import { createHouseholdMember, updateHouseholdMember, deleteHouseholdMember } from '@/lib/actions/profile-actions';
-import { RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
+import { HouseholdMemberFormData, RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
 import { ArrowLeft, Plus, ShieldCheck, Users } from 'lucide-react';
 
 // Using Prisma type from the database
@@ -20,8 +20,8 @@ type HouseholdMember = {
   occupation: string | null;
   phone: string | null;
   email: string | null;
-  relationship: keyof typeof RELATIONSHIP_LABELS;
-  governanceRoles: (keyof typeof GOVERNANCE_ROLE_LABELS)[];
+  relationship: HouseholdMemberFormData['relationship'];
+  governanceRoles: HouseholdMemberFormData['governanceRoles'];
   isResident: boolean;
   notes: string | null;
   userId: string;
@@ -29,17 +29,7 @@ type HouseholdMember = {
   updatedAt: Date;
 };
 
-type FormData = {
-  fullName: string;
-  age?: number;
-  occupation?: string;
-  phone?: string;
-  email?: string;
-  relationship: keyof typeof RELATIONSHIP_LABELS;
-  governanceRoles: (keyof typeof GOVERNANCE_ROLE_LABELS)[];
-  isResident: boolean;
-  notes?: string;
-};
+type FormData = HouseholdMemberFormData;
 
 interface ProfilesClientProps {
   initialMembers: HouseholdMember[];
