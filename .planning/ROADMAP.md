@@ -83,10 +83,13 @@ Plans:
   2. Assessment emphasizes questions in advisor-identified focus areas
   3. User sees clear indication when assessment is customized by advisor
   4. Assessment completion remains within 12-15 minute target despite customization
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 10-01: TBD
+- [ ] 10-01-PLAN.md — Customization data layer (pure functions, DB queries, assessment-approval linkage)
+- [ ] 10-02-PLAN.md — Assessment UI modifications (customization banner, question flow filtering)
+- [ ] 10-03-PLAN.md — Scoring engine emphasis multipliers and score API customization
+- [ ] 10-04-PLAN.md — Results page customization indicator
 
 ## Progress
 
@@ -101,4 +104,4 @@ Plans:
 | 7. Household Reporting | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 8. Audio Interview Foundation | v1.2      | 5/6 + gap closure | Bug fixes pending | 2026-03-14 |
 | 9. Advisor Portal Access | v1.2      | 0/6            | Planned | - |
-| 10. Assessment Customization | v1.2      | 0/TBD          | Not started | - |
+| 10. Assessment Customization | v1.2      | 0/4          | Planned | - |
