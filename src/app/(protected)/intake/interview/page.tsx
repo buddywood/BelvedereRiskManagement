@@ -127,24 +127,50 @@ export default function InterviewPage() {
       });
 
       // Step 3: Trigger transcription
-      const transcribeResponse = await fetch(`/api/intake/${interviewId}/transcribe`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ questionId: currentQuestion.id }),
-      });
+      try {
+        const transcribeResponse = await fetch(`/api/intake/${interviewId}/transcribe`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ questionId: currentQuestion.id }),
+        });
 
-      if (transcribeResponse.ok) {
-        const transcribeData = await transcribeResponse.json();
+        if (transcribeResponse.ok) {
+          const transcribeData = await transcribeResponse.json();
 
-        // Update store with transcription result
+          // Update store with transcription result
+          setResponse(currentQuestion.id, {
+            audioUrl: uploadData.audioUrl,
+            audioDuration: duration,
+            transcription: transcribeData.transcription,
+            status: 'completed'
+          });
+        } else {
+          // Handle transcription failure gracefully
+          console.warn("Transcription failed, but audio was saved:", await transcribeResponse.text());
+
+          setResponse(currentQuestion.id, {
+            audioUrl: uploadData.audioUrl,
+            audioDuration: duration,
+            transcription: undefined,
+            status: 'completed' // Mark as completed even without transcription
+          });
+
+          toast("Audio saved. Transcription will be processed later.", { icon: '⚠️' });
+        }
+      } catch (transcribeError) {
+        console.warn("Transcription service error:", transcribeError);
+
+        // Audio is saved, just mark as completed without transcription
         setResponse(currentQuestion.id, {
           audioUrl: uploadData.audioUrl,
           audioDuration: duration,
-          transcription: transcribeData.transcription,
+          transcription: undefined,
           status: 'completed'
         });
+
+        toast("Audio saved. Transcription will be processed later.", { icon: '⚠️' });
       }
 
       // Step 4: If this is the last question, auto-submit

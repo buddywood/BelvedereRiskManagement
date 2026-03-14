@@ -35,6 +35,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             mfaVerified: !dbUser?.mfaEnabled, // Auto-verify if MFA not enabled
           },
         });
+
+        console.info("Auth signIn callback created session", {
+          userId: user.id,
+          email: user.email,
+          mfaEnabled: Boolean(dbUser?.mfaEnabled),
+        });
       }
       return true;
     },

@@ -20,6 +20,7 @@ export default {
         const parsed = credentialsSchema.safeParse(credentials);
 
         if (!parsed.success) {
+          console.warn("Credentials authorize rejected invalid payload");
           return null;
         }
 
@@ -30,14 +31,21 @@ export default {
         });
 
         if (!user || !user.password) {
+          console.warn("Credentials authorize failed: user not found", { email });
           return null;
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
+          console.warn("Credentials authorize failed: invalid password", { email });
           return null;
         }
+
+        console.info("Credentials authorize succeeded", {
+          email: user.email,
+          userId: user.id,
+        });
 
         return {
           id: user.id,

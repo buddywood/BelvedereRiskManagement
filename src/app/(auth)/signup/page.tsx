@@ -1,17 +1,20 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AuthPanel } from "@/components/auth/AuthPanel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -64,8 +67,10 @@ export default function SignUpPage() {
         return;
       }
 
-      // Redirect to home page
-      router.push("/");
+      console.info("Account created and sign in successful", { email, callbackUrl });
+
+      // Redirect to callback destination after successful account creation
+      router.push(callbackUrl);
       router.refresh();
     } catch (err) {
       console.error("Sign up error:", err);
@@ -82,7 +87,10 @@ export default function SignUpPage() {
       footer={
         <span>
           Already have an account?{" "}
-          <Link href="/signin" className="font-semibold text-foreground hover:underline">
+          <Link
+            href={callbackUrl ? `/signin?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signin"}
+            className="font-semibold text-foreground hover:underline"
+          >
             Sign in
           </Link>
         </span>
@@ -105,9 +113,8 @@ export default function SignUpPage() {
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -118,9 +125,8 @@ export default function SignUpPage() {
 
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm password</Label>
-            <Input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -141,5 +147,13 @@ export default function SignUpPage() {
         </Button>
       </form>
     </AuthPanel>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<div className="py-12 text-center text-sm text-muted-foreground">Loading sign-up experience...</div>}>
+      <SignUpForm />
+    </Suspense>
   );
 }

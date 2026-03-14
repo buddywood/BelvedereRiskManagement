@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { AuthPanel } from "@/components/auth/AuthPanel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -45,7 +48,10 @@ export default function ForgotPasswordPage() {
         title="Check your email"
         description="If an account exists with that email, we have sent a reset link. Check your inbox and follow the instructions."
         footer={
-          <Link href="/signin" className="font-semibold text-foreground hover:underline">
+          <Link
+            href={callbackUrl ? `/signin?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signin"}
+            className="font-semibold text-foreground hover:underline"
+          >
             Return to sign in
           </Link>
         }
@@ -66,7 +72,10 @@ export default function ForgotPasswordPage() {
       title="Forgot password"
       description="Enter the email address associated with your account and we will send a secure reset link."
       footer={
-        <Link href="/signin" className="font-semibold text-foreground hover:underline">
+        <Link
+          href={callbackUrl ? `/signin?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signin"}
+          className="font-semibold text-foreground hover:underline"
+        >
           Return to sign in
         </Link>
       }
@@ -96,5 +105,13 @@ export default function ForgotPasswordPage() {
         </Button>
       </form>
     </AuthPanel>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<div className="py-12 text-center text-sm text-muted-foreground">Loading password recovery...</div>}>
+      <ForgotPasswordForm />
+    </Suspense>
   );
 }

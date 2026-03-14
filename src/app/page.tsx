@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ArrowRight, ShieldCheck, Sparkles, Waypoints } from "lucide-react";
+import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
   return (
     <main className="min-h-screen py-6 sm:py-8">
       <div className="page-shell">
@@ -25,15 +28,38 @@ export default function Home() {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">
-                <Button asChild size="lg" className="sm:min-w-44">
-                  <Link href="/signin">
-                    Sign In
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="sm:min-w-44">
-                  <Link href="/signup">Create Account</Link>
-                </Button>
+                {session?.user ? (
+                  <>
+                    <Button asChild size="lg" className="sm:min-w-44">
+                      <Link href="/dashboard">
+                        Go to Dashboard
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                    <form
+                      action={async () => {
+                        "use server";
+                        await signOut({ redirectTo: "/" });
+                      }}
+                    >
+                      <Button type="submit" size="lg" variant="outline" className="w-full sm:min-w-44">
+                        Sign Out
+                      </Button>
+                    </form>
+                  </>
+                ) : (
+                  <>
+                    <Button asChild size="lg" className="sm:min-w-44">
+                      <Link href="/signin">
+                        Sign In
+                        <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="sm:min-w-44">
+                      <Link href="/signup">Create Account</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
 
@@ -99,8 +125,19 @@ export default function Home() {
                 </div>
 
                 <div className="section-divider border-t pt-6 text-sm text-muted-foreground">
-                  Existing clients can sign in to continue an assessment, review
-                  recommendations, and manage account security settings.
+                  {session?.user ? (
+                    <>
+                      Signed in as{" "}
+                      <span className="font-semibold text-foreground">{session.user.email}</span>.
+                      Continue to the dashboard, review recommendations, and manage account
+                      security settings.
+                    </>
+                  ) : (
+                    <>
+                      Existing clients can sign in to continue an assessment, review
+                      recommendations, and manage account security settings.
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

@@ -9,10 +9,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -36,9 +38,12 @@ function SignInForm() {
         return;
       }
 
-      // Redirect to callback URL or home page
-      const callbackUrl = searchParams.get("callbackUrl") || "/";
-      router.push(callbackUrl);
+      // Temporary auth logging while the sign-in flow is being validated.
+      const redirectTo = callbackUrl || "/dashboard";
+      console.info("Sign in successful", { email, callbackUrl: redirectTo });
+
+      // Redirect to callback URL or dashboard
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       console.error("Sign in error:", err);
@@ -56,11 +61,21 @@ function SignInForm() {
         <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <span>
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="font-semibold text-foreground hover:underline">
+            <Link
+              href={callbackUrl ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signup"}
+              className="font-semibold text-foreground hover:underline"
+            >
               Sign up
             </Link>
           </span>
-          <Link href="/forgot-password" className="font-semibold text-foreground hover:underline">
+          <Link
+            href={
+              callbackUrl
+                ? `/forgot-password?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : "/forgot-password"
+            }
+            className="font-semibold text-foreground hover:underline"
+          >
             Forgot password?
           </Link>
         </div>
@@ -82,9 +97,8 @@ function SignInForm() {
 
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
