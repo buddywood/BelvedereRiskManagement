@@ -47,9 +47,12 @@ export default async function ProtectedLayout({
               </div>
 
               <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
-                <nav className="grid grid-cols-2 gap-2 md:flex md:grid-cols-4">
+                <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:flex md:grid-cols-5">
                   <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/dashboard">Dashboard</Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
+                    <Link href="/intake">Intake</Link>
                   </Button>
                   <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/assessment">Assessment</Link>

@@ -10,8 +10,9 @@ import { persist } from 'zustand/middleware';
 
 export interface InterviewResponse {
   audioUrl?: string;
+  audioDuration?: number;
   transcription?: string;
-  status: 'recording' | 'completed' | 'uploading' | 'failed';
+  status: 'recording' | 'completed' | 'uploading' | 'failed' | 'pending';
 }
 
 interface IntakeState {
