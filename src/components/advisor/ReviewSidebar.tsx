@@ -8,10 +8,9 @@ import type { IntakeReviewData } from "@/lib/advisor/types";
 interface ReviewSidebarProps {
   interviewId: string;
   approval: IntakeReviewData['approval'];
-  onStatusChange: () => void;
 }
 
-export function ReviewSidebar({ interviewId, approval, onStatusChange }: ReviewSidebarProps) {
+export function ReviewSidebar({ interviewId, approval }: ReviewSidebarProps) {
   // Initialize state from existing approval data
   const [selectedAreas, setSelectedAreas] = useState<string[]>(
     approval?.focusAreas || []
@@ -41,7 +40,6 @@ export function ReviewSidebar({ interviewId, approval, onStatusChange }: ReviewS
         selectedFocusAreas={selectedAreas}
         notes={notes}
         onNotesChange={setNotes}
-        onStatusChange={onStatusChange}
         disabled={false}
       />
     </div>

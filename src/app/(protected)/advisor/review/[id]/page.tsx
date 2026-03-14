@@ -52,10 +52,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
     }
   };
 
-  // Refresh function for status changes
-  const refreshData = () => {
-    redirect(`/advisor/review/${id}`);
-  };
+  // No refresh function needed - server actions handle revalidation
 
   return (
     <div className="min-h-screen bg-background">
@@ -149,7 +146,6 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
                 <ReviewSidebar
                   interviewId={interview.id}
                   approval={approval}
-                  onStatusChange={refreshData}
                 />
               </div>
             </div>

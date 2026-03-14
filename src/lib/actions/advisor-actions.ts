@@ -106,7 +106,7 @@ export async function markIntakeInReview(interviewId: string) {
       });
     }
 
-    revalidatePath('/advisor/intake-review');
+    revalidatePath('/advisor/review/[id]', 'page');
     return {
       success: true,
       data: approval,
@@ -143,8 +143,8 @@ export async function approveClientIntake(data: unknown) {
       approvedAt: new Date(),
     });
 
-    revalidatePath('/advisor/intake-review');
-    revalidatePath('/advisor/dashboard');
+    revalidatePath('/advisor/review/[id]', 'page');
+    revalidatePath('/advisor');
     return {
       success: true,
       data: approval,
@@ -177,8 +177,8 @@ export async function rejectClientIntake(approvalId: string, notes?: string) {
       notes,
     });
 
-    revalidatePath('/advisor/intake-review');
-    revalidatePath('/advisor/dashboard');
+    revalidatePath('/advisor/review/[id]', 'page');
+    revalidatePath('/advisor');
     return {
       success: true,
       data: approval,
@@ -221,7 +221,7 @@ export async function markNotificationReadAction(notificationId: string) {
 
     await markNotificationRead(notificationId, profile.id);
 
-    revalidatePath('/advisor/dashboard');
+    revalidatePath('/advisor');
     revalidatePath('/advisor/notifications');
     return {
       success: true,
@@ -239,7 +239,7 @@ export async function markAllNotificationsReadAction() {
 
     await markAllNotificationsRead(profile.id);
 
-    revalidatePath('/advisor/dashboard');
+    revalidatePath('/advisor');
     revalidatePath('/advisor/notifications');
     return {
       success: true,

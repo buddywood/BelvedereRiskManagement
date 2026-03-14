@@ -64,6 +64,7 @@ export function AudioRecorder({
   } = useAudioRecorder();
 
   const [showExistingAudio, setShowExistingAudio] = useState(Boolean(existingAudioUrl));
+  const [isExpandedExistingResponse, setIsExpandedExistingResponse] = useState(false);
   const processedBlobRef = useRef<Blob | null>(null);
   const [isEditingTranscript, setIsEditingTranscript] = useState(false);
   const [editedTranscription, setEditedTranscription] = useState(transcription || "");
@@ -72,6 +73,7 @@ export function AudioRecorder({
   // Initialize with existing audio if provided
   useEffect(() => {
     setShowExistingAudio(Boolean(existingAudioUrl));
+    setIsExpandedExistingResponse(false);
   }, [existingAudioUrl]);
 
   useEffect(() => {
@@ -84,6 +86,7 @@ export function AudioRecorder({
       processedBlobRef.current = audioBlob;
       onRecordingComplete(audioBlob, duration);
       setShowExistingAudio(false); // Clear existing audio flag when new recording made
+      setIsExpandedExistingResponse(true);
     }
   }, [audioBlob, duration, isRecording, onRecordingComplete]);
 
@@ -109,6 +112,7 @@ export function AudioRecorder({
     resetRecording();
     processedBlobRef.current = null;
     setIsEditingTranscript(false);
+    setIsExpandedExistingResponse(false);
     setShowExistingAudio(false);
   };
 
@@ -184,6 +188,42 @@ export function AudioRecorder({
   // Show completed recording state (either new recording or existing)
   const displayAudioUrl = audioUrl || (showExistingAudio ? existingAudioUrl : undefined);
   const displayDuration = duration > 0 ? duration : 0;
+  const isShowingCollapsedExistingResponse =
+    Boolean(showExistingAudio && existingAudioUrl && !audioUrl && !isExpandedExistingResponse);
+
+  if (isShowingCollapsedExistingResponse) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 space-y-6">
+        <div className="flex items-center gap-3 text-emerald-600">
+          <CheckCircle2 className="size-5" />
+          <span className="font-medium">Response already recorded for this question</span>
+        </div>
+
+        <p className="max-w-xl text-center text-sm text-muted-foreground">
+          You can review the saved audio and transcript, or record a fresh response for this step.
+        </p>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsExpandedExistingResponse(true)}
+            disabled={disabled}
+          >
+            Review Saved Response
+          </Button>
+          <Button
+            type="button"
+            onClick={handleReRecord}
+            disabled={disabled}
+          >
+            <Mic className="size-4" />
+            Record New Response
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (displayAudioUrl || showExistingAudio) {
     return (

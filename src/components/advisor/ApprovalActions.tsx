@@ -19,7 +19,6 @@ interface ApprovalActionsProps {
   selectedFocusAreas: string[];
   notes: string;
   onNotesChange: (notes: string) => void;
-  onStatusChange: () => void;
   disabled?: boolean;
 }
 
@@ -30,7 +29,6 @@ export function ApprovalActions({
   selectedFocusAreas,
   notes,
   onNotesChange,
-  onStatusChange,
   disabled = false
 }: ApprovalActionsProps) {
   const [isPending, startTransition] = useTransition();
@@ -42,7 +40,6 @@ export function ApprovalActions({
         const result = await markIntakeInReview(interviewId);
         if (result.success) {
           toast.success("Review started");
-          onStatusChange();
         } else {
           toast.error(result.error || "Failed to start review");
         }
@@ -69,7 +66,6 @@ export function ApprovalActions({
         if (result.success) {
           toast.success("Client approved for assessment");
           setShowConfirmation(null);
-          onStatusChange();
         } else {
           toast.error(result.error || "Failed to approve client");
         }
@@ -92,7 +88,6 @@ export function ApprovalActions({
         if (result.success) {
           toast.success("Client intake rejected");
           setShowConfirmation(null);
-          onStatusChange();
         } else {
           toast.error(result.error || "Failed to reject client");
         }
@@ -110,7 +105,6 @@ export function ApprovalActions({
         const result = await markIntakeInReview(interviewId);
         if (result.success) {
           toast.success("Approval revoked - back to review");
-          onStatusChange();
         } else {
           toast.error(result.error || "Failed to revoke approval");
         }
@@ -126,7 +120,6 @@ export function ApprovalActions({
         const result = await markIntakeInReview(interviewId);
         if (result.success) {
           toast.success("Intake reopened for review");
-          onStatusChange();
         } else {
           toast.error(result.error || "Failed to reopen intake");
         }
