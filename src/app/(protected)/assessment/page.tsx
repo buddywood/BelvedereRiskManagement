@@ -52,25 +52,34 @@ export default function AssessmentHubPage() {
   // Household profile for personalization
   const { profile } = useHouseholdProfile();
 
-  // Fetch assessment data from server for rehydration
-  const { data: assessmentData } = useQuery({
+  // Fetch assessment data from server for rehydration (with timeout to avoid hanging)
+  const FETCH_TIMEOUT_MS = 12_000;
+  const { data: assessmentData, isError: assessmentFetchError } = useQuery({
     queryKey: ['assessment', store.assessmentId],
     queryFn: async () => {
       if (!store.assessmentId) return null;
 
-      const response = await fetch(`/api/assessment/${store.assessmentId}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-      if (response.status === 404) {
-        // Assessment not found (deleted/expired), reset store
-        store.resetAssessment();
-        return null;
+      try {
+        const response = await fetch(`/api/assessment/${store.assessmentId}`, {
+          signal: controller.signal,
+        });
+
+        if (response.status === 404) {
+          store.resetAssessment();
+          return null;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch assessment');
+        }
+
+        return response.json();
+      } finally {
+        clearTimeout(timeoutId);
       }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch assessment');
-      }
-
-      return response.json();
     },
     enabled: !!store.assessmentId && !store.isHydrated,
     retry: 1,
@@ -88,10 +97,26 @@ export default function AssessmentHubPage() {
       store.setHydrated(true);
     }
 
+    // If fetch failed or timed out, stop waiting so the page can render
+    if (assessmentFetchError && store.assessmentId && !store.isHydrated) {
+      store.setHydrated(true);
+    }
+
     // Defer to avoid synchronous setState in effect (react-hooks/set-state-in-effect)
     const t = setTimeout(() => setIsInitializing(false), 0);
     return () => clearTimeout(t);
-  }, [assessmentData, store]);
+  }, [assessmentData, assessmentFetchError, store]);
+
+  // Safety: stop showing loading after max time so the page never hangs
+  const LOADING_MAX_MS = 15_000;
+  useEffect(() => {
+    const id = setTimeout(() => {
+      store.setHydrated(true);
+      setIsInitializing(false);
+    }, LOADING_MAX_MS);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount
+  }, []);
 
   // Create new assessment mutation
   const createAssessmentMutation = useMutation({
