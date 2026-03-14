@@ -20,7 +20,7 @@ export async function createIntakeInterview(userId: string): Promise<IntakeInter
   });
 }
 
-export async function getIntakeInterview(userId: string, id: string) {
+export async function getIntakeInterview(userId: string, id: string): Promise<(IntakeInterview & { responses: IntakeResponse[] }) | null> {
   return prisma.intakeInterview.findFirst({
     where: { id, userId },
     include: {
