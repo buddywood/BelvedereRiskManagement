@@ -36,9 +36,14 @@ export interface UseAssessmentNavigationReturn {
   branchingChange: BranchingChange | null;
 }
 
+export interface UseAssessmentNavigationOptions {
+  visibleSubCategories?: string[];
+}
+
 export function useAssessmentNavigation(
   pillarSlug: string,
-  questionIndex: number
+  questionIndex: number,
+  options?: UseAssessmentNavigationOptions
 ): UseAssessmentNavigationReturn {
   const router = useRouter();
   const { answers, setCurrentPosition, householdProfile } = useAssessmentStore();
@@ -46,8 +51,13 @@ export function useAssessmentNavigation(
   // Filter questions for current pillar
   const pillarQuestions = allQuestions.filter((q) => q.pillar === pillarSlug);
 
-  // Get visible questions based on branching rules
-  const visibleQuestions = getVisibleQuestions(answers, pillarQuestions, householdProfile);
+  // Apply subcategory filtering first (for customization)
+  const subcategoryFiltered = options?.visibleSubCategories?.length
+    ? pillarQuestions.filter(q => options.visibleSubCategories!.includes(q.subCategory))
+    : pillarQuestions;
+
+  // Get visible questions based on branching rules (applied after subcategory filtering)
+  const visibleQuestions = getVisibleQuestions(answers, subcategoryFiltered, householdProfile);
 
   // Track previous answers for branching change detection
   const previousAnswersRef = useRef<Record<string, unknown>>(answers);
@@ -61,7 +71,7 @@ export function useAssessmentNavigation(
       return null;
     }
 
-    return detectBranchingChanges(previousAnswers, answers, pillarQuestions, householdProfile);
+    return detectBranchingChanges(previousAnswers, answers, subcategoryFiltered, householdProfile);
   }, [answers, pillarQuestions]);
 
   // Update previous answers ref after change detection

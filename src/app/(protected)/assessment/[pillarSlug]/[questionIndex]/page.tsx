@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAssessmentStore } from '@/lib/assessment/store';
 import { useAssessmentNavigation } from '@/lib/hooks/useAssessmentNavigation';
 import { useAutoSave } from '@/lib/hooks/useAutoSave';
@@ -11,6 +12,7 @@ import { NavigationButtons } from '@/components/assessment/NavigationButtons';
 import { SectionProgress } from '@/components/assessment/ProgressBar';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
+import type { CustomizationConfig } from '@/lib/assessment/customization';
 
 /**
  * Dynamic Question Route Page
@@ -45,7 +47,27 @@ export default function QuestionPage({ params }: QuestionPageProps) {
   // Household profile for personalization
   const { profile } = useHouseholdProfile();
 
-  // Navigation logic
+  // Fetch customization configuration
+  const { data: customizationConfig, isLoading: customizationLoading } = useQuery<CustomizationConfig>({
+    queryKey: ['assessment-customization'],
+    queryFn: async () => {
+      const response = await fetch('/api/assessment/customization');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch customization config');
+      }
+
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Extract visible subcategories for navigation filtering
+  const visibleSubCategories = customizationConfig?.isCustomized && customizationConfig.visibleSubCategories.length > 0
+    ? customizationConfig.visibleSubCategories
+    : undefined;
+
+  // Navigation logic (with customization filtering)
   const {
     currentQuestion,
     goNext,
@@ -55,7 +77,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     progress,
     visibleQuestions,
     branchingChange,
-  } = useAssessmentNavigation(pillarSlug, questionIndex);
+  } = useAssessmentNavigation(pillarSlug, questionIndex, { visibleSubCategories });
 
   // Store profile in zustand on load
   useEffect(() => {
@@ -83,6 +105,17 @@ export default function QuestionPage({ params }: QuestionPageProps) {
       }
     }
   }, [questionIndex, visibleQuestions.length, pillarSlug, router]);
+
+  // Show loading while customization config is being fetched
+  if (customizationLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-muted-foreground">Loading assessment configuration...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentQuestion) {
     return (
