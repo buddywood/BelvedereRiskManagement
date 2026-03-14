@@ -44,7 +44,7 @@
   2. User can record audio response to each interview question
   3. User receives confirmation when interview is completed and submitted
   4. System automatically transcribes audio responses for advisor review
-**Plans:** 5 plans — completed 2026-03-14
+**Plans:** 6 plans (5 feature + 1 gap closure)
 
 Plans:
 - [x] 08-01-PLAN.md — Prisma models, types, question bank, and Zod schemas
@@ -52,6 +52,7 @@ Plans:
 - [x] 08-03-PLAN.md — Audio recording hook and interview state management
 - [x] 08-04-PLAN.md — Interview UI components (QuestionDisplay, AudioRecorder, StepIndicator)
 - [x] 08-05-PLAN.md — Interview wizard pages, navigation integration, and completion flow
+- [ ] 08-06-PLAN.md — Gap closure: fix critical bugs (dynamic import, step indicator, error handling)
 
 #### Phase 9: Advisor Portal Access
 **Goal**: Advisors can securely review and manage client intake responses
@@ -94,6 +95,6 @@ Plans:
 | 5. Profile Foundation | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 6. Assessment Integration | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 7. Household Reporting | v1.1      | 2/2            | Complete    | 2026-03-13 |
-| 8. Audio Interview Foundation | v1.2      | 5/5            | Complete    | 2026-03-14 |
+| 8. Audio Interview Foundation | v1.2      | 5/6 + gap closure | Bug fixes pending | 2026-03-14 |
 | 9. Advisor Portal Access | v1.2      | 0/TBD          | Not started | - |
 | 10. Assessment Customization | v1.2      | 0/TBD          | Not started | - |
