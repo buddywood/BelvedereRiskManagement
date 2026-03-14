@@ -22,6 +22,7 @@ export const { auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.mfaEnabled = Boolean(token.mfaEnabled);
         session.user.mfaVerified = Boolean(token.mfaVerified);
+        session.user.role = token.role as string;
       }
       return session;
     },

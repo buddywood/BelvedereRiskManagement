@@ -53,9 +53,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (userId) {
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
-          select: { mfaEnabled: true },
+          select: { mfaEnabled: true, role: true },
         });
         token.mfaEnabled = dbUser?.mfaEnabled ?? false;
+        token.role = dbUser?.role ?? 'USER';
         if (token.mfaEnabled) {
           const [session] = await prisma.session.findMany({
             where: {
@@ -78,6 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.mfaEnabled = Boolean(token.mfaEnabled);
         session.user.mfaVerified = Boolean(token.mfaVerified);
+        session.user.role = token.role as string;
       }
       return session;
     },

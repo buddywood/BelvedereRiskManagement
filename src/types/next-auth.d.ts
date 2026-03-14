@@ -6,11 +6,13 @@ declare module "next-auth" {
       id: string;
       mfaEnabled?: boolean;
       mfaVerified?: boolean;
+      role?: string;
     } & DefaultSession["user"];
   }
 
   interface User {
     mfaEnabled?: boolean;
+    role?: string;
   }
 }
 
@@ -19,5 +21,6 @@ declare module "next-auth/jwt" {
     id: string;
     mfaEnabled?: boolean;
     mfaVerified?: boolean;
+    role?: string;
   }
 }
