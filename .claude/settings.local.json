@@ -15,7 +15,8 @@
       "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify key-links /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-01-PLAN.md)",
       "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify key-links /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-02-PLAN.md)",
       "Bash(node /Users/bwoodtalton/.claude/get-shit-done/bin/gsd-tools.js verify key-links /Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/01-authentication-security/01-03-PLAN.md)",
-      "Skill(gsd:complete-milestone)"
+      "Skill(gsd:complete-milestone)",
+      "Skill(gsd:plan-phase)"
     ]
   }
 }

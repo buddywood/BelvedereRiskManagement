@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
 const resetPasswordSchema = z.object({
@@ -70,13 +70,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash new password with Argon2id (same params as registration)
-    const hashedPassword = await argon2.hash(password, {
-      type: argon2.argon2id,
-      memoryCost: 65536, // 64 MiB
-      timeCost: 3,
-      parallelism: 1,
-    });
+    // Hash new password with bcrypt (same cost factor as registration)
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Update password and delete token in a transaction
     await prisma.$transaction([

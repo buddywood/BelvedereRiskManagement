@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
-import * as argon2 from "argon2";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 
 const credentialsSchema = z.object({
@@ -33,7 +33,7 @@ export default {
           return null;
         }
 
-        const isValidPassword = await argon2.verify(user.password, password);
+        const isValidPassword = await bcrypt.compare(password, user.password);
 
         if (!isValidPassword) {
           return null;
