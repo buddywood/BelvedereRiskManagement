@@ -11,6 +11,7 @@ import {
   updateIntakeApproval,
   getAdvisorNotifications,
   markNotificationRead,
+  markAllNotificationsRead,
 } from '@/lib/data/advisor';
 import { approveClientSchema } from '@/lib/schemas/advisor';
 import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
@@ -221,11 +222,30 @@ export async function markNotificationReadAction(notificationId: string) {
     await markNotificationRead(notificationId, profile.id);
 
     revalidatePath('/advisor/dashboard');
+    revalidatePath('/advisor/notifications');
     return {
       success: true,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to mark notification as read';
+    return { success: false, error: message };
+  }
+}
+
+export async function markAllNotificationsReadAction() {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    await markAllNotificationsRead(profile.id);
+
+    revalidatePath('/advisor/dashboard');
+    revalidatePath('/advisor/notifications');
+    return {
+      success: true,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to mark all notifications as read';
     return { success: false, error: message };
   }
 }

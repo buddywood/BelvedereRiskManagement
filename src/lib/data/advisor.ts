@@ -212,3 +212,15 @@ export async function createNotification(
     },
   });
 }
+
+export async function markAllNotificationsRead(advisorProfileId: string) {
+  return prisma.advisorNotification.updateMany({
+    where: {
+      advisorId: advisorProfileId,
+      read: false,
+    },
+    data: {
+      read: true,
+    },
+  });
+}
