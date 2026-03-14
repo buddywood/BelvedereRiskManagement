@@ -12,10 +12,12 @@ import { AudioRecorder } from "@/components/intake/AudioRecorder";
 import { StepIndicator } from "@/components/intake/StepIndicator";
 import { useIntakeInterview } from "@/lib/hooks/useIntakeInterview";
 import { useIntakeStore } from "@/lib/intake/store";
+import { INTAKE_QUESTIONS } from "@/lib/intake/questions";
 import {
   getIntakeInterviewAction,
   updateProgress,
-  submitIntakeInterviewAction
+  submitIntakeInterviewAction,
+  getActiveIntakeInterviewAction
 } from "@/lib/actions/intake-actions";
 
 /**
@@ -50,11 +52,8 @@ export default function InterviewPage() {
   useEffect(() => {
     async function loadInterview() {
       try {
-        // In a real app, we'd get the interview ID from the active interview
-        // For now, we'll use a dummy implementation that gets from store or creates one
-        const activeInterviewResult = await import("@/lib/actions/intake-actions").then(
-          actions => actions.getActiveIntakeInterviewAction()
-        );
+        // Get the active interview
+        const activeInterviewResult = await getActiveIntakeInterviewAction();
 
         if (activeInterviewResult.success && activeInterviewResult.interview) {
           const interview = activeInterviewResult.interview;
@@ -98,7 +97,7 @@ export default function InterviewPage() {
 
   // Handle audio recording completion with auto-save
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
-    if (!interviewId || !currentQuestion) return;
+    if (!interviewId || !currentQuestion || uploading || submitting) return;
 
     setUploading(true);
 
@@ -263,14 +262,10 @@ export default function InterviewPage() {
           Object.entries(responses)
             .filter(([, response]) => response?.status === 'completed')
             .map(([questionId]) => {
-              // Find question index by ID
-              const questionIndex = Array.from({ length: totalQuestions }, (_, i) => i)
-                .find(i => {
-                  // This is a simplified lookup - in practice we'd import INTAKE_QUESTIONS
-                  return true; // For now, just mark steps with responses as completed
-                });
-              return questionIndex || 0;
+              const questionIndex = INTAKE_QUESTIONS.findIndex(q => q.id === questionId);
+              return questionIndex >= 0 ? questionIndex : -1;
             })
+            .filter(index => index >= 0)
         )}
       />
 
