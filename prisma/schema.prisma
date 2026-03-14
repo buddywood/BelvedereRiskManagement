@@ -91,6 +91,7 @@ model Assessment {
   startedAt     DateTime         @default(now())
   completedAt   DateTime?
   updatedAt     DateTime         @updatedAt
+  approvalId    String?          // Links to IntakeApproval for customized assessments
 
   user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   responses     AssessmentResponse[]

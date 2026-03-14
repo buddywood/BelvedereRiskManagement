@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getActiveApprovalForUser } from "@/lib/data/assessment-customization";
 
 /**
  * Assessment API Routes
@@ -57,11 +58,15 @@ export async function POST(_request: NextRequest) {
       );
     }
 
+    // Check if user has an active approval to link the assessment
+    const approval = await getActiveApprovalForUser(session.user.id);
+
     const assessment = await prisma.assessment.create({
       data: {
         userId: session.user.id,
         version: 1,
         status: "IN_PROGRESS",
+        approvalId: approval?.id || null,
       },
     });
 
