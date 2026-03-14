@@ -16,7 +16,7 @@ import { ActionPlan } from "@/components/assessment/ActionPlan";
 import { DownloadSection } from "@/components/reports/DownloadSection";
 import { TemplateList } from "@/components/reports/TemplateList";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +39,11 @@ interface ScoreData {
     recommendation: string;
   }>;
   completedAt: string;
+  customization?: {
+    isCustomized: boolean;
+    focusAreaCount: number;
+    emphasisMultiplier: number;
+  };
 }
 
 export default function AssessmentResultsPage() {
@@ -169,6 +174,14 @@ export default function AssessmentResultsPage() {
             <p className="text-sm leading-7 text-muted-foreground sm:text-base">
               Completed on {format(new Date(scoreData.completedAt), "MMMM d, yyyy 'at' h:mm a")}
             </p>
+            {scoreData.customization?.isCustomized && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Shield className="h-4 w-4" />
+                <span>
+                  Advisor-customized assessment focused on {scoreData.customization.focusAreaCount} risk {scoreData.customization.focusAreaCount === 1 ? 'area' : 'areas'}
+                </span>
+              </div>
+            )}
           </div>
 
           <Card className="bg-background/60">
