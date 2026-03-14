@@ -42,6 +42,24 @@ function getPreferredMimeType(): string {
   return '';
 }
 
+function createMediaRecorder(stream: MediaStream, mimeType: string): MediaRecorder {
+  try {
+    return new MediaRecorder(stream);
+  } catch (defaultError) {
+    console.warn('Failed to initialize MediaRecorder with browser default, trying preferred mime type:', defaultError);
+  }
+
+  if (mimeType) {
+    try {
+      return new MediaRecorder(stream, { mimeType });
+    } catch (error) {
+      console.warn('Failed to initialize MediaRecorder with mime type, falling back to browser default:', mimeType, error);
+    }
+  }
+
+  return new MediaRecorder(stream);
+}
+
 export function useAudioRecorder(): UseAudioRecorderReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -55,6 +73,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const durationIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
 
   // Clear any existing error when starting new actions
   const clearError = useCallback(() => {
@@ -66,6 +85,15 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     try {
       clearError();
 
+      // Clear any previous preview before starting a new recording.
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+      audioUrlRef.current = null;
+      setAudioBlob(null);
+      setAudioUrl(null);
+      setDuration(0);
+
       // Request microphone permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaStreamRef.current = stream;
@@ -74,10 +102,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       // Get preferred MIME type for cross-browser compatibility
       const mimeType = getPreferredMimeType();
 
-      // Create MediaRecorder with detected MIME type
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: mimeType || undefined
-      });
+      // Create MediaRecorder with detected MIME type, falling back to browser default if needed.
+      const mediaRecorder = createMediaRecorder(stream, mimeType);
+      const resolvedMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
       mediaRecorderRef.current = mediaRecorder;
 
       // Reset chunks array
@@ -93,22 +120,48 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       // Handle recording completion
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, {
-          type: mimeType || 'audio/webm'
+          type: resolvedMimeType
         });
-        setAudioBlob(blob);
 
-        // Create object URL for playback preview
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
+        if (blob.size === 0) {
+          setError('No audio was captured. Please check your microphone input and try again.');
+          setAudioBlob(null);
+          setAudioUrl(null);
+        } else {
+          setAudioBlob(blob);
+
+          // Create object URL for playback preview
+          const url = URL.createObjectURL(blob);
+          audioUrlRef.current = url;
+          setAudioUrl(url);
+        }
 
         setIsRecording(false);
         setIsPaused(false);
+        mediaRecorderRef.current = null;
+
+        if (durationIntervalRef.current) {
+          clearInterval(durationIntervalRef.current);
+          durationIntervalRef.current = null;
+        }
+
+        // Stop media stream tracks only after the recorder has flushed data.
+        if (mediaStreamRef.current) {
+          mediaStreamRef.current.getTracks().forEach(track => track.stop());
+          mediaStreamRef.current = null;
+        }
+      };
+
+      mediaRecorder.onerror = () => {
+        setError('Recording failed. Please try again.');
+        setIsRecording(false);
+        setIsPaused(false);
+        mediaRecorderRef.current = null;
       };
 
       // Start recording
-      mediaRecorder.start();
+      mediaRecorder.start(250);
       setIsRecording(true);
-      setDuration(0);
 
       // Start duration timer (update every second)
       durationIntervalRef.current = setInterval(() => {
@@ -133,12 +186,19 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         setError('An unexpected error occurred while starting recording.');
       }
     }
-  }, [clearError]);
+  }, [audioUrl, clearError]);
 
   // Stop recording
   const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+    const mediaRecorder = mediaRecorderRef.current;
+
+    if (mediaRecorder?.state === 'recording') {
+      try {
+        mediaRecorder.requestData();
+      } catch (error) {
+        console.warn('MediaRecorder requestData failed before stop:', error);
+      }
+      mediaRecorder.stop();
     }
 
     // Clear duration interval
@@ -147,11 +207,6 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       durationIntervalRef.current = null;
     }
 
-    // Stop media stream tracks
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach(track => track.stop());
-      mediaStreamRef.current = null;
-    }
   }, [isRecording]);
 
   // Reset recording state
@@ -165,6 +220,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
+    audioUrlRef.current = null;
 
     // Reset all state
     setAudioBlob(null);
@@ -181,9 +237,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      // Stop any active recording
-      if (isRecording) {
-        stopRecording();
+      const mediaRecorder = mediaRecorderRef.current;
+      if (mediaRecorder?.state === 'recording') {
+        mediaRecorder.stop();
       }
 
       // Clear duration interval
@@ -192,8 +248,8 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       }
 
       // Revoke object URLs to prevent memory leaks
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
       }
 
       // Stop media stream tracks
@@ -201,7 +257,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         mediaStreamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  }, [isRecording, audioUrl, stopRecording]);
+  }, []);
 
   return {
     isRecording,

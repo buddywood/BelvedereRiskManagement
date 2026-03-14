@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Mic, Square, RotateCcw, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Mic, Square, RotateCcw, CheckCircle2, AlertCircle, Pencil, Save, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { useAudioRecorder } from "@/lib/hooks/useAudioRecorder";
 
 /**
@@ -15,6 +16,10 @@ import { useAudioRecorder } from "@/lib/hooks/useAudioRecorder";
 interface AudioRecorderProps {
   onRecordingComplete: (blob: Blob, duration: number) => void;
   existingAudioUrl?: string;
+  transcription?: string;
+  transcriptionEditedAt?: string;
+  transcriptionStatus?: 'recording' | 'completed' | 'uploading' | 'failed' | 'pending';
+  onTranscriptionSave?: (transcription: string) => Promise<void>;
   disabled?: boolean;
 }
 
@@ -24,9 +29,26 @@ function formatDuration(seconds: number): string {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
+function formatEditedTimestamp(value: string): string {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Edited recently";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
 export function AudioRecorder({
   onRecordingComplete,
   existingAudioUrl,
+  transcription,
+  transcriptionEditedAt,
+  transcriptionStatus,
+  onTranscriptionSave,
   disabled = false
 }: AudioRecorderProps) {
   const {
@@ -41,22 +63,35 @@ export function AudioRecorder({
     hasPermission
   } = useAudioRecorder();
 
-  const [hasExistingAudio, setHasExistingAudio] = useState(false);
+  const [showExistingAudio, setShowExistingAudio] = useState(Boolean(existingAudioUrl));
+  const processedBlobRef = useRef<Blob | null>(null);
+  const [isEditingTranscript, setIsEditingTranscript] = useState(false);
+  const [editedTranscription, setEditedTranscription] = useState(transcription || "");
+  const [isSavingTranscript, setIsSavingTranscript] = useState(false);
 
   // Initialize with existing audio if provided
   useEffect(() => {
-    if (existingAudioUrl && !audioUrl) {
-      setHasExistingAudio(true);
-    }
-  }, [existingAudioUrl, audioUrl]);
+    setShowExistingAudio(Boolean(existingAudioUrl));
+  }, [existingAudioUrl]);
+
+  useEffect(() => {
+    setEditedTranscription(transcription || "");
+  }, [transcription]);
 
   // Call onRecordingComplete when new recording is finished
   useEffect(() => {
-    if (audioBlob && duration > 0 && !isRecording) {
+    if (audioBlob && !isRecording && duration > 0 && processedBlobRef.current !== audioBlob) {
+      processedBlobRef.current = audioBlob;
       onRecordingComplete(audioBlob, duration);
-      setHasExistingAudio(false); // Clear existing audio flag when new recording made
+      setShowExistingAudio(false); // Clear existing audio flag when new recording made
     }
   }, [audioBlob, duration, isRecording, onRecordingComplete]);
+
+  useEffect(() => {
+    if (!audioBlob) {
+      processedBlobRef.current = null;
+    }
+  }, [audioBlob]);
 
   const handleStartRecording = async () => {
     try {
@@ -72,7 +107,21 @@ export function AudioRecorder({
 
   const handleReRecord = () => {
     resetRecording();
-    setHasExistingAudio(false);
+    processedBlobRef.current = null;
+    setIsEditingTranscript(false);
+    setShowExistingAudio(false);
+  };
+
+  const handleSaveTranscript = async () => {
+    if (!onTranscriptionSave) return;
+
+    setIsSavingTranscript(true);
+    try {
+      await onTranscriptionSave(editedTranscription);
+      setIsEditingTranscript(false);
+    } finally {
+      setIsSavingTranscript(false);
+    }
   };
 
   // Show error state
@@ -133,10 +182,10 @@ export function AudioRecorder({
   }
 
   // Show completed recording state (either new recording or existing)
-  const displayAudioUrl = audioUrl || existingAudioUrl;
+  const displayAudioUrl = audioUrl || (showExistingAudio ? existingAudioUrl : undefined);
   const displayDuration = duration > 0 ? duration : 0;
 
-  if (displayAudioUrl || hasExistingAudio) {
+  if (displayAudioUrl || showExistingAudio) {
     return (
       <div className="flex flex-col items-center justify-center py-8 space-y-6">
         {/* Success indicator */}
@@ -166,6 +215,85 @@ export function AudioRecorder({
           </p>
         )}
 
+        {/* Transcription display */}
+        {transcriptionStatus === 'pending' || transcriptionStatus === 'uploading' ? (
+          <div className="w-full max-w-2xl rounded-[1.25rem] border section-divider bg-background/55 px-5 py-4">
+            <p className="editorial-kicker">Transcription</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Generating transcript from your recording...
+            </p>
+          </div>
+        ) : transcription ? (
+          <div className="w-full max-w-2xl rounded-[1.25rem] border section-divider bg-background/55 px-5 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="editorial-kicker">Transcription</p>
+                {transcriptionEditedAt ? (
+                  <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="rounded-full border border-border/70 bg-background/80 px-2 py-0.5 font-medium uppercase tracking-[0.14em]">
+                      Edited
+                    </span>
+                    <span>{formatEditedTimestamp(transcriptionEditedAt)}</span>
+                  </div>
+                ) : null}
+              </div>
+              {!isEditingTranscript && onTranscriptionSave ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditingTranscript(true)}
+                  disabled={disabled}
+                >
+                  <Pencil className="size-4" />
+                  Edit
+                </Button>
+              ) : null}
+            </div>
+
+            {isEditingTranscript ? (
+              <div className="mt-3 space-y-3">
+                <Textarea
+                  value={editedTranscription}
+                  onChange={(event) => setEditedTranscription(event.target.value)}
+                  className="min-h-32"
+                  disabled={isSavingTranscript}
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={handleSaveTranscript}
+                    disabled={isSavingTranscript || editedTranscription.trim().length === 0}
+                  >
+                    {isSavingTranscript ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Save className="size-4" />
+                    )}
+                    Save Transcript
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setEditedTranscription(transcription);
+                      setIsEditingTranscript(false);
+                    }}
+                    disabled={isSavingTranscript}
+                  >
+                    <X className="size-4" />
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm leading-7 text-foreground/90">{transcription}</p>
+            )}
+          </div>
+        ) : null}
+
         {/* Re-record button */}
         <Button
           variant="outline"
@@ -186,7 +314,7 @@ export function AudioRecorder({
       <Button
         size="lg"
         onClick={handleStartRecording}
-        disabled={disabled || hasPermission === false}
+          disabled={disabled || hasPermission === false}
         className="size-20 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200"
       >
         <Mic className="size-8" />

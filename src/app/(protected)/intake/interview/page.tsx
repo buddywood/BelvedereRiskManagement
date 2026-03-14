@@ -17,7 +17,8 @@ import {
   getIntakeInterviewAction,
   updateProgress,
   submitIntakeInterviewAction,
-  getActiveIntakeInterviewAction
+  getActiveIntakeInterviewAction,
+  saveResponse
 } from "@/lib/actions/intake-actions";
 
 /**
@@ -73,6 +74,7 @@ export default function InterviewPage() {
                   audioUrl: response.audioUrl || undefined,
                   audioDuration: response.audioDuration || 0,
                   transcription: response.transcription || undefined,
+                  transcriptionEditedAt: undefined,
                   status: response.transcriptionStatus === 'COMPLETED' ? 'completed' : 'pending'
                 });
               }
@@ -226,6 +228,36 @@ export default function InterviewPage() {
     }
   };
 
+  const handleTranscriptionSave = async (transcription: string) => {
+    if (!interviewId || !currentQuestion) return;
+
+    const result = await saveResponse(interviewId, {
+      interviewId,
+      questionId: currentQuestion.id,
+      audioUrl: currentResponse?.audioUrl,
+      audioDuration: currentResponse?.audioDuration,
+      transcription,
+    });
+
+    if (!result.success) {
+      const errorMessage =
+        ("error" in result && result.error) ||
+        ("errors" in result && result.errors
+          ? Object.values(result.errors).flat().find(Boolean)
+          : undefined) ||
+        "Failed to save transcript";
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    setResponse(currentQuestion.id, {
+      transcription,
+      transcriptionEditedAt: new Date().toISOString(),
+      status: currentResponse?.status || 'completed',
+    });
+    toast.success("Transcript updated");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -283,6 +315,10 @@ export default function InterviewPage() {
           <AudioRecorder
             onRecordingComplete={handleRecordingComplete}
             existingAudioUrl={currentResponse?.audioUrl}
+            transcription={currentResponse?.transcription}
+            transcriptionEditedAt={currentResponse?.transcriptionEditedAt}
+            transcriptionStatus={currentResponse?.status}
+            onTranscriptionSave={handleTranscriptionSave}
             disabled={uploading || submitting}
           />
 
