@@ -68,3 +68,73 @@ export async function sendPasswordResetEmail(
     console.error("Failed to send password reset email:", error);
   }
 }
+
+export async function sendAdvisorIntakeNotification(
+  advisorEmail: string,
+  advisorName: string,
+  clientName: string,
+  clientEmail: string,
+  reviewUrl: string
+): Promise<void> {
+  try {
+    // Initialize Resend client at runtime (not module load time)
+    // to avoid build-time errors when RESEND_API_KEY is not set
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error("RESEND_API_KEY not configured - email will not be sent");
+      return;
+    }
+
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: advisorEmail,
+      subject: `New Intake Ready for Review - ${clientName}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px;">
+              <h1 style="color: #18181b; margin-top: 0;">New Intake Ready for Review</h1>
+
+              <p style="margin: 16px 0;">
+                Hello ${advisorName},
+              </p>
+
+              <p style="margin: 16px 0;">
+                <strong>${clientName}</strong> (<a href="mailto:${clientEmail}" style="color: #18181b;">${clientEmail}</a>) has completed their intake interview and is ready for your review.
+              </p>
+
+              <div style="text-align: center; margin: 32px 0;">
+                <a href="${reviewUrl}" style="display: inline-block; background: #18181b; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: 500;">
+                  Review Intake
+                </a>
+              </div>
+
+              <p style="margin: 16px 0; font-size: 14px; color: #666;">
+                Or copy and paste this URL into your browser:
+              </p>
+              <p style="margin: 8px 0; font-size: 14px; word-break: break-all;">
+                <a href="${reviewUrl}" style="color: #18181b;">${reviewUrl}</a>
+              </p>
+
+              <hr style="border: none; border-top: 1px solid #ddd; margin: 24px 0;">
+
+              <p style="margin: 16px 0; font-size: 14px; color: #666;">
+                This is an automated notification from Belvedere Risk Management.
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  } catch (error) {
+    // Log error but don't throw - prevents blocking the notification flow
+    // In production, use proper logging service (e.g., Sentry)
+    console.error("Failed to send advisor intake notification:", error);
+  }
+}
