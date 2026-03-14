@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A complete 12-minute TurboTax-style Family Governance assessment with household profile integration that produces personalized PDF reports and customizable governance policy templates. Users complete secure registration, create optional household member profiles, answer personalized questions (53-68 via intelligent branching), and receive customized deliverables including executive summaries, risk breakdowns, and 7 pre-filled governance policy templates with family member names.
+A complete advisor-guided Family Governance platform with audio-enhanced intake interviews, secure advisor portal, and customized risk assessments. Users complete audio interviews with family governance experts, who review responses and approve customized assessments focused on specific risk areas with 1.5x emphasis scoring. The platform produces personalized PDF reports and customizable governance policy templates with household member names and advisor-curated recommendations.
 
 ## Core Value
 
@@ -26,45 +26,37 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - ✓ Policy template pre-population with household member names and roles — v1.1
 - ✓ Extended family tracking for non-resident members — v1.1
 - ✓ 100% backward compatibility for assessments without profiles — v1.1
-
-## Current Milestone: v1.2 Intake & Triage System
-
-**Goal:** Transform platform from self-service to advisor-guided experience with professional intake interview and risk area curation.
-
-**Target features:**
-- Step-by-step intake interview with audio response capability
-- New advisor portal for reviewing client responses and risk identification
-- Assessment customization based on advisor-selected risk focus areas
-- Third-party audio integration for recording and playback
-- Advisor approval workflow connecting intake to curated assessment
+- ✓ Step-by-step intake interview system with audio response capability — v1.2
+- ✓ Advisor portal for client intake review and management — v1.2
+- ✓ Risk area identification and approval workflow for advisors — v1.2
+- ✓ Assessment customization with 1.5x emphasis multipliers for advisor-selected focus areas — v1.2
+- ✓ Audio transcription via OpenAI Whisper integration — v1.2
+- ✓ Notification system for advisor-client communication — v1.2
 
 ### Active
 
-- [ ] Step-by-step intake interview system with comprehensive question set
-- [ ] Audio response recording and playback via third-party integration
-- [ ] Advisor portal for client intake review and management
-- [ ] Risk area identification and approval workflow for advisors
-- [ ] Assessment category filtering based on advisor-selected focus areas
-- [ ] User journey transformation from self-service to advisor-guided flow
+(Ready for next milestone planning)
 
 ### Out of Scope
 
 - Other risk pillars (Financial, Operational, etc.) — Family Governance focus validated
 - Real-time collaboration features — single-user assessment works well
 - Mobile native app — responsive web sufficient for target users
-- Advanced user management — current auth sufficient for MVP
-- AI-generated recommendations — template-based approach preferred
+- Advanced user management — current auth sufficient for advisor workflow
+- AI-generated recommendations — template-based approach with advisor guidance preferred
 
 ## Current State
 
-**Version:** v1.1 Household Profile Integration shipped 2026-03-13
-**Codebase:** ~130,460 lines TypeScript/TSX
-**Tech Stack:** Next.js 15, Prisma 7, PostgreSQL, Auth.js v5, @react-pdf/renderer, docxtemplater, TanStack Query
-**Assessment Coverage:** 68 questions with household-aware personalization and intelligent filtering
-**Security:** TOTP MFA, Argon2id password hashing, AES-256-GCM encryption, rate limiting, ownership-enforced household data
-**Deliverables:** Personalized PDF reports with household composition + 7 pre-filled governance policy templates
+**Version:** v1.2 Intake & Triage System shipped 2026-03-14
+**Codebase:** ~1,301,761 lines TypeScript/TSX (+1,612 lines this milestone)
+**Tech Stack:** Next.js 15, Prisma 7, PostgreSQL, Auth.js v5, @react-pdf/renderer, docxtemplater, TanStack Query, OpenAI Whisper API
+**Assessment Coverage:** 68 questions with household-aware personalization, intelligent filtering, and advisor-customized emphasis
+**Security:** TOTP MFA, Argon2id password hashing, AES-256-GCM encryption, rate limiting, role-based advisor portal access
+**Deliverables:** Advisor-customized PDF reports + 7 pre-filled governance policy templates with household composition
 
-**User Flow:** Registration → MFA setup → Optional household profiles → Personalized 12-15 minute assessment → Customized deliverables with family member names
+**User Flow:** Registration → MFA setup → Audio intake interview → Advisor review & approval → Customized 12-15 minute assessment → Deliverables with emphasis on advisor-selected risk areas
+
+**Advisor Flow:** Portal access → Client intake review with audio playback → Risk area selection → Assessment approval → Customized scoring with 1.5x multipliers
 
 ## Key Decisions
 
@@ -84,13 +76,20 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 | Ownership-enforced household CRUD | Secure multi-user household data access | ✓ Good — prevents data leakage between users |
 | Client-server component split for profiles | Optimize data fetching while maintaining interactivity | ✓ Good — clean separation of concerns |
 | nullGetter pattern for template placeholders | Graceful handling of missing household data | ✓ Good — prevents template corruption |
+| Audio interview foundation before advisor portal | Establish data source before consumption interface | ✓ Good — logical dependency flow |
+| OpenAI Whisper for transcription | Proven accuracy for professional advisor review | ✓ Good — reliable transcript quality |
+| Filesystem storage for MVP audio | Simple storage avoiding cloud complexity | ✓ Good — rapid development without S3 setup |
+| Pure function architecture for customization logic | Separate data access from business logic for testability | ✓ Good — comprehensive unit testing enabled |
+| 1.5x emphasis multiplier constant | Noticeable but not overwhelming focus area weighting | ✓ Good — balanced scoring adjustment |
+| Pre-filter before branching logic | Question filtering before assessment branching | ✓ Good — clean separation of concerns |
+| Advisor portal role-based access | Secure multi-tenant advisor-client relationships | ✓ Good — proper access control without complexity |
 
 ## Constraints
 
-- **Tech Stack**: Full-stack JavaScript — validated as successful approach
+- **Tech Stack**: Full-stack JavaScript — validated as successful approach across 3 milestones
 - **Budget**: Minimal hosting costs — achieved with efficient architecture
-- **Security**: Enterprise-grade requirements — TOTP MFA and encryption delivered
-- **Scope**: Family Governance pillar only — validated as sufficient for MVP
+- **Security**: Enterprise-grade requirements — TOTP MFA, encryption, and role-based access delivered
+- **Scope**: Family Governance pillar only — validated as sufficient for advisor-guided MVP
 
 ---
-*Last updated: 2026-03-13 after v1.2 milestone started*
+*Last updated: 2026-03-14 after v1.2 milestone completion*

@@ -29,3 +29,13 @@
 
 ---
 
+
+## v1.2 Intake & Triage System (Shipped: 2026-03-14)
+
+**Phases completed:** 10 phases, 36 plans, 29 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+

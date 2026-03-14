@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-03-13)
 - ✅ **v1.1 Household Profile Integration** — Phases 5-7 (shipped 2026-03-13)
-- 🚧 **v1.2 Intake & Triage System** — Phases 8-10 (in progress)
+- ✅ **v1.2 Intake & Triage System** — Phases 8-10 (shipped 2026-03-14)
 
 ## Phases
 
@@ -31,65 +31,16 @@
 
 </details>
 
-### 🚧 v1.2 Intake & Triage System (In Progress)
+<details>
+<summary>✅ v1.2 Intake & Triage System (Phases 8-10) — SHIPPED 2026-03-14</summary>
 
-**Milestone Goal:** Transform platform from self-service to advisor-guided experience with professional intake interview and risk area curation.
+- [x] Phase 8: Audio Interview Foundation (6/6 plans) — completed 2026-03-14
+- [x] Phase 9: Advisor Portal Access (6/6 plans) — completed 2026-03-14
+- [x] Phase 10: Assessment Customization (4/4 plans) — completed 2026-03-14
 
-#### Phase 8: Audio Interview Foundation
-**Goal**: Users can complete audio-enhanced intake interviews with transcription
-**Depends on**: v1.1 household system, existing auth
-**Requirements**: INTAKE-01, INTAKE-02, INTAKE-03, INTAKE-04, INTAKE-05
-**Success Criteria** (what must be TRUE):
-  1. User can navigate step-by-step intake interview without losing progress
-  2. User can record audio response to each interview question
-  3. User receives confirmation when interview is completed and submitted
-  4. System automatically transcribes audio responses for advisor review
-**Plans:** 6 plans (5 feature + 1 gap closure)
+**What shipped:** Transform platform from self-service to advisor-guided experience with professional intake interview and risk area curation. Complete audio-enhanced intake interviews with transcription, secure advisor portal for client review and approval, and assessment customization with 1.5x emphasis multipliers for advisor-selected focus areas.
 
-Plans:
-- [x] 08-01-PLAN.md — Prisma models, types, question bank, and Zod schemas
-- [x] 08-02-PLAN.md — Data access layer, server actions, and API routes (audio + transcription)
-- [x] 08-03-PLAN.md — Audio recording hook and interview state management
-- [x] 08-04-PLAN.md — Interview UI components (QuestionDisplay, AudioRecorder, StepIndicator)
-- [x] 08-05-PLAN.md — Interview wizard pages, navigation integration, and completion flow
-- [ ] 08-06-PLAN.md — Gap closure: fix critical bugs (dynamic import, step indicator, error handling)
-
-#### Phase 9: Advisor Portal Access
-**Goal**: Advisors can securely review and manage client intake responses
-**Depends on**: Phase 8 (audio interview data)
-**Requirements**: ADVISOR-01, ADVISOR-02, ADVISOR-03, ADVISOR-04, ADVISOR-05, ADVISOR-06
-**Success Criteria** (what must be TRUE):
-  1. Advisor can access secure portal showing assigned client intakes
-  2. Advisor can view transcribed responses and play back original audio
-  3. Advisor can identify focus risk areas based on intake responses
-  4. Advisor can approve client for customized assessment
-  5. Advisor receives notifications when new intakes are ready for review
-**Plans:** 6 plans
-
-Plans:
-- [ ] 09-01-PLAN.md — Prisma schema extensions (UserRole, AdvisorProfile, assignments, approvals) and auth/type foundations
-- [ ] 09-02-PLAN.md — Advisor data access layer, auth helpers, and authenticated server actions
-- [ ] 09-03-PLAN.md — Advisor dashboard layout, client list page, and navigation integration
-- [ ] 09-04-PLAN.md — Intake review page with transcript viewer, audio player, risk area selector, and approval workflow
-- [ ] 09-05-PLAN.md — Notification system (email + in-app)
-- [ ] 09-06-PLAN.md — End-to-end advisor portal verification checkpoint
-
-#### Phase 10: Assessment Customization
-**Goal**: Assessments adapt based on advisor-selected focus areas while maintaining completion time
-**Depends on**: Phase 9 (advisor approval workflow)
-**Requirements**: ASSESS-01, ASSESS-02, ASSESS-03, ASSESS-04
-**Success Criteria** (what must be TRUE):
-  1. Assessment shows only advisor-selected risk categories for approved clients
-  2. Assessment emphasizes questions in advisor-identified focus areas
-  3. User sees clear indication when assessment is customized by advisor
-  4. Assessment completion remains within 12-15 minute target despite customization
-**Plans:** 4 plans
-
-Plans:
-- [ ] 10-01-PLAN.md — Customization data layer (pure functions, DB queries, assessment-approval linkage)
-- [ ] 10-02-PLAN.md — Assessment UI modifications (customization banner, question flow filtering)
-- [ ] 10-03-PLAN.md — Scoring engine emphasis multipliers and score API customization
-- [ ] 10-04-PLAN.md — Results page customization indicator
+</details>
 
 ## Progress
 
@@ -102,6 +53,6 @@ Plans:
 | 5. Profile Foundation | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 6. Assessment Integration | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 7. Household Reporting | v1.1      | 2/2            | Complete    | 2026-03-13 |
-| 8. Audio Interview Foundation | v1.2      | 5/6 + gap closure | Bug fixes pending | 2026-03-14 |
-| 9. Advisor Portal Access | v1.2      | 0/6            | Planned | - |
-| 10. Assessment Customization | v1.2      | 0/4          | Planned | - |
+| 8. Audio Interview Foundation | v1.2      | 6/6            | Complete    | 2026-03-14 |
+| 9. Advisor Portal Access | v1.2      | 6/6            | Complete    | 2026-03-14 |
+| 10. Assessment Customization | v1.2      | 4/4            | Complete    | 2026-03-14 |
