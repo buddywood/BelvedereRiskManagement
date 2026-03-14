@@ -17,7 +17,11 @@ export type AdvisorDashboardClient = {
 // Complete data for reviewing a client's intake interview
 export type IntakeReviewData = {
   interview: IntakeInterview & {
-    user: User;
+    user: {
+      id: string;
+      name: string | null;
+      email: string;
+    };
     responses: IntakeResponse[];
   };
   approval: IntakeApproval | null;
