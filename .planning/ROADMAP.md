@@ -64,14 +64,15 @@ Plans:
   3. Advisor can identify focus risk areas based on intake responses
   4. Advisor can approve client for customized assessment
   5. Advisor receives notifications when new intakes are ready for review
-**Plans:** 5 plans
+**Plans:** 6 plans
 
 Plans:
 - [ ] 09-01-PLAN.md — Prisma schema extensions (UserRole, AdvisorProfile, assignments, approvals) and auth/type foundations
 - [ ] 09-02-PLAN.md — Advisor data access layer, auth helpers, and authenticated server actions
 - [ ] 09-03-PLAN.md — Advisor dashboard layout, client list page, and navigation integration
 - [ ] 09-04-PLAN.md — Intake review page with transcript viewer, audio player, risk area selector, and approval workflow
-- [ ] 09-05-PLAN.md — Notification system (email + in-app) and end-to-end verification checkpoint
+- [ ] 09-05-PLAN.md — Notification system (email + in-app)
+- [ ] 09-06-PLAN.md — End-to-end advisor portal verification checkpoint
 
 #### Phase 10: Assessment Customization
 **Goal**: Assessments adapt based on advisor-selected focus areas while maintaining completion time
@@ -99,5 +100,5 @@ Plans:
 | 6. Assessment Integration | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 7. Household Reporting | v1.1      | 2/2            | Complete    | 2026-03-13 |
 | 8. Audio Interview Foundation | v1.2      | 5/6 + gap closure | Bug fixes pending | 2026-03-14 |
-| 9. Advisor Portal Access | v1.2      | 0/5            | Planned | - |
+| 9. Advisor Portal Access | v1.2      | 0/6            | Planned | - |
 | 10. Assessment Customization | v1.2      | 0/TBD          | Not started | - |
