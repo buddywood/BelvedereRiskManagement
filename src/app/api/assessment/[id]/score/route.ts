@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { Prisma, RiskLevel as PrismaRiskLevel } from "@prisma/client";
-import { calculatePillarScore } from "@/lib/assessment/scoring";
+import { calculatePillarScore, calculateCustomizedPillarScore } from "@/lib/assessment/scoring";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
+import { Question } from "@/lib/assessment/types";
+import {
+  getCustomizationConfig,
+  getEmphasisMultipliers,
+  getVisibleQuestionIds,
+} from "@/lib/assessment/customization";
 
 /**
  * Assessment Score API Routes
@@ -127,7 +133,7 @@ export async function POST(
     // Verify ownership
     const assessment = await prisma.assessment.findUnique({
       where: { id },
-      select: { userId: true },
+      select: { userId: true, approvalId: true },
     });
 
     if (!assessment) {
@@ -158,9 +164,36 @@ export async function POST(
       answers[response.questionId] = response.answer;
     });
 
-    // Get visible questions based on branching logic
-    const visibleQuestions = getVisibleQuestions(answers, allQuestions);
-    const visibleIds = visibleQuestions.map(q => q.id);
+    // Check for customization from linked approval
+    let customizationConfig = null;
+    let customizationMetadata = null;
+    if (assessment.approvalId) {
+      const approval = await prisma.intakeApproval.findUnique({
+        where: { id: assessment.approvalId },
+        select: { focusAreas: true },
+      });
+      if (approval) {
+        customizationConfig = getCustomizationConfig(approval.focusAreas);
+        customizationMetadata = {
+          isCustomized: true,
+          focusAreaCount: approval.focusAreas.length,
+          emphasisMultiplier: customizationConfig.emphasisMultiplier,
+        };
+      }
+    }
+
+    // Get visible questions based on customization or standard branching logic
+    let visibleQuestions: Question[];
+    let visibleIds: string[];
+    if (customizationConfig) {
+      // Use customization to filter questions by subcategory
+      visibleIds = getVisibleQuestionIds(customizationConfig.visibleSubCategories, allQuestions);
+      visibleQuestions = allQuestions.filter(q => visibleIds.includes(q.id));
+    } else {
+      // Standard branching logic
+      visibleQuestions = getVisibleQuestions(answers, allQuestions);
+      visibleIds = visibleQuestions.map(q => q.id);
+    }
 
     // Check minimum completion threshold (50% of visible questions)
     const totalVisibleQuestions = visibleQuestions.length;
@@ -176,13 +209,25 @@ export async function POST(
       );
     }
 
-    // Calculate pillar score using only visible questions
-    const scoreResult = calculatePillarScore(
-      answers,
-      familyGovernancePillar,
-      allQuestions,
-      visibleIds
-    );
+    // Calculate pillar score - customized or standard
+    let scoreResult;
+    if (customizationConfig) {
+      const emphasisMultipliers = getEmphasisMultipliers(customizationConfig);
+      scoreResult = calculateCustomizedPillarScore(
+        answers,
+        familyGovernancePillar,
+        allQuestions,
+        visibleIds,
+        emphasisMultipliers
+      );
+    } else {
+      scoreResult = calculatePillarScore(
+        answers,
+        familyGovernancePillar,
+        allQuestions,
+        visibleIds
+      );
+    }
 
     // Map risk level to Prisma enum
     const prismaRiskLevel = mapRiskLevelToPrisma(scoreResult.riskLevel);
@@ -221,13 +266,20 @@ export async function POST(
       }),
     ]);
 
-    return NextResponse.json({
+    const responseData: any = {
       score: pillarScore.score,
       riskLevel: pillarScore.riskLevel,
       breakdown: pillarScore.breakdown,
       missingControls: pillarScore.missingControls,
       completedAt: pillarScore.calculatedAt,
-    });
+    };
+
+    // Add customization metadata if applicable
+    if (customizationMetadata) {
+      responseData.customization = customizationMetadata;
+    }
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error calculating score:", error);
     return NextResponse.json(

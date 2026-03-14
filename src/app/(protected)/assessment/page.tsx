@@ -7,6 +7,7 @@ import { useAssessmentStore } from '@/lib/assessment/store';
 import { useHouseholdProfile } from '@/lib/hooks/useHouseholdProfile';
 import { PillarCard } from '@/components/assessment/PillarCard';
 import { OverallProgress } from '@/components/assessment/ProgressBar';
+import { CustomizationBanner } from '@/components/assessment/CustomizationBanner';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, Clock } from 'lucide-react';
@@ -16,6 +17,8 @@ import { getVisibleQuestions } from '@/lib/assessment/branching';
 import { allQuestions } from '@/lib/assessment/questions';
 import { formatDistanceToNow } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
+import type { CustomizationConfig } from '@/lib/assessment/customization';
+import { getVisibleQuestionIds, estimateCompletionMinutes } from '@/lib/assessment/customization';
 
 /**
  * Assessment Hub Page
@@ -83,6 +86,21 @@ export default function AssessmentHubPage() {
     },
     enabled: !!store.assessmentId && !store.isHydrated,
     retry: 1,
+  });
+
+  // Fetch customization configuration
+  const { data: customizationConfig, isLoading: customizationLoading } = useQuery<CustomizationConfig>({
+    queryKey: ['assessment-customization'],
+    queryFn: async () => {
+      const response = await fetch('/api/assessment/customization');
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch customization config');
+      }
+
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   // Rehydrate store from server data
@@ -183,14 +201,28 @@ export default function AssessmentHubPage() {
 
   const pillarStatus = getPillarStatus();
 
-  // Calculate accurate question count using branching logic
+  // Calculate accurate question count using branching logic and customization
   const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
-  const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions, profile);
+
+  // Apply customization filtering if config is available and assessment is customized
+  const baseQuestions = customizationConfig?.isCustomized && customizationConfig.visibleSubCategories.length > 0
+    ? pillarQuestions.filter(q => customizationConfig.visibleSubCategories.includes(q.subCategory))
+    : pillarQuestions;
+
+  const visibleQuestions = getVisibleQuestions(store.answers, baseQuestions, profile);
   const questionsAnswered = visibleQuestions.filter((q) => {
     const answer = store.answers[q.id];
     return answer !== undefined && answer !== null;
   }).length;
-  const totalQuestions = visibleQuestions.length || pillarQuestions.length;
+  const totalQuestions = visibleQuestions.length || baseQuestions.length;
+
+  // Calculate customized duration if applicable
+  const estimatedDuration = customizationConfig?.isCustomized && customizationConfig.visibleSubCategories.length > 0
+    ? estimateCompletionMinutes(customizationConfig.visibleSubCategories, allQuestions)
+    : FAMILY_GOVERNANCE_PILLAR.estimatedMinutes;
+
+  // Calculate focus area count for customization banner
+  const focusAreaCount = customizationConfig?.visibleSubCategories.length || 0;
 
   // Show loading skeleton until hydrated
   if (isInitializing || (store.assessmentId && !store.isHydrated)) {
@@ -240,11 +272,16 @@ export default function AssessmentHubPage() {
             <CardContent className="grid gap-3 pt-5 sm:grid-cols-3 sm:pt-6">
               <div>
                 <p className="editorial-kicker">Section</p>
-                <p className="mt-2 text-xl font-semibold">1 Pillar</p>
+                <p className="mt-2 text-xl font-semibold">
+                  {customizationConfig?.isCustomized && focusAreaCount > 0
+                    ? `${focusAreaCount} of 8 Focus Areas`
+                    : '1 Pillar'
+                  }
+                </p>
               </div>
               <div>
                 <p className="editorial-kicker">Duration</p>
-                <p className="mt-2 text-xl font-semibold">~25 min</p>
+                <p className="mt-2 text-xl font-semibold">~{estimatedDuration} min</p>
               </div>
               <div>
                 <p className="editorial-kicker">Status</p>
@@ -293,6 +330,14 @@ export default function AssessmentHubPage() {
         </Card>
       )}
 
+      {customizationConfig?.isCustomized && (
+        <CustomizationBanner
+          advisorName={customizationConfig.advisorName}
+          focusAreaCount={focusAreaCount}
+          estimatedMinutes={estimatedDuration}
+        />
+      )}
+
       <section className="space-y-4">
         <div className="space-y-2">
           <p className="editorial-kicker">Assessment Section</p>
@@ -316,7 +361,7 @@ export default function AssessmentHubPage() {
             <p className="editorial-kicker">Next Step</p>
             {pillarStatus === 'not-started' ? (
               <p className="text-base leading-7 text-muted-foreground">
-                Ready to begin? This assessment will take approximately {FAMILY_GOVERNANCE_PILLAR.estimatedMinutes} minutes and saves progress automatically.
+                Ready to begin? This assessment will take approximately {estimatedDuration} minutes and saves progress automatically.
               </p>
             ) : pillarStatus === 'in-progress' ? (
               <p className="text-base leading-7 text-muted-foreground">
