@@ -54,6 +54,11 @@ export default async function ProtectedLayout({
                   <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/intake">Intake</Link>
                   </Button>
+                  {(session?.user?.role === 'ADVISOR' || session?.user?.role === 'ADMIN') && (
+                    <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
+                      <Link href="/advisor">Advisor</Link>
+                    </Button>
+                  )}
                   <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
                     <Link href="/assessment">Assessment</Link>
                   </Button>
