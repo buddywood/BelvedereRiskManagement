@@ -43,45 +43,67 @@ export default async function ProtectedLayout({
 
   return (
     <div className="min-h-screen py-3 sm:py-6">
-      {restrictNavToIntake && <RedirectIncompleteIntake restrictNavToIntake={restrictNavToIntake} />}
+      {restrictNavToIntake && (
+        <RedirectIncompleteIntake restrictNavToIntake={restrictNavToIntake} />
+      )}
       <div className="page-shell">
         <div className="hero-surface overflow-x-hidden rounded-[2rem]">
           <header className="border-b section-divider bg-background/55 overflow-visible">
-            <div className="px-4 py-3 sm:px-8 sm:py-4 lg:px-10">
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-0.5 sm:space-y-1">
-                  <p className="editorial-kicker">Belvedere Risk Management</p>
-                  <h1 className="text-lg font-semibold leading-tight tracking-[-0.03em] sm:text-3xl sm:leading-none">
-                    Governance Assessment Workspace
-                  </h1>
-                </div>
+            <div className="pl-0 pr-4 py-3 sm:pl-4 sm:pr-8 sm:py-4 lg:pl-6 lg:pr-10">
+              {" "}
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
+                  {" "}
+                  <div className="min-w-0">
+                    <Link
+                      href="/"
+                      className="block text-foreground"
+                      aria-label="Belvedere home"
+                    >
+                      <BelvedereLogoLockup className="h-auto w-full max-w-[190px] lg:max-w-[220px]" />
+                    </Link>
 
-                <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
-                  <Link href="/" className="hidden text-foreground sm:block" aria-label="Belvedere home">
-                    <BelvedereLogoLockup className="h-auto w-full max-w-[200px] lg:max-w-[240px]" />
-                  </Link>
-                  <div className="hidden rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground lg:block">
-                    Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
+                    <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                      <p className="text-sm text-muted-foreground">
+                        Signed in as{" "}
+                        <span className="font-semibold text-foreground break-all">
+                          {session.user.email}
+                        </span>
+                      </p>
+                      <form
+                        action={async () => {
+                          "use server";
+                          await signOut({ redirectTo: "/" });
+                        }}
+                      >
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          size="sm"
+                          className="min-w-[110px] px-4"
+                        >
+                          Sign Out
+                        </Button>
+                      </form>
+                    </div>
                   </div>
-                  <form
-                    action={async () => {
-                      "use server";
-                      await signOut({ redirectTo: "/" });
-                    }}
-                  >
-                    <Button type="submit" variant="outline" size="sm" className="px-3 sm:px-4">
-                      Sign Out
-                    </Button>
-                  </form>
+                  <div className="min-w-0 xl:max-w-[560px] xl:text-right">
+                    <p className="editorial-kicker mb-1">
+                      Belvedere Risk Management
+                    </p>
+                    <h1 className="text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]">
+                      Governance Assessment Workspace
+                    </h1>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between md:gap-4">
-                <div className="min-w-0 flex-1">
-                  <ProtectedNav showAdvisor={showAdvisor} showAdmin={showAdmin} restrictNavToIntake={restrictNavToIntake} intakeApprovedForClient={intakeApprovedForClient} />
-                </div>
-                <div className="hidden shrink-0 rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground md:block lg:hidden md:max-w-[24rem]">
-                  Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
+                <div className="border-t border-border/60 pt-4 mt-3">
+                  <ProtectedNav
+                    showAdvisor={showAdvisor}
+                    showAdmin={showAdmin}
+                    restrictNavToIntake={restrictNavToIntake}
+                    intakeApprovedForClient={intakeApprovedForClient}
+                  />
                 </div>
               </div>
             </div>

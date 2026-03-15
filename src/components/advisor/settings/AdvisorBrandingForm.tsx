@@ -7,13 +7,22 @@ import { toast } from 'react-hot-toast';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Pencil } from 'lucide-react';
 
 const brandingSchema = z.object({
   logoUrl: z.string().optional(),
 });
 
 type BrandingFormData = z.infer<typeof brandingSchema>;
+
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 interface AdvisorBrandingFormProps {
   profile: {
@@ -33,13 +42,16 @@ interface AdvisorBrandingFormProps {
 }
 
 export function AdvisorBrandingForm({ profile, updateBrandingAction }: AdvisorBrandingFormProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(profile.logoUrl);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
   } = useForm<BrandingFormData>({
     resolver: zodResolver(brandingSchema),
     defaultValues: {
@@ -48,22 +60,20 @@ export function AdvisorBrandingForm({ profile, updateBrandingAction }: AdvisorBr
   });
 
   const logoUrl = watch('logoUrl');
+  const showPreview = logoUrl && logoUrl.trim() !== '' && isValidUrl(logoUrl);
+  const hasLogo = currentLogoUrl && currentLogoUrl.trim() !== '' && isValidUrl(currentLogoUrl);
 
   const onSubmit = async (data: BrandingFormData) => {
     setIsSubmitting(true);
-
     try {
       const formData = new FormData();
-      if (data.logoUrl) {
-        formData.append('logoUrl', data.logoUrl);
-      } else {
-        formData.append('logoUrl', '');
-      }
-
+      formData.append('logoUrl', data.logoUrl?.trim() ?? '');
       const result = await updateBrandingAction(formData);
-
       if (result.success) {
-        toast.success('Branding updated successfully');
+        setCurrentLogoUrl(data.logoUrl?.trim() || null);
+        setIsEditing(false);
+        reset({ logoUrl: data.logoUrl ?? '' });
+        toast.success('Branding updated');
       } else {
         toast.error(result.error || 'Failed to update branding');
       }
@@ -75,90 +85,95 @@ export function AdvisorBrandingForm({ profile, updateBrandingAction }: AdvisorBr
     }
   };
 
-  const fieldLabelClassName = 'text-sm font-semibold text-foreground';
-  const fieldHintClassName = 'text-xs leading-5 text-muted-foreground';
-  const errorClassName = 'text-sm text-destructive';
-
-  // Check if URL is valid for preview
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
+  const handleCancel = () => {
+    reset({ logoUrl: currentLogoUrl || '' });
+    setIsEditing(false);
   };
 
-  const showPreview = logoUrl && logoUrl.trim() !== '' && isValidUrl(logoUrl);
-
   return (
-    <div className="rounded-lg border bg-card p-6">
-      <div className="space-y-2 mb-6">
-        <h2 className="text-xl font-semibold tracking-[-0.03em]">Branding</h2>
-        <p className="text-sm text-muted-foreground">
-          Configure your logo and branding that appears in client invitation emails.
-        </p>
+    <div className="rounded-xl border bg-card p-6 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">Branding</h2>
+          <p className="text-sm text-muted-foreground">
+            Logo shown in client invitation emails.
+          </p>
+        </div>
+        {!isEditing && (
+          <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)} className="shrink-0">
+            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+            Edit
+          </Button>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="space-y-2">
-          <label htmlFor="logoUrl" className={fieldLabelClassName}>
-            Logo URL
-          </label>
-          <p className={fieldHintClassName}>
-            Enter the HTTPS URL of your company logo. Leave empty to use no logo.
-          </p>
-          <Input
-            id="logoUrl"
-            type="url"
-            {...register('logoUrl')}
-            placeholder="https://example.com/logo.png"
-            aria-invalid={!!errors.logoUrl}
-            disabled={isSubmitting}
-          />
-          {errors.logoUrl && <p className={errorClassName}>{errors.logoUrl.message}</p>}
-        </div>
-
-        {showPreview && (
-          <div className="space-y-2">
-            <p className={fieldLabelClassName}>Preview</p>
-            <div className="rounded-md border bg-muted/50 p-4">
+      {!isEditing ? (
+        <div className="mt-6">
+          {hasLogo ? (
+            <div className="rounded-lg border bg-muted/30 p-6 flex items-center justify-center min-h-[100px]">
               <img
-                src={logoUrl}
-                alt="Logo preview"
-                className="max-h-[60px] max-w-[200px] object-contain"
+                src={currentLogoUrl!}
+                alt="Your logo"
+                className="max-h-16 max-w-[220px] object-contain"
                 onError={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  img.style.display = 'none';
-                  const parent = img.parentNode as HTMLElement;
-                  if (parent && !parent.querySelector('.error-text')) {
-                    const errorText = document.createElement('p');
-                    errorText.className = 'text-xs text-destructive error-text';
-                    errorText.textContent = 'Failed to load image from URL';
-                    parent.appendChild(errorText);
-                  }
-                }}
-                onLoad={(e) => {
-                  const img = e.target as HTMLImageElement;
-                  img.style.display = 'block';
-                  const parent = img.parentNode as HTMLElement;
-                  const errorText = parent?.querySelector('.error-text');
-                  if (errorText) {
-                    errorText.remove();
-                  }
+                  (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
             </div>
-          </div>
-        )}
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isSubmitting} size="lg">
-            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSubmitting ? 'Saving...' : 'Save Branding'}
-          </Button>
+          ) : (
+            <p className="text-sm text-muted-foreground py-4">No logo set. Click Edit to add one.</p>
+          )}
         </div>
-      </form>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
+          <div className="space-y-2">
+            <label htmlFor="logoUrl" className="text-sm font-medium">
+              Logo URL
+            </label>
+            <Input
+              id="logoUrl"
+              type="url"
+              {...register('logoUrl')}
+              placeholder="https://example.com/logo.png"
+              aria-invalid={!!errors.logoUrl}
+              disabled={isSubmitting}
+              className="max-w-md"
+            />
+            {errors.logoUrl && <p className="text-sm text-destructive">{errors.logoUrl.message}</p>}
+            <p className="text-xs text-muted-foreground">HTTPS URL only. Leave empty for no logo.</p>
+          </div>
+          {showPreview && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Preview</p>
+              <div className="rounded-lg border bg-muted/30 p-4 inline-block">
+                <img
+                  src={logoUrl}
+                  alt="Logo preview"
+                  className="max-h-14 max-w-[180px] object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          <div className="flex gap-2 pt-1">
+            <Button type="submit" disabled={isSubmitting} size="sm" className="min-w-[80px]">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+                  Saving...
+                </>
+              ) : (
+                "Save"
+              )}
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={handleCancel} disabled={isSubmitting}>
+              Cancel
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

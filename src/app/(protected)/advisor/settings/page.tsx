@@ -20,88 +20,74 @@ export default async function AdvisorSettingsPage() {
   }
 
   const { profile } = result.data!;
+  const displayName =
+    profile.user.firstName && profile.user.lastName
+      ? `${profile.user.firstName} ${profile.user.lastName}`
+      : profile.user.name || "—";
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/advisor">
+      <div>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/advisor" className="inline-flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Clients
           </Link>
         </Button>
-        <div className="space-y-1">
-          <p className="editorial-kicker">Account management</p>
-          <h1 className="text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
-            Settings
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Configure your branding and contact information.
-          </p>
-        </div>
       </div>
 
-      {/* Branding Section */}
+      <div className="space-y-1">
+        <p className="editorial-kicker">Account management</p>
+        <h1 className="text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
+          Settings
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Manage branding and view your profile used in invitations.
+        </p>
+      </div>
+
       <div className="space-y-6">
         <AdvisorBrandingForm
           profile={profile}
           updateBrandingAction={updateAdvisorBranding}
         />
 
-        {/* Contact Information Display */}
-        <div className="rounded-lg border bg-card p-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <h2 className="text-xl font-semibold tracking-[-0.03em]">Contact Information</h2>
-              <p className="text-sm text-muted-foreground">
-                This information is displayed in client invitation emails.
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Name</p>
-                <p className="text-sm">
-                  {profile.user.firstName && profile.user.lastName
-                    ? `${profile.user.firstName} ${profile.user.lastName}`
-                    : profile.user.name || 'Not set'
-                  }
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Email</p>
-                <p className="text-sm">{profile.user.email}</p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Phone</p>
-                <p className="text-sm">{profile.phone || 'Not set'}</p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Firm Name</p>
-                <p className="text-sm">{profile.firmName || 'Not set'}</p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Job Title</p>
-                <p className="text-sm">{profile.jobTitle || 'Not set'}</p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">License Number</p>
-                <p className="text-sm">{profile.licenseNumber || 'Not set'}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t">
-              <p className="text-xs text-muted-foreground">
-                To update your contact information, please contact your administrator.
-              </p>
-            </div>
+        <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold tracking-tight">Contact information</h2>
+            <p className="text-sm text-muted-foreground">
+              Shown in client invitation emails. Updated by your administrator.
+            </p>
           </div>
+          <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Name</dt>
+              <dd className="mt-1 text-sm">{displayName}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Email</dt>
+              <dd className="mt-1 text-sm">{profile.user.email}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Phone</dt>
+              <dd className="mt-1 text-sm">{profile.phone || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Firm</dt>
+              <dd className="mt-1 text-sm">{profile.firmName || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Job title</dt>
+              <dd className="mt-1 text-sm">{profile.jobTitle || "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wider text-muted-foreground">License</dt>
+              <dd className="mt-1 text-sm">{profile.licenseNumber || "—"}</dd>
+            </div>
+          </dl>
+          <p className="mt-5 border-t pt-4 text-xs text-muted-foreground">
+            To change this information, contact your administrator.
+          </p>
         </div>
       </div>
     </div>
