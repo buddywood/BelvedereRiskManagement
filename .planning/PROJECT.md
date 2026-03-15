@@ -8,6 +8,15 @@ A complete governance intelligence platform for wealth advisors managing multipl
 
 Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
 
+## Current Milestone: v1.4 Advisor Workflow Pipeline
+
+**Goal:** Automate the complete client journey from advisor invite through governance report delivery with status tracking and intelligent notifications.
+
+**Target features:**
+- Client invite system with registration links and invitation tracking
+- Status tracking dashboard showing visual client pipeline progression
+- Automated notifications for stage transitions, pending reviews, and deadlines
+
 ## Requirements
 
 ### Validated
@@ -39,7 +48,11 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 
 ### Active
 
-(Ready for next milestone planning)
+<!-- Current scope. Building toward these. -->
+
+- [ ] Advisor client invitation system with registration link generation
+- [ ] Client status tracking with visual pipeline progression
+- [ ] Automated notification system for workflow stage transitions
 
 ### Out of Scope
 
@@ -107,4 +120,4 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - **Scope**: Family Governance pillar only — validated as sufficient for governance intelligence platform
 
 ---
-*Last updated: 2026-03-15 after v1.3 milestone completion*
+*Last updated: 2026-03-15 after v1.4 milestone start*

@@ -7,15 +7,14 @@
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
-**Current focus:** Planning next milestone
+**Current focus:** v1.4 Advisor Workflow Pipeline
 
 ## Current Position
 
-**Milestone:** v1.3 Governance Intelligence
-**Status:** COMPLETE (shipped 2026-03-15)
-**Phases:** 11-14 (all complete)
-
-**What shipped:** Multi-client advisor dashboard with secure data isolation, analytics engine with trend visualizations, automated risk intelligence with portfolio-wide insights, and family self-service portal.
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-15 — Milestone v1.4 started
 
 ## Performance Metrics
 
