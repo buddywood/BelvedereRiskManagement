@@ -1,7 +1,7 @@
 # Feature Research
 
-**Domain:** Governance Intelligence Dashboard Platform
-**Researched:** 2026-03-14
+**Domain:** Client invitation systems, status tracking dashboards, and automated workflow notifications
+**Researched:** 2026-03-15
 **Confidence:** MEDIUM
 
 ## Feature Landscape
@@ -12,14 +12,13 @@ Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Multi-Client Portfolio View | Advisors manage multiple families, expect consolidated view | MEDIUM | Hierarchical client organization with role-based access |
-| Real-Time Risk Scoring Dashboard | Standard in 2026 governance platforms | MEDIUM | Integrate with existing assessment scoring engine |
-| Historical Trend Visualization | Required for annual governance tracking | MEDIUM | Chart.js or D3.js for time-series data |
-| Automated Compliance Reporting | Expected in enterprise governance tools | HIGH | PDF generation with branded templates |
-| Client Performance Comparisons | Advisors benchmark families against peers | MEDIUM | Anonymous aggregate scoring by industry/size |
-| Risk Alert System | Proactive notification when scores change | LOW | Email/in-app notifications with thresholds |
-| Data Export Capabilities | Standard business intelligence feature | LOW | CSV/Excel export for external analysis |
-| Mobile-Responsive Interface | 2026 expectation for professional dashboards | MEDIUM | Progressive web app patterns |
+| Secure email invitations with branded templates | Standard for all wealth management platforms 2026 | MEDIUM | Email templates with personalization, secure links, advisor branding |
+| Real-time pipeline status dashboard | Advisors need visibility into client onboarding progress | MEDIUM | Visual pipeline stages, completion percentages, at-a-glance health |
+| Automated status change notifications | Expected for professional service delivery efficiency | MEDIUM | Stage transitions, document uploads, deadline alerts |
+| Document collection progress tracking | Required for compliance and momentum maintenance | LOW | File upload status, completion indicators, automated reminders |
+| Mobile-responsive portal access | Clients expect modern digital experience across devices | LOW | Responsive design, secure authentication, mobile optimization |
+| Client communication preferences | Professional expectation to respect communication choices | LOW | Email frequency, notification types, contact method preferences |
+| Secure messaging within platform | Clients expect integrated, compliant communication | MEDIUM | Portal-based messaging, audit trail, file sharing |
 
 ### Differentiators (Competitive Advantage)
 
@@ -27,14 +26,13 @@ Features that set the product apart. Not required, but valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| AI-Powered Risk Insights | Automated anomaly detection and recommendations | HIGH | Machine learning on assessment patterns |
-| Predictive Governance Modeling | Forecast family risk trends based on historical data | HIGH | Time series forecasting algorithms |
-| Interactive Family Governance Maps | Visual relationship mapping of governance structures | HIGH | D3.js force-directed graphs |
-| Custom Benchmark Creation | Advisors define peer groups for comparison | MEDIUM | Flexible filtering and grouping engine |
-| Governance Calendar Integration | Sync policy reviews and assessments with calendar | LOW | CalDAV integration with major calendar providers |
-| White-Label Customization | Advisors brand dashboards for their clients | MEDIUM | CSS theming and logo customization |
-| Voice-to-Insights Integration | Query dashboard data using natural language | HIGH | LLM integration with structured data queries |
-| Automated Policy Template Updates | Dynamic policy recommendations based on assessment changes | MEDIUM | Rule engine connecting scores to policy templates |
+| AI-powered personalized onboarding paths | Adapts workflow based on client complexity/family structure | HIGH | Dynamic path adjustment based on assessment responses |
+| Predictive analytics for engagement optimization | Identifies at-risk clients before they disengage | HIGH | Behavior analysis, proactive intervention recommendations |
+| White-label invitation system with advisor branding | Complete advisor brand experience throughout journey | MEDIUM | Custom domains, branded templates, logos, color schemes |
+| Family member role-based invitation workflows | Handles complex governance structures with multiple stakeholders | HIGH | Multi-approver flows, role permissions, dependency tracking |
+| Smart calendar integration with availability matching | Streamlines complex family scheduling across time zones | MEDIUM | Calendar sync, family availability coordination |
+| Compliance audit trail with governance focus | Demonstrates regulatory adherence specific to family governance | MEDIUM | Detailed logs, governance decision tracking, export capabilities |
+| Video introduction integration for personal touch | Humanizes digital onboarding for high-touch relationships | MEDIUM | Embedded advisor videos, recording tools, personalization |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
@@ -42,34 +40,38 @@ Features that seem good but create problems.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Real-Time Live Collaboration | Appears modern and engaging | Creates complexity, version conflicts, rarely needed | Async collaboration with clear ownership workflows |
-| Unlimited Dashboard Customization | Users want control over their interface | Analysis paralysis, inconsistent UX, support burden | Predefined layouts with limited configuration options |
-| Direct Client Data Entry | Seems efficient to skip advisor workflow | Bypasses advisor review, quality control issues | Maintain advisor-mediated workflow with client visibility |
-| Comprehensive Social Features | Appears to add engagement value | Privacy concerns for family governance data | Simple commenting/notes within advisor-controlled environment |
+| Built-in CRM functionality | "One platform for everything" | Not our expertise, existing solutions better | Deep CRM integration via APIs |
+| Complex project management features | Onboarding seems like project management | Over-engineering for specific governance use case | Focus on governance-specific workflow states |
+| Marketing automation beyond onboarding | "Nurture prospects too" | Scope creep, dilutes governance intelligence focus | Partner with marketing platforms, focus on assessment |
+| Social media integration | "Modern engagement" | Outside wealth management compliance scope | Professional communication channels only |
+| Video conferencing built-in | "Complete platform" | Commodity feature, maintenance overhead | Support existing meeting platforms via links |
 
 ## Feature Dependencies
 
 ```
-Multi-Client Portfolio View
-    └──requires──> Client Role Management
-                       └──requires──> User Authentication System
+Secure Authentication (existing)
+    └──enables──> Client Invitation System
+                       └──requires──> Status Dashboard (tracks invitations)
+                                          └──enables──> Automated Notifications
 
-Historical Trend Visualization
-    └──requires──> Assessment Data Storage
-                       └──requires──> Existing Assessment Engine
+Document Collection (existing file handling)
+    └──enhances──> Progress Tracking
+                      └──triggers──> Status Notifications
 
-AI-Powered Risk Insights ──enhances──> Real-Time Risk Scoring Dashboard
+Family/Household Management (existing)
+    └──enables──> Multi-stakeholder Invitations
+                     └──requires──> Role-based Workflows
 
-Predictive Governance Modeling ──requires──> Historical Trend Visualization
-
-Custom Benchmark Creation ──conflicts──> Anonymous Aggregate Scoring
+Notification System Foundation (existing)
+    └──extends──> Workflow Notifications
 ```
 
 ### Dependency Notes
 
-- **Multi-Client Portfolio View requires Client Role Management:** Advisors need different access levels per client family
-- **AI-Powered Risk Insights enhances Real-Time Risk Scoring:** ML recommendations build on existing scoring framework
-- **Custom Benchmark Creation conflicts with Anonymous Aggregate Scoring:** Custom groups may compromise anonymity requirements
+- **Status Dashboard requires Client Invitation System:** Dashboard shows invitation status and progress
+- **Automated Notifications require Status Dashboard:** Notifications triggered by status changes tracked in dashboard
+- **Multi-stakeholder Invitations require Family Management:** Complex family structures need existing household relationship data
+- **All features require existing Authentication/MFA:** Security is table stakes for wealth management
 
 ## MVP Definition
 
@@ -77,42 +79,39 @@ Custom Benchmark Creation ──conflicts──> Anonymous Aggregate Scoring
 
 Minimum viable product — what's needed to validate the concept.
 
-- [ ] Multi-Client Portfolio View — Core value proposition for advisors
-- [ ] Real-Time Risk Scoring Dashboard — Integration with existing assessment engine
-- [ ] Historical Trend Visualization — Essential for annual governance tracking
-- [ ] Basic Risk Alert System — Proactive value for advisor workflow
-- [ ] Data Export Capabilities — Standard business intelligence expectation
+- [ ] Secure email invitation system — Essential for advisor workflow, table stakes expectation
+- [ ] Basic status dashboard — Advisors must see client progress, prevents manual tracking
+- [ ] Automated reminder notifications — Prevents client drop-off, maintains professional momentum
+- [ ] Document collection tracking — Builds on existing file handling, shows completion status
 
 ### Add After Validation (v1.x)
 
 Features to add once core is working.
 
-- [ ] Client Performance Comparisons — When user base provides sufficient data for meaningful benchmarks
-- [ ] Automated Compliance Reporting — When PDF generation infrastructure is established
-- [ ] Custom Benchmark Creation — When core analytics prove valuable
+- [ ] White-label branding — When advisors request branded experience
+- [ ] Advanced notification customization — When usage patterns show needed flexibility
+- [ ] Mobile app optimization — When mobile usage data shows demand
 
 ### Future Consideration (v2+)
 
 Features to defer until product-market fit is established.
 
-- [ ] AI-Powered Risk Insights — Requires substantial data history for training
-- [ ] Predictive Governance Modeling — Advanced analytics for mature platform
-- [ ] Interactive Family Governance Maps — Complex visualization for established user base
+- [ ] AI-powered personalization — Requires usage data to be meaningful
+- [ ] Predictive analytics — Need baseline engagement data first
+- [ ] Video integration — Nice-to-have, not essential for governance workflow validation
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Multi-Client Portfolio View | HIGH | MEDIUM | P1 |
-| Real-Time Risk Scoring Dashboard | HIGH | MEDIUM | P1 |
-| Historical Trend Visualization | HIGH | MEDIUM | P1 |
-| Risk Alert System | MEDIUM | LOW | P1 |
-| Data Export Capabilities | MEDIUM | LOW | P1 |
-| Client Performance Comparisons | HIGH | MEDIUM | P2 |
-| Automated Compliance Reporting | MEDIUM | HIGH | P2 |
-| Mobile-Responsive Interface | MEDIUM | MEDIUM | P2 |
-| AI-Powered Risk Insights | HIGH | HIGH | P3 |
-| Predictive Governance Modeling | MEDIUM | HIGH | P3 |
+| Secure email invitations | HIGH | MEDIUM | P1 |
+| Status dashboard | HIGH | MEDIUM | P1 |
+| Automated notifications | HIGH | MEDIUM | P1 |
+| Document tracking | MEDIUM | LOW | P1 |
+| White-label branding | MEDIUM | MEDIUM | P2 |
+| AI personalization | LOW | HIGH | P3 |
+| Video integration | LOW | MEDIUM | P3 |
+| Predictive analytics | LOW | HIGH | P3 |
 
 **Priority key:**
 - P1: Must have for launch
@@ -121,39 +120,45 @@ Features to defer until product-market fit is established.
 
 ## Competitor Feature Analysis
 
-| Feature | Masttro | BlackRock Geopolitical Dashboard | Our Approach |
-|---------|---------|----------------------------------|--------------|
-| Global Wealth Visualization | Interactive wealth maps with entities | Geopolitical risk heatmaps | Family governance risk landscapes |
-| Historical Performance | Asset performance over time | Risk event frequency tracking | Governance assessment trends |
-| AI-Powered Insights | AI tools for wealth management | Market attention analysis | Assessment pattern analysis |
-| Multi-Client Management | Family office operations platform | Institutional risk monitoring | Advisor-centric multi-family platform |
+| Feature | Industry Standard | Wealth Management Leaders | Our Approach |
+|---------|------------------|---------------------------|--------------|
+| Email invitations | Basic templates | Branded, personalized | Governance-focused templates |
+| Status tracking | Simple progress bars | Real-time dashboards | Governance milestone tracking |
+| Notifications | Generic CRM alerts | Customizable workflows | Assessment-specific triggers |
+| Document collection | File uploads | Secure portals with compliance | Integrate with existing assessment docs |
 
 ## Integration with Existing Features
 
 ### Assessment System Integration
-- Extend existing scoring engine to power real-time dashboard metrics
-- Use existing 68-question assessment data for historical trend analysis
-- Leverage existing customization scoring for client comparisons
+- Use existing 68-question assessment as the core workflow being tracked
+- Leverage existing scoring engine to trigger notifications based on completion
+- Build on existing customization features for advisor-specific workflows
 
 ### Household Profile Integration
-- Use existing household member profiles for multi-client organization
-- Leverage role-based access already implemented for advisor portal
-- Build on existing member-aware permissions for dashboard access
+- Use existing household member profiles for multi-stakeholder invitations
+- Leverage role-based access for family member permissions in workflow
+- Build on existing member-aware authentication for secure access
 
 ### Security and Privacy Integration
-- Extend existing TOTP/MFA to dashboard access
-- Maintain SOC 2 compliance with dashboard data visualization
-- Use existing audit logging for risk alert and export functionality
+- Extend existing TOTP/MFA to invitation system access
+- Maintain SOC 2 compliance with workflow tracking and notifications
+- Use existing audit logging for invitation and status tracking history
+
+### Notification System Foundation Integration
+- Extend existing notification infrastructure for workflow alerts
+- Build on existing email template system for invitation customization
+- Leverage existing preference management for notification settings
 
 ## Sources
 
-- [New Governance Tools From OpenAI and Microsoft Target AI Risks](https://www.pymnts.com/news/artificial-intelligence/2026/new-governance-tools-from-openai-and-microsoft-target-ai-risks/)
-- [Best Family Office Software for 2026: Features, Pricing, and Use Cases](https://masttro.com/insights/best-family-office-software)
-- [Best Risk Assessment Tools 2026: Top 10 Picks](https://www.flowforma.com/blog/automated-risk-assessment-tools)
-- [9 Dashboard Design Principles (2026)](https://www.designrush.com/agency/ui-ux-design/dashboard/trends/dashboard-design-principles)
-- [Data Governance Metrics and KPIs: Track and Report](https://www.scrut.io/post/data-governance-metrics-kpi)
-- [Geopolitical Risk Dashboard | BlackRock Investment Institute](https://www.blackrock.com/corporate/insights/blackrock-investment-institute/interactive-charts/geopolitical-risk-dashboard)
+- [Wealth Management Software in 2026 | Top Platforms & Technology Solutions](https://revenx.com/wealth-management-software-in-2026-platforms-and-technology-for-scalable-pre-set-appointments/)
+- [Client Onboarding in Wealth Management: Best Practices](https://whatfix.com/blog/client-onboarding-in-wealth-management/)
+- [Wealth management client onboarding process + checklist - Blog | ShareFile](https://www.sharefile.com/resource/blogs/wealth-management-client-onboarding)
+- [Guide to Wealth Management Onboarding & Service](https://www.smartcommunications.com/resources/guides/the-ultimate-guide-to-wealth-management-client-onboarding-and-servicing/)
+- [10 new client onboarding email templates for a smoother onboarding experience | Moxo](https://www.moxo.com/blog/new-client-onboarding-email-template)
+- [Pipeline CRM for Financial Services](https://pipelinecrm.com/industries/financial-services-crm/)
+- [CRM Features Transforming Financial Services: Analytics, Workflow, and Compliance | Bedrock](https://bedrockfs.com/crm-features-transforming-financial-services-analytics-workflow-and-compliance/)
 
 ---
-*Feature research for: Governance Intelligence Dashboard Platform*
-*Researched: 2026-03-14*
+*Feature research for: Client invitation systems, status tracking dashboards, and automated workflow notifications*
+*Researched: 2026-03-15*
