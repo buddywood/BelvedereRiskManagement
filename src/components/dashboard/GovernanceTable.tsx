@@ -30,7 +30,7 @@ export function GovernanceTable({ clients }: GovernanceTableProps) {
     if (typeof window !== 'undefined' && window.innerWidth < 1024) {
       return { assessments: false, lastAssessment: false };
     }
-    return {};
+    return { assessments: true, lastAssessment: true };
   });
 
   const getRiskSeverityOrder = (riskLevel: string | null) => {
