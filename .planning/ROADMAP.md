@@ -116,6 +116,12 @@ Plans:
 
 **Requirements:** FAMILY-01, FAMILY-02, FAMILY-03, FAMILY-04
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Data layer: family dashboard types, user-scoped queries, server actions
+- [ ] 14-02-PLAN.md — Dashboard UI: household members, score display, pillar breakdown, trend chart, emphasis indicators
+
 **Success Criteria:**
 1. Family members can log in and see their governance score with their household member names displayed
 2. Families can view their score improvements over time when they complete multiple annual assessments
