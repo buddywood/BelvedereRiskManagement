@@ -77,6 +77,12 @@ Plans:
 
 **Requirements:** VIZ-01, VIZ-02, VIZ-03, VIZ-04, VIZ-05
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Analytics data layer: Recharts install, types, queries, formatters, chart container
+- [ ] 12-02-PLAN.md — Chart components and analytics page: trend line chart, category breakdown, comparison view, navigation
+
 **Success Criteria:**
 1. Advisor can view line charts showing governance score changes over time for any family with multiple assessments
 2. Advisor can see visual breakdown of all 8 governance categories with scores displayed as charts
@@ -125,7 +131,7 @@ Plans:
 | 9. Advisor Portal Access | v1.2      | 6/6            | Complete    | 2026-03-14 |
 | 10. Assessment Customization | v1.2      | 4/4            | Complete    | 2026-03-14 |
 | 11. Dashboard Foundation | v1.3  | 3/3            | Complete    | 2026-03-14 |
-| **12. Analytics Engine** | **v1.3**      | **0/0**        | **Pending** | **-**      |
+| **12. Analytics Engine** | **v1.3**      | **0/2**        | **Planned** | **-**      |
 | **13. Intelligence Features** | **v1.3**  | **0/0**        | **Pending** | **-**      |
 | **14. Family Dashboard** | **v1.3**      | **0/0**        | **Pending** | **-**      |
 
