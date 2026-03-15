@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
 import { ClientCard } from "@/components/advisor/ClientCard";
 import { NotificationBell } from "@/components/advisor/NotificationBell";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default async function AdvisorDashboardPage() {
   const result = await getAdvisorDashboardData();
@@ -75,6 +78,23 @@ export default async function AdvisorDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Governance Dashboard */}
+      <Card className="hero-surface rounded-lg p-6">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h3 className="text-xl font-semibold">Governance Dashboard</h3>
+            <p className="text-sm text-muted-foreground">
+              View governance scores and risk levels across your client portfolio
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/advisor/dashboard">
+              View Portfolio Dashboard
+            </Link>
+          </Button>
+        </div>
+      </Card>
 
       <div className="section-divider"></div>
 

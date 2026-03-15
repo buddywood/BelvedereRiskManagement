@@ -9,6 +9,7 @@ const NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/intake", label: "Intake" },
   { href: "/advisor", label: "Advisor" },
+  { href: "/advisor/dashboard", label: "Governance" },
   { href: "/assessment", label: "Assessment" },
   { href: "/profiles", label: "Profiles" },
   { href: "/settings", label: "Settings" },
@@ -23,7 +24,7 @@ export function ProtectedNav({ showAdvisor = false }: ProtectedNavProps) {
 
   const items = showAdvisor
     ? NAV_ITEMS
-    : NAV_ITEMS.filter((item) => item.href !== "/advisor");
+    : NAV_ITEMS.filter((item) => item.href !== "/advisor" && item.href !== "/advisor/dashboard");
 
   return (
     <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:flex md:grid-cols-5">
