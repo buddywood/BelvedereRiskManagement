@@ -14,10 +14,10 @@
 
 **Milestone:** v1.3 Governance Intelligence
 **Phase:** 11 - Dashboard Foundation
-**Plan:** 11-02 (next)
+**Plan:** 11-03 (next)
 **Status:** Ready for next plan
 
-**Progress Bar:** ██████████                              33% (1/3 plans completed in current phase)
+**Progress Bar:** ████████████████████                    67% (2/3 plans completed in current phase)
 
 ## Performance Metrics
 
@@ -41,7 +41,13 @@
 
 ### Key Architectural Decisions
 
-**v1.3 specific:**
+**v1.3 Phase 11 specific:**
+- TanStack React Table with custom sorting for governance score column (null scores first)
+- Responsive column visibility hides assessments and date columns on mobile/tablet
+- Hero section UI pattern consistent with existing dashboard pages for advisor familiarity
+- Badge risk indicators with appropriate severity colors (green/amber/orange/red)
+
+**v1.3 general:**
 - Extend existing Prisma ownership patterns with advisor relationships (not rebuild authorization)
 - Recharts for React-first charting with TypeScript support
 - Redis caching for advisor dashboard aggregations
@@ -92,8 +98,8 @@
 
 ## Session Continuity
 
-**Last Session:** 2026-03-15T01:30:18.508Z
-**Context:** Completed Phase 11 Plan 01 - Dashboard data layer with advisor-scoped queries
+**Last Session:** 2026-03-15T01:34:41Z
+**Context:** Completed Phase 11 Plan 02 - Dashboard UI components with governance table
 
 **Session Handoff Notes:**
 - v1.3 requirements: 18 total across 4 categories (DASH, VIZ, INTEL, FAMILY)
@@ -102,7 +108,7 @@
 - Research context: Used to validate technology choices and phase structure
 - Dependencies: Each phase builds on previous (Foundation → Analytics → Intelligence → Family)
 
-**Ready for:** `/gsd:execute-phase 11` to continue with plan 11-02 (Dashboard UI Components)
+**Ready for:** `/gsd:execute-phase 11` to continue with plan 11-03 (Dashboard Analytics Foundation)
 
 **Files updated this session:**
 - `.planning/ROADMAP.md`: Added v1.3 phases 11-14 with success criteria
