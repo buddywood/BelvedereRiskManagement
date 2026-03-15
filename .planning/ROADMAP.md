@@ -96,6 +96,13 @@ Plans:
 
 **Requirements:** INTEL-01, INTEL-02, INTEL-03, INTEL-04
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Risk identification data layer: intelligence types, risk algorithms, advisor-scoped queries, server actions
+- [ ] 13-02-PLAN.md — Intelligence dashboard UI: risk summary card, portfolio risk list, distribution chart, navigation
+- [ ] 13-03-PLAN.md — Risk drill-down: family risk detail page, risk cards with recommendations, cross-navigation
+
 **Success Criteria:**
 1. System automatically shows top 3 risk areas for each family based on lowest governance scores
 2. Advisor can see master list of all high-risk governance issues across their entire client portfolio
@@ -132,7 +139,7 @@ Plans:
 | 10. Assessment Customization | v1.2      | 4/4            | Complete    | 2026-03-14 |
 | 11. Dashboard Foundation | v1.3  | 3/3            | Complete    | 2026-03-14 |
 | **12. Analytics Engine** | **v1.3**      | **0/2**        | **Planned** | **-**      |
-| **13. Intelligence Features** | **v1.3**  | **0/0**        | **Pending** | **-**      |
+| **13. Intelligence Features** | **v1.3**  | **0/3**        | **Planned** | **-**      |
 | **14. Family Dashboard** | **v1.3**      | **0/0**        | **Pending** | **-**      |
 
 **Current milestone progress:** 1/4 phases complete (25%)
