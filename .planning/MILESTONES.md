@@ -39,3 +39,13 @@
 
 ---
 
+
+## v1.3 Governance Intelligence (Shipped: 2026-03-15)
+
+**Phases completed:** 14 phases, 46 plans, 43 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
