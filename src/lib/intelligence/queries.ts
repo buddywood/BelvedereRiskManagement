@@ -3,7 +3,61 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { PILLAR_WEIGHTS } from "@/lib/analytics/queries";
 import { CATEGORY_LABELS } from "@/lib/analytics/formatters";
-import type { RiskSeverity, RiskIndicator, FamilyRiskSummary, PortfolioIntelligence } from "./types";
+import type { RiskSeverity, RiskIndicator, FamilyRiskSummary, PortfolioIntelligence, RiskDetail, RiskRecommendation, AssessmentResponseDetail } from "./types";
+
+/**
+ * Static governance recommendations mapped by category slug
+ */
+const RISK_RECOMMENDATIONS: Record<string, RiskRecommendation[]> = {
+  'decision-making-authority': [
+    { title: 'Establish formal decision-making framework', description: 'Create clear guidelines for who makes what decisions and under what circumstances', priority: 'high' },
+    { title: 'Document authority levels for financial decisions', description: 'Define spending thresholds and approval requirements for different transaction types', priority: 'medium' },
+    { title: 'Create family council with defined voting procedures', description: 'Establish structured governance body with clear voting rights and procedures', priority: 'medium' },
+  ],
+  'access-controls': [
+    { title: 'Implement tiered access to financial information', description: 'Establish different levels of access based on family member roles and responsibilities', priority: 'high' },
+    { title: 'Review and update beneficiary access rights annually', description: 'Regularly audit and adjust access permissions to match current family structure', priority: 'medium' },
+  ],
+  'trust-estate-governance': [
+    { title: 'Schedule annual trust document review', description: 'Ensure trust provisions remain aligned with family goals and legal requirements', priority: 'high' },
+    { title: 'Clarify trustee succession plan', description: 'Document clear procedures for trustee replacement and transition', priority: 'medium' },
+    { title: 'Establish trust protector role', description: 'Appoint independent oversight to monitor trustee performance and resolve disputes', priority: 'low' },
+  ],
+  'marriage-relationship-risk': [
+    { title: 'Consider prenuptial/postnuptial agreements', description: 'Protect family assets through appropriate marital agreements', priority: 'high' },
+    { title: 'Establish family wealth education program for spouses', description: 'Ensure new family members understand governance principles and expectations', priority: 'medium' },
+  ],
+  'succession-planning': [
+    { title: 'Create formal succession timeline', description: 'Establish clear timeline and milestones for leadership transition', priority: 'high' },
+    { title: 'Identify and develop next-generation leaders', description: 'Invest in leadership development for family members taking future roles', priority: 'medium' },
+    { title: 'Document transition procedures for key roles', description: 'Create detailed handover processes for critical family governance positions', priority: 'medium' },
+  ],
+  'behavior-standards': [
+    { title: 'Codify family values and expected behaviors', description: 'Document clear behavioral expectations and family code of conduct', priority: 'high' },
+    { title: 'Establish consequences for policy violations', description: 'Create fair and consistent enforcement mechanisms for governance breaches', priority: 'medium' },
+  ],
+  'business-involvement': [
+    { title: 'Define family employment policies', description: 'Establish clear criteria and processes for family members joining the business', priority: 'high' },
+    { title: 'Create compensation guidelines for family members in business', description: 'Develop fair compensation frameworks that balance family and business interests', priority: 'medium' },
+  ],
+  'documentation-communication': [
+    { title: 'Schedule quarterly family governance meetings', description: 'Establish regular communication rhythm for governance updates and decisions', priority: 'high' },
+    { title: 'Create centralized document repository', description: 'Implement secure, accessible system for storing and sharing governance documents', priority: 'medium' },
+  ],
+};
+
+/**
+ * Get recommendations for a specific category slug with severity-based priority adjustment
+ */
+function getRecommendationsForCategory(categorySlug: string, severity: RiskSeverity): RiskRecommendation[] {
+  const baseRecommendations = RISK_RECOMMENDATIONS[categorySlug] || [];
+
+  // Adjust priority based on severity
+  return baseRecommendations.map(rec => ({
+    ...rec,
+    priority: severity === 'critical' ? 'high' : severity === 'moderate' ? 'medium' : 'low'
+  }));
+}
 
 /**
  * Determine risk severity based on governance score
@@ -247,5 +301,123 @@ export async function getPortfolioIntelligence(
     familyRiskSummaries,
     portfolioRisks,
     risksByCategory,
+  };
+}
+
+/**
+ * Get detailed risk information for a specific family with recommendations and assessment responses (INTEL-04)
+ */
+export async function getRiskDetailForFamily(
+  clientId: string,
+  advisorProfileId: string
+): Promise<RiskDetail | null> {
+  // Step a: Verify advisor-client relationship
+  const assignment = await prisma.clientAdvisorAssignment.findFirst({
+    where: {
+      advisorId: advisorProfileId,
+      clientId: clientId,
+      status: 'ACTIVE',
+    },
+    include: {
+      client: {
+        select: {
+          id: true,
+          email: true,
+        }
+      }
+    }
+  });
+
+  if (!assignment) {
+    return null;
+  }
+
+  // Step b: Get latest completed assessment with scores
+  const assessment = await prisma.assessment.findFirst({
+    where: {
+      userId: clientId,
+      status: 'COMPLETED',
+    },
+    include: {
+      scores: true,
+    },
+    orderBy: {
+      completedAt: 'desc',
+    },
+  });
+
+  if (!assessment || !assessment.completedAt) {
+    return null;
+  }
+
+  // Step c: Create RiskIndicators for each pillar score
+  const riskIndicators: RiskIndicator[] = assessment.scores.map(pillarScore => ({
+    familyId: clientId,
+    familyName: assignment.client.email,
+    categorySlug: pillarScore.pillar,
+    categoryName: CATEGORY_LABELS[pillarScore.pillar] || pillarScore.pillar,
+    score: pillarScore.score,
+    severity: getSeverity(pillarScore.score),
+    weight: PILLAR_WEIGHTS[pillarScore.pillar as keyof typeof PILLAR_WEIGHTS] || 0,
+    assessmentId: assessment.id,
+    assessmentDate: assessment.completedAt!.toISOString(),
+  }));
+
+  // Step d: Sort by score ascending (lowest first = highest risk) and take top 3
+  const topRiskIndicators = riskIndicators
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 3);
+
+  // Step e: For each top risk, fetch assessment responses and attach recommendations
+  const topRisksWithDetails = await Promise.all(
+    topRiskIndicators.map(async (risk) => {
+      // INTEL-04 critical step: Fetch underlying assessment responses for this pillar
+      const assessmentResponses = await prisma.assessmentResponse.findMany({
+        where: {
+          assessmentId: assessment.id,
+          pillar: risk.categorySlug,
+        },
+        select: {
+          questionId: true,
+          pillar: true,
+          subCategory: true,
+          answer: true,
+          skipped: true,
+          answeredAt: true,
+        },
+      });
+
+      // Map to AssessmentResponseDetail interface
+      const responseDetails: AssessmentResponseDetail[] = assessmentResponses.map(response => ({
+        questionId: response.questionId,
+        pillar: response.pillar,
+        subCategory: response.subCategory || '',
+        answer: response.answer,
+        skipped: response.skipped,
+        answeredAt: response.answeredAt.toISOString(),
+      }));
+
+      // Get recommendations for this category
+      const recommendations = getRecommendationsForCategory(risk.categorySlug, risk.severity);
+
+      return {
+        ...risk,
+        recommendations,
+        assessmentResponses: responseDetails,
+      };
+    })
+  );
+
+  // Step f: Calculate weighted overall score
+  const overallScore = calculateWeightedScore(assessment.scores);
+
+  // Step g: Return complete RiskDetail object
+  return {
+    familyId: clientId,
+    familyName: assignment.client.email,
+    overallScore,
+    latestAssessmentDate: assessment.completedAt!.toISOString(),
+    assessmentId: assessment.id,
+    topRisks: topRisksWithDetails,
   };
 }

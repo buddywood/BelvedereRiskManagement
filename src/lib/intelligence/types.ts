@@ -21,6 +21,34 @@ export interface FamilyRiskSummary {
   latestAssessmentDate: string;
 }
 
+export interface RiskRecommendation {
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
+// Represents an actual assessment response that contributed to a risk score
+export interface AssessmentResponseDetail {
+  questionId: string;
+  pillar: string;
+  subCategory: string;
+  answer: unknown; // Json field from Prisma
+  skipped: boolean;
+  answeredAt: string;
+}
+
+export interface RiskDetail {
+  familyId: string;
+  familyName: string;
+  overallScore: number;
+  latestAssessmentDate: string;
+  assessmentId: string;
+  topRisks: Array<RiskIndicator & {
+    recommendations: RiskRecommendation[];
+    assessmentResponses: AssessmentResponseDetail[]; // INTEL-04: underlying assessment details
+  }>;
+}
+
 export interface PortfolioIntelligence {
   totalFamilies: number;
   familiesAtRisk: number; // families with at least one critical or moderate risk
