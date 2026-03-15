@@ -16,8 +16,8 @@ export default function CompletePage() {
       <div className="space-y-8">
         {/* Success Header */}
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="w-8 h-8 text-green-600" />
+          <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+            <CheckCircle2 className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-semibold tracking-[-0.03em]">
             Interview Complete
@@ -74,12 +74,12 @@ export default function CompletePage() {
         </Card>
 
         {/* Timeline */}
-        <Card className="p-6 bg-blue-50 border-blue-200">
+        <Card className="p-6 bg-muted/60 border-border">
           <div className="flex items-center gap-3 mb-3">
-            <Clock className="w-5 h-5 text-blue-600" />
-            <h3 className="font-medium text-blue-900">Timeline</h3>
+            <Clock className="w-5 h-5 text-muted-foreground" />
+            <h3 className="font-medium text-foreground">Timeline</h3>
           </div>
-          <p className="text-sm text-blue-800">
+          <p className="text-sm text-muted-foreground">
             Your advisor will typically review your responses within 1-2 business days.
             You'll be notified when your customized assessment is ready.
           </p>

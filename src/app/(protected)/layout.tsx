@@ -2,6 +2,7 @@ import { auth, signOut } from "@/lib/auth";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { ProtectedNav } from "@/components/layout/ProtectedNav";
 
 export default async function ProtectedLayout({
   children,
@@ -47,28 +48,12 @@ export default async function ProtectedLayout({
               </div>
 
               <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
-                <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:flex md:grid-cols-5">
-                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
-                    <Link href="/dashboard">Dashboard</Link>
-                  </Button>
-                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
-                    <Link href="/intake">Intake</Link>
-                  </Button>
-                  {(session?.user?.role === 'ADVISOR' || session?.user?.role === 'ADMIN') && (
-                    <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
-                      <Link href="/advisor">Advisor</Link>
-                    </Button>
-                  )}
-                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
-                    <Link href="/assessment">Assessment</Link>
-                  </Button>
-                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
-                    <Link href="/profiles">Profiles</Link>
-                  </Button>
-                  <Button asChild variant="ghost" size="sm" className="h-9 w-full px-3">
-                    <Link href="/settings">Settings</Link>
-                  </Button>
-                </nav>
+                <ProtectedNav
+                  showAdvisor={
+                    session?.user?.role === "ADVISOR" ||
+                    session?.user?.role === "ADMIN"
+                  }
+                />
 
                 <div className="hidden rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground md:block lg:hidden md:max-w-[24rem]">
                   Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
