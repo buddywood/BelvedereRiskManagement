@@ -14,6 +14,7 @@ import {
   markAllNotificationsRead,
 } from '@/lib/data/advisor';
 import { getAdvisorDashboardClients, getDashboardMetrics } from '@/lib/dashboard/queries';
+import { getFamilyGovernanceTrends } from '@/lib/analytics/queries';
 import { approveClientSchema } from '@/lib/schemas/advisor';
 import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
 import type { AdvisorDashboardClient, IntakeReviewData } from '@/lib/advisor/types';
@@ -269,6 +270,23 @@ export async function markAllNotificationsReadAction() {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to mark all notifications as read';
+    return { success: false, error: message };
+  }
+}
+
+export async function getFamilyAnalyticsData(clientId: string) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const data = await getFamilyGovernanceTrends(clientId, profile.id);
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get family analytics data';
     return { success: false, error: message };
   }
 }

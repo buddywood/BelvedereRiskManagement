@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { format } from "date-fns";
+import Link from "next/link";
 import type { DashboardClient } from "@/lib/dashboard/types";
 import { ScoreBadge } from "./ScoreBadge";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +62,24 @@ export function GovernanceTable({ clients }: GovernanceTableProps) {
   const columns: ColumnDef<DashboardClient, any>[] = [
     columnHelper.accessor('name', {
       header: 'Family Name',
-      cell: (info) => info.getValue() || 'Unnamed Family',
+      cell: (info) => {
+        const client = info.row.original;
+        const familyName = info.getValue() || 'Unnamed Family';
+
+        // Only link families that have at least 1 completed assessment
+        if (client.assessmentCount > 0) {
+          return (
+            <Link
+              href={`/advisor/analytics/${client.id}`}
+              className="hover:underline text-primary"
+            >
+              {familyName}
+            </Link>
+          );
+        }
+
+        return familyName;
+      },
       enableSorting: true,
     }),
     columnHelper.accessor(
