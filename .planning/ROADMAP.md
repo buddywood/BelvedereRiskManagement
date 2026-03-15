@@ -39,6 +39,13 @@ Plans:
 
 **Requirements:** STATUS-01, STATUS-02, STATUS-03, STATUS-04, STATUS-05, STATUS-06, DOC-01, DOC-02
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 016-01-PLAN.md — Schema extension, pipeline types, status computation, and query layer
+- [ ] 016-02-PLAN.md — SSE endpoint, real-time hooks, and pipeline dashboard with TanStack Table
+- [ ] 016-03-PLAN.md — Client detail drill-down with workflow timeline and document management
+
 **Success Criteria:**
 1. Advisor dashboard displays real-time client pipeline with visual progress indicators for all stages
 2. Each client shows current stage with completion percentage and next action required
@@ -93,14 +100,14 @@ Plans:
 | Phase | Status | Requirements | Progress |
 |-------|--------|--------------|----------|
 | 15 - Secure Client Invitations | Planned | 10 | ░░░░░░░░░░ 0% |
-| 16 - Client Status Pipeline | Pending | 8 | ░░░░░░░░░░ 0% |
+| 16 - Client Status Pipeline | Planned | 8 | ░░░░░░░░░░ 0% |
 | 17 - Document Collection System | Pending | 5 | ░░░░░░░░░░ 0% |
 | 18 - Intelligent Notifications | Pending | 5 | ░░░░░░░░░░ 0% |
 | 19 - Multi-Family Workflows | Pending | 5 | ░░░░░░░░░░ 0% |
 
 **Total Requirements:** 33 mapped, 0 remaining
 **Estimated Completion:** TBD
-**Next Phase:** Phase 15 - Secure Client Invitations
+**Next Phase:** Phase 16 - Client Status Pipeline
 
 ---
 *Last updated: 2026-03-15*
