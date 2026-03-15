@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, Sparkles, Waypoints } from "lucide-react";
+import { BelvedereLogoLockup } from "@/components/home/BelvedereLogoLockup";
 
 export default function AuthLayout({
   children,
@@ -76,8 +78,13 @@ export default function AuthLayout({
             </div>
           </section>
 
-          <section className="order-1 flex items-center justify-center px-4 py-6 sm:px-8 lg:order-2 lg:px-12">
-            <div className="w-full max-w-xl">{children}</div>
+          <section className="order-1 flex flex-col gap-6 px-4 py-6 sm:px-8 lg:order-2 lg:px-12">
+            <div className="flex w-full justify-end">
+              <Link href="/" className="text-foreground" aria-label="Belvedere home">
+                <BelvedereLogoLockup className="h-auto w-full max-w-[280px]" />
+              </Link>
+            </div>
+            <div className="flex w-full max-w-xl flex-1 items-center justify-center">{children}</div>
           </section>
         </div>
       </div>

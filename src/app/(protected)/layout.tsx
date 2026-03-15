@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ProtectedNav } from "@/components/layout/ProtectedNav";
 import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncompleteIntake";
+import { BelvedereLogoLockup } from "@/components/home/BelvedereLogoLockup";
 import { prisma } from "@/lib/db";
 
 export default async function ProtectedLayout({
@@ -46,7 +48,10 @@ export default async function ProtectedLayout({
                   </h1>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3">
+                <div className="flex shrink-0 flex-wrap items-center justify-end gap-3">
+                  <Link href="/" className="hidden text-foreground sm:block" aria-label="Belvedere home">
+                    <BelvedereLogoLockup className="h-auto w-full max-w-[200px] lg:max-w-[240px]" />
+                  </Link>
                   <div className="hidden rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground lg:block">
                     Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
                   </div>
