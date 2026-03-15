@@ -27,7 +27,7 @@ async function AnalyticsContent({ clientId }: { clientId: string }) {
 
   const { data } = result;
 
-  if (data.assessments.length === 0) {
+  if (!data || data.assessments.length === 0) {
     return (
       <div className="text-center py-12">
         <h2 className="text-lg font-semibold mb-2">No Completed Assessments Yet</h2>

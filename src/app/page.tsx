@@ -3,8 +3,6 @@ import { ArrowRight, ShieldCheck, Sparkles, Waypoints } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BelvedereLogoLockup } from "@/components/home/BelvedereLogoLockup";
-
 export default async function Home() {
   const session = await auth();
 
@@ -167,9 +165,6 @@ export default async function Home() {
           </section>
 
           <aside className="mt-12 flex flex-col items-stretch gap-8 lg:mt-0 lg:pl-10">
-            <div className="flex w-full justify-end text-foreground">
-              <BelvedereLogoLockup className="h-auto w-full max-w-[280px]" />
-            </div>
             <Card className="w-full overflow-hidden">
               <CardContent className="space-y-8 pt-8">
                 <div className="space-y-2">

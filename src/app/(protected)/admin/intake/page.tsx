@@ -2,11 +2,11 @@ import { getIntakeForAdmin } from "@/lib/admin/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const STATUS_COLORS: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+const STATUS_COLORS: Record<string, "default" | "secondary" | "success" | "warning" | "info" | "outline"> = {
   NOT_STARTED: "outline",
   IN_PROGRESS: "secondary",
-  COMPLETED: "default",
-  SUBMITTED: "default",
+  COMPLETED: "success",
+  SUBMITTED: "success",
 };
 
 export default async function AdminIntakePage() {
