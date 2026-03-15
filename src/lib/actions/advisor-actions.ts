@@ -13,6 +13,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from '@/lib/data/advisor';
+import { getAdvisorDashboardClients, getDashboardMetrics } from '@/lib/dashboard/queries';
 import { approveClientSchema } from '@/lib/schemas/advisor';
 import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
 import type { AdvisorDashboardClient, IntakeReviewData } from '@/lib/advisor/types';
@@ -36,6 +37,28 @@ export async function getAdvisorDashboardData() {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get advisor dashboard data';
+    return { success: false, error: message };
+  }
+}
+
+export async function getGovernanceDashboardData() {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const clients = await getAdvisorDashboardClients(profile.id);
+    const metrics = getDashboardMetrics(clients);
+
+    return {
+      success: true,
+      data: {
+        clients,
+        metrics,
+        profile,
+      },
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get governance dashboard data';
     return { success: false, error: message };
   }
 }
