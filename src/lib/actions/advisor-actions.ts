@@ -15,6 +15,7 @@ import {
 } from '@/lib/data/advisor';
 import { getAdvisorDashboardClients, getDashboardMetrics } from '@/lib/dashboard/queries';
 import { getFamilyGovernanceTrends } from '@/lib/analytics/queries';
+import { getPortfolioIntelligence, getTopRisksForFamily } from '@/lib/intelligence/queries';
 import { approveClientSchema } from '@/lib/schemas/advisor';
 import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
 import type { AdvisorDashboardClient, IntakeReviewData } from '@/lib/advisor/types';
@@ -287,6 +288,40 @@ export async function getFamilyAnalyticsData(clientId: string) {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get family analytics data';
+    return { success: false, error: message };
+  }
+}
+
+export async function getPortfolioIntelligenceData() {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const data = await getPortfolioIntelligence(profile.id);
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get portfolio intelligence data';
+    return { success: false, error: message };
+  }
+}
+
+export async function getFamilyRiskData(clientId: string) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const data = await getTopRisksForFamily(clientId, profile.id);
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get family risk data';
     return { success: false, error: message };
   }
 }
