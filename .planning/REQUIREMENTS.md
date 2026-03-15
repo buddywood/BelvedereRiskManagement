@@ -91,45 +91,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INVITE-01 | TBD | Pending |
-| INVITE-02 | TBD | Pending |
-| INVITE-03 | TBD | Pending |
-| INVITE-04 | TBD | Pending |
-| INVITE-05 | TBD | Pending |
-| INVITE-06 | TBD | Pending |
-| INVITE-07 | TBD | Pending |
-| STATUS-01 | TBD | Pending |
-| STATUS-02 | TBD | Pending |
-| STATUS-03 | TBD | Pending |
-| STATUS-04 | TBD | Pending |
-| STATUS-05 | TBD | Pending |
-| STATUS-06 | TBD | Pending |
-| NOTIFY-01 | TBD | Pending |
-| NOTIFY-02 | TBD | Pending |
-| NOTIFY-03 | TBD | Pending |
-| NOTIFY-04 | TBD | Pending |
-| NOTIFY-05 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| DOC-02 | TBD | Pending |
-| DOC-03 | TBD | Pending |
-| DOC-04 | TBD | Pending |
-| DOC-05 | TBD | Pending |
-| BRAND-01 | TBD | Pending |
-| BRAND-02 | TBD | Pending |
-| BRAND-03 | TBD | Pending |
-| BRAND-04 | TBD | Pending |
-| BRAND-05 | TBD | Pending |
-| WORKFLOW-01 | TBD | Pending |
-| WORKFLOW-02 | TBD | Pending |
-| WORKFLOW-03 | TBD | Pending |
-| WORKFLOW-04 | TBD | Pending |
-| WORKFLOW-05 | TBD | Pending |
+| INVITE-01 | Phase 15 | Pending |
+| INVITE-02 | Phase 15 | Pending |
+| INVITE-03 | Phase 15 | Pending |
+| INVITE-04 | Phase 15 | Pending |
+| INVITE-05 | Phase 15 | Pending |
+| INVITE-06 | Phase 15 | Pending |
+| INVITE-07 | Phase 15 | Pending |
+| STATUS-01 | Phase 16 | Pending |
+| STATUS-02 | Phase 16 | Pending |
+| STATUS-03 | Phase 16 | Pending |
+| STATUS-04 | Phase 16 | Pending |
+| STATUS-05 | Phase 16 | Pending |
+| STATUS-06 | Phase 16 | Pending |
+| NOTIFY-01 | Phase 18 | Pending |
+| NOTIFY-02 | Phase 18 | Pending |
+| NOTIFY-03 | Phase 18 | Pending |
+| NOTIFY-04 | Phase 18 | Pending |
+| NOTIFY-05 | Phase 18 | Pending |
+| DOC-01 | Phase 16 | Pending |
+| DOC-02 | Phase 16 | Pending |
+| DOC-03 | Phase 17 | Pending |
+| DOC-04 | Phase 17 | Pending |
+| DOC-05 | Phase 17 | Pending |
+| BRAND-01 | Phase 15 | Pending |
+| BRAND-02 | Phase 15 | Pending |
+| BRAND-03 | Phase 17 | Pending |
+| BRAND-04 | Phase 15 | Pending |
+| BRAND-05 | Phase 17 | Pending |
+| WORKFLOW-01 | Phase 19 | Pending |
+| WORKFLOW-02 | Phase 19 | Pending |
+| WORKFLOW-03 | Phase 19 | Pending |
+| WORKFLOW-04 | Phase 19 | Pending |
+| WORKFLOW-05 | Phase 19 | Pending |
 
 **Coverage:**
-- v1.4 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29 ⚠️
+- v1.4 requirements: 33 total
+- Mapped to phases: 33
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-15*
-*Last updated: 2026-03-15 after initial definition*
+*Last updated: 2026-03-15 after roadmap creation*

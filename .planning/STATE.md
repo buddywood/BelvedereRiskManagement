@@ -11,10 +11,13 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-15 — Milestone v1.4 started
+**Milestone:** v1.4 Advisor Workflow Pipeline
+**Phase:** Phase 15 - Secure Client Invitations
+**Plan:** Not started
+**Status:** Roadmap created, ready for phase planning
+**Progress:** ░░░░░░░░░░ 0% (0/5 phases complete)
+
+**Last activity:** 2026-03-15 — Roadmap created for v1.4 milestone
 
 ## Performance Metrics
 
@@ -43,14 +46,56 @@ Last activity: 2026-03-15 — Milestone v1.4 started
 - Security: Multi-tenant data isolation enforced
 - Analytics: Trend visualization with historical tracking operational
 
+## Accumulated Context
+
+### v1.4 Roadmap Decisions
+
+**Phase Structure (5 phases):**
+- Phase 15: Secure Client Invitations (10 requirements)
+- Phase 16: Client Status Pipeline (8 requirements)
+- Phase 17: Document Collection System (5 requirements)
+- Phase 18: Intelligent Notifications (5 requirements)
+- Phase 19: Multi-Family Workflows (5 requirements)
+
+**Key Architectural Decisions:**
+- Extend existing Prisma schema with ClientInvitation and ClientStatus models
+- Use Server-Sent Events for real-time dashboard updates (simpler than WebSockets)
+- Leverage existing Resend email infrastructure for invitation system
+- Maintain multi-tenant data isolation patterns from existing codebase
+
+**Critical Success Factors:**
+- Multi-tenant security boundaries must be established in Phase 15 foundation
+- Status tracking dashboard provides foundation for intelligent notifications
+- Document collection integrates with existing PDF report generation
+- Notification system prevents alert fatigue through preference management
+
+### Research Insights Applied
+
+- Security-first approach: Multi-tenant isolation cannot be retrofitted
+- Real-time updates via SSE rather than polling for advisor dashboard efficiency
+- Notification intelligence over automation to prevent advisor workflow interruption
+- White-label branding throughout client journey for professional advisor experience
+
+### TODOs
+
+- [ ] Plan Phase 15: Secure Client Invitations
+- [ ] Research deeper notification patterns during Phase 18 planning
+- [ ] Validate complex family workflow patterns during Phase 19 planning
+
+### Blockers
+
+None identified. Ready to proceed with phase planning.
+
 ## Session Continuity
 
 **Last Session:** 2026-03-15T19:00:00Z
-**Context:** Completed v1.3 milestone - archived to `.planning/milestones/`
+**Context:** v1.4 roadmap created with 5 phases, 33 requirements mapped, 100% coverage achieved
 
-**Ready for:** Next milestone planning with `/gsd:new-milestone`
+**Ready for:** Phase 15 planning with `/gsd:plan-phase 15`
 
-**Archive location:** `.planning/milestones/v1.3-GOVERNANCE-INTELLIGENCE.md`
+**Next Action:** Begin Phase 15 planning - Secure Client Invitations
+
+**Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
 
 ---
-*Next action: Start next milestone with /gsd:new-milestone*
+*Next action: Plan Phase 15 with /gsd:plan-phase 15*
