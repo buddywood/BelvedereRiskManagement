@@ -18,7 +18,7 @@ type ActionResult<T> =
 /**
  * Server action to send a new invitation
  */
-export async function sendInvitation(formData: FormData): Promise<ActionResult<InvitationWithDetails & { url: string }>> {
+export async function sendInvitation(formData: FormData): Promise<ActionResult<InvitationWithDetails & { url: string; emailSent: boolean; emailNotSentReason?: string }>> {
   try {
     // Authenticate and get advisor role
     const { userId } = await requireAdvisorRole();
@@ -80,7 +80,7 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
 /**
  * Server action to resend an existing invitation
  */
-export async function resendInvitationAction(invitationId: string): Promise<ActionResult<InvitationWithDetails & { url: string }>> {
+export async function resendInvitationAction(invitationId: string): Promise<ActionResult<InvitationWithDetails & { url: string; emailSent: boolean; emailNotSentReason?: string }>> {
   try {
     // Authenticate and get advisor role
     const { userId } = await requireAdvisorRole();
