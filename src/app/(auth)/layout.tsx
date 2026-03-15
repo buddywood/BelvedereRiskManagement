@@ -1,3 +1,6 @@
+import { Card, CardContent } from "@/components/ui/card";
+import { ShieldCheck, Sparkles, Waypoints } from "lucide-react";
+
 export default function AuthLayout({
   children,
 }: {
@@ -6,10 +9,10 @@ export default function AuthLayout({
   return (
     <div className="min-h-screen py-6 sm:py-8">
       <div className="page-shell">
-        <div className="hero-surface grid min-h-[calc(100vh-3rem)] overflow-hidden rounded-[2rem] lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="app-grid order-2 flex flex-col justify-between gap-8 border-t section-divider px-6 py-6 sm:px-8 lg:order-1 lg:border-t-0 lg:border-r lg:px-12 lg:py-12">
+        <div className="hero-surface app-grid grid min-h-[calc(100vh-3rem)] overflow-hidden rounded-[2rem] lg:grid-cols-[1.05fr_0.95fr]">
+          <section className="order-2 flex flex-col justify-between gap-8 border-t section-divider px-6 py-6 sm:px-8 lg:order-1 lg:border-t-0 lg:border-r lg:px-12 lg:py-12">
             <div className="space-y-6">
-              <p className="editorial-kicker">Belvedere Risk Management</p>
+              <p className="editorial-kicker">Governance Assessment</p>
               <div className="max-w-xl space-y-4">
                 <h1 className="text-4xl font-semibold leading-none text-balance sm:text-5xl lg:text-6xl">
                   A calmer, more intentional way to assess governance risk.
@@ -22,24 +25,54 @@ export default function AuthLayout({
             </div>
 
             <div className="hidden gap-4 sm:grid-cols-3 lg:grid">
-              <div className="rounded-[1.5rem] border section-divider bg-background/55 p-5">
-                <p className="text-sm font-semibold">Guided</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Step-by-step flows designed for focused assessment work.
-                </p>
-              </div>
-              <div className="rounded-[1.5rem] border section-divider bg-background/55 p-5">
-                <p className="text-sm font-semibold">Responsive</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Thoughtful layouts that scale from mobile review to desktop analysis.
-                </p>
-              </div>
-              <div className="rounded-[1.5rem] border section-divider bg-background/55 p-5">
-                <p className="text-sm font-semibold">Secure</p>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Authentication and MFA experiences aligned with the brand tone.
-                </p>
-              </div>
+              <Card className="group gap-0 rounded-[1.25rem] border border-border/70 bg-card/80 py-0 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset] transition-all duration-200 hover:border-brand/30 hover:bg-card hover:shadow-[0_8px_30px_-12px_rgba(26,24,20,0.12)]">
+                <CardContent className="space-y-4 p-5 sm:p-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition-colors duration-200 group-hover:bg-brand/15">
+                    <ShieldCheck className="size-5" aria-hidden />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-semibold leading-tight text-foreground">
+                      Governance Risk Identification
+                    </h3>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Surface structural governance gaps before they become
+                      disputes.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="group gap-0 rounded-[1.25rem] border border-border/70 bg-card/80 py-0 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset] transition-all duration-200 hover:border-brand/30 hover:bg-card hover:shadow-[0_8px_30px_-12px_rgba(26,24,20,0.12)]">
+                <CardContent className="space-y-4 p-5 sm:p-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition-colors duration-200 group-hover:bg-brand/15">
+                    <Waypoints className="size-5" aria-hidden />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-semibold leading-tight text-foreground">
+                      Advisor-Guided Assessment
+                    </h3>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      A structured interview designed for families and their
+                      advisors.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="group gap-0 rounded-[1.25rem] border border-border/70 bg-card/80 py-0 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset] transition-all duration-200 hover:border-brand/30 hover:bg-card hover:shadow-[0_8px_30px_-12px_rgba(26,24,20,0.12)]">
+                <CardContent className="space-y-4 p-5 sm:p-6">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand transition-colors duration-200 group-hover:bg-brand/15">
+                    <Sparkles className="size-5" aria-hidden />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-base font-semibold leading-tight text-foreground">
+                      Continuity Intelligence
+                    </h3>
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      Receive governance recommendations and succession
+                      frameworks.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </section>
 

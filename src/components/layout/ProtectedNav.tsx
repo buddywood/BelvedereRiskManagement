@@ -5,40 +5,84 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS: { href: string; label: string }[] = [
+const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/intake", label: "Intake" },
-  { href: "/advisor", label: "Advisor" },
-  { href: "/advisor/dashboard", label: "Governance" },
   { href: "/assessment", label: "Assessment" },
   { href: "/profiles", label: "Profiles" },
   { href: "/settings", label: "Settings" },
 ];
 
+const ADVISOR_NAV_ITEMS: { href: string; label: string }[] = [
+  { href: "/advisor", label: "Advisor Hub" },
+  { href: "/advisor/dashboard", label: "Portfolio" },
+  { href: "/dashboard", label: "Client View" },
+  { href: "/intake", label: "Intake" },
+  { href: "/assessment", label: "Assessment" },
+  { href: "/profiles", label: "Profiles" },
+  { href: "/settings", label: "Settings" },
+];
+
+const ADMIN_NAV_ITEMS: { href: string; label: string }[] = [
+  { href: "/admin", label: "Admin" },
+  { href: "/admin/advisors", label: "Advisors" },
+  { href: "/admin/clients", label: "Clients" },
+  { href: "/admin/intake", label: "Intake Management" },
+  { href: "/admin/assessment", label: "Assessment Management" },
+  { href: "/admin/settings", label: "Settings" },
+];
+
 interface ProtectedNavProps {
   showAdvisor?: boolean;
+  showAdmin?: boolean;
+  restrictNavToIntake?: boolean;
 }
 
-export function ProtectedNav({ showAdvisor = false }: ProtectedNavProps) {
+export function ProtectedNav({ showAdvisor = false, showAdmin = false, restrictNavToIntake = false }: ProtectedNavProps) {
   const pathname = usePathname();
 
-  const items = showAdvisor
-    ? NAV_ITEMS
-    : NAV_ITEMS.filter((item) => item.href !== "/advisor" && item.href !== "/advisor/dashboard");
+  const items = showAdmin
+    ? ADMIN_NAV_ITEMS
+    : showAdvisor
+      ? ADVISOR_NAV_ITEMS
+      : CLIENT_NAV_ITEMS;
+
+  // When restrictNavToIntake (client, intake not submitted), only Intake is enabled
+  const isClientRestricted = restrictNavToIntake && !showAdvisor && !showAdmin;
+  const enabledHrefs = isClientRestricted ? new Set(["/intake"]) : null;
+
+  // Most specific matching route wins (e.g. /advisor/dashboard over /advisor)
+  const activeHref = [...items]
+    .sort((a, b) => b.href.length - a.href.length)
+    .find(({ href }) => pathname === href || pathname.startsWith(href + "/"))?.href;
 
   return (
-    <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:flex md:grid-cols-5">
+    <nav
+      className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+      aria-label="Main navigation"
+    >
       {items.map(({ href, label }) => {
-        const isActive =
-          href === pathname ||
-          (href !== "/dashboard" && pathname.startsWith(href + "/"));
-        return (
+        const isActive = activeHref === href;
+        const isDisabled = enabledHrefs !== null && !enabledHrefs.has(href);
+        return isDisabled ? (
+          <span
+            key={href}
+            aria-disabled="true"
+            title="Complete your intake interview to unlock. Assessment and other areas become available after your advisor reviews and assigns your assessment."
+            className={cn(
+              "inline-flex h-9 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium",
+              "text-muted-foreground/60 opacity-70"
+            )}
+          >
+            {label}
+          </span>
+        ) : (
           <Button
             asChild
             variant="ghost"
             size="sm"
             className={cn(
-              "h-9 w-full px-3",
+              "h-9 shrink-0 px-3",
               isActive &&
                 "bg-secondary text-foreground font-semibold hover:bg-secondary hover:text-foreground"
             )}

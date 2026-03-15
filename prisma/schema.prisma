@@ -251,7 +251,40 @@ enum ApprovalStatus {
 enum NotificationType {
   NEW_INTAKE
   INTAKE_UPDATED
+  NEW_LEAD
   SYSTEM
+}
+
+enum FamilyComplexity {
+  SINGLE_HOUSEHOLD
+  MULTI_GENERATIONAL
+  FAMILY_BUSINESS_INVOLVED
+}
+
+model GovernanceReviewLead {
+  id                    String            @id @default(cuid())
+  name                  String
+  email                 String
+  familyOfficeName      String
+  primaryAdvisor        String?
+  familyComplexity      FamilyComplexity
+  promptedInterest      String?
+  createdAt             DateTime          @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+}
+
+model InviteCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  prefillEmail String?  // optional: prefill signup form when this code is used
+  expiresAt  DateTime?
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  createdAt   DateTime  @default(now())
+
+  @@index([code])
 }
 
 model AdvisorProfile {

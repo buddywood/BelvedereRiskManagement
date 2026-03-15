@@ -13,25 +13,61 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
       role="img"
       aria-label="Belvedere Governance Intelligence"
     >
-      {/* Radar symbol */}
-      <g transform="translate(40,40)">
+      {/* Radar symbol — right edge 6px left of "B" (B starts ~320 minus wordmark width; icon right at 174) */}
+      <g transform="translate(153,40)">
         <polygon
           points="0,-22 21,-7 13,20 -13,20 -21,-7"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.8"
         />
-        <line x1="0" y1="0" x2="0" y2="-22" stroke="currentColor" strokeWidth="1" />
-        <line x1="0" y1="0" x2="21" y2="-7" stroke="currentColor" strokeWidth="1" />
-        <line x1="0" y1="0" x2="13" y2="20" stroke="currentColor" strokeWidth="1" />
-        <line x1="0" y1="0" x2="-13" y2="20" stroke="currentColor" strokeWidth="1" />
-        <line x1="0" y1="0" x2="-21" y2="-7" stroke="currentColor" strokeWidth="1" />
+        <line
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="-22"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1="0"
+          y1="0"
+          x2="21"
+          y2="-7"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1="0"
+          y1="0"
+          x2="13"
+          y2="20"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1="0"
+          y1="0"
+          x2="-13"
+          y2="20"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1="0"
+          y1="0"
+          x2="-21"
+          y2="-7"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
         <circle cx="0" cy="0" r="2.5" fill="var(--brand)" />
       </g>
-      {/* Wordmark — tightened spacing from icon */}
+      {/* Wordmark — 6px left of icon’s right edge (icon ends at 40+21=61, so text starts at 67) */}
       <text
-        x="76"
+        x="320"
         y="38"
+        textAnchor="end"
         fontFamily="var(--font-display), Georgia, serif"
         fontSize="24"
         fill="var(--foreground)"
@@ -40,13 +76,14 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
         BELVEDERE
       </text>
       <text
-        x="76"
+        x="320"
         y="56"
+        textAnchor="end"
         fontFamily="var(--font-sans), Inter, sans-serif"
         fontSize="12"
         fill="var(--muted-foreground)"
       >
-        Governance Intelligence
+        Risk Intelligence
       </text>
     </svg>
   );

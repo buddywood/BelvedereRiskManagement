@@ -196,7 +196,7 @@ export async function markNotificationRead(notificationId: string, advisorProfil
 
 export async function createNotification(
   advisorProfileId: string,
-  type: 'NEW_INTAKE' | 'INTAKE_UPDATED' | 'SYSTEM',
+  type: 'NEW_INTAKE' | 'INTAKE_UPDATED' | 'NEW_LEAD' | 'SYSTEM',
   title: string,
   message: string,
   referenceId?: string

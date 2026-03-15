@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { verifyInviteToken, consumeInviteCode } from "@/lib/invite";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -15,6 +16,7 @@ const registerSchema = z.object({
       /[^A-Za-z0-9]/,
       "Password must contain at least one special character"
     ),
+  inviteToken: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -31,7 +33,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password } = validation.data;
+    const { email, password, inviteToken } = validation.data;
+
+    // Require valid invite token to create an account
+    if (!inviteToken) {
+      return NextResponse.json(
+        { error: "Invite code required. Start from the assessment link and enter your invite code." },
+        { status: 400 }
+      );
+    }
+    const inviteCodeId = verifyInviteToken(inviteToken);
+    if (!inviteCodeId) {
+      return NextResponse.json(
+        { error: "Invalid or expired invite. Please request a new link and enter your invite code again." },
+        { status: 400 }
+      );
+    }
 
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -48,17 +65,20 @@ export async function POST(request: NextRequest) {
     // Hash password with bcrypt
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user
+    // Create user (this form only creates USER role; advisors/admins are set up separately)
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
+        role: "USER",
       },
       select: {
         id: true,
         email: true,
       },
     });
+
+    await consumeInviteCode(inviteCodeId);
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {

@@ -9,8 +9,8 @@ export default async function AdvisorLayout({
 }) {
   const session = await auth();
 
-  // Check if user has advisor or admin role
-  if (!session?.user?.role || (session.user.role !== "ADVISOR" && session.user.role !== "ADMIN")) {
+  const role = session?.user?.role?.toString().toUpperCase();
+  if (!role || (role !== "ADVISOR" && role !== "ADMIN")) {
     redirect("/dashboard?error=unauthorized");
   }
 

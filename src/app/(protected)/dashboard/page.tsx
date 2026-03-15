@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { formatDistanceToNow, format } from "date-fns";
 import { allQuestions } from "@/lib/assessment/questions";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,12 @@ export default async function DashboardPage() {
 
   if (!session?.user?.id) {
     return null;
+  }
+
+  // Advisors and admins land on the advisor hub instead of the client dashboard
+  const role = session.user.role?.toString().toUpperCase();
+  if (role === "ADVISOR" || role === "ADMIN") {
+    redirect("/advisor");
   }
 
   // Fetch assessments with responses and scores

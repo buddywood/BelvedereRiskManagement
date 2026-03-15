@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent, Suspense } from "react";
+import { useState, FormEvent, Suspense, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,12 +14,43 @@ import { PasswordInput } from "@/components/ui/password-input";
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const inviteToken = searchParams.get("invite") ?? "";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!inviteToken) router.replace("/start");
+  }, [inviteToken, router]);
+
+  // Prefill email from invite code lookup when token is present (runs once on load)
+  useEffect(() => {
+    if (!inviteToken) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/invite/prefill?token=${encodeURIComponent(inviteToken)}`);
+        const data = await res.json();
+        if (!cancelled && data.prefillEmail) setEmail(String(data.prefillEmail));
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteToken]);
+
+  if (!inviteToken) {
+    return (
+      <AuthPanel title="Create account" description="Redirecting to enter your invite code…">
+        <p className="text-sm text-muted-foreground">If you are not redirected, <Link href="/start" className="font-semibold underline">go to enter your invite code</Link>.</p>
+      </AuthPanel>
+    );
+  }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,11 +70,11 @@ function SignUpForm() {
     setIsLoading(true);
 
     try {
-      // Register user
+      // Register user (invite token required by API)
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, inviteToken }),
       });
 
       const data = await response.json();
@@ -83,15 +114,15 @@ function SignUpForm() {
     <AuthPanel
       eyebrow="Secure Onboarding"
       title="Create account"
-      description="Set up a secure workspace for governance assessments, recommendations, and account controls."
+      description="Set up a client account for governance assessments, recommendations, and account controls. This form creates user accounts only; advisors and admins are set up separately."
       footer={
         <span>
-          Already have an account?{" "}
+          Looking for an advisor?{" "}
           <Link
-            href={callbackUrl ? `/signin?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signin"}
+            href="/request-review"
             className="font-semibold text-foreground hover:underline"
           >
-            Sign in
+            Request a review here
           </Link>
         </span>
       }

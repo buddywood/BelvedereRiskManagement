@@ -1,0 +1,45 @@
+import Link from "next/link";
+import { requireAdminRole } from "@/lib/admin/auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChevronRight } from "lucide-react";
+
+const SECTIONS = [
+  { href: "/admin/advisors", label: "Advisors", description: "View and manage advisor accounts and profiles." },
+  { href: "/admin/clients", label: "Clients", description: "View and manage client accounts and assignments." },
+  { href: "/admin/intake", label: "Intake Management", description: "Review intake interviews and submission status." },
+  { href: "/admin/assessment", label: "Assessment Management", description: "Review assessments and completion status." },
+  { href: "/admin/settings", label: "Settings", description: "Admin and system settings." },
+] as const;
+
+export default async function AdminPage() {
+  await requireAdminRole();
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold tracking-tight">Admin</h2>
+        <p className="text-muted-foreground">
+          Manage advisors, clients, intake, and assessments. Use the links above or below.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {SECTIONS.map(({ href, label, description }) => (
+          <Link key={href} href={href}>
+            <Card className="h-full transition-colors hover:bg-muted/50">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center justify-between text-base">
+                  {label}
+                  <ChevronRight className="size-4 text-muted-foreground" />
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{description}</p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

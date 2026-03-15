@@ -31,7 +31,12 @@ export function AuthPanel({
   contentClassName,
 }: AuthPanelProps) {
   return (
-    <Card className={cn("overflow-hidden", className)}>
+    <Card
+      className={cn(
+        "overflow-hidden rounded-[1.25rem] border-border/70 bg-card/80 shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset]",
+        className
+      )}
+    >
       <CardHeader className="space-y-4 border-b section-divider pb-6">
         {eyebrow ? <p className="editorial-kicker">{eyebrow}</p> : null}
         <div className="space-y-2">

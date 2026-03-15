@@ -22,8 +22,9 @@ export default async function Home() {
                     wealth.
                   </h1>
                   <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-                    A discreet digital governance assessment designed to identify
-                    structural risks and strengthen family decision frameworks.
+                    A discreet digital governance assessment designed to
+                    identify structural risks and strengthen family decision
+                    frameworks.
                   </p>
                   <p className="text-sm text-muted-foreground">
                     12–15 minute governance assessment
@@ -64,7 +65,10 @@ export default async function Home() {
                         size="lg"
                         className="w-full whitespace-normal min-h-12 text-center sm:min-w-[13rem] sm:flex-1 sm:px-5"
                       >
-                        <Link href="/signup" title="Start your governance assessment">
+                        <Link
+                          href="/start"
+                          title="Start your governance assessment"
+                        >
                           Start Assessment
                           <ArrowRight className="size-4" />
                         </Link>
@@ -75,8 +79,11 @@ export default async function Home() {
                         variant="outline"
                         className="w-full sm:min-w-0 sm:flex-1"
                       >
-                        <Link href="/signin" title="Sign in to the advisor portal">
-                          Advisor Login
+                        <Link
+                          href="/signin"
+                          title="Sign in to the advisor portal"
+                        >
+                          Advisor Portal
                         </Link>
                       </Button>
                     </div>
@@ -89,8 +96,18 @@ export default async function Home() {
                         Sign in
                       </Link>
                     </p>
+                    <p className="text-sm text-muted-foreground">
+                      Looking for an advisor?{" "}
+                      <Link
+                        href="/request-review"
+                        className="font-semibold text-foreground underline-offset-4 hover:underline"
+                      >
+                        Request a review here
+                      </Link>
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      Private and encrypted. Responses visible only to your advisor.
+                      Private and encrypted. Responses visible only to your
+                      advisor.
                     </p>
                   </div>
                 )}
@@ -149,9 +166,9 @@ export default async function Home() {
             </div>
           </section>
 
-          <aside className="mt-12 flex flex-col items-start gap-8 pt-4 lg:mt-0 lg:pl-10">
-            <div className="w-full max-w-[280px] text-foreground">
-              <BelvedereLogoLockup className="h-auto w-full" />
+          <aside className="mt-12 flex flex-col items-stretch gap-8 lg:mt-0 lg:pl-10">
+            <div className="flex w-full justify-end text-foreground">
+              <BelvedereLogoLockup className="h-auto w-full max-w-[280px]" />
             </div>
             <Card className="w-full overflow-hidden">
               <CardContent className="space-y-8 pt-8">
@@ -166,8 +183,8 @@ export default async function Home() {
                     Legacy survives through governance.
                   </p>
                   <p className="text-sm leading-7 text-muted-foreground">
-                    Families often operate with informal decision structures that
-                    work — until they don’t.
+                    Families often operate with informal decision structures
+                    that work — until they don’t.
                   </p>
                 </div>
 
@@ -219,7 +236,8 @@ export default async function Home() {
                 Wealth Advisors
               </h3>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Provide structured governance guidance alongside financial planning.
+                Provide structured governance guidance alongside financial
+                planning.
               </p>
             </div>
             <div className="rounded-[1.25rem] border border-border/70 bg-card/80 px-5 py-5 sm:px-6 sm:py-6">
@@ -244,7 +262,8 @@ export default async function Home() {
                 Belvedere Governance Score
               </h3>
               <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
-                7.2 <span className="font-normal text-muted-foreground">/ 10</span>
+                7.2{" "}
+                <span className="font-normal text-muted-foreground">/ 10</span>
                 <span className="ml-2 text-base font-medium normal-nums text-muted-foreground sm:text-lg">
                   – Moderate Risk
                 </span>

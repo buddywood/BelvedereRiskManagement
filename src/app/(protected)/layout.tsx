@@ -1,8 +1,9 @@
 import { auth, signOut } from "@/lib/auth";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ProtectedNav } from "@/components/layout/ProtectedNav";
+import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncompleteIntake";
+import { prisma } from "@/lib/db";
 
 export default async function ProtectedLayout({
   children,
@@ -16,11 +17,26 @@ export default async function ProtectedLayout({
     redirect("/signin");
   }
 
+  const role = session?.user?.role?.toString().toUpperCase();
+  const showAdvisor = role === "ADVISOR" || role === "ADMIN";
+  const showAdmin = role === "ADMIN";
+
+  // For clients: restrict nav to Intake until they have submitted intake (assessment not yet assigned/started)
+  let restrictNavToIntake = false;
+  if (role === "USER" && session.user.id) {
+    const submitted = await prisma.intakeInterview.findFirst({
+      where: { userId: session.user.id, status: "SUBMITTED" },
+      select: { id: true },
+    });
+    restrictNavToIntake = !submitted;
+  }
+
   return (
     <div className="min-h-screen py-3 sm:py-6">
+      {restrictNavToIntake && <RedirectIncompleteIntake restrictNavToIntake={restrictNavToIntake} />}
       <div className="page-shell">
-        <div className="hero-surface overflow-hidden rounded-[2rem]">
-          <header className="border-b section-divider bg-background/55">
+        <div className="hero-surface overflow-x-hidden rounded-[2rem]">
+          <header className="border-b section-divider bg-background/55 overflow-visible">
             <div className="px-4 py-3 sm:px-8 sm:py-4 lg:px-10">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-0.5 sm:space-y-1">
@@ -47,15 +63,11 @@ export default async function ProtectedLayout({
                 </div>
               </div>
 
-              <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
-                <ProtectedNav
-                  showAdvisor={
-                    session?.user?.role === "ADVISOR" ||
-                    session?.user?.role === "ADMIN"
-                  }
-                />
-
-                <div className="hidden rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground md:block lg:hidden md:max-w-[24rem]">
+              <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between md:gap-4">
+                <div className="min-w-0 flex-1">
+                  <ProtectedNav showAdvisor={showAdvisor} showAdmin={showAdmin} restrictNavToIntake={restrictNavToIntake} />
+                </div>
+                <div className="hidden shrink-0 rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground md:block lg:hidden md:max-w-[24rem]">
                   Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>
                 </div>
               </div>

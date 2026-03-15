@@ -10,8 +10,8 @@ export async function requireAdvisorRole() {
     throw new Error("Not authenticated");
   }
 
-  const userRole = session.user.role;
-  if (userRole !== 'ADVISOR' && userRole !== 'ADMIN') {
+  const userRole = session.user.role?.toString().toUpperCase();
+  if (userRole !== "ADVISOR" && userRole !== "ADMIN") {
     throw new Error("Unauthorized: Advisor access required");
   }
 
