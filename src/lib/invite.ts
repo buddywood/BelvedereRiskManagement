@@ -4,6 +4,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/db";
 
 const INVITE_TOKEN_TTL_SEC = 60 * 10; // 10 minutes
+export const INVITATION_TTL_SEC = 60 * 60 * 24 * 7; // 7 days
 
 function getSecret(): string {
   const secret = process.env.AUTH_SECRET;
@@ -13,6 +14,13 @@ function getSecret(): string {
 
 export function createInviteToken(inviteCodeId: string): string {
   const exp = Math.floor(Date.now() / 1000) + INVITE_TOKEN_TTL_SEC;
+  const payload = `${inviteCodeId}.${exp}`;
+  const sig = createHmac("sha256", getSecret()).update(payload).digest("base64url");
+  return `${payload}.${sig}`;
+}
+
+export function createInvitationToken(inviteCodeId: string): string {
+  const exp = Math.floor(Date.now() / 1000) + INVITATION_TTL_SEC;
   const payload = `${inviteCodeId}.${exp}`;
   const sig = createHmac("sha256", getSecret()).update(payload).digest("base64url");
   return `${payload}.${sig}`;
