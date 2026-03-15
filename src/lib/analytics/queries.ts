@@ -5,7 +5,7 @@ import type { FamilyAnalyticsData, AssessmentComparison, GovernanceTrendPoint, C
 import { CATEGORY_LABELS } from "./formatters";
 
 // Pillar weights from the family governance pillar definition
-const PILLAR_WEIGHTS = {
+export const PILLAR_WEIGHTS = {
   'decision-making-authority': 20,
   'access-controls': 15,
   'trust-estate-governance': 15,
