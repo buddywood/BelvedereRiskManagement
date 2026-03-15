@@ -19,6 +19,8 @@ import { getPortfolioIntelligence, getTopRisksForFamily, getRiskDetailForFamily 
 import { approveClientSchema } from '@/lib/schemas/advisor';
 import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
 import type { AdvisorDashboardClient, IntakeReviewData } from '@/lib/advisor/types';
+import { getAdvisorInvitations } from '@/lib/invitations/service';
+import { InvitationStatus } from '@prisma/client';
 
 export async function getAdvisorDashboardData() {
   try {
@@ -29,12 +31,19 @@ export async function getAdvisorDashboardData() {
     const notifications = await getAdvisorNotifications(profile.id);
     const unreadNotificationCount = notifications.filter(n => !n.read).length;
 
+    // Get pending invitations count (SENT or OPENED status)
+    const invitations = await getAdvisorInvitations(profile.id);
+    const pendingInvitationsCount = invitations.filter(
+      inv => inv.status === InvitationStatus.SENT || inv.status === InvitationStatus.OPENED
+    ).length;
+
     return {
       success: true,
       data: {
         clients,
         profile,
         unreadNotificationCount,
+        pendingInvitationsCount,
       },
     };
   } catch (error) {
@@ -70,7 +79,7 @@ export async function getIntakeReviewData(interviewId: string) {
     const { userId } = await requireAdvisorRole();
     const profile = await getAdvisorProfileOrThrow(userId);
 
-    const validatedFields = z.object({ interviewId: z.string().cuid() }).safeParse({ interviewId });
+    const validatedFields = z.object({ interviewId: z.string().min(1) }).safeParse({ interviewId });
     if (!validatedFields.success) {
       return {
         success: false,
@@ -94,6 +103,10 @@ export async function getIntakeReviewData(interviewId: string) {
         text: q.questionText,
         helpText: q.context,
         type: 'audio',
+        questionNumber: q.questionNumber,
+        questionText: q.questionText,
+        context: q.context,
+        recordingTips: q.recordingTips,
       })),
     };
 
@@ -112,7 +125,7 @@ export async function markIntakeInReview(interviewId: string) {
     const { userId } = await requireAdvisorRole();
     const profile = await getAdvisorProfileOrThrow(userId);
 
-    const validatedFields = z.object({ interviewId: z.string().cuid() }).safeParse({ interviewId });
+    const validatedFields = z.object({ interviewId: z.string().min(1) }).safeParse({ interviewId });
     if (!validatedFields.success) {
       return {
         success: false,
@@ -339,6 +352,59 @@ export async function getFamilyRiskDetailData(familyId: string) {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get family risk detail data';
+    return { success: false, error: message };
+  }
+}
+
+export async function updateAdvisorBranding(formData: FormData) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const logoUrl = formData.get('logoUrl')?.toString();
+
+    // Validate logo URL if provided
+    if (logoUrl && logoUrl.trim() !== '') {
+      try {
+        const url = new URL(logoUrl);
+        if (url.protocol !== 'https:') {
+          return {
+            success: false,
+            error: 'Logo URL must use HTTPS',
+          };
+        }
+      } catch {
+        return {
+          success: false,
+          error: 'Invalid URL format',
+        };
+      }
+    }
+
+    // Update the advisor profile
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    try {
+      await prisma.advisorProfile.update({
+        where: { id: profile.id },
+        data: {
+          logoUrl: logoUrl && logoUrl.trim() !== '' ? logoUrl.trim() : null,
+        },
+      });
+
+      revalidatePath('/advisor/settings');
+      revalidatePath('/advisor');
+
+      return {
+        success: true,
+        data: { logoUrl: logoUrl && logoUrl.trim() !== '' ? logoUrl.trim() : null },
+      };
+    } finally {
+      await prisma.$disconnect();
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update branding';
     return { success: false, error: message };
   }
 }

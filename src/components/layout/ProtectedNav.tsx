@@ -9,19 +9,16 @@ const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/intake", label: "Intake" },
   { href: "/assessment", label: "Assessment" },
-  { href: "/profiles", label: "Profiles" },
+  { href: "/profiles", label: "Profiles & Roles" },
   { href: "/settings", label: "Settings" },
 ];
 
 const ADVISOR_NAV_ITEMS: { href: string; label: string }[] = [
-  { href: "/advisor", label: "Advisor Hub" },
-  { href: "/advisor/dashboard", label: "Portfolio" },
+  { href: "/advisor", label: "Clients" },
+  { href: "/advisor/dashboard", label: "Dashboard" },
   { href: "/advisor/intelligence", label: "Risk Intelligence" },
-  { href: "/dashboard", label: "Client View" },
-  { href: "/intake", label: "Intake" },
-  { href: "/assessment", label: "Assessment" },
-  { href: "/profiles", label: "Profiles" },
-  { href: "/settings", label: "Settings" },
+  { href: "/advisor/notifications", label: "Notifications" },
+  { href: "/advisor/settings", label: "Settings" },
 ];
 
 const ADMIN_NAV_ITEMS: { href: string; label: string }[] = [
@@ -37,9 +34,16 @@ interface ProtectedNavProps {
   showAdvisor?: boolean;
   showAdmin?: boolean;
   restrictNavToIntake?: boolean;
+  /** When false for clients, Assessment link is disabled until advisor approves intake */
+  intakeApprovedForClient?: boolean;
 }
 
-export function ProtectedNav({ showAdvisor = false, showAdmin = false, restrictNavToIntake = false }: ProtectedNavProps) {
+export function ProtectedNav({
+  showAdvisor = false,
+  showAdmin = false,
+  restrictNavToIntake = false,
+  intakeApprovedForClient = false,
+}: ProtectedNavProps) {
   const pathname = usePathname();
 
   const items = showAdmin
@@ -52,10 +56,19 @@ export function ProtectedNav({ showAdvisor = false, showAdmin = false, restrictN
   const isClientRestricted = restrictNavToIntake && !showAdvisor && !showAdmin;
   const enabledHrefs = isClientRestricted ? new Set(["/intake"]) : null;
 
+  // For clients with submitted but not approved intake: Assessment is disabled
+  const isClientAssessmentLocked =
+    !showAdvisor && !showAdmin && !intakeApprovedForClient;
+  const disabledAssessmentHref = isClientAssessmentLocked
+    ? "/assessment"
+    : null;
+
   // Most specific matching route wins (e.g. /advisor/dashboard over /advisor)
   const activeHref = [...items]
     .sort((a, b) => b.href.length - a.href.length)
-    .find(({ href }) => pathname === href || pathname.startsWith(href + "/"))?.href;
+    .find(
+      ({ href }) => pathname === href || pathname.startsWith(href + "/"),
+    )?.href;
 
   return (
     <nav
@@ -64,15 +77,21 @@ export function ProtectedNav({ showAdvisor = false, showAdmin = false, restrictN
     >
       {items.map(({ href, label }) => {
         const isActive = activeHref === href;
-        const isDisabled = enabledHrefs !== null && !enabledHrefs.has(href);
+        const isDisabledByIntake =
+          enabledHrefs !== null && !enabledHrefs.has(href);
+        const isDisabledByApproval = disabledAssessmentHref === href;
+        const isDisabled = isDisabledByIntake || isDisabledByApproval;
+        const disabledTitle = isDisabledByApproval
+          ? "Assessment unlocks after your advisor reviews and approves your intake."
+          : "Complete your intake interview to unlock. Assessment and other areas become available after your advisor reviews and assigns your assessment.";
         return isDisabled ? (
           <span
             key={href}
             aria-disabled="true"
-            title="Complete your intake interview to unlock. Assessment and other areas become available after your advisor reviews and assigns your assessment."
+            title={disabledTitle}
             className={cn(
               "inline-flex h-9 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium",
-              "text-muted-foreground/60 opacity-70"
+              "text-muted-foreground/60 opacity-70",
             )}
           >
             {label}
@@ -85,7 +104,7 @@ export function ProtectedNav({ showAdvisor = false, showAdmin = false, restrictN
             className={cn(
               "h-9 shrink-0 px-3",
               isActive &&
-                "bg-secondary text-foreground font-semibold hover:bg-secondary hover:text-foreground"
+                "bg-secondary text-foreground font-semibold hover:bg-secondary hover:text-foreground",
             )}
             key={href}
           >
