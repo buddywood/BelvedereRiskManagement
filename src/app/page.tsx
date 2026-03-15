@@ -17,7 +17,8 @@ export default async function Home() {
                 <p className="editorial-kicker">Belvedere Risk Management</p>
                 <div className="max-w-3xl space-y-4">
                   <h1 className="text-4xl font-semibold leading-none text-balance sm:text-6xl lg:text-[4.5rem]">
-                    Modern governance intelligence for discerning families.
+                    The governance intelligence platform for modern family
+                    wealth.
                   </h1>
                   <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
                     A discreet digital assessment experience inspired by the
@@ -42,7 +43,12 @@ export default async function Home() {
                         await signOut({ redirectTo: "/" });
                       }}
                     >
-                      <Button type="submit" size="lg" variant="outline" className="w-full sm:min-w-44">
+                      <Button
+                        type="submit"
+                        size="lg"
+                        variant="outline"
+                        className="w-full sm:min-w-44"
+                      >
                         Sign Out
                       </Button>
                     </form>
@@ -55,7 +61,12 @@ export default async function Home() {
                         <ArrowRight className="size-4" />
                       </Link>
                     </Button>
-                    <Button asChild size="lg" variant="outline" className="sm:min-w-44">
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="sm:min-w-44"
+                    >
                       <Link href="/signup">Create Account</Link>
                     </Button>
                   </>
@@ -68,9 +79,12 @@ export default async function Home() {
                 <CardContent className="space-y-3 pt-6">
                   <ShieldCheck className="size-5 text-brand" />
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold">Risk-first design</p>
+                    <p className="text-sm font-semibold">
+                      Governance Risk Identification
+                    </p>
                     <p className="text-sm leading-6 text-muted-foreground">
-                      Confidential workflows built for clarity, not noise.
+                      Surface structural governance gaps before they become
+                      disputes.
                     </p>
                   </div>
                 </CardContent>
@@ -79,9 +93,12 @@ export default async function Home() {
                 <CardContent className="space-y-3 pt-6">
                   <Waypoints className="size-5 text-brand" />
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold">Guided assessment</p>
+                    <p className="text-sm font-semibold">
+                      Advisor-Guided Assessment
+                    </p>
                     <p className="text-sm leading-6 text-muted-foreground">
-                      Structured prompts surface governance gaps with precision.
+                      A structured interview designed for families and their
+                      advisors.
                     </p>
                   </div>
                 </CardContent>
@@ -90,9 +107,12 @@ export default async function Home() {
                 <CardContent className="space-y-3 pt-6">
                   <Sparkles className="size-5 text-brand" />
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold">Actionable insight</p>
+                    <p className="text-sm font-semibold">
+                      Continuity Intelligence
+                    </p>
                     <p className="text-sm leading-6 text-muted-foreground">
-                      Receive recommendations designed for advisors and family leadership.
+                      Receive governance recommendations and succession
+                      frameworks.
                     </p>
                   </div>
                 </CardContent>
@@ -106,9 +126,9 @@ export default async function Home() {
                 <div className="space-y-2">
                   <p className="editorial-kicker">Our Company Ethos</p>
                   <p className="text-xl font-medium leading-8 text-balance text-foreground/90">
-                    Security should empower, not restrict. This assessment
-                    translates that principle into a contemporary client
-                    experience.
+                    Governance requires clarity, not assumption. Families often
+                    operate with informal decision structures that work — until
+                    they don’t.
                   </p>
                 </div>
 
@@ -120,7 +140,8 @@ export default async function Home() {
                   </p>
                   <p>
                     The product experience is built to mirror that posture:
-                    discreet, confident, and deeply intentional at every touchpoint.
+                    discreet, confident, and deeply intentional at every
+                    touchpoint.
                   </p>
                 </div>
 
@@ -128,14 +149,17 @@ export default async function Home() {
                   {session?.user ? (
                     <>
                       Signed in as{" "}
-                      <span className="font-semibold text-foreground">{session.user.email}</span>.
-                      Continue to the dashboard, review recommendations, and manage account
-                      security settings.
+                      <span className="font-semibold text-foreground">
+                        {session.user.email}
+                      </span>
+                      . Continue to the dashboard, review recommendations, and
+                      manage account security settings.
                     </>
                   ) : (
                     <>
-                      Existing clients can sign in to continue an assessment, review
-                      recommendations, and manage account security settings.
+                      Existing clients can sign in to continue an assessment,
+                      review recommendations, and manage account security
+                      settings.
                     </>
                   )}
                 </div>
