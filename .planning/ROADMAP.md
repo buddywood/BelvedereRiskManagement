@@ -56,6 +56,13 @@
 
 **Requirements:** DASH-01, DASH-02, DASH-03, DASH-04, DASH-05
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Data layer: dashboard types, advisor-scoped queries, TanStack React Table install
+- [ ] 11-02-PLAN.md — Dashboard UI: governance table, metrics cards, score badges, loading skeleton
+- [ ] 11-03-PLAN.md — Navigation, Suspense optimization, and human verification
+
 **Success Criteria:**
 1. Advisor can log into dashboard and see only their assigned families with governance scores displayed
 2. Advisor cannot access or view any client data they are not authorized to see
@@ -117,7 +124,7 @@
 | 8. Audio Interview Foundation | v1.2      | 6/6            | Complete    | 2026-03-14 |
 | 9. Advisor Portal Access | v1.2      | 6/6            | Complete    | 2026-03-14 |
 | 10. Assessment Customization | v1.2      | 4/4            | Complete    | 2026-03-14 |
-| **11. Dashboard Foundation** | **v1.3**  | **0/0**        | **Pending** | **-**      |
+| **11. Dashboard Foundation** | **v1.3**  | **0/3**        | **Planned** | **-**      |
 | **12. Analytics Engine** | **v1.3**      | **0/0**        | **Pending** | **-**      |
 | **13. Intelligence Features** | **v1.3**  | **0/0**        | **Pending** | **-**      |
 | **14. Family Dashboard** | **v1.3**      | **0/0**        | **Pending** | **-**      |
