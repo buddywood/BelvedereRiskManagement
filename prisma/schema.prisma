@@ -21,6 +21,8 @@ model User {
   emailVerified DateTime?
   password      String
   name          String?
+  firstName     String?
+  lastName      String?
   image         String?
   role          UserRole  @default(USER)
   mfaEnabled    Boolean   @default(false)
@@ -35,6 +37,7 @@ model User {
   householdMembers HouseholdMember[]
   intakeInterviews IntakeInterview[]
   advisorProfile AdvisorProfile?
+  clientProfile  ClientProfile?
   clientAssignments ClientAdvisorAssignment[] @relation("ClientAssignments")
 
   @@index([email])
@@ -145,6 +148,13 @@ enum RiskLevel {
   MEDIUM
   HIGH
   CRITICAL
+}
+
+enum InvitationStatus {
+  SENT
+  OPENED
+  REGISTERED
+  EXPIRED
 }
 
 enum FamilyRelationship {
@@ -283,8 +293,18 @@ model InviteCode {
   maxUses     Int?
   usedCount   Int       @default(0)
   createdAt   DateTime  @default(now())
+  createdBy   String?
+  status      InvitationStatus @default(SENT)
+  statusUpdatedAt DateTime @default(now())
+  personalMessage String?
+  clientName  String?
+  resendCount Int       @default(0)
+
+  advisor     AdvisorProfile? @relation(fields: [createdBy], references: [id])
 
   @@index([code])
+  @@index([createdBy])
+  @@index([status])
 }
 
 model AdvisorProfile {
@@ -295,11 +315,33 @@ model AdvisorProfile {
   licenseNumber    String?
   firmName         String?
   bio              String?
+  phone            String?
+  jobTitle         String?
+  logoUrl          String?
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @updatedAt
   clientAssignments ClientAdvisorAssignment[] @relation("AdvisorAssignments")
   approvals        IntakeApproval[]
   notifications    AdvisorNotification[]
+  invitations      InviteCode[]
+
+  @@index([userId])
+}
+
+model ClientProfile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone        String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String?
+  dateOfBirth  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([userId])
 }
