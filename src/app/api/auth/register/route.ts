@@ -17,6 +17,7 @@ const registerSchema = z.object({
       "Password must contain at least one special character"
     ),
   inviteToken: z.string().optional(),
+  name: z.string().max(100).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { email, password, inviteToken } = validation.data;
+    const { email, password, inviteToken, name } = validation.data;
 
     // Require valid invite token to create an account
     if (!inviteToken) {
@@ -65,20 +66,75 @@ export async function POST(request: NextRequest) {
     // Hash password with bcrypt
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user (this form only creates USER role; advisors/admins are set up separately)
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        role: "USER",
-      },
-      select: {
-        id: true,
-        email: true,
-      },
+    // Look up the invitation to check if it was created by an advisor
+    const inviteCode = await prisma.inviteCode.findUnique({
+      where: { id: inviteCodeId },
+      select: { createdBy: true, clientName: true }
     });
 
-    await consumeInviteCode(inviteCodeId);
+    if (!inviteCode) {
+      return NextResponse.json(
+        { error: "Invalid invitation" },
+        { status: 400 }
+      );
+    }
+
+    // Use transaction to create user and link to advisor if invitation has createdBy
+    const result = await prisma.$transaction(async (tx) => {
+      // Determine the name to use
+      const userName = name || inviteCode.clientName || undefined;
+
+      // Create user (this form only creates USER role; advisors/admins are set up separately)
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          role: "USER",
+          name: userName,
+        },
+        select: {
+          id: true,
+          email: true,
+        },
+      });
+
+      // If this is an advisor-initiated invitation, create the client-advisor relationship
+      if (inviteCode.createdBy) {
+        // Create ClientProfile for the new user
+        await tx.clientProfile.create({
+          data: {
+            userId: user.id,
+          },
+        });
+
+        // Create ClientAdvisorAssignment linking the new client to the advisor
+        await tx.clientAdvisorAssignment.create({
+          data: {
+            clientId: user.id,
+            advisorId: inviteCode.createdBy,
+          },
+        });
+
+        // Update invitation status to REGISTERED
+        await tx.inviteCode.update({
+          where: { id: inviteCodeId },
+          data: {
+            status: "REGISTERED",
+            statusUpdatedAt: new Date(),
+          },
+        });
+      }
+
+      // Consume the invite code (increment usage count)
+      await tx.inviteCode.update({
+        where: { id: inviteCodeId },
+        data: { usedCount: { increment: 1 } },
+      });
+
+      return user;
+    });
+
+    const user = result;
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
