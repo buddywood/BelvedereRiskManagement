@@ -1,59 +1,77 @@
 # Requirements: Belvedere Risk Management
 
-**Defined:** 2026-03-14
-**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
+**Defined:** 2026-03-15
+**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
 
-## v1.3 Requirements
+## v1.4 Requirements
 
-Requirements for governance intelligence dashboard milestone. Each maps to roadmap phases.
+Requirements for Advisor Workflow Pipeline milestone. Each maps to roadmap phases.
 
-### Dashboard Infrastructure
+### Client Invitations
 
-- [ ] **DASH-01**: Advisor can view portfolio dashboard showing all assigned client families with governance scores
-- [ ] **DASH-02**: Advisor can access multi-client dashboard with proper data isolation between advisor-client relationships
-- [ ] **DASH-03**: Advisor can navigate responsive dashboard interface on desktop and tablet devices
-- [ ] **DASH-04**: System enforces row-level security preventing advisors from viewing unauthorized client data
-- [ ] **DASH-05**: Dashboard loads within 2 seconds for advisors with up to 50 assigned families
+- [ ] **INVITE-01**: Advisor can send secure email invitations to new clients with registration links
+- [ ] **INVITE-02**: Client receives branded email invitation with personalized advisor message
+- [ ] **INVITE-03**: Invitation email includes secure registration link with expiration date
+- [ ] **INVITE-04**: Client can register through invitation link and access assessment portal
+- [ ] **INVITE-05**: System tracks invitation status (sent, opened, registered, expired)
+- [ ] **INVITE-06**: Advisor can resend invitations for unopened or expired links
+- [ ] **INVITE-07**: Invitation link automatically expires after configurable duration (e.g., 7 days)
 
-### Analytics & Visualization
+### Status Tracking
 
-- [ ] **VIZ-01**: Advisor can view historical governance score trends for individual families over multiple assessment periods
-- [ ] **VIZ-02**: Advisor can see governance score changes between annual assessments with trend indicators (improving/declining)
-- [ ] **VIZ-03**: Advisor can view risk pillar breakdown charts showing scores across governance domains for each family
-- [ ] **VIZ-04**: Advisor can compare risk pillar scores between different assessment periods for the same family
-- [ ] **VIZ-05**: Charts display properly with governance data typical for family assessments (8 categories, 68 questions)
+- [ ] **STATUS-01**: Advisor dashboard displays real-time client pipeline with visual progress indicators
+- [ ] **STATUS-02**: Each client shows current stage (invited, registered, intake complete, assessment in progress, etc.)
+- [ ] **STATUS-03**: Pipeline displays completion percentage for each workflow stage
+- [ ] **STATUS-04**: Advisor can filter and sort clients by status, date invited, or progress
+- [ ] **STATUS-05**: Dashboard refreshes automatically to show real-time status updates
+- [ ] **STATUS-06**: Advisor can click a client to view detailed workflow progress
 
-### Intelligence Features
+### Automated Notifications
 
-- [ ] **INTEL-01**: System automatically identifies top 3 governance risks for each family based on assessment scores
-- [ ] **INTEL-02**: Advisor can view prioritized list of highest-risk governance gaps across their client portfolio
-- [ ] **INTEL-03**: Risk indicators show specific governance areas (succession planning, decision authority, etc.) requiring attention
-- [ ] **INTEL-04**: Advisor can click on risk indicators to view underlying assessment details and recommendations
+- [ ] **NOTIFY-01**: System sends automated email when client registers from invitation
+- [ ] **NOTIFY-02**: Client receives reminder notifications for incomplete assessment stages
+- [ ] **NOTIFY-03**: Advisor receives notifications when client completes key milestones
+- [ ] **NOTIFY-04**: System sends deadline reminders for stalled client workflows
+- [ ] **NOTIFY-05**: Users can configure notification preferences for frequency and types
 
-### Family Dashboard Access
+### Document Collection
 
-- [ ] **FAMILY-01**: Family members can view their own governance score dashboard with household-specific data
-- [ ] **FAMILY-02**: Family members can see their historical governance improvements from annual assessments
-- [ ] **FAMILY-03**: Family members can view their risk pillar breakdown charts with explanations
-- [ ] **FAMILY-04**: Family dashboard shows advisor-customized assessment results with emphasis indicators
+- [ ] **DOC-01**: Advisor can mark required documents for each client
+- [ ] **DOC-02**: Status dashboard shows document collection progress for each client
+- [ ] **DOC-03**: Client portal allows document upload with secure file handling
+- [ ] **DOC-04**: System tracks uploaded vs missing documents for each client
+- [ ] **DOC-05**: Clients receive automated reminders for missing documents
 
-## v2 Requirements
+### White-Label Branding
+
+- [ ] **BRAND-01**: Advisor can upload custom logo for platform branding
+- [ ] **BRAND-02**: Email templates include advisor branding and color scheme
+- [ ] **BRAND-03**: Client portal displays advisor branding throughout user experience
+- [ ] **BRAND-04**: Advisor can customize invitation message template content
+- [ ] **BRAND-05**: PDF governance reports include advisor branding and logo
+
+### Family Governance Workflows
+
+- [ ] **WORKFLOW-01**: Advisor can invite multiple family members with different governance roles
+- [ ] **WORKFLOW-02**: Family members receive role-specific invitations and portal access
+- [ ] **WORKFLOW-03**: Status tracking displays progress for multi-member family assessments
+- [ ] **WORKFLOW-04**: System coordinates workflow dependencies between family members
+- [ ] **WORKFLOW-05**: Advisor can manage complex family invitation sequences and approvals
+
+## v1.5 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.
 
 ### Advanced Analytics
 
-- **ANALYTICS-01**: Real-time governance score monitoring with automatic updates as assessments complete
-- **ANALYTICS-02**: Client performance comparisons against anonymous peer benchmarks
-- **ANALYTICS-03**: Predictive governance risk modeling based on historical patterns
-- **ANALYTICS-04**: Custom benchmark creation allowing advisors to define peer comparison groups
+- **ANALYTICS-01**: Compliance audit trail with detailed governance decision tracking
+- **ANALYTICS-02**: Regulatory export capabilities for audit documentation
+- **ANALYTICS-03**: Advisor performance analytics across client pipeline
 
-### Intelligence Automation
+### AI Features
 
-- **AUTO-01**: Automated risk alert notifications when governance scores decline significantly
-- **AUTO-02**: AI-powered governance insights and recommendations for improvement
-- **AUTO-03**: Automated compliance reporting with PDF generation for regulatory requirements
-- **AUTO-04**: Voice-to-insights integration for advisor dashboard queries
+- **AI-01**: Predictive engagement analytics to identify at-risk clients
+- **AI-02**: Personalized onboarding path recommendations based on family complexity
 
 ## Out of Scope
 
@@ -61,12 +79,11 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Real-time collaboration between advisors | Single-advisor per family model sufficient for governance workflow |
-| Mobile native app | Responsive web dashboard meets advisor and family needs |
-| Video conferencing integration | Audio interviews with transcription already provide sufficient client interaction |
-| Multi-language support | English-focused governance framework for target market |
-| Advanced user role management | Current advisor/family model handles governance requirements |
-| Integration with external portfolio systems | Family governance focus doesn't require financial data integration |
+| Built-in CRM functionality | Not our expertise, existing CRM integration preferred |
+| Complex project management features | Over-engineering for governance-specific use case |
+| Marketing automation beyond onboarding | Scope creep, dilutes governance intelligence focus |
+| Video conferencing integration | Commodity feature, existing platforms preferred |
+| Social media integration | Outside wealth management compliance scope |
 
 ## Traceability
 
@@ -74,30 +91,45 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-01 | Phase 11 | Pending |
-| DASH-02 | Phase 11 | Pending |
-| DASH-03 | Phase 11 | Pending |
-| DASH-04 | Phase 11 | Pending |
-| DASH-05 | Phase 11 | Pending |
-| VIZ-01 | Phase 12 | Pending |
-| VIZ-02 | Phase 12 | Pending |
-| VIZ-03 | Phase 12 | Pending |
-| VIZ-04 | Phase 12 | Pending |
-| VIZ-05 | Phase 12 | Pending |
-| INTEL-01 | Phase 13 | Pending |
-| INTEL-02 | Phase 13 | Pending |
-| INTEL-03 | Phase 13 | Pending |
-| INTEL-04 | Phase 13 | Pending |
-| FAMILY-01 | Phase 14 | Pending |
-| FAMILY-02 | Phase 14 | Pending |
-| FAMILY-03 | Phase 14 | Pending |
-| FAMILY-04 | Phase 14 | Pending |
+| INVITE-01 | TBD | Pending |
+| INVITE-02 | TBD | Pending |
+| INVITE-03 | TBD | Pending |
+| INVITE-04 | TBD | Pending |
+| INVITE-05 | TBD | Pending |
+| INVITE-06 | TBD | Pending |
+| INVITE-07 | TBD | Pending |
+| STATUS-01 | TBD | Pending |
+| STATUS-02 | TBD | Pending |
+| STATUS-03 | TBD | Pending |
+| STATUS-04 | TBD | Pending |
+| STATUS-05 | TBD | Pending |
+| STATUS-06 | TBD | Pending |
+| NOTIFY-01 | TBD | Pending |
+| NOTIFY-02 | TBD | Pending |
+| NOTIFY-03 | TBD | Pending |
+| NOTIFY-04 | TBD | Pending |
+| NOTIFY-05 | TBD | Pending |
+| DOC-01 | TBD | Pending |
+| DOC-02 | TBD | Pending |
+| DOC-03 | TBD | Pending |
+| DOC-04 | TBD | Pending |
+| DOC-05 | TBD | Pending |
+| BRAND-01 | TBD | Pending |
+| BRAND-02 | TBD | Pending |
+| BRAND-03 | TBD | Pending |
+| BRAND-04 | TBD | Pending |
+| BRAND-05 | TBD | Pending |
+| WORKFLOW-01 | TBD | Pending |
+| WORKFLOW-02 | TBD | Pending |
+| WORKFLOW-03 | TBD | Pending |
+| WORKFLOW-04 | TBD | Pending |
+| WORKFLOW-05 | TBD | Pending |
 
 **Coverage:**
-- v1.3 requirements: 18 total
-- Mapped to phases: 18 ✓
-- Unmapped: 0 ✓
+- v1.4 requirements: 29 total
+- Mapped to phases: 0
+- Unmapped: 29 ⚠️
 
 ---
-*Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after roadmap creation*
+*Requirements defined: 2026-03-15*
+*Last updated: 2026-03-15 after initial definition*
