@@ -37,6 +37,18 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 
 (Ready for next milestone planning)
 
+## Current Milestone: v1.3 Governance Intelligence
+
+**Goal:** Transform the platform from single-assessment tool into a governance intelligence dashboard for advisors managing multiple families.
+
+**Target features:**
+- Belvedere Governance Score (0-10 headline score) derived from weighted scoring engine
+- Risk pillar visualization with charts showing scores across governance domains
+- Top risk indicators that automatically surface highest-risk governance gaps
+- Advisor insights panel for prioritizing remediation work across multiple clients
+- Annual assessment tracking enabling families to retake assessments for trend analysis
+- Dual dashboard experience (advisor multi-client view + family self-service view)
+
 ### Out of Scope
 
 - Other risk pillars (Financial, Operational, etc.) — Family Governance focus validated
@@ -92,4 +104,4 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - **Scope**: Family Governance pillar only — validated as sufficient for advisor-guided MVP
 
 ---
-*Last updated: 2026-03-14 after v1.2 milestone completion*
+*Last updated: 2026-03-14 after v1.3 milestone started*
