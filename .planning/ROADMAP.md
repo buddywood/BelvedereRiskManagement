@@ -17,6 +17,14 @@ Transform the governance intelligence platform into a complete advisor workflow 
 
 **Requirements:** INVITE-01, INVITE-02, INVITE-03, INVITE-04, INVITE-05, INVITE-06, INVITE-07, BRAND-01, BRAND-02, BRAND-04
 
+**Plans:** 4 plans
+
+Plans:
+- [ ] 015-01-PLAN.md — Schema extension and invitation business logic
+- [ ] 015-02-PLAN.md — Branded email template and server actions
+- [ ] 015-03-PLAN.md — Registration flow update with advisor linking
+- [ ] 015-04-PLAN.md — Advisor invitation management UI and branding settings
+
 **Success Criteria:**
 1. Advisor can send secure email invitations with custom branding and personalized messages
 2. Client receives branded invitation email with secure registration link that expires appropriately
@@ -84,7 +92,7 @@ Transform the governance intelligence platform into a complete advisor workflow 
 
 | Phase | Status | Requirements | Progress |
 |-------|--------|--------------|----------|
-| 15 - Secure Client Invitations | Pending | 10 | ░░░░░░░░░░ 0% |
+| 15 - Secure Client Invitations | Planned | 10 | ░░░░░░░░░░ 0% |
 | 16 - Client Status Pipeline | Pending | 8 | ░░░░░░░░░░ 0% |
 | 17 - Document Collection System | Pending | 5 | ░░░░░░░░░░ 0% |
 | 18 - Intelligent Notifications | Pending | 5 | ░░░░░░░░░░ 0% |
