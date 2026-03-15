@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import Link from "next/link";
+import { Shield } from "lucide-react";
 import { getGovernanceDashboardData } from "@/lib/actions/advisor-actions";
 import { GovernanceTable } from "@/components/dashboard/GovernanceTable";
 import { MetricsCards } from "@/components/dashboard/MetricsCards";
@@ -105,6 +107,17 @@ export default function AdvisorGovernanceDashboardPage() {
           </p>
         </div>
       </section>
+
+      {/* Quick navigation */}
+      <div className="flex justify-center">
+        <Link
+          href="/advisor/intelligence"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Shield className="h-4 w-4" />
+          Risk Intelligence
+        </Link>
+      </div>
 
       {/* Data-dependent content with Suspense streaming */}
       <Suspense fallback={<DashboardSkeleton />}>

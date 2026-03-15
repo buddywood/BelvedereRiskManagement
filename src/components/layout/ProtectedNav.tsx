@@ -16,6 +16,7 @@ const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
 const ADVISOR_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/advisor", label: "Advisor Hub" },
   { href: "/advisor/dashboard", label: "Portfolio" },
+  { href: "/advisor/intelligence", label: "Risk Intelligence" },
   { href: "/dashboard", label: "Client View" },
   { href: "/intake", label: "Intake" },
   { href: "/assessment", label: "Assessment" },
