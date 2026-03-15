@@ -1,0 +1,103 @@
+# Requirements: Belvedere Risk Management
+
+**Defined:** 2026-03-14
+**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
+
+## v1.3 Requirements
+
+Requirements for governance intelligence dashboard milestone. Each maps to roadmap phases.
+
+### Dashboard Infrastructure
+
+- [ ] **DASH-01**: Advisor can view portfolio dashboard showing all assigned client families with governance scores
+- [ ] **DASH-02**: Advisor can access multi-client dashboard with proper data isolation between advisor-client relationships
+- [ ] **DASH-03**: Advisor can navigate responsive dashboard interface on desktop and tablet devices
+- [ ] **DASH-04**: System enforces row-level security preventing advisors from viewing unauthorized client data
+- [ ] **DASH-05**: Dashboard loads within 2 seconds for advisors with up to 50 assigned families
+
+### Analytics & Visualization
+
+- [ ] **VIZ-01**: Advisor can view historical governance score trends for individual families over multiple assessment periods
+- [ ] **VIZ-02**: Advisor can see governance score changes between annual assessments with trend indicators (improving/declining)
+- [ ] **VIZ-03**: Advisor can view risk pillar breakdown charts showing scores across governance domains for each family
+- [ ] **VIZ-04**: Advisor can compare risk pillar scores between different assessment periods for the same family
+- [ ] **VIZ-05**: Charts display properly with governance data typical for family assessments (8 categories, 68 questions)
+
+### Intelligence Features
+
+- [ ] **INTEL-01**: System automatically identifies top 3 governance risks for each family based on assessment scores
+- [ ] **INTEL-02**: Advisor can view prioritized list of highest-risk governance gaps across their client portfolio
+- [ ] **INTEL-03**: Risk indicators show specific governance areas (succession planning, decision authority, etc.) requiring attention
+- [ ] **INTEL-04**: Advisor can click on risk indicators to view underlying assessment details and recommendations
+
+### Family Dashboard Access
+
+- [ ] **FAMILY-01**: Family members can view their own governance score dashboard with household-specific data
+- [ ] **FAMILY-02**: Family members can see their historical governance improvements from annual assessments
+- [ ] **FAMILY-03**: Family members can view their risk pillar breakdown charts with explanations
+- [ ] **FAMILY-04**: Family dashboard shows advisor-customized assessment results with emphasis indicators
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Advanced Analytics
+
+- **ANALYTICS-01**: Real-time governance score monitoring with automatic updates as assessments complete
+- **ANALYTICS-02**: Client performance comparisons against anonymous peer benchmarks
+- **ANALYTICS-03**: Predictive governance risk modeling based on historical patterns
+- **ANALYTICS-04**: Custom benchmark creation allowing advisors to define peer comparison groups
+
+### Intelligence Automation
+
+- **AUTO-01**: Automated risk alert notifications when governance scores decline significantly
+- **AUTO-02**: AI-powered governance insights and recommendations for improvement
+- **AUTO-03**: Automated compliance reporting with PDF generation for regulatory requirements
+- **AUTO-04**: Voice-to-insights integration for advisor dashboard queries
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Real-time collaboration between advisors | Single-advisor per family model sufficient for governance workflow |
+| Mobile native app | Responsive web dashboard meets advisor and family needs |
+| Video conferencing integration | Audio interviews with transcription already provide sufficient client interaction |
+| Multi-language support | English-focused governance framework for target market |
+| Advanced user role management | Current advisor/family model handles governance requirements |
+| Integration with external portfolio systems | Family governance focus doesn't require financial data integration |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| DASH-01 | TBD | Pending |
+| DASH-02 | TBD | Pending |
+| DASH-03 | TBD | Pending |
+| DASH-04 | TBD | Pending |
+| DASH-05 | TBD | Pending |
+| VIZ-01 | TBD | Pending |
+| VIZ-02 | TBD | Pending |
+| VIZ-03 | TBD | Pending |
+| VIZ-04 | TBD | Pending |
+| VIZ-05 | TBD | Pending |
+| INTEL-01 | TBD | Pending |
+| INTEL-02 | TBD | Pending |
+| INTEL-03 | TBD | Pending |
+| INTEL-04 | TBD | Pending |
+| FAMILY-01 | TBD | Pending |
+| FAMILY-02 | TBD | Pending |
+| FAMILY-03 | TBD | Pending |
+| FAMILY-04 | TBD | Pending |
+
+**Coverage:**
+- v1.3 requirements: 18 total
+- Mapped to phases: 0 (pending roadmap creation)
+- Unmapped: 18 ⚠️
+
+---
+*Requirements defined: 2026-03-14*
+*Last updated: 2026-03-14 after initial definition*
