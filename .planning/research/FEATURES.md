@@ -1,7 +1,7 @@
 # Feature Research
 
-**Domain:** Family Governance Assessment with Intake Interview, Audio Collection, and Advisor Portal
-**Researched:** 2026-03-13
+**Domain:** Governance Intelligence Dashboard Platform
+**Researched:** 2026-03-14
 **Confidence:** MEDIUM
 
 ## Feature Landscape
@@ -12,15 +12,14 @@ Features users assume exist. Missing these = product feels incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Structured intake interview flow | Industry standard for advisor-guided onboarding | MEDIUM | 15-30 minute questionnaire with branching logic |
-| Audio response recording | Expected for qualitative assessment in 2026 | MEDIUM | Web-based recording with auto-transcription |
-| Real-time auto-save | Users expect no data loss during sessions | LOW | Already implemented in existing assessment |
-| Mobile-responsive design | Advisors access portals from any device | LOW | Critical for advisor workflow flexibility |
-| Secure client portal | Standard for wealth management platforms | MEDIUM | Document sharing, meeting agendas, encrypted communication |
-| Assessment customization | Advisors expect to tailor assessments per family | HIGH | Custom question sets, branding, role-based filtering |
-| Approval workflow | Required for advisor oversight of assessments | MEDIUM | Multi-step approval with audit trails |
-| Basic analytics dashboard | Advisors need progress tracking and insights | MEDIUM | Assessment completion rates, response patterns |
-| TOTP/MFA authentication | Security baseline for financial services | LOW | Already implemented |
+| Multi-Client Portfolio View | Advisors manage multiple families, expect consolidated view | MEDIUM | Hierarchical client organization with role-based access |
+| Real-Time Risk Scoring Dashboard | Standard in 2026 governance platforms | MEDIUM | Integrate with existing assessment scoring engine |
+| Historical Trend Visualization | Required for annual governance tracking | MEDIUM | Chart.js or D3.js for time-series data |
+| Automated Compliance Reporting | Expected in enterprise governance tools | HIGH | PDF generation with branded templates |
+| Client Performance Comparisons | Advisors benchmark families against peers | MEDIUM | Anonymous aggregate scoring by industry/size |
+| Risk Alert System | Proactive notification when scores change | LOW | Email/in-app notifications with thresholds |
+| Data Export Capabilities | Standard business intelligence feature | LOW | CSV/Excel export for external analysis |
+| Mobile-Responsive Interface | 2026 expectation for professional dashboards | MEDIUM | Progressive web app patterns |
 
 ### Differentiators (Competitive Advantage)
 
@@ -28,14 +27,14 @@ Features that set the product apart. Not required, but valuable.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| AI-powered emotional analysis | Extract sentiment/emotion from audio responses | HIGH | Voice AI can identify complex emotional states and conflict |
-| Real-time family member integration | Dynamic question personalization using household data | MEDIUM | Builds on existing household member features |
-| Automated risk area curation | AI suggests focus areas based on intake responses | HIGH | Reduces advisor prep time, improves assessment relevance |
-| Multi-language audio support | Serves diverse wealthy families | MEDIUM | Transcription and translation capabilities |
-| Advisor coaching recommendations | Suggest conversation topics based on responses | HIGH | Transforms assessment into coaching tool |
-| Advanced workflow automation | Smart routing of tasks based on response content | HIGH | Auto-route insights to appropriate team members |
-| Predictive family dynamics analysis | Identify potential governance challenges early | HIGH | Pattern recognition across family member responses |
-| White-label portal customization | Advisor firms can brand the entire experience | MEDIUM | Full UI customization with firm branding |
+| AI-Powered Risk Insights | Automated anomaly detection and recommendations | HIGH | Machine learning on assessment patterns |
+| Predictive Governance Modeling | Forecast family risk trends based on historical data | HIGH | Time series forecasting algorithms |
+| Interactive Family Governance Maps | Visual relationship mapping of governance structures | HIGH | D3.js force-directed graphs |
+| Custom Benchmark Creation | Advisors define peer groups for comparison | MEDIUM | Flexible filtering and grouping engine |
+| Governance Calendar Integration | Sync policy reviews and assessments with calendar | LOW | CalDAV integration with major calendar providers |
+| White-Label Customization | Advisors brand dashboards for their clients | MEDIUM | CSS theming and logo customization |
+| Voice-to-Insights Integration | Query dashboard data using natural language | HIGH | LLM integration with structured data queries |
+| Automated Policy Template Updates | Dynamic policy recommendations based on assessment changes | MEDIUM | Rule engine connecting scores to policy templates |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
@@ -43,40 +42,34 @@ Features that seem good but create problems.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Video recording capability | "More engaging than audio" | Privacy concerns, storage costs, limited value over audio | High-quality audio with transcript |
-| Complex role-based permissions | "Need granular control" | Over-engineering for family use case | Simple advisor/family member distinction |
-| Real-time chat/messaging | "Better communication" | Scope creep beyond assessment tool | Existing secure communication methods |
-| Advanced financial modeling | "One-stop solution" | Outside core competency, many tools exist | Integrate with existing advisor tools |
-| Social collaboration features | "Family engagement" | Families prefer private governance discussions | Advisor-mediated communication |
-| Mobile app development | "Better user experience" | Maintenance overhead, web-first more flexible | Progressive web app with mobile optimization |
+| Real-Time Live Collaboration | Appears modern and engaging | Creates complexity, version conflicts, rarely needed | Async collaboration with clear ownership workflows |
+| Unlimited Dashboard Customization | Users want control over their interface | Analysis paralysis, inconsistent UX, support burden | Predefined layouts with limited configuration options |
+| Direct Client Data Entry | Seems efficient to skip advisor workflow | Bypasses advisor review, quality control issues | Maintain advisor-mediated workflow with client visibility |
+| Comprehensive Social Features | Appears to add engagement value | Privacy concerns for family governance data | Simple commenting/notes within advisor-controlled environment |
 
 ## Feature Dependencies
 
 ```
-Intake Interview Flow
-    └──requires──> Assessment Customization
-                       └──requires──> Approval Workflow
+Multi-Client Portfolio View
+    └──requires──> Client Role Management
+                       └──requires──> User Authentication System
 
-Audio Collection
-    └──requires──> Intake Interview Flow
-    └──enables──> AI Emotional Analysis
+Historical Trend Visualization
+    └──requires──> Assessment Data Storage
+                       └──requires──> Existing Assessment Engine
 
-Advisor Portal
-    └──requires──> Secure Authentication (existing)
-    └──enables──> Client Management
+AI-Powered Risk Insights ──enhances──> Real-Time Risk Scoring Dashboard
 
-Real-time Family Integration ──enhances──> Assessment Customization
-    └──requires──> Household Profile System (existing)
+Predictive Governance Modeling ──requires──> Historical Trend Visualization
 
-AI Features ──conflict──> Privacy Requirements
+Custom Benchmark Creation ──conflicts──> Anonymous Aggregate Scoring
 ```
 
 ### Dependency Notes
 
-- **Audio Collection requires Intake Interview Flow:** Audio responses need structured questions to respond to
-- **Assessment Customization requires Approval Workflow:** Custom assessments need advisor oversight before deployment
-- **AI Features conflict with Privacy Requirements:** Advanced AI analysis may conflict with family privacy expectations
-- **Real-time Family Integration enhances Assessment Customization:** Builds on existing household profile features for dynamic personalization
+- **Multi-Client Portfolio View requires Client Role Management:** Advisors need different access levels per client family
+- **AI-Powered Risk Insights enhances Real-Time Risk Scoring:** ML recommendations build on existing scoring framework
+- **Custom Benchmark Creation conflicts with Anonymous Aggregate Scoring:** Custom groups may compromise anonymity requirements
 
 ## MVP Definition
 
@@ -84,43 +77,42 @@ AI Features ──conflict──> Privacy Requirements
 
 Minimum viable product — what's needed to validate the concept.
 
-- [ ] Structured intake interview flow — Foundation for advisor-guided experience
-- [ ] Audio response recording — Core differentiator from text-only assessments
-- [ ] Basic approval workflow — Essential for advisor oversight
-- [ ] Secure advisor portal — Required for advisor access and client management
-- [ ] Assessment customization (basic) — Advisors need to tailor for families
+- [ ] Multi-Client Portfolio View — Core value proposition for advisors
+- [ ] Real-Time Risk Scoring Dashboard — Integration with existing assessment engine
+- [ ] Historical Trend Visualization — Essential for annual governance tracking
+- [ ] Basic Risk Alert System — Proactive value for advisor workflow
+- [ ] Data Export Capabilities — Standard business intelligence expectation
 
 ### Add After Validation (v1.x)
 
 Features to add once core is working.
 
-- [ ] AI emotional analysis — When audio data volume justifies AI training
-- [ ] Advanced analytics dashboard — When usage patterns are established
-- [ ] Multi-language support — When serving diverse client base
-- [ ] Advanced workflow automation — When core workflows prove successful
+- [ ] Client Performance Comparisons — When user base provides sufficient data for meaningful benchmarks
+- [ ] Automated Compliance Reporting — When PDF generation infrastructure is established
+- [ ] Custom Benchmark Creation — When core analytics prove valuable
 
 ### Future Consideration (v2+)
 
 Features to defer until product-market fit is established.
 
-- [ ] Automated risk curation — Requires significant AI training and family data
-- [ ] Predictive family dynamics — Complex ML feature, needs large dataset
-- [ ] White-label customization — When serving multiple advisor firms
-- [ ] Advisor coaching recommendations — Advanced AI feature requiring extensive training
+- [ ] AI-Powered Risk Insights — Requires substantial data history for training
+- [ ] Predictive Governance Modeling — Advanced analytics for mature platform
+- [ ] Interactive Family Governance Maps — Complex visualization for established user base
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Intake interview flow | HIGH | MEDIUM | P1 |
-| Audio recording | HIGH | MEDIUM | P1 |
-| Approval workflow | HIGH | LOW | P1 |
-| Assessment customization | HIGH | HIGH | P1 |
-| Advisor portal | HIGH | MEDIUM | P1 |
-| AI emotional analysis | MEDIUM | HIGH | P2 |
-| Analytics dashboard | MEDIUM | MEDIUM | P2 |
-| Multi-language support | LOW | MEDIUM | P3 |
-| Advanced workflow automation | LOW | HIGH | P3 |
+| Multi-Client Portfolio View | HIGH | MEDIUM | P1 |
+| Real-Time Risk Scoring Dashboard | HIGH | MEDIUM | P1 |
+| Historical Trend Visualization | HIGH | MEDIUM | P1 |
+| Risk Alert System | MEDIUM | LOW | P1 |
+| Data Export Capabilities | MEDIUM | LOW | P1 |
+| Client Performance Comparisons | HIGH | MEDIUM | P2 |
+| Automated Compliance Reporting | MEDIUM | HIGH | P2 |
+| Mobile-Responsive Interface | MEDIUM | MEDIUM | P2 |
+| AI-Powered Risk Insights | HIGH | HIGH | P3 |
+| Predictive Governance Modeling | MEDIUM | HIGH | P3 |
 
 **Priority key:**
 - P1: Must have for launch
@@ -129,43 +121,39 @@ Features to defer until product-market fit is established.
 
 ## Competitor Feature Analysis
 
-| Feature | TurboTax Style Tools | Wealth Management Platforms | Our Approach |
-|---------|---------------------|----------------------------|--------------|
-| Audio Collection | Text-only guided experience | Limited audio capabilities | Core audio-first assessment |
-| Family Integration | Individual-focused | Basic family account linking | Deep household member integration |
-| Advisor Oversight | Self-service only | Complex approval chains | Streamlined advisor-guided flow |
-| Assessment Customization | Fixed question sets | Heavy customization overhead | Balanced customization with templates |
+| Feature | Masttro | BlackRock Geopolitical Dashboard | Our Approach |
+|---------|---------|----------------------------------|--------------|
+| Global Wealth Visualization | Interactive wealth maps with entities | Geopolitical risk heatmaps | Family governance risk landscapes |
+| Historical Performance | Asset performance over time | Risk event frequency tracking | Governance assessment trends |
+| AI-Powered Insights | AI tools for wealth management | Market attention analysis | Assessment pattern analysis |
+| Multi-Client Management | Family office operations platform | Institutional risk monitoring | Advisor-centric multi-family platform |
 
 ## Integration with Existing Features
 
 ### Assessment System Integration
-- Extend existing 68-question branching logic to include intake interview responses
-- Use audio responses to inform assessment personalization
-- Maintain existing auto-save functionality across intake and assessment flows
+- Extend existing scoring engine to power real-time dashboard metrics
+- Use existing 68-question assessment data for historical trend analysis
+- Leverage existing customization scoring for client comparisons
 
 ### Household Profile Integration
-- Leverage existing household member profiles for intake personalization
-- Use member roles and relationships to customize intake questions
-- Build on existing member-aware question branching
+- Use existing household member profiles for multi-client organization
+- Leverage role-based access already implemented for advisor portal
+- Build on existing member-aware permissions for dashboard access
 
 ### Security and Privacy Integration
-- Extend existing TOTP/MFA to advisor portal access
-- Maintain SOC 2 compliance with audio data collection
-- Use existing audit logging for advisor approval workflows
+- Extend existing TOTP/MFA to dashboard access
+- Maintain SOC 2 compliance with dashboard data visualization
+- Use existing audit logging for risk alert and export functionality
 
 ## Sources
 
-- [AI Video Interviewing in 2026: Best Practices & Platforms](https://www.humanly.io/blog/ai-video-interviewing-best-practices-2026)
-- [Conducting Intake Effectively: 22 Forms, Questions, & Apps](https://quenza.com/blog/intake-form-counseling/)
-- [Best User Feedback Collection Systems in 2026: Complete Guide](https://blog.buildbetter.ai/best-user-feedback-collection-systems-2026-guide/)
-- [Voice AI in User Research: Conducting Audio-Based Studies](https://innerview.co/blog/revolutionizing-user-research-harnessing-voice-ai-for-audio-based-studies)
-- [Agentforce for Financial Services: 2026 Complete Guide](https://vantagepoint.io/blog/sf/agentforce-for-financial-services-2026-guide)
-- [InvestGlass Approval Workflow Software for Banks](https://www.investglass.com/revolutionising-financial-operations-the-power-of-investglass-approval-workflow-software-for-banks-and-brokerage-firms/)
-- [The Top 25 SaaS Assessment Software in 2026](https://topbusinesssoftware.com/categories/assessment/saas/)
-- [Best Learning Management System Features in 2026](https://leveluplms.com/the-best-learning-management-system-features-you-should-look-for-in-2026/)
-- [Family Governance for High Net Worth Families: A Practical Guide](https://www.selectadvisorsinstitute.com/our-perspective/family-governance-for-high-net-worth-families)
-- [Virtual Family Office: Modern Wealth Management](https://masttro.com/insights/virtual-family-office/)
+- [New Governance Tools From OpenAI and Microsoft Target AI Risks](https://www.pymnts.com/news/artificial-intelligence/2026/new-governance-tools-from-openai-and-microsoft-target-ai-risks/)
+- [Best Family Office Software for 2026: Features, Pricing, and Use Cases](https://masttro.com/insights/best-family-office-software)
+- [Best Risk Assessment Tools 2026: Top 10 Picks](https://www.flowforma.com/blog/automated-risk-assessment-tools)
+- [9 Dashboard Design Principles (2026)](https://www.designrush.com/agency/ui-ux-design/dashboard/trends/dashboard-design-principles)
+- [Data Governance Metrics and KPIs: Track and Report](https://www.scrut.io/post/data-governance-metrics-kpi)
+- [Geopolitical Risk Dashboard | BlackRock Investment Institute](https://www.blackrock.com/corporate/insights/blackrock-investment-institute/interactive-charts/geopolitical-risk-dashboard)
 
 ---
-*Feature research for: Family Governance Assessment with Intake Interview, Audio Collection, and Advisor Portal*
-*Researched: 2026-03-13*
+*Feature research for: Governance Intelligence Dashboard Platform*
+*Researched: 2026-03-14*

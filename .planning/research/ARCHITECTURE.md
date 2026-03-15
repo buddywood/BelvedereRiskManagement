@@ -1,357 +1,318 @@
-# Architecture Integration: Household Profile Features
+# Architecture Research
 
-**Domain:** Household Profile Management for Risk Assessment Platform
-**Researched:** 2026-03-12
+**Domain:** Governance intelligence dashboards for Next.js assessment platform
+**Researched:** 2026-03-14
 **Confidence:** HIGH
 
-## Integration Architecture
+## Standard Architecture
 
-### System Overview with Profile Integration
+### System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         PRESENTATION LAYER                                  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
-│  │ Profile UI  │  │Assessment UI│  │ Report UI   │  │ Auth UI     │         │
-│  │ Components  │  │ Components  │  │ Components  │  │ Components  │         │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘         │
-│         │                │                │                │                  │
-├─────────┴────────────────┴────────────────┴────────────────┴──────────────────┤
-│                      BUSINESS LOGIC LAYER                                   │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐           │
-│  │ Profile Services │  │ Assessment Logic │  │ Template Engine  │           │
-│  │ + Branching     │  │ + Profile Context│  │ + Profile Data   │           │
-│  └──────────────────┘  └──────────────────┘  └──────────────────┘           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                         STATE MANAGEMENT                                    │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                       │
-│  │ Profile Store│  │Assessment    │  │ Session      │                       │
-│  │ (Zustand)    │  │ Store        │  │ Store        │                       │
-│  └──────────────┘  └──────────────┘  └──────────────┘                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                         DATA LAYER                                          │
-│  ┌────────────────────────────────────────────────────────────────────────┐  │
-│  │ PostgreSQL + Prisma ORM + Row-Level Security                          │  │
-│  │ User → HouseholdProfile → Assessment → Responses → PillarScores       │  │
-│  └────────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Presentation Layer                            │
+├─────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
+│  │   Client    │  │   Advisor   │  │  Dashboard  │  │  Analytics  │ │
+│  │ Dashboard   │  │ Management  │  │  Widgets    │  │   Views     │ │
+│  └─────┬───────┘  └─────┬───────┘  └─────┬───────┘  └─────┬───────┘ │
+│        │                │                │                │         │
+├────────┴────────────────┴────────────────┴────────────────┴─────────┤
+│                      Business Logic Layer                          │
+├─────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │           Server Actions + API Routes                       │   │
+│  │  • Assessment aggregation  • Report generation             │   │
+│  │  • Multi-client analytics  • Real-time data sync           │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+├─────────────────────────────────────────────────────────────────────┤
+│                      Data Access Layer                             │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
+│  │   Prisma     │  │    Caching   │  │   External   │              │
+│  │   Client     │  │   (Redis)    │  │   Services   │              │
+│  └──────────────┘  └──────────────┘  └──────────────┘              │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-### Component Integration Points
+### Component Responsibilities
 
-| Component | Current System | Profile Integration | Communication Pattern |
-|-----------|----------------|-------------------|---------------------|
-| Branching Logic | `shouldShowQuestion()` → answers only | Profile data + answers → enhanced context | Service layer injection |
-| Assessment Store | User answers + session state | Profile data + answers + member context | Extended Zustand store |
-| Template Generator | Score data + user email | Score + profile + member data | Data mapper enhancement |
-| Question Components | Static question rendering | Dynamic member-specific questions | Props + context |
-| Progress Tracking | Question completion % | Profile-aware completion tracking | Store computed values |
+| Component | Responsibility | Typical Implementation |
+|-----------|----------------|------------------------|
+| Dashboard Widgets | Real-time data display, charts, KPIs | React components with SWR/React Query |
+| Analytics Views | Historical trends, comparative analysis | Server Components with Prisma aggregations |
+| Multi-Client Manager | Tenant isolation, client filtering | Row-level security with Prisma middleware |
+| Assessment Aggregator | Score calculations, trend analysis | Background jobs + cached results |
+| Report Generator | PDF generation, template processing | React-PDF with server-side rendering |
 
-## Database Schema Integration
+## Integration with Existing Architecture
 
-### New Models Required
+### Current System Enhancement Points
+
+**Existing Foundation:**
+- Next.js 15 with App Router ✓
+- PostgreSQL + Prisma 7 ✓
+- Role-based authentication (USER/ADVISOR/ADMIN) ✓
+- Assessment engine with scoring pipeline ✓
+- PDF generation + server actions ✓
+
+**New Dashboard Components:**
 
 ```typescript
-model HouseholdProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  familyName      String?
-  estimatedNetWorth Float?
-  numberOfHeirs   Int?
-  hasSpouse       Boolean  @default(false)
-  hasTrusts       Boolean  @default(false)
-  hasFamilyBusiness Boolean @default(false)
+// Extend existing Prisma models
+model DashboardWidget {
+  id         String   @id @default(cuid())
+  advisorId  String
+  type       WidgetType
+  config     Json
+  position   Json
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  members         HouseholdMember[]
-  assessments     Assessment[]
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([userId])
+  advisor    AdvisorProfile @relation(fields: [advisorId], references: [id])
 }
 
-model HouseholdMember {
-  id              String   @id @default(cuid())
-  profileId       String
-  name            String
-  relationship    String   // spouse, child, dependent, etc.
-  age             Int?
-  hasSpecialNeeds Boolean  @default(false)
-  isSuccessor     Boolean  @default(false)
+model AssessmentMetrics {
+  id           String   @id @default(cuid())
+  assessmentId String   @unique
+  completedAt  DateTime
+  totalScore   Float
+  riskTrend    Float?   // Month-over-month change
+  advisorNotes String?
 
-  profile         HouseholdProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
-
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@index([profileId])
+  assessment   Assessment @relation(fields: [assessmentId], references: [id])
 }
 ```
 
-### Existing Model Updates
+### Modified vs New Components
 
-```typescript
-model Assessment {
-  // Add household profile relationship
-  profileId       String?
-  profile         HouseholdProfile? @relation(fields: [profileId], references: [id])
+| Component Type | Status | Rationale |
+|---------------|--------|-----------|
+| **Advisor Layout** | MODIFY | Add dashboard nav, extend existing `/advisor` layout |
+| **Client Cards** | EXTEND | Add metrics overlay to existing ClientCard component |
+| **Assessment API** | EXTEND | Add aggregation endpoints to existing `/api/assessment` |
+| **Dashboard Views** | NEW | Create `/advisor/dashboard` with analytics widgets |
+| **Metrics Engine** | NEW | Background calculation service for trends |
+| **Data Aggregation** | NEW | Prisma aggregation queries + caching layer |
 
-  // Enhance context tracking
-  profileSnapshot Json?  // Snapshot of profile data when assessment started
-}
-
-model AssessmentResponse {
-  // Add member context for personalized questions
-  targetMemberId  String?
-  memberContext   Json?   // Which household member this response relates to
-}
-```
-
-## Architectural Patterns
-
-### Pattern 1: Profile-Aware Question Branching
-
-**What:** Extend existing branching logic to consider both user answers AND profile data
-**When to use:** When questions should appear/disappear based on household composition
-**Trade-offs:** Increased complexity, better user experience, more accurate assessments
-
-**Example:**
-```typescript
-// Enhanced branching rule
-interface ProfileAwareBranchingRule extends BranchingRule {
-  profileCondition?: (profile: HouseholdProfile) => boolean;
-  memberCondition?: (members: HouseholdMember[]) => boolean;
-}
-
-// Updated logic
-export function shouldShowQuestion(
-  question: Question,
-  answers: Record<string, unknown>,
-  profile?: HouseholdProfile,
-  members?: HouseholdMember[]
-): boolean {
-  // Existing answer-based logic
-  if (!evaluateAnswerCondition(question, answers)) {
-    return false;
-  }
-
-  // New profile-based logic
-  if (question.branchingRule?.profileCondition && profile) {
-    return question.branchingRule.profileCondition(profile);
-  }
-
-  if (question.branchingRule?.memberCondition && members) {
-    return question.branchingRule.memberCondition(members);
-  }
-
-  return true;
-}
-```
-
-### Pattern 2: Profile-Context State Management
-
-**What:** Extend Zustand store to include profile data alongside assessment state
-**When to use:** When UI components need both assessment and profile data
-**Trade-offs:** Single source of truth, potential store bloat for large families
-
-**Example:**
-```typescript
-interface EnhancedAssessmentState extends AssessmentState {
-  // Profile context
-  currentProfile: HouseholdProfile | null;
-  householdMembers: HouseholdMember[];
-
-  // Profile actions
-  setProfile: (profile: HouseholdProfile) => void;
-  updateMember: (memberId: string, updates: Partial<HouseholdMember>) => void;
-
-  // Enhanced answer tracking with member context
-  setMemberAnswer: (questionId: string, answer: unknown, memberId?: string) => void;
-}
-```
-
-### Pattern 3: Template Data Composition
-
-**What:** Compose template data from multiple sources (scores + profile + members)
-**When to use:** When generating personalized reports and documents
-**Trade-offs:** Rich personalization, complex data mapping, template dependencies
-
-**Example:**
-```typescript
-interface EnhancedTemplateData {
-  // Existing score data
-  assessment: ScoreResult;
-  userEmail: string;
-
-  // New profile data
-  household: {
-    familyName: string;
-    totalMembers: number;
-    estimatedNetWorth: string;
-    hasSuccessors: boolean;
-  };
-
-  // Member-specific sections
-  memberProfiles: {
-    id: string;
-    name: string;
-    relationship: string;
-    riskFactors: string[];
-    recommendations: string[];
-  }[];
-}
-```
-
-## Data Flow Integration
-
-### Profile-Aware Assessment Flow
-
-```
-[Profile Setup] → [Assessment Start] → [Profile-Enhanced Questions] → [Member-Specific Responses] → [Personalized Scoring] → [Profile-Rich Reports]
-       ↓                ↓                        ↓                            ↓                        ↓                    ↓
-[Profile Store] → [Assessment Store] → [Enhanced Branching] → [Member Context] → [Score Calculator] → [Template Engine]
-```
-
-### State Synchronization
-
-```
-[Profile Changes]
-    ↓
-[Invalidate Assessment Cache] → [Recalculate Visible Questions] → [Update Progress] → [Refresh UI]
-    ↓                              ↓                               ↓                   ↓
-[Database Update] → [Zustand Store Update] → [Component Re-render] → [User Sees Changes]
-```
-
-## Integration Anti-Patterns
-
-### Anti-Pattern 1: Profile Data in Assessment Store
-
-**What people do:** Store all household profile data in assessment store
-**Why it's wrong:** Violates separation of concerns, creates tight coupling, bloats assessment logic
-**Do this instead:** Keep profile store separate, inject profile context only when needed for branching/scoring
-
-### Anti-Pattern 2: Deep Member Nesting in Questions
-
-**What people do:** Create separate question variants for each household member
-**Why it's wrong:** Exponential question explosion, maintenance nightmare, poor UX
-**Do this instead:** Use dynamic question rendering with member context injection
-
-### Anti-Pattern 3: Profile Snapshots Everywhere
-
-**What people do:** Store profile snapshots in every response record
-**Why it's wrong:** Data duplication, stale data issues, storage bloat
-**Do this instead:** Store profile snapshot only at assessment level, reference member IDs in responses
-
-## Build Order Dependencies
-
-### Phase 1: Database Foundation
-1. **HouseholdProfile** model with basic fields
-2. **HouseholdMember** model with relationships
-3. Database migration scripts
-4. Updated Assessment model with profile relationship
-
-**Critical Integration Point:** Must maintain backward compatibility with existing assessments
-
-### Phase 2: Core Profile Services
-1. Profile CRUD operations (create, read, update, delete)
-2. Member management services
-3. Profile validation logic
-4. API routes for profile management
-
-**Critical Integration Point:** Profile service interfaces must align with existing auth patterns
-
-### Phase 3: Enhanced Branching Logic
-1. Profile-aware branching rule interfaces
-2. Updated `shouldShowQuestion()` function
-3. Member-context question filtering
-4. Integration with existing assessment store
-
-**Critical Integration Point:** Branching logic changes require extensive testing to avoid breaking existing assessments
-
-### Phase 4: Assessment Integration
-1. Profile store creation (Zustand)
-2. Assessment store enhancement with profile context
-3. Question component updates for member-specific rendering
-4. Progress tracking with profile awareness
-
-**Critical Integration Point:** State management changes must preserve existing auto-save functionality
-
-### Phase 5: Template Personalization
-1. Enhanced template data mapper
-2. Profile-aware document generation
-3. Member-specific report sections
-4. Template registry updates for household features
-
-**Critical Integration Point:** Template changes must maintain backward compatibility with existing reports
-
-## Critical Integration Points
-
-| Integration Point | Risk Level | Mitigation Strategy |
-|------------------|------------|-------------------|
-| Branching Logic Migration | HIGH | Feature flags, gradual rollout, extensive testing |
-| Assessment Store Changes | MEDIUM | Backward compatibility, data migration scripts |
-| Template Data Breaking Changes | MEDIUM | Versioned template interfaces, graceful degradation |
-| Database Schema Evolution | LOW | Standard Prisma migration workflow |
-
-## Recommended Project Structure Updates
+## Recommended Project Structure
 
 ```
 src/
-├── lib/
-│   ├── profile/           # NEW: Profile management
-│   │   ├── types.ts       # Profile and member interfaces
-│   │   ├── services.ts    # CRUD operations
-│   │   ├── store.ts       # Zustand profile store
-│   │   └── validation.ts  # Profile data validation
-│   ├── assessment/        # ENHANCED: Existing assessment logic
-│   │   ├── branching.ts   # Updated with profile awareness
-│   │   ├── store.ts       # Enhanced with profile context
-│   │   └── scoring.ts     # Profile-aware scoring
-│   └── templates/         # ENHANCED: Template generation
-│       ├── data-mapper.ts # Enhanced with profile data
-│       └── generator.ts   # Profile-aware generation
-├── components/
-│   ├── profile/           # NEW: Profile UI components
-│   │   ├── ProfileForm.tsx
-│   │   ├── MemberList.tsx
-│   │   └── ProfileSummary.tsx
-│   ├── assessment/        # ENHANCED: Existing components
-│   │   ├── QuestionCard.tsx # Member-aware rendering
-│   │   └── ProgressBar.tsx  # Profile-aware progress
-│   └── ui/                # Existing shared components
-└── app/
-    ├── api/
-    │   ├── profile/       # NEW: Profile API routes
-    │   │   └── route.ts
-    │   ├── assessment/    # ENHANCED: Profile-aware endpoints
-    │   │   └── [id]/score/route.ts # Profile data included
-    │   └── templates/     # ENHANCED: Profile data injection
-    └── (protected)/
-        ├── profile/       # NEW: Profile management pages
-        └── assessment/    # ENHANCED: Profile-aware assessment
+├── app/(protected)/advisor/
+│   ├── dashboard/              # NEW: Multi-client analytics dashboard
+│   │   ├── page.tsx           # Dashboard overview with widgets
+│   │   ├── analytics/         # Detailed analytics views
+│   │   └── clients/[id]/      # Per-client drill-down views
+│   ├── layout.tsx             # MODIFY: Add dashboard navigation
+│   └── page.tsx               # EXTEND: Add dashboard preview cards
+├── components/dashboard/       # NEW: Dashboard-specific components
+│   ├── widgets/               # Chart components, KPI cards
+│   ├── analytics/             # Trend analysis, comparisons
+│   └── client-insights/       # Client-specific visualizations
+├── lib/dashboard/             # NEW: Dashboard business logic
+│   ├── aggregation.ts         # Data aggregation functions
+│   ├── metrics.ts             # Metric calculation engines
+│   └── caching.ts             # Dashboard data caching
+├── lib/actions/
+│   └── dashboard-actions.ts   # NEW: Server actions for dashboard
+└── app/api/dashboard/         # NEW: Real-time data endpoints
+    ├── metrics/route.ts       # Aggregate metrics API
+    └── widgets/[id]/route.ts  # Widget-specific data
 ```
+
+### Structure Rationale
+
+- **dashboard/:** Dedicated folder for new functionality avoids disrupting existing assessment flows
+- **components/dashboard/:** Reusable widgets prevent code duplication across advisor views
+- **lib/dashboard/:** Business logic separation allows for easy testing and caching strategies
+
+## Architectural Patterns
+
+### Pattern 1: Multi-Tenant Row-Level Security
+
+**What:** Use Prisma middleware to automatically filter queries by advisor-client relationships
+**When to use:** All dashboard data access to ensure tenant isolation
+**Trade-offs:** Performance overhead vs data security guarantee
+
+**Example:**
+```typescript
+// lib/db.ts - Extend existing Prisma client
+prisma.$use(async (params, next) => {
+  if (params.model && ['Assessment', 'PillarScore'].includes(params.model)) {
+    const session = await getServerSession();
+    if (session?.user?.role === 'ADVISOR') {
+      // Auto-inject advisor filter
+      params.args.where = {
+        ...params.args.where,
+        user: {
+          clientAssignments: {
+            some: {
+              advisorId: session.user.advisorProfile?.id
+            }
+          }
+        }
+      };
+    }
+  }
+  return next(params);
+});
+```
+
+### Pattern 2: Cached Aggregation Pipeline
+
+**What:** Pre-calculate dashboard metrics using background jobs + Redis caching
+**When to use:** Complex multi-client analytics that don't need real-time updates
+**Trade-offs:** Stale data (5-15min delay) vs sub-second dashboard load times
+
+**Example:**
+```typescript
+// lib/dashboard/aggregation.ts
+export async function calculateAdvisorMetrics(advisorId: string) {
+  const cacheKey = `advisor:${advisorId}:metrics`;
+  const cached = await redis.get(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const metrics = await prisma.assessment.aggregate({
+    _avg: { scores: { score: true } },
+    _count: { status: { completed: true } },
+    where: {
+      user: {
+        clientAssignments: {
+          some: { advisorId }
+        }
+      }
+    }
+  });
+
+  await redis.setex(cacheKey, 900, JSON.stringify(metrics)); // 15min cache
+  return metrics;
+}
+```
+
+### Pattern 3: Streaming Dashboard Updates
+
+**What:** Use Server-Sent Events for real-time dashboard updates without WebSocket overhead
+**When to use:** Live assessment progress tracking for advisor monitoring
+**Trade-offs:** Simpler than WebSockets but less flexible for bidirectional communication
+
+## Data Flow
+
+### Dashboard Request Flow
+
+```
+[Advisor Dashboard Load]
+    ↓
+[Server Component] → [Dashboard Actions] → [Cached Aggregations] → [PostgreSQL]
+    ↓                      ↓                       ↓                    ↓
+[Rendered HTML] ← [Metric Calculations] ← [Prisma Queries] ← [Row-Level Security]
+    ↓
+[Client Hydration] → [Real-time Updates] → [SSE Endpoint]
+```
+
+### Assessment Integration Flow
+
+```
+[Assessment Completion]
+    ↓
+[Scoring Pipeline] → [Dashboard Metrics Update] → [Cache Invalidation]
+    ↓                        ↓                         ↓
+[Advisor Notification] ← [Background Job] ← [Redis Cache Clear]
+```
+
+### Key Data Flows
+
+1. **Multi-Client Overview:** Aggregates scores across all assigned clients with trend calculations
+2. **Real-time Progress:** Streams live assessment progress to advisor dashboard via SSE
+3. **Historical Analysis:** Combines assessment data with time-series analysis for trend insights
 
 ## Scaling Considerations
 
-| Scale | Profile-Specific Considerations |
-|-------|-------------------------------|
-| 0-1k families | Store member data as JSONB, simple profile queries |
-| 1k-10k families | Normalize member relationships, index on profile_id |
-| 10k+ families | Consider member data archival, profile search optimization |
+| Scale | Architecture Adjustments |
+|-------|--------------------------|
+| 1-50 advisors | Current PostgreSQL + Redis cache handles load easily |
+| 50-500 advisors | Add read replicas, optimize Prisma queries, implement query batching |
+| 500+ advisors | Consider database sharding by advisor region, microservice separation |
+
+### Scaling Priorities
+
+1. **First bottleneck:** Dashboard aggregation queries - solve with materialized views and smart caching
+2. **Second bottleneck:** Real-time updates - implement rate limiting and selective updates
+
+## Anti-Patterns
+
+### Anti-Pattern 1: Real-time Everything
+
+**What people do:** Make every dashboard widget update in real-time via WebSocket/polling
+**Why it's wrong:** Overwhelms database with unnecessary queries, degrades UX with constant reloading
+**Do this instead:** Use cached aggregations (15min updates) for trends, real-time only for active assessments
+
+### Anti-Pattern 2: Client-Side Aggregation
+
+**What people do:** Fetch raw assessment data to browser and calculate metrics client-side
+**Why it's wrong:** Security risk (exposes other clients' data), poor performance, breaks on large datasets
+**Do this instead:** Server-side aggregation with Prisma, return only processed metrics to client
+
+### Anti-Pattern 3: Single Mega-Dashboard
+
+**What people do:** Cram all possible metrics into one overwhelming dashboard page
+**Why it's wrong:** Slow loading, cognitive overload for advisors, difficult maintenance
+**Do this instead:** Modular widget system with drill-down capability and customizable layouts
+
+## Integration Points
+
+### External Services
+
+| Service | Integration Pattern | Notes |
+|---------|---------------------|-------|
+| Existing Assessment Engine | Direct Prisma queries | Leverage existing scoring pipeline |
+| PDF Report System | Extend existing routes | Add dashboard snapshot generation |
+| Email Notifications | Extend existing system | Add assessment completion alerts |
+
+### Internal Boundaries
+
+| Boundary | Communication | Notes |
+|----------|---------------|-------|
+| Dashboard ↔ Assessment | Shared Prisma models | Use existing Assessment/PillarScore schema |
+| Advisor ↔ Client data | Row-level security | Enforced via Prisma middleware |
+| Real-time updates ↔ Cache | Event-driven invalidation | Redis pub/sub for cache coordination |
+
+## Build Order Recommendation
+
+### Phase 1: Foundation (Week 1-2)
+1. Extend Prisma schema with dashboard models
+2. Create basic `/advisor/dashboard` layout
+3. Implement row-level security middleware
+4. Add Redis caching infrastructure
+
+### Phase 2: Core Widgets (Week 3-4)
+1. Client overview cards with basic metrics
+2. Assessment completion tracking
+3. Simple trend calculations (month-over-month)
+4. Export existing PDF functionality to dashboard
+
+### Phase 3: Advanced Analytics (Week 5-6)
+1. Historical trend analysis
+2. Comparative client performance
+3. Risk level distribution charts
+4. Real-time progress streaming
+
+### Phase 4: Polish & Performance (Week 7-8)
+1. Customizable dashboard layouts
+2. Advanced caching optimization
+3. Background job implementation
+4. Performance monitoring and alerting
 
 ## Sources
 
-- [Next.js Authentication Patterns for 2026](https://workos.com/blog/top-authentication-solutions-nextjs-2026)
-- [SaaS Architecture Patterns with Next.js](https://vladimirsiedykh.com/blog/saas-architecture-patterns-nextjs)
-- [Prisma Schema Relations Documentation](https://www.prisma.io/docs/orm/prisma-schema/data-model/relations)
-- [Profile-Driven Document Generation](https://apryse.com/blog/docx-generation-from-templates-react)
-- [React PDF Generation Libraries 2025](https://dev.to/ansonch/6-open-source-pdf-generation-and-modification-libraries-every-react-dev-should-know-in-2025-13g0)
-- [Multi-Tenant Database Patterns](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/)
+- [Next.js SaaS Dashboard Development: Scalability & Best Practices](https://www.ksolves.com/blog/next-js/best-practices-for-saas-dashboards)
+- [How to Build an Admin Dashboard with shadcn/ui and Next.js (2026 Guide)](https://adminlte.io/blog/build-admin-dashboard-shadcn-nextjs/)
+- [Next.js App Router: The Patterns That Actually Matter in 2026](https://dev.to/teguh_coding/nextjs-app-router-the-patterns-that-actually-matter-in-2026-146)
+- [Next.js 16 Real-Time Analytics Dashboard: A Production Guide](https://www.shsxnk.com/blog/realtime-analytics-dashboard)
+- [How to use Prisma ORM and Prisma Postgres with Next.js and Vercel](https://www.prisma.io/docs/guides/nextjs)
+- [What is multi-tenant architecture? A complete guide for 2026](https://www.future-processing.com/blog/multi-tenant-architecture/)
+- [Multi-Tenant Deployment: 2026 Complete Guide & Examples](https://qrvey.com/blog/multi-tenant-deployment/)
+- [The 2026 Multi-Tenant Data Integration Playbook for Scalable SaaS](https://cdatasoftware.medium.com/the-2026-multi-tenant-data-integration-playbook-for-scalable-saas-1371986d2c2c)
 
 ---
-*Architecture research for: Household Profile Integration*
-*Researched: 2026-03-12*
+*Architecture research for: Governance intelligence dashboards for Next.js assessment platform*
+*Researched: 2026-03-14*
