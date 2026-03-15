@@ -6,6 +6,12 @@ export type AdvisorDashboardClient = {
   name: string | null;
   email: string;
   assignedAt: Date;
+  clientProfile?: {
+    phone: string | null;
+    city: string | null;
+    state: string | null;
+    country: string | null;
+  } | null;
   latestInterview: {
     id: string;
     status: string;
@@ -35,6 +41,11 @@ export type IntakeQuestion = {
   learnMore?: string;
   type: string;
   options?: Array<{ value: number; label: string; description?: string }>;
+  /** Full intake form fields for advisor view: same as client sees, enables "Play question" TTS */
+  questionNumber?: number;
+  questionText?: string;
+  context?: string;
+  recordingTips?: string[];
 };
 
 // Risk area selection for advisor approval process

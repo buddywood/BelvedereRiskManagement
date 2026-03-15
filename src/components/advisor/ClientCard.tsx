@@ -1,15 +1,22 @@
 import Link from "next/link";
-import { User, FileText, Clock } from "lucide-react";
+import { User, FileText, Clock, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { AdvisorDashboardClient } from "@/lib/advisor/types";
+import { TOTAL_QUESTIONS } from "@/lib/intake/questions";
 
 interface ClientCardProps {
   client: AdvisorDashboardClient;
 }
 
+function formatLocation(profile: NonNullable<AdvisorDashboardClient["clientProfile"]>) {
+  const parts = [profile.city, profile.state, profile.country].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : null;
+}
+
 export function ClientCard({ client }: ClientCardProps) {
-  const { name, email, assignedAt, latestInterview } = client;
+  const { name, email, assignedAt, latestInterview, clientProfile } = client;
+  const location = clientProfile ? formatLocation(clientProfile) : null;
 
   // Status badge configuration
   const getStatusConfig = (status: string) => {
@@ -69,6 +76,24 @@ export function ClientCard({ client }: ClientCardProps) {
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Personal details when present */}
+        {(clientProfile?.phone || location) && (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+            {clientProfile?.phone && (
+              <span className="inline-flex items-center gap-1.5">
+                <Phone className="h-3.5 w-3.5" />
+                {clientProfile.phone}
+              </span>
+            )}
+            {location && (
+              <span className="inline-flex items-center gap-1.5">
+                <MapPin className="h-3.5 w-3.5" />
+                {location}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Assignment info */}
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
@@ -91,14 +116,14 @@ export function ClientCard({ client }: ClientCardProps) {
             </div>
 
             <div className="text-sm text-muted-foreground">
-              {latestInterview.responseCount}/10 questions answered
+              {latestInterview.responseCount}/{TOTAL_QUESTIONS} questions answered
             </div>
 
-            {/* Action button */}
+            {/* Action button: view intake form and listen to responses */}
             {latestInterview.status === 'SUBMITTED' ? (
               <Button asChild size="sm" className="w-full">
-                <Link href={`/advisor/review/${latestInterview.id}`}>
-                  Review Intake
+                <Link href={`/advisor/review/${latestInterview.id}`} title="View intake form and listen to responses">
+                  View intake
                 </Link>
               </Button>
             ) : (

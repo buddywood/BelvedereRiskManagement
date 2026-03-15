@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AdvisorPersonalDetailsForm } from "@/components/settings/AdvisorPersonalDetailsForm";
+import { ClientPersonalDetailsForm } from "@/components/settings/ClientPersonalDetailsForm";
+import { getAdvisorPersonalDetails, getClientPersonalDetails } from "@/lib/actions/personal-profile";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -12,6 +15,8 @@ export default async function SettingsPage() {
   if (!session?.user?.id) {
     redirect("/signin");
   }
+
+  const role = session.user.role?.toString().toUpperCase();
 
   // Fetch user data
   const user = await prisma.user.findUnique({
@@ -25,6 +30,18 @@ export default async function SettingsPage() {
 
   if (!user) {
     redirect("/signin");
+  }
+
+  // Fetch personal details for profile section (advisor or client by role)
+  let advisorDetails: Awaited<ReturnType<typeof getAdvisorPersonalDetails>>["data"] = null;
+  let clientDetails: Awaited<ReturnType<typeof getClientPersonalDetails>>["data"] = null;
+  if (role === "ADVISOR" || role === "ADMIN") {
+    const res = await getAdvisorPersonalDetails();
+    if (res.success && res.data) advisorDetails = res.data;
+  }
+  if (role === "USER") {
+    const res = await getClientPersonalDetails();
+    if (res.success && res.data) clientDetails = res.data;
   }
 
   const recoveryCodesRemaining = user.mfaRecoveryCodes
@@ -78,6 +95,27 @@ export default async function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {(advisorDetails !== null || clientDetails !== null) && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-3xl">Personal details</CardTitle>
+              <CardDescription>
+                {advisorDetails !== null
+                  ? "Contact and professional details for your advisor profile."
+                  : "Contact and address details visible to your advisor."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {advisorDetails !== null && (
+                <AdvisorPersonalDetailsForm initialData={advisorDetails} />
+              )}
+              {clientDetails !== null && (
+                <ClientPersonalDetailsForm initialData={clientDetails} />
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

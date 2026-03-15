@@ -29,6 +29,8 @@ export async function getAdvisorProfileOrThrow(userId: string) {
         select: {
           name: true,
           email: true,
+          firstName: true,
+          lastName: true,
         },
       },
     },

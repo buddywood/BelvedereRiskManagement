@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Clock, FileText, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TranscriptViewer } from "@/components/advisor/TranscriptViewer";
+import { AdvisorIntakeView } from "@/components/advisor/AdvisorIntakeView";
 import { ReviewSidebar } from "@/components/advisor/ReviewSidebar";
 import { getIntakeReviewData } from "@/lib/actions/advisor-actions";
 
@@ -64,11 +64,11 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
               <Link href="/advisor">
                 <Button variant="ghost" size="sm">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Dashboard
+                  Back to Clients
                 </Button>
               </Link>
               <div className="h-6 w-px bg-border" />
-              <h1 className="text-xl font-semibold">Intake Review</h1>
+              <h1 className="text-xl font-semibold">View intake</h1>
             </div>
 
             <Badge variant={getStatusVariant(approval?.status)}>
@@ -121,21 +121,23 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
               </div>
             </div>
 
-            {/* Transcript viewer */}
-            <div className="rounded-lg border bg-card p-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">Interview Responses</h3>
-                  <span className="text-sm text-muted-foreground">
-                    {interview.responses.length} responses
-                  </span>
-                </div>
-
-                <TranscriptViewer
-                  responses={interview.responses}
-                  questions={questions}
-                />
+            {/* Intake form: view each question (with Play question) and client response */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">View intake</h3>
+                <span className="text-sm text-muted-foreground">
+                  {interview.responses.length} of {questions.length} responses
+                </span>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Review each intake question as the client saw it. Use &quot;Play question&quot; to hear the question, then listen to the client&apos;s recorded response and read the transcript.
+              </p>
+
+              <AdvisorIntakeView
+                responses={interview.responses}
+                questions={questions}
+                totalQuestions={questions.length}
+              />
             </div>
           </div>
 

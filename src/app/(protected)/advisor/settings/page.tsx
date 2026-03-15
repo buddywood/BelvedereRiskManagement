@@ -28,7 +28,7 @@ export default async function AdvisorSettingsPage() {
         <Button variant="outline" size="sm" asChild>
           <Link href="/advisor">
             <ArrowLeft className="h-4 w-4" />
-            Back to portal
+            Back to Clients
           </Link>
         </Button>
         <div className="space-y-1">

@@ -1,24 +1,27 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAssessmentStore } from '@/lib/assessment/store';
-import { useHouseholdProfile } from '@/lib/hooks/useHouseholdProfile';
-import { PillarCard } from '@/components/assessment/PillarCard';
-import { OverallProgress } from '@/components/assessment/ProgressBar';
-import { CustomizationBanner } from '@/components/assessment/CustomizationBanner';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, Clock } from 'lucide-react';
-import toast from 'react-hot-toast';
-import type { Pillar } from '@/lib/assessment/types';
-import { getVisibleQuestions } from '@/lib/assessment/branching';
-import { allQuestions } from '@/lib/assessment/questions';
-import { formatDistanceToNow } from 'date-fns';
-import { Card, CardContent } from '@/components/ui/card';
-import type { CustomizationConfig } from '@/lib/assessment/customization';
-import { getVisibleQuestionIds, estimateCompletionMinutes } from '@/lib/assessment/customization';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAssessmentStore } from "@/lib/assessment/store";
+import { useHouseholdProfile } from "@/lib/hooks/useHouseholdProfile";
+import { PillarCard } from "@/components/assessment/PillarCard";
+import { OverallProgress } from "@/components/assessment/ProgressBar";
+import { CustomizationBanner } from "@/components/assessment/CustomizationBanner";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, Clock } from "lucide-react";
+import toast from "react-hot-toast";
+import type { Pillar } from "@/lib/assessment/types";
+import { getVisibleQuestions } from "@/lib/assessment/branching";
+import { allQuestions } from "@/lib/assessment/questions";
+import { formatDistanceToNow } from "date-fns";
+import { Card, CardContent } from "@/components/ui/card";
+import type { CustomizationConfig } from "@/lib/assessment/customization";
+import {
+  getVisibleQuestionIds,
+  estimateCompletionMinutes,
+} from "@/lib/assessment/customization";
 
 /**
  * Assessment Hub Page
@@ -30,20 +33,69 @@ import { getVisibleQuestionIds, estimateCompletionMinutes } from '@/lib/assessme
 
 // MVP: Single pillar with 8 sub-categories (will expand in future phases)
 const FAMILY_GOVERNANCE_PILLAR: Pillar = {
-  id: 'family-governance',
-  name: 'Family Governance',
-  slug: 'family-governance',
-  description: 'Evaluate your family\'s governance structures, decision-making processes, and succession planning.',
+  id: "family-governance",
+  name: "Family Governance",
+  slug: "family-governance",
+  description:
+    "Evaluate your family's governance structures, decision-making processes, and succession planning.",
   estimatedMinutes: 25,
   subCategories: [
-    { id: 'governance-structure', name: 'Governance Structure', description: 'Family councils and decision-making bodies', weight: 1, questionIds: [] },
-    { id: 'decision-making', name: 'Decision Making', description: 'Processes and protocols', weight: 1, questionIds: [] },
-    { id: 'conflict-resolution', name: 'Conflict Resolution', description: 'Dispute handling mechanisms', weight: 1, questionIds: [] },
-    { id: 'succession-planning', name: 'Succession Planning', description: 'Leadership transition strategies', weight: 1, questionIds: [] },
-    { id: 'communication', name: 'Communication', description: 'Family communication frameworks', weight: 1, questionIds: [] },
-    { id: 'education', name: 'Education', description: 'Next generation preparation', weight: 1, questionIds: [] },
-    { id: 'values-mission', name: 'Values & Mission', description: 'Family purpose and principles', weight: 1, questionIds: [] },
-    { id: 'documentation', name: 'Documentation', description: 'Policies and formal agreements', weight: 1, questionIds: [] },
+    {
+      id: "governance-structure",
+      name: "Governance Structure",
+      description: "Family councils and decision-making bodies",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "decision-making",
+      name: "Decision Making",
+      description: "Processes and protocols",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "conflict-resolution",
+      name: "Conflict Resolution",
+      description: "Dispute handling mechanisms",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "succession-planning",
+      name: "Succession Planning",
+      description: "Leadership transition strategies",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "communication",
+      name: "Communication",
+      description: "Family communication frameworks",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "education",
+      name: "Education",
+      description: "Next generation preparation",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "values-mission",
+      name: "Values & Mission",
+      description: "Family purpose and principles",
+      weight: 1,
+      questionIds: [],
+    },
+    {
+      id: "documentation",
+      name: "Documentation",
+      description: "Policies and formal agreements",
+      weight: 1,
+      questionIds: [],
+    },
   ],
 };
 
@@ -58,7 +110,7 @@ export default function AssessmentHubPage() {
   // Fetch assessment data from server for rehydration (with timeout to avoid hanging)
   const FETCH_TIMEOUT_MS = 12_000;
   const { data: assessmentData, isError: assessmentFetchError } = useQuery({
-    queryKey: ['assessment', store.assessmentId],
+    queryKey: ["assessment", store.assessmentId],
     queryFn: async () => {
       if (!store.assessmentId) return null;
 
@@ -76,7 +128,7 @@ export default function AssessmentHubPage() {
         }
 
         if (!response.ok) {
-          throw new Error('Failed to fetch assessment');
+          throw new Error("Failed to fetch assessment");
         }
 
         return response.json();
@@ -89,19 +141,20 @@ export default function AssessmentHubPage() {
   });
 
   // Fetch customization configuration
-  const { data: customizationConfig, isLoading: customizationLoading } = useQuery<CustomizationConfig>({
-    queryKey: ['assessment-customization'],
-    queryFn: async () => {
-      const response = await fetch('/api/assessment/customization');
+  const { data: customizationConfig, isLoading: customizationLoading } =
+    useQuery<CustomizationConfig>({
+      queryKey: ["assessment-customization"],
+      queryFn: async () => {
+        const response = await fetch("/api/assessment/customization");
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch customization config');
-      }
+        if (!response.ok) {
+          throw new Error("Failed to fetch customization config");
+        }
 
-      return response.json();
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+        return response.json();
+      },
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    });
 
   // Rehydrate store from server data
   useEffect(() => {
@@ -139,25 +192,25 @@ export default function AssessmentHubPage() {
   // Create new assessment mutation
   const createAssessmentMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/assessment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/assessment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create assessment');
+        throw new Error("Failed to create assessment");
       }
 
       return response.json();
     },
     onSuccess: (data) => {
       store.setAssessmentId(data.id);
-      store.setCurrentPosition('family-governance', 0);
-      toast.success('Assessment started');
-      router.push('/assessment/family-governance/0');
+      store.setCurrentPosition("family-governance", 0);
+      toast.success("Assessment started");
+      router.push("/assessment/family-governance/0");
     },
     onError: () => {
-      toast.error('Failed to start assessment');
+      toast.error("Failed to start assessment");
     },
   });
 
@@ -170,8 +223,14 @@ export default function AssessmentHubPage() {
     store.cleanOrphanedAnswers();
 
     // Smart resume: Find next unanswered question using branching logic
-    const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
-    const visibleQuestions = getVisibleQuestions(store.answers, pillarQuestions, profile);
+    const pillarQuestions = allQuestions.filter(
+      (q) => q.pillar === "family-governance",
+    );
+    const visibleQuestions = getVisibleQuestions(
+      store.answers,
+      pillarQuestions,
+      profile,
+    );
 
     // Find first unanswered question
     let nextQuestionIndex = 0;
@@ -188,28 +247,39 @@ export default function AssessmentHubPage() {
       }
     }
 
-    const pillar = store.currentPillar || 'family-governance';
+    const pillar = store.currentPillar || "family-governance";
     router.push(`/assessment/${pillar}/${nextQuestionIndex}`);
   };
 
   // Determine pillar status
   const getPillarStatus = () => {
-    if (!store.assessmentId) return 'not-started';
-    if (store.completedPillars.includes('family-governance')) return 'completed';
-    return 'in-progress';
+    if (!store.assessmentId) return "not-started";
+    if (store.completedPillars.includes("family-governance"))
+      return "completed";
+    return "in-progress";
   };
 
   const pillarStatus = getPillarStatus();
 
   // Calculate accurate question count using branching logic and customization
-  const pillarQuestions = allQuestions.filter((q) => q.pillar === 'family-governance');
+  const pillarQuestions = allQuestions.filter(
+    (q) => q.pillar === "family-governance",
+  );
 
   // Apply customization filtering if config is available and assessment is customized
-  const baseQuestions = customizationConfig?.isCustomized && customizationConfig.visibleSubCategories.length > 0
-    ? pillarQuestions.filter(q => customizationConfig.visibleSubCategories.includes(q.subCategory))
-    : pillarQuestions;
+  const baseQuestions =
+    customizationConfig?.isCustomized &&
+    customizationConfig.visibleSubCategories.length > 0
+      ? pillarQuestions.filter((q) =>
+          customizationConfig.visibleSubCategories.includes(q.subCategory),
+        )
+      : pillarQuestions;
 
-  const visibleQuestions = getVisibleQuestions(store.answers, baseQuestions, profile);
+  const visibleQuestions = getVisibleQuestions(
+    store.answers,
+    baseQuestions,
+    profile,
+  );
   const questionsAnswered = visibleQuestions.filter((q) => {
     const answer = store.answers[q.id];
     return answer !== undefined && answer !== null;
@@ -217,9 +287,14 @@ export default function AssessmentHubPage() {
   const totalQuestions = visibleQuestions.length || baseQuestions.length;
 
   // Calculate customized duration if applicable
-  const estimatedDuration = customizationConfig?.isCustomized && customizationConfig.visibleSubCategories.length > 0
-    ? estimateCompletionMinutes(customizationConfig.visibleSubCategories, allQuestions)
-    : FAMILY_GOVERNANCE_PILLAR.estimatedMinutes;
+  const estimatedDuration =
+    customizationConfig?.isCustomized &&
+    customizationConfig.visibleSubCategories.length > 0
+      ? estimateCompletionMinutes(
+          customizationConfig.visibleSubCategories,
+          allQuestions,
+        )
+      : FAMILY_GOVERNANCE_PILLAR.estimatedMinutes;
 
   // Calculate focus area count for customization banner
   const focusAreaCount = customizationConfig?.visibleSubCategories.length || 0;
@@ -249,9 +324,9 @@ export default function AssessmentHubPage() {
                 Family Governance Assessment
               </h1>
               <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-                A guided evaluation of governance structure, succession planning,
-                communication, and decision-making practices designed for families
-                operating with institutional rigor.
+                A guided evaluation of governance structure, succession
+                planning, communication, and decision-making practices designed
+                for families operating with institutional rigor.
               </p>
             </div>
 
@@ -267,51 +342,27 @@ export default function AssessmentHubPage() {
               </div>
             </div>
           </div>
-
-          <Card className="bg-background/60">
-            <CardContent className="grid gap-3 pt-5 sm:grid-cols-3 sm:pt-6">
-              <div>
-                <p className="editorial-kicker">Section</p>
-                <p className="mt-2 text-xl font-semibold">
-                  {customizationConfig?.isCustomized && focusAreaCount > 0
-                    ? `${focusAreaCount} of 8 Focus Areas`
-                    : '1 Pillar'
-                  }
-                </p>
-              </div>
-              <div>
-                <p className="editorial-kicker">Duration</p>
-                <p className="mt-2 text-xl font-semibold">~{estimatedDuration} min</p>
-              </div>
-              <div>
-                <p className="editorial-kicker">Status</p>
-                <p className="mt-2 text-xl font-semibold">
-                  {pillarStatus === 'not-started'
-                    ? 'Ready'
-                    : pillarStatus === 'in-progress'
-                      ? 'In Progress'
-                      : 'Completed'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
-      {pillarStatus === 'in-progress' && store.assessmentId && (
+      {pillarStatus === "in-progress" && store.assessmentId && (
         <Alert variant="info">
           <AlertTitle className="text-lg font-semibold">
             Welcome back
           </AlertTitle>
           <AlertDescription className="space-y-2">
             <p>
-              You&apos;ve completed <strong>{questionsAnswered}</strong> of <strong>{totalQuestions}</strong> visible questions.
-              Continue from where you left off.
+              You&apos;ve completed <strong>{questionsAnswered}</strong> of{" "}
+              <strong>{totalQuestions}</strong> visible questions. Continue from
+              where you left off.
             </p>
             {store.lastSaved && (
               <p className="text-sm flex items-center gap-2">
                 <Clock className="h-3 w-3" />
-                Last saved {formatDistanceToNow(new Date(store.lastSaved), { addSuffix: true })}
+                Last saved{" "}
+                {formatDistanceToNow(new Date(store.lastSaved), {
+                  addSuffix: true,
+                })}
               </p>
             )}
           </AlertDescription>
@@ -350,7 +401,11 @@ export default function AssessmentHubPage() {
             status={pillarStatus}
             questionsAnswered={questionsAnswered}
             totalQuestions={totalQuestions}
-            onClick={pillarStatus === 'not-started' ? handleStartAssessment : handleContinueAssessment}
+            onClick={
+              pillarStatus === "not-started"
+                ? handleStartAssessment
+                : handleContinueAssessment
+            }
           />
         </div>
       </section>
@@ -359,23 +414,26 @@ export default function AssessmentHubPage() {
         <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl space-y-2">
             <p className="editorial-kicker">Next Step</p>
-            {pillarStatus === 'not-started' ? (
+            {pillarStatus === "not-started" ? (
               <p className="text-base leading-7 text-muted-foreground">
-                Ready to begin? This assessment will take approximately {estimatedDuration} minutes and saves progress automatically.
+                Ready to begin? This assessment will take approximately{" "}
+                {estimatedDuration} minutes and saves progress automatically.
               </p>
-            ) : pillarStatus === 'in-progress' ? (
+            ) : pillarStatus === "in-progress" ? (
               <p className="text-base leading-7 text-muted-foreground">
-                Continue your assessment to receive tailored governance recommendations and a scored summary.
+                Continue your assessment to receive tailored governance
+                recommendations and a scored summary.
               </p>
             ) : (
               <p className="text-base leading-7 text-muted-foreground">
-                Your assessment is complete. Review your results, risk drivers, and recommended actions.
+                Your assessment is complete. Review your results, risk drivers,
+                and recommended actions.
               </p>
             )}
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            {pillarStatus === 'not-started' ? (
+            {pillarStatus === "not-started" ? (
               <Button
                 size="lg"
                 onClick={handleStartAssessment}
@@ -387,10 +445,10 @@ export default function AssessmentHubPage() {
                     Starting...
                   </>
                 ) : (
-                  'Begin Assessment'
+                  "Begin Assessment"
                 )}
               </Button>
-            ) : pillarStatus === 'in-progress' ? (
+            ) : pillarStatus === "in-progress" ? (
               <>
                 <Button size="lg" onClick={handleContinueAssessment}>
                   Continue Assessment
@@ -398,20 +456,23 @@ export default function AssessmentHubPage() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => router.push('/assessment/family-governance/0')}
+                  onClick={() => router.push("/assessment/family-governance/0")}
                 >
                   Review from Start
                 </Button>
               </>
             ) : (
               <>
-                <Button size="lg" onClick={() => router.push('/assessment/results')}>
+                <Button
+                  size="lg"
+                  onClick={() => router.push("/assessment/results")}
+                >
                   View Results
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => router.push('/dashboard')}
+                  onClick={() => router.push("/dashboard")}
                 >
                   Return to Dashboard
                 </Button>

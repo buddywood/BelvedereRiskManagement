@@ -55,7 +55,7 @@ export default async function AdvisorClientsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button asChild>
-            <Link href="/advisor/invite" className="inline-flex items-center gap-2">
+            <Link href="/advisor/invitations" className="inline-flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
               Invite client
             </Link>
@@ -142,7 +142,7 @@ export default async function AdvisorClientsPage() {
             <div className="space-y-3">
               <p className="text-muted-foreground">No clients assigned yet.</p>
               <p className="text-sm text-muted-foreground">
-                <Link href="/advisor/invite" className="font-medium text-primary underline underline-offset-2">
+                <Link href="/advisor/invitations" className="font-medium text-primary underline underline-offset-2">
                   Invite a client
                 </Link>{" "}
                 or contact your administrator to get started.

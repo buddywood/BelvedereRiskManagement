@@ -23,14 +23,22 @@ export default async function ProtectedLayout({
   const showAdvisor = role === "ADVISOR" || role === "ADMIN";
   const showAdmin = role === "ADMIN";
 
-  // For clients: restrict nav to Intake until they have submitted intake (assessment not yet assigned/started)
+  // For clients: restrict nav to Intake until they have submitted intake; Assessment stays disabled until advisor approves
   let restrictNavToIntake = false;
+  let intakeApprovedForClient = false;
   if (role === "USER" && session.user.id) {
-    const submitted = await prisma.intakeInterview.findFirst({
+    const submittedInterview = await prisma.intakeInterview.findFirst({
       where: { userId: session.user.id, status: "SUBMITTED" },
       select: { id: true },
     });
-    restrictNavToIntake = !submitted;
+    restrictNavToIntake = !submittedInterview;
+    if (submittedInterview) {
+      const approval = await prisma.intakeApproval.findUnique({
+        where: { interviewId: submittedInterview.id },
+        select: { status: true },
+      });
+      intakeApprovedForClient = approval?.status === "APPROVED";
+    }
   }
 
   return (
@@ -70,7 +78,7 @@ export default async function ProtectedLayout({
 
               <div className="mt-3 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between md:gap-4">
                 <div className="min-w-0 flex-1">
-                  <ProtectedNav showAdvisor={showAdvisor} showAdmin={showAdmin} restrictNavToIntake={restrictNavToIntake} />
+                  <ProtectedNav showAdvisor={showAdvisor} showAdmin={showAdmin} restrictNavToIntake={restrictNavToIntake} intakeApprovedForClient={intakeApprovedForClient} />
                 </div>
                 <div className="hidden shrink-0 rounded-full border section-divider bg-background/70 px-4 py-2 text-sm text-muted-foreground md:block lg:hidden md:max-w-[24rem]">
                   Signed in as <span className="font-semibold text-foreground">{session.user.email}</span>

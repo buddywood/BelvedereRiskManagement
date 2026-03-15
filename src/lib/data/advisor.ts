@@ -30,14 +30,22 @@ export async function getAssignedClients(advisorProfileId: string): Promise<Advi
           id: true,
           name: true,
           email: true,
+          clientProfile: {
+            select: {
+              phone: true,
+              city: true,
+              state: true,
+              country: true,
+            },
+          },
         },
       },
     },
   });
 
-  // Get the latest interview for each client
+  // Get all interviews for assigned clients so we can pick the right one per client
   const clientIds = assignments.map(a => a.client.id);
-  const latestInterviews = await prisma.intakeInterview.findMany({
+  const allInterviews = await prisma.intakeInterview.findMany({
     where: {
       userId: { in: clientIds },
     },
@@ -53,20 +61,21 @@ export async function getAssignedClients(advisorProfileId: string): Promise<Advi
         },
       },
     },
-    orderBy: {
-      updatedAt: 'desc',
-    },
+    orderBy: { updatedAt: 'desc' },
   });
 
-  // Group interviews by userId and get the most recent for each client
-  const interviewsByClient = new Map();
-  for (const interview of latestInterviews) {
-    if (!interviewsByClient.has(interview.userId)) {
-      interviewsByClient.set(interview.userId, {
-        id: interview.id,
-        status: interview.status,
-        submittedAt: interview.submittedAt,
-        responseCount: interview._count.responses,
+  // Per client: prefer SUBMITTED interview (so advisor status matches what client completed); else latest by updatedAt
+  const interviewsByClient = new Map<string, { id: string; status: string; submittedAt: Date | null; responseCount: number }>();
+  for (const clientId of clientIds) {
+    const clientInterviews = allInterviews.filter(i => i.userId === clientId);
+    const submitted = clientInterviews.find(i => i.status === 'SUBMITTED');
+    const chosen = submitted ?? clientInterviews[0] ?? null; // submitted takes precedence; else most recently updated
+    if (chosen) {
+      interviewsByClient.set(clientId, {
+        id: chosen.id,
+        status: chosen.status,
+        submittedAt: chosen.submittedAt,
+        responseCount: chosen._count.responses,
       });
     }
   }
@@ -76,6 +85,7 @@ export async function getAssignedClients(advisorProfileId: string): Promise<Advi
     name: assignment.client.name,
     email: assignment.client.email,
     assignedAt: assignment.assignedAt,
+    clientProfile: assignment.client.clientProfile ?? undefined,
     latestInterview: interviewsByClient.get(assignment.client.id) || null,
   }));
 }

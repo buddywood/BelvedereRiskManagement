@@ -49,7 +49,7 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
       advisorLogoUrl: profile.logoUrl || undefined,
     };
 
-    await sendAdvisorInvitationEmail({
+    const emailResult = await sendAdvisorInvitationEmail({
       clientEmail: validatedInput.clientEmail,
       advisorInfo,
       personalMessage: validatedInput.personalMessage,
@@ -57,7 +57,14 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
       clientName: validatedInput.clientName,
     });
 
-    return { success: true, data: invitation };
+    return {
+      success: true,
+      data: {
+        ...invitation,
+        emailSent: emailResult.sent,
+        emailNotSentReason: emailResult.sent ? undefined : emailResult.reason,
+      },
+    };
   } catch (error) {
     // Handle duplicate email gracefully
     if (error instanceof Error) {
@@ -95,7 +102,7 @@ export async function resendInvitationAction(invitationId: string): Promise<Acti
       advisorLogoUrl: profile.logoUrl || undefined,
     };
 
-    await sendAdvisorInvitationEmail({
+    const emailResult = await sendAdvisorInvitationEmail({
       clientEmail: invitation.prefillEmail || "",
       advisorInfo,
       personalMessage: invitation.personalMessage || "I'd like to invite you to complete a family governance assessment.",
@@ -103,7 +110,14 @@ export async function resendInvitationAction(invitationId: string): Promise<Acti
       clientName: invitation.clientName || undefined,
     });
 
-    return { success: true, data: invitation };
+    return {
+      success: true,
+      data: {
+        ...invitation,
+        emailSent: emailResult.sent,
+        emailNotSentReason: emailResult.sent ? undefined : emailResult.reason,
+      },
+    };
   } catch (error) {
     if (error instanceof Error) {
       return { success: false, error: error.message };

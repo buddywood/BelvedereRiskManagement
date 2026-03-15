@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { InviteClientForm } from "@/components/advisor/invitations/InviteClientForm";
 import { InvitationTable } from "@/components/advisor/invitations/InvitationTable";
 import { getInvitationsAction } from "@/lib/actions/invitations";
@@ -21,6 +24,16 @@ export default async function InvitationsPage() {
 
   return (
     <div className="space-y-8">
+      {/* Back link */}
+      <div>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/advisor" className="inline-flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Clients
+          </Link>
+        </Button>
+      </div>
+
       {/* Header */}
       <div className="space-y-1">
         <p className="editorial-kicker">Client management</p>

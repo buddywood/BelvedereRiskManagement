@@ -6,7 +6,13 @@ import { formatDistanceToNow, format } from "date-fns";
 import { allQuestions } from "@/lib/assessment/questions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export default async function DashboardPage() {
@@ -22,17 +28,31 @@ export default async function DashboardPage() {
     redirect("/advisor");
   }
 
+  // Client: check if intake is approved (assessment access gated on advisor approval)
+  let intakeApproved = false;
+  const submittedInterview = await prisma.intakeInterview.findFirst({
+    where: { userId: session.user.id, status: "SUBMITTED" },
+    select: { id: true },
+  });
+  if (submittedInterview) {
+    const approval = await prisma.intakeApproval.findUnique({
+      where: { interviewId: submittedInterview.id },
+      select: { status: true },
+    });
+    intakeApproved = approval?.status === "APPROVED";
+  }
+
   // Fetch assessments with responses and scores
   const assessments = await prisma.assessment.findMany({
     where: { userId: session.user.id },
     include: {
       _count: { select: { responses: true } },
       scores: {
-        orderBy: { calculatedAt: 'desc' },
+        orderBy: { calculatedAt: "desc" },
         take: 1,
       },
     },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { updatedAt: "desc" },
   });
 
   const totalQuestions = allQuestions.length;
@@ -44,11 +64,12 @@ export default async function DashboardPage() {
           <div className="space-y-2 sm:space-y-3">
             <p className="editorial-kicker">Client Dashboard</p>
             <h2 className="text-3xl font-semibold text-balance sm:text-5xl">
-              Welcome back, {session?.user?.email?.split("@")[0]}
+              Welcome back,{" "}
+              {session.user.firstName ?? session.user.name ?? "Guest"}
             </h2>
             <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-              Review assessment progress, access results, and manage account security
-              from a workspace designed for discretion and clarity.
+              Review assessment progress, access results, and manage account
+              security from a workspace designed for discretion and clarity.
             </p>
           </div>
 
@@ -56,7 +77,9 @@ export default async function DashboardPage() {
             <CardContent className="grid gap-3 pt-5 sm:grid-cols-3 sm:pt-6">
               <div>
                 <p className="editorial-kicker">Assessments</p>
-                <p className="mt-2 text-3xl font-semibold">{assessments.length}</p>
+                <p className="mt-2 text-3xl font-semibold">
+                  {assessments.length}
+                </p>
               </div>
               <div>
                 <p className="editorial-kicker">MFA</p>
@@ -67,7 +90,11 @@ export default async function DashboardPage() {
               <div>
                 <p className="editorial-kicker">Latest Status</p>
                 <p className="mt-2 text-xl font-semibold">
-                  {assessments[0]?.status === "COMPLETED" ? "Results Ready" : assessments.length ? "In Progress" : "Ready to Start"}
+                  {assessments[0]?.status === "COMPLETED"
+                    ? "Results Ready"
+                    : assessments.length
+                      ? "In Progress"
+                      : "Ready to Start"}
                 </p>
               </div>
             </CardContent>
@@ -76,19 +103,28 @@ export default async function DashboardPage() {
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <Card>
+        <Card className={!intakeApproved ? "opacity-75" : undefined}>
           <CardHeader>
             <CardTitle className="text-3xl">Your Assessments</CardTitle>
             <CardDescription>
-              Monitor progress and continue or review the latest family governance assessment.
+              {intakeApproved
+                ? "Monitor progress and continue or review the latest family governance assessment."
+                : "Assessment unlocks after your advisor reviews and approves your intake."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {assessments.length === 0 ? (
+            {!intakeApproved ? (
+              <div className="rounded-[1.5rem] border section-divider bg-muted/40 px-6 py-10 text-center">
+                <p className="mx-auto max-w-2xl text-sm leading-7 text-muted-foreground">
+                  Complete your intake and wait for your advisor to approve it.
+                  The assessment will then become available here.
+                </p>
+              </div>
+            ) : assessments.length === 0 ? (
               <div className="rounded-[1.5rem] border section-divider bg-background/55 px-6 py-10 text-center">
                 <p className="mx-auto mb-5 max-w-2xl text-sm leading-7 text-muted-foreground">
-                  No assessments yet. Start your first risk assessment to receive
-                  personalized governance recommendations.
+                  No assessments yet. Start your first risk assessment to
+                  receive personalized governance recommendations.
                 </p>
                 <Button asChild size="lg">
                   <Link href="/assessment">Start Assessment</Link>
@@ -97,9 +133,10 @@ export default async function DashboardPage() {
             ) : (
               <div className="space-y-4">
                 {assessments.map((assessment) => {
-                  const isCompleted = assessment.status === 'COMPLETED';
+                  const isCompleted = assessment.status === "COMPLETED";
                   const responseCount = assessment._count.responses;
-                  const progressPercentage = (responseCount / totalQuestions) * 100;
+                  const progressPercentage =
+                    (responseCount / totalQuestions) * 100;
                   const latestScore = assessment.scores[0];
 
                   return (
@@ -111,14 +148,18 @@ export default async function DashboardPage() {
                               Family Governance Assessment
                             </CardTitle>
                             <CardDescription>
-                              Updated {formatDistanceToNow(new Date(assessment.updatedAt), { addSuffix: true })}
+                              Updated{" "}
+                              {formatDistanceToNow(
+                                new Date(assessment.updatedAt),
+                                { addSuffix: true },
+                              )}
                             </CardDescription>
                           </div>
                           <Badge
-                            variant={isCompleted ? 'success' : 'info'}
+                            variant={isCompleted ? "success" : "info"}
                             className="w-fit"
                           >
-                            {isCompleted ? 'Completed' : 'In Progress'}
+                            {isCompleted ? "Completed" : "In Progress"}
                           </Badge>
                         </div>
                       </CardHeader>
@@ -127,12 +168,18 @@ export default async function DashboardPage() {
                           <>
                             <div className="space-y-3">
                               <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Progress</span>
+                                <span className="text-muted-foreground">
+                                  Progress
+                                </span>
                                 <span className="font-medium text-foreground">
-                                  {responseCount} of {totalQuestions} questions answered
+                                  {responseCount} of {totalQuestions} questions
+                                  answered
                                 </span>
                               </div>
-                              <Progress value={progressPercentage} className="h-2.5" />
+                              <Progress
+                                value={progressPercentage}
+                                className="h-2.5"
+                              />
                               <p className="text-xs text-muted-foreground">
                                 {Math.round(progressPercentage)}% complete
                               </p>
@@ -144,7 +191,10 @@ export default async function DashboardPage() {
                               </p>
                               <div className="mt-3 flex items-center gap-3">
                                 <div className="flex-1">
-                                  <Progress value={progressPercentage} className="h-2" />
+                                  <Progress
+                                    value={progressPercentage}
+                                    className="h-2"
+                                  />
                                 </div>
                                 <span className="text-sm text-muted-foreground">
                                   Family Governance
@@ -152,9 +202,22 @@ export default async function DashboardPage() {
                               </div>
                             </div>
 
-                            <Button asChild className="w-full" size="lg">
-                              <Link href="/assessment">Continue Assessment</Link>
-                            </Button>
+                            {intakeApproved ? (
+                              <Button asChild className="w-full" size="lg">
+                                <Link href="/assessment">
+                                  Continue Assessment
+                                </Link>
+                              </Button>
+                            ) : (
+                              <Button
+                                className="w-full"
+                                size="lg"
+                                disabled
+                                title="Assessment unlocks after your advisor approves your intake."
+                              >
+                                Continue Assessment
+                              </Button>
+                            )}
                           </>
                         ) : (
                           <>
@@ -171,10 +234,13 @@ export default async function DashboardPage() {
                                   </div>
                                   <Badge
                                     variant={
-                                      latestScore.riskLevel === 'LOW' ? 'success' :
-                                      latestScore.riskLevel === 'MEDIUM' ? 'warning' :
-                                      latestScore.riskLevel === 'HIGH' ? 'warning' :
-                                      'outline'
+                                      latestScore.riskLevel === "LOW"
+                                        ? "success"
+                                        : latestScore.riskLevel === "MEDIUM"
+                                          ? "warning"
+                                          : latestScore.riskLevel === "HIGH"
+                                            ? "warning"
+                                            : "outline"
                                     }
                                     className="w-fit"
                                   >
@@ -183,22 +249,46 @@ export default async function DashboardPage() {
                                 </div>
 
                                 <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4 text-sm text-muted-foreground">
-                                  Completed on {format(new Date(assessment.completedAt || assessment.updatedAt), 'MMM d, yyyy')}
+                                  Completed on{" "}
+                                  {format(
+                                    new Date(
+                                      assessment.completedAt ||
+                                        assessment.updatedAt,
+                                    ),
+                                    "MMM d, yyyy",
+                                  )}
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                  <Button asChild size="lg">
-                                    <Link href="/assessment/results">View Results</Link>
-                                  </Button>
-                                  <Button asChild size="lg" variant="outline">
-                                    <a href={`/api/reports/${assessment.id}/pdf`} download>Download Report</a>
-                                  </Button>
-                                  <Button asChild size="lg" variant="outline">
-                                    <Link href="/assessment/results">Get Templates</Link>
-                                  </Button>
-                                  <Button asChild size="lg" variant="outline">
-                                    <Link href="/assessment">Start New</Link>
-                                  </Button>
+                                  {intakeApproved ? (
+                                    <>
+                                      <Button asChild size="lg">
+                                        <Link href="/assessment/results">
+                                          View Results
+                                        </Link>
+                                      </Button>
+                                      <Button asChild size="lg" variant="outline">
+                                        <a
+                                          href={`/api/reports/${assessment.id}/pdf`}
+                                          download
+                                        >
+                                          Download Report
+                                        </a>
+                                      </Button>
+                                      <Button asChild size="lg" variant="outline">
+                                        <Link href="/assessment/results">
+                                          Get Templates
+                                        </Link>
+                                      </Button>
+                                      <Button asChild size="lg" variant="outline">
+                                        <Link href="/assessment">Start New</Link>
+                                      </Button>
+                                    </>
+                                  ) : (
+                                    <p className="col-span-full text-sm text-muted-foreground">
+                                      Assessment actions unlock after your advisor approves your intake.
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -223,7 +313,9 @@ export default async function DashboardPage() {
           <CardContent className="space-y-4">
             <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4">
               <p className="editorial-kicker">Email</p>
-              <p className="mt-2 text-base font-semibold">{session?.user?.email}</p>
+              <p className="mt-2 text-base font-semibold">
+                {session?.user?.email}
+              </p>
             </div>
 
             <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-4">
@@ -234,7 +326,9 @@ export default async function DashboardPage() {
                     {session?.user?.mfaEnabled ? "Enabled" : "Disabled"}
                   </p>
                 </div>
-                <Badge variant={session?.user?.mfaEnabled ? "success" : "secondary"}>
+                <Badge
+                  variant={session?.user?.mfaEnabled ? "success" : "secondary"}
+                >
                   {session?.user?.mfaEnabled ? "Protected" : "Recommended"}
                 </Badge>
               </div>

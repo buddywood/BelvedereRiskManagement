@@ -1,190 +1,35 @@
-"use client";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { auth } from "@/lib/auth";
+import { MFAVerifyForm } from "./MFAVerifyForm";
 
-import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signOut } from "next-auth/react";
-import { AuthPanel } from "@/components/auth/AuthPanel";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+/**
+ * MFA verify page: only shown when the user has MFA enabled.
+ * If the user is signed in but does not have MFA enabled, redirect to dashboard (or callbackUrl).
+ * This avoids showing the TOTP form to clients who only use the invite-code flow.
+ */
+export default async function MFAVerifyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const session = await auth();
 
-function MFAVerifyForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-
-  const [useRecovery, setUseRecovery] = useState(false);
-  const [token, setToken] = useState("");
-  const [recoveryCode, setRecoveryCode] = useState("");
-  const [error, setError] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
-
-  async function handleTOTPSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setVerifying(true);
-
-    try {
-      const res = await fetch("/api/auth/mfa/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token,
-          action: "login",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Verification failed");
-      }
-
-      // Redirect to original destination
-      router.push(callbackUrl);
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setVerifying(false);
-    }
+  if (!session?.user) {
+    redirect("/signin?callbackUrl=/mfa/verify");
   }
 
-  async function handleRecoverySubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setVerifying(true);
-
-    try {
-      const res = await fetch("/api/auth/mfa/recovery", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: recoveryCode }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Recovery code verification failed");
-      }
-
-      // Show remaining codes warning if low
-      if (data.remainingCodes <= 2) {
-        alert(
-          `Warning: You have ${data.remainingCodes} recovery code${
-            data.remainingCodes === 1 ? "" : "s"
-          } remaining. Consider generating new codes in settings.`
-        );
-      }
-
-      // Redirect to original destination
-      router.push(callbackUrl);
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed");
-    } finally {
-      setVerifying(false);
-    }
+  if (!session.user.mfaEnabled) {
+    const params = await searchParams;
+    const callbackUrl =
+      typeof params.callbackUrl === "string" ? params.callbackUrl : "/dashboard";
+    redirect(callbackUrl);
   }
 
-  return (
-    <AuthPanel
-      eyebrow="Multi-Factor Authentication"
-      title="Verify your identity"
-      description={
-        useRecovery
-          ? "Use one of your saved recovery codes to continue securely."
-          : "Enter the current code from your authenticator app to access the workspace."
-      }
-      footer={
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-auto p-0"
-          disabled={signingOut}
-          onClick={async () => {
-            setSigningOut(true);
-            await signOut({ callbackUrl: "/" });
-          }}
-        >
-          {signingOut ? "Signing out..." : "Sign out"}
-        </Button>
-      }
-    >
-      {!useRecovery ? (
-        <form onSubmit={handleTOTPSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="token">Authentication code</Label>
-            <Input
-              type="text"
-              id="token"
-              value={token}
-              onChange={(e) =>
-                setToken(e.target.value.replace(/\D/g, "").slice(0, 6))
-              }
-              placeholder="000000"
-              maxLength={6}
-              required
-              autoFocus
-              className="text-center font-mono text-2xl tracking-[0.45em]"
-            />
-          </div>
+  const params = await searchParams;
+  const callbackUrl =
+    typeof params.callbackUrl === "string" ? params.callbackUrl : "/dashboard";
 
-          {error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          <Button type="submit" size="lg" className="w-full" disabled={verifying || token.length !== 6}>
-            {verifying ? "Verifying..." : "Verify"}
-          </Button>
-
-          <Button type="button" variant="ghost" className="w-full" onClick={() => setUseRecovery(true)}>
-            Use a recovery code instead
-          </Button>
-        </form>
-      ) : (
-        <form onSubmit={handleRecoverySubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="recovery">Recovery code</Label>
-            <Input
-              type="text"
-              id="recovery"
-              value={recoveryCode}
-              onChange={(e) => setRecoveryCode(e.target.value.toLowerCase())}
-              placeholder="Enter recovery code"
-              required
-              autoFocus
-              className="font-mono"
-            />
-            <p className="text-sm text-muted-foreground">
-              Recovery codes are single-use and will be consumed after successful verification.
-            </p>
-          </div>
-
-          {error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
-
-          <Button type="submit" size="lg" className="w-full" disabled={verifying || !recoveryCode}>
-            {verifying ? "Verifying..." : "Verify Recovery Code"}
-          </Button>
-
-          <Button type="button" variant="ghost" className="w-full" onClick={() => setUseRecovery(false)}>
-            Use authenticator app instead
-          </Button>
-        </form>
-      )}
-    </AuthPanel>
-  );
-}
-
-export default function MFAVerifyPage() {
   return (
     <Suspense
       fallback={
@@ -193,7 +38,7 @@ export default function MFAVerifyPage() {
         </div>
       }
     >
-      <MFAVerifyForm />
+      <MFAVerifyForm callbackUrl={callbackUrl} />
     </Suspense>
   );
 }

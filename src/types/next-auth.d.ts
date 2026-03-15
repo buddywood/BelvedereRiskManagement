@@ -2,17 +2,20 @@ import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
   interface Session {
-    user: {
+    user: DefaultSession["user"] & {
       id: string;
       mfaEnabled?: boolean;
       mfaVerified?: boolean;
       role?: string;
-    } & DefaultSession["user"];
+      firstName?: string | null;
+    };
   }
 
   interface User {
     mfaEnabled?: boolean;
+    mfaVerified?: boolean;
     role?: string;
+    firstName?: string | null;
   }
 }
 
@@ -22,5 +25,6 @@ declare module "next-auth/jwt" {
     mfaEnabled?: boolean;
     mfaVerified?: boolean;
     role?: string;
+    firstName?: string | null;
   }
 }

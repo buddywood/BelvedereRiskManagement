@@ -8,7 +8,7 @@ export const assignClientSchema = z.object({
 
 // Schema for approving a client's intake with focus areas selection
 export const approveClientSchema = z.object({
-  interviewId: z.string().cuid(),
+  interviewId: z.string().min(1),
   focusAreas: z.array(z.string()).min(1, "Select at least one focus area"),
   notes: z.string().optional(),
 });

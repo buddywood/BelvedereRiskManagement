@@ -47,3 +47,27 @@ export const GOVERNANCE_ROLE_LABELS: Record<string, string> = {
   EXECUTOR: 'Executor',
   OTHER: 'Other',
 };
+
+// Advisor profile personal details (name, phone, job title)
+export const advisorPersonalDetailsSchema = z.object({
+  firstName: z.string().max(80, 'First name must be 80 characters or less').optional().or(z.literal('')),
+  lastName: z.string().max(80, 'Last name must be 80 characters or less').optional().or(z.literal('')),
+  phone: z.string().max(30, 'Phone must be 30 characters or less').optional().or(z.literal('')),
+  jobTitle: z.string().max(100, 'Job title must be 100 characters or less').optional().or(z.literal('')),
+});
+export type AdvisorPersonalDetailsFormData = z.infer<typeof advisorPersonalDetailsSchema>;
+
+// Client profile personal details
+export const clientPersonalDetailsSchema = z.object({
+  firstName: z.string().max(80, 'First name must be 80 characters or less').optional().or(z.literal('')),
+  lastName: z.string().max(80, 'Last name must be 80 characters or less').optional().or(z.literal('')),
+  phone: z.string().max(30, 'Phone must be 30 characters or less').optional().or(z.literal('')),
+  addressLine1: z.string().max(120, 'Address line must be 120 characters or less').optional().or(z.literal('')),
+  addressLine2: z.string().max(120, 'Address line must be 120 characters or less').optional().or(z.literal('')),
+  city: z.string().max(80, 'City must be 80 characters or less').optional().or(z.literal('')),
+  state: z.string().max(50, 'State must be 50 characters or less').optional().or(z.literal('')),
+  postalCode: z.string().max(20, 'Postal code must be 20 characters or less').optional().or(z.literal('')),
+  country: z.string().max(80, 'Country must be 80 characters or less').optional().or(z.literal('')),
+  dateOfBirth: z.string().optional().or(z.literal('')), // ISO date string from input
+});
+export type ClientPersonalDetailsFormData = z.infer<typeof clientPersonalDetailsSchema>;

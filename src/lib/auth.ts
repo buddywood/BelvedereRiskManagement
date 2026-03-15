@@ -53,10 +53,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (userId) {
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
-          select: { mfaEnabled: true, role: true },
+          select: { mfaEnabled: true, role: true, firstName: true },
         });
         token.mfaEnabled = dbUser?.mfaEnabled ?? false;
         token.role = (dbUser?.role ?? "USER").toString().toUpperCase();
+        token.firstName = dbUser?.firstName ?? undefined;
         if (token.mfaEnabled) {
           const [session] = await prisma.session.findMany({
             where: {
@@ -79,6 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string;
         session.user.mfaEnabled = Boolean(token.mfaEnabled);
         session.user.mfaVerified = Boolean(token.mfaVerified);
+        session.user.firstName = (token.firstName as string) ?? undefined;
         let role = (token.role as string) ?? "USER";
         // ADMIN is only valid for the designated admin account
         if (role === "ADMIN" && session.user.email !== "buddy@ebilly.com") {

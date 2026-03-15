@@ -167,22 +167,22 @@ export function renderInvitationTemplate(data: InvitationTemplateData): string {
   `;
 }
 
+export type SendEmailResult = { sent: true } | { sent: false; reason: string };
+
 /**
- * Sends branded advisor invitation email via Resend
+ * Sends branded advisor invitation email via Resend.
+ * Returns whether the email was sent so the UI can show the link if not.
  */
-export async function sendAdvisorInvitationEmail(data: SendInvitationData): Promise<void> {
+export async function sendAdvisorInvitationEmail(data: SendInvitationData): Promise<SendEmailResult> {
   try {
-    // Initialize Resend client at runtime (not module load time)
-    // to avoid build-time errors when RESEND_API_KEY is not set
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-      console.error("RESEND_API_KEY not configured - email will not be sent");
-      return;
+      console.warn("RESEND_API_KEY not set - invitation email not sent. Add RESEND_API_KEY to .env.local to send emails.");
+      return { sent: false, reason: "RESEND_API_KEY is not configured. Add it to .env.local to send invitation emails." };
     }
 
     const resend = new Resend(apiKey);
 
-    // Render the email template
     const htmlContent = renderInvitationTemplate({
       ...data.advisorInfo,
       personalMessage: data.personalMessage,
@@ -190,15 +190,22 @@ export async function sendAdvisorInvitationEmail(data: SendInvitationData): Prom
       clientName: data.clientName,
     });
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
       from: FROM_EMAIL,
       to: data.clientEmail,
       subject: `Invitation from ${data.advisorInfo.advisorName} - Family Governance Assessment`,
       html: htmlContent,
     });
+
+    if (result.error) {
+      console.error("Resend API error:", result.error);
+      return { sent: false, reason: result.error.message || "Email delivery failed." };
+    }
+
+    return { sent: true };
   } catch (error) {
-    // Log error but don't throw - prevents blocking the invitation flow
-    // In production, use proper logging service (e.g., Sentry)
+    const message = error instanceof Error ? error.message : "Unknown error";
     console.error("Failed to send advisor invitation email:", error);
+    return { sent: false, reason: message };
   }
 }

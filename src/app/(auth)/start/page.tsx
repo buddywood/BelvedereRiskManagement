@@ -95,7 +95,7 @@ export default function StartAssessmentPage() {
           </Alert>
         ) : null}
         <div className="space-y-2">
-          <Label id="code-label">6-character invite code</Label>
+          <Label id="code-label">6-character invite code (letters and numbers)</Label>
           <div
             className="flex justify-center gap-2"
             role="group"
@@ -117,15 +117,18 @@ export default function StartAssessmentPage() {
                 autoComplete="one-time-code"
                 disabled={isLoading}
                 className={cn(
-                  "size-11 rounded-lg border border-input bg-background text-center text-lg font-mono font-semibold uppercase tracking-wider transition-all duration-200",
-                  "focus:border-brand/50 focus:outline-none focus:ring-2 focus:ring-brand/20",
-                  "focus:bg-gradient-to-br focus:from-brand/15 focus:via-background focus:to-brand/5",
+                  "h-11 w-11 min-w-0 rounded-xl border border-input bg-card/80 text-center text-lg font-mono font-semibold uppercase tracking-wider shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] transition-all duration-200 outline-none",
+                  "focus-visible:border-brand/50 focus-visible:ring-[3px] focus-visible:ring-brand/20",
+                  "focus-visible:bg-gradient-to-br focus-visible:from-brand/15 focus-visible:via-background focus-visible:to-brand/5",
                   "disabled:pointer-events-none disabled:opacity-50"
                 )}
                 aria-label={`Character ${i + 1} of ${BOX_COUNT}`}
               />
             ))}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Enter one letter or number per box. Paste supported.
+          </p>
         </div>
         <Button type="submit" className="w-full" disabled={isLoading || !code}>
           {isLoading ? "Checking…" : "Continue to create account"}

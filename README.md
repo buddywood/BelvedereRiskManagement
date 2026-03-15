@@ -20,6 +20,71 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+---
+
+## Testing & Test Credentials
+
+Use these only in local/development. Ensure the app and database are running, then run the seed scripts as needed.
+
+### Seed scripts (run in order if starting fresh)
+
+| Script | Purpose |
+|--------|--------|
+| `node scripts/seed-advisor-test-data.js` | Creates advisor user, two client users (including `client-mfa@test.com` for MFA testing), advisor profile, client–advisor assignments, and submitted intake interviews with sample responses. |
+| `node scripts/seed-invite-code.js` | Creates invite codes: **123456** (no prefill) and **BELV01** (prefills `buddy+belvcustomer@ebilly.com` on signup). Run with args: `node scripts/seed-invite-code.js [CODE] [PREFILL_EMAIL]`. |
+| `node scripts/set-advisor-role.js` | Sets `advisor@test.com` role to ADVISOR (run if the advisor menu is missing). |
+| `node scripts/set-admin-role.js` | Creates or updates `buddy@ebilly.com` as ADMIN (designated admin account). |
+
+### Test users & credentials
+
+| Role | Email | Password | Notes |
+|------|--------|----------|--------|
+| **Advisor** | `advisor@test.com` | `testpassword123` | Has advisor profile and assigned client. After login, use Advisor Hub / Portfolio. |
+| **Client** | `client@test.com` | `testpassword123` | Seeded with a submitted intake; use for advisor review flow. |
+| **Client (MFA)** | `client-mfa@test.com` | `testpassword123` | Second client for MFA testing. Sign in, go to Settings, enable MFA, then sign out and sign in again to hit the MFA verify screen. |
+| **Admin** | `buddy@ebilly.com` | `Test1111!` | Admin access is restricted to this account in code. Run `set-admin-role.js` first. |
+
+### Invitation emails (advisor → client)
+
+Advisor “Send invitation” uses [Resend](https://resend.com) to email the signup link. To actually send emails:
+
+1. Sign up at [resend.com](https://resend.com) and get an API key.
+2. In `.env.local` add:
+   - `RESEND_API_KEY=re_...` (your key)
+   - `FROM_EMAIL=onboarding@resend.dev` (or your verified domain sender)
+
+Without `RESEND_API_KEY`, the invitation is still created and the advisor sees a copyable link to share manually. The UI will show “Invitation created — email was not sent” and the link to copy.
+
+### Invite codes (assessment signup flow)
+
+- **123456** – Generic 6-character code (no email prefill).
+- **BELV01** – Prefills signup email with `buddy+belvcustomer@ebilly.com`.
+
+To create a custom code with optional prefill:
+
+```bash
+node scripts/seed-invite-code.js ABC123 buddy+belvcustomer@ebilly.com
+```
+
+### Testing the main flows
+
+1. **Client assessment flow**  
+   Home → **Start Assessment** → `/start` → enter **BELV01** (or **123456**) → signup (email prefilled if using BELV01) → redirect to intake → complete intake → advisor review → assessment unlocks.
+
+2. **Advisor**  
+   Sign in with `advisor@test.com` / `testpassword123` → you are redirected to Advisor Hub; use Portfolio, Client View, and review links as needed.
+
+3. **Admin**  
+   Run `node scripts/set-admin-role.js`, then sign in with `buddy@ebilly.com` / `Test1111!` → Admin nav (Advisors, Clients, Intake Management, Assessment Management, Settings).
+
+4. **Request a review (no account)**
+   Home → **Request a review here** → `/request-review` → submit the short form → creates a lead and notifies advisors.
+
+5. **MFA verify flow**
+   Sign in as `client-mfa@test.com` / `testpassword123` → **Settings** → **Enable Two-Factor Authentication** (complete setup). Sign out, then sign in again; you should be sent to the MFA verify screen (TOTP or recovery code) before reaching the dashboard.
+
+After changing roles or re-seeding, sign out and sign in again (and hard refresh if needed) so the session and nav reflect the updates.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

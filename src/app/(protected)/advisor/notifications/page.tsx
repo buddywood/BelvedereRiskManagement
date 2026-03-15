@@ -41,7 +41,7 @@ export default async function NotificationsPage() {
         <Button asChild variant="ghost" size="sm" className="p-0">
           <Link href="/advisor" className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
             <ChevronLeft className="h-4 w-4" />
-            Back to dashboard
+            Back to Clients
           </Link>
         </Button>
       </div>
