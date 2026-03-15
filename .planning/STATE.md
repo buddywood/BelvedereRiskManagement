@@ -12,12 +12,12 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 ## Current Position
 
 **Milestone:** v1.4 Advisor Workflow Pipeline
-**Phase:** Phase 15 - Secure Client Invitations
-**Plan:** Plan 04 complete (4/4)
-**Status:** Phase complete - All invitation workflow components implemented
-**Progress:** [██████████] 100%
+**Phase:** Phase 16 - Client Status Pipeline
+**Plan:** Plan 01 complete (1/3)
+**Status:** In progress - Data foundation complete, dashboard implementation next
+**Progress:** [███▓▓▓▓▓▓▓] 33%
 
-**Last activity:** 2026-03-15 — Completed Plan 015-04 (invitation management UI and advisor branding)
+**Last activity:** 2026-03-15 — Completed Plan 016-01 (data pipeline foundation)
 
 ## Performance Metrics
 
@@ -84,6 +84,13 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 - Created dedicated advisor settings page for branding configuration
 - Integrated invitation management into existing advisor portal navigation
 
+### Phase 16 Decisions
+
+- Stage computed from data rather than stored to avoid sync issues
+- DocumentRequirement model supports future Phase 17 document collection
+- Pipeline types include all workflow states from invitation to completion
+- Multi-tenant isolation maintained through advisor-scoped queries
+
 ### TODOs
 
 - [x] Plan Phase 15: Secure Client Invitations
@@ -97,12 +104,12 @@ None identified. Ready to proceed with phase planning.
 
 ## Session Continuity
 
-**Last Session:** 2026-03-15T23:00:38Z
-**Context:** Completed Plan 015-04 (invitation management UI and advisor branding)
+**Last Session:** 2026-03-15T23:58:37Z
+**Context:** Completed Plan 016-01 (data pipeline foundation)
 
-**Ready for:** Phase 16 planning with `/gsd:plan-phase 16`
+**Ready for:** Phase 16 Plan 02 execution with `/gsd:execute-plan 016-02`
 
-**Next Action:** Plan Phase 16 - Client Status Pipeline
+**Next Action:** Execute Plan 016-02 - Pipeline Dashboard
 
 **Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
 
