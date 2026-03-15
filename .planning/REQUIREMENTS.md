@@ -74,30 +74,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DASH-01 | TBD | Pending |
-| DASH-02 | TBD | Pending |
-| DASH-03 | TBD | Pending |
-| DASH-04 | TBD | Pending |
-| DASH-05 | TBD | Pending |
-| VIZ-01 | TBD | Pending |
-| VIZ-02 | TBD | Pending |
-| VIZ-03 | TBD | Pending |
-| VIZ-04 | TBD | Pending |
-| VIZ-05 | TBD | Pending |
-| INTEL-01 | TBD | Pending |
-| INTEL-02 | TBD | Pending |
-| INTEL-03 | TBD | Pending |
-| INTEL-04 | TBD | Pending |
-| FAMILY-01 | TBD | Pending |
-| FAMILY-02 | TBD | Pending |
-| FAMILY-03 | TBD | Pending |
-| FAMILY-04 | TBD | Pending |
+| DASH-01 | Phase 11 | Pending |
+| DASH-02 | Phase 11 | Pending |
+| DASH-03 | Phase 11 | Pending |
+| DASH-04 | Phase 11 | Pending |
+| DASH-05 | Phase 11 | Pending |
+| VIZ-01 | Phase 12 | Pending |
+| VIZ-02 | Phase 12 | Pending |
+| VIZ-03 | Phase 12 | Pending |
+| VIZ-04 | Phase 12 | Pending |
+| VIZ-05 | Phase 12 | Pending |
+| INTEL-01 | Phase 13 | Pending |
+| INTEL-02 | Phase 13 | Pending |
+| INTEL-03 | Phase 13 | Pending |
+| INTEL-04 | Phase 13 | Pending |
+| FAMILY-01 | Phase 14 | Pending |
+| FAMILY-02 | Phase 14 | Pending |
+| FAMILY-03 | Phase 14 | Pending |
+| FAMILY-04 | Phase 14 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 18 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-14*
-*Last updated: 2026-03-14 after initial definition*
+*Last updated: 2026-03-14 after roadmap creation*
