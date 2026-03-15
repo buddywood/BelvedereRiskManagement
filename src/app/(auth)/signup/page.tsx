@@ -14,19 +14,22 @@ import { PasswordInput } from "@/components/ui/password-input";
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const inviteToken = searchParams.get("invite") ?? "";
+  const callbackUrl = searchParams.get("callbackUrl") ?? (inviteToken ? "/intake" : "/dashboard");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [advisorName, setAdvisorName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!inviteToken) router.replace("/start");
   }, [inviteToken, router]);
 
-  // Prefill email from invite code lookup when token is present (runs once on load)
+  // Prefill data from invite code lookup when token is present (runs once on load)
   useEffect(() => {
     if (!inviteToken) return;
     let cancelled = false;
@@ -34,9 +37,46 @@ function SignUpForm() {
       try {
         const res = await fetch(`/api/invite/prefill?token=${encodeURIComponent(inviteToken)}`);
         const data = await res.json();
-        if (!cancelled && data.prefillEmail) setEmail(String(data.prefillEmail));
+        if (!cancelled) {
+          if (data.prefillEmail) setEmail(String(data.prefillEmail));
+          if (data.clientName) {
+            // Parse clientName into firstName and lastName
+            const nameParts = String(data.clientName).trim().split(/\s+/);
+            if (nameParts.length >= 2) {
+              setFirstName(nameParts[0]);
+              setLastName(nameParts.slice(1).join(" "));
+            } else if (nameParts.length === 1) {
+              setFirstName(nameParts[0]);
+            }
+          }
+          if (data.advisorName) setAdvisorName(String(data.advisorName));
+        }
       } catch {
         // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [inviteToken]);
+
+  // Track OPENED status when invitation link is opened (runs once on load)
+  useEffect(() => {
+    if (!inviteToken) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        // Decode the invite token to extract the inviteCodeId (first segment before the dot)
+        const parts = inviteToken.split(".");
+        if (parts.length >= 3) {
+          const inviteCodeId = parts[0];
+          // POST to track that invitation was opened (fire and forget)
+          await fetch(`/api/invitations/${inviteCodeId}/opened`, {
+            method: "POST",
+          });
+        }
+      } catch {
+        // ignore - this is fire and forget tracking
       }
     })();
     return () => {
@@ -71,10 +111,16 @@ function SignUpForm() {
 
     try {
       // Register user (invite token required by API)
+      const name = `${firstName} ${lastName}`.trim();
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, inviteToken }),
+        body: JSON.stringify({
+          email,
+          password,
+          inviteToken,
+          name: name || undefined,
+        }),
       });
 
       const data = await response.json();
@@ -110,11 +156,15 @@ function SignUpForm() {
     }
   };
 
+  const formDescription = advisorName
+    ? `Your advisor ${advisorName} has invited you to complete a family governance assessment.`
+    : "Set up a client account for governance assessments, recommendations, and account controls. This form creates user accounts only; advisors and admins are set up separately.";
+
   return (
     <AuthPanel
       eyebrow="Secure Onboarding"
       title="Create account"
-      description="Set up a client account for governance assessments, recommendations, and account controls. This form creates user accounts only; advisors and admins are set up separately."
+      description={formDescription}
       footer={
         <span>
           Looking for an advisor?{" "}
@@ -128,6 +178,34 @@ function SignUpForm() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid gap-5 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">First name</Label>
+            <Input
+              id="firstName"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              autoComplete="given-name"
+              placeholder="First name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last name</Label>
+            <Input
+              id="lastName"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              autoComplete="family-name"
+              placeholder="Last name"
+            />
+          </div>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input

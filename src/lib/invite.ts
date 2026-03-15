@@ -74,3 +74,41 @@ export async function getPrefillEmailForToken(token: string): Promise<string | n
   });
   return invite?.prefillEmail?.trim() || null;
 }
+
+/** Returns prefill data for signup form including email, client name, and advisor info. */
+export async function getPrefillDataForToken(token: string): Promise<{
+  prefillEmail: string | null;
+  clientName: string | null;
+  advisorName: string | null;
+} | null> {
+  const inviteCodeId = verifyInviteToken(token);
+  if (!inviteCodeId) return null;
+
+  const invite = await prisma.inviteCode.findUnique({
+    where: { id: inviteCodeId },
+    select: {
+      prefillEmail: true,
+      clientName: true,
+      advisor: {
+        select: {
+          user: {
+            select: { name: true, firstName: true, lastName: true }
+          }
+        }
+      }
+    },
+  });
+
+  if (!invite) return null;
+
+  const advisorName = invite.advisor?.user?.name ||
+    (invite.advisor?.user?.firstName && invite.advisor?.user?.lastName
+      ? `${invite.advisor.user.firstName} ${invite.advisor.user.lastName}`.trim()
+      : null);
+
+  return {
+    prefillEmail: invite.prefillEmail?.trim() || null,
+    clientName: invite.clientName?.trim() || null,
+    advisorName,
+  };
+}
