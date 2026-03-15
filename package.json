@@ -39,6 +39,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "react-hot-toast": "^2.6.0",
+    "recharts": "^3.8.0",
     "resend": "^6.9.2",
     "tailwind-merge": "^3.5.0",
     "use-debounce": "^10.1.0",
