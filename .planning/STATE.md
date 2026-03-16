@@ -13,11 +13,11 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Milestone:** v1.4 Advisor Workflow Pipeline
 **Phase:** Phase 17 - Document Collection System
-**Plan:** Plan 02 complete (2/3)
-**Status:** In Progress - Client document portal complete
-**Progress:** [██████░░░░] 67%
+**Plan:** Plan 03 complete (3/3)
+**Status:** Complete - Branded reports and document reminders operational
+**Progress:** [██████████] 100%
 
-**Last activity:** 2026-03-16 — Completed Plan 017-02 (client document portal)
+**Last activity:** 2026-03-16 — Completed Plan 017-03 (branded reports and document reminders)
 
 ## Performance Metrics
 
@@ -98,6 +98,15 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 - Document requirement management with inline CRUD operations
 - Suspense streaming for progressive loading of complex client data
 
+### Phase 17 Decisions
+
+- Used HTTP cron endpoint instead of node-cron for serverless compatibility
+- Implemented 3-day grace period and 7-day deduplication for reminder timing
+- Grouped documents by client to send single email per client
+- Added advisor logo validation requiring HTTPS URLs for security
+- Advisor branding prop pattern established: { firmName?: string, logoUrl?: string }
+- CRON_SECRET authentication pattern for scheduled endpoints
+
 ### TODOs
 
 - [x] Plan Phase 15: Secure Client Invitations
@@ -111,12 +120,12 @@ None identified. Ready to proceed with phase planning.
 
 ## Session Continuity
 
-**Last Session:** 2026-03-16T03:35:07Z
-**Context:** Completed Plan 017-02 (client document portal)
+**Last Session:** 2026-03-16T03:41:16Z
+**Context:** Completed Phase 17 (document collection system)
 
-**Ready for:** Continue Phase 17 with `/gsd:execute-plan 017-03`
+**Ready for:** Begin Phase 18 with `/gsd:plan-phase 18`
 
-**Next Action:** Execute Plan 017-03 - Advisor Document Management
+**Next Action:** Plan Phase 18 - Intelligent Notifications
 
 **Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
 
