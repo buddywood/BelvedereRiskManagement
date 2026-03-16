@@ -13,11 +13,11 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Milestone:** v1.4 Advisor Workflow Pipeline
 **Phase:** Phase 16 - Client Status Pipeline
-**Plan:** Plan 01 complete (1/3)
-**Status:** In progress - Data foundation complete, dashboard implementation next
-**Progress:** [███▓▓▓▓▓▓▓] 33%
+**Plan:** Plan 02 complete (2/3)
+**Status:** In progress - Pipeline dashboard complete, status dashboard next
+**Progress:** [██████▓▓▓▓] 67%
 
-**Last activity:** 2026-03-15 — Completed Plan 016-01 (data pipeline foundation)
+**Last activity:** 2026-03-16 — Completed Plan 016-02 (pipeline dashboard)
 
 ## Performance Metrics
 
@@ -90,6 +90,10 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 - DocumentRequirement model supports future Phase 17 document collection
 - Pipeline types include all workflow states from invitation to completion
 - Multi-tenant isolation maintained through advisor-scoped queries
+- SSE polling every 30 seconds for simplicity over WebSocket complexity
+- TanStack Table for consistent table patterns with existing dashboard components
+- Visual step indicator shows abbreviated stage labels for compact table display
+- Pipeline navigation placed as first card in advisor portal for primary workflow
 
 ### TODOs
 
@@ -104,12 +108,12 @@ None identified. Ready to proceed with phase planning.
 
 ## Session Continuity
 
-**Last Session:** 2026-03-15T23:58:37Z
-**Context:** Completed Plan 016-01 (data pipeline foundation)
+**Last Session:** 2026-03-16T00:05:12Z
+**Context:** Completed Plan 016-02 (pipeline dashboard)
 
-**Ready for:** Phase 16 Plan 02 execution with `/gsd:execute-plan 016-02`
+**Ready for:** Phase 16 Plan 03 execution with `/gsd:execute-plan 016-03`
 
-**Next Action:** Execute Plan 016-02 - Pipeline Dashboard
+**Next Action:** Execute Plan 016-03 - Status Dashboard
 
 **Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
 
