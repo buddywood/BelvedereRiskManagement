@@ -36,16 +36,6 @@ export default async function AdvisorSettingsPage() {
         </Button>
       </div>
 
-      <div className="space-y-1">
-        <p className="editorial-kicker">Account management</p>
-        <h1 className="text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
-          Settings
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Manage branding and view your profile used in invitations.
-        </p>
-      </div>
-
       <div className="space-y-6">
         <AdvisorBrandingForm
           profile={profile}

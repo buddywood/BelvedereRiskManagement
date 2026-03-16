@@ -36,25 +36,16 @@ export default async function NotificationsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/advisor" className="inline-flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Clients
-          </Link>
-        </Button>
-      </div>
-
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
-          <p className="editorial-kicker">Notifications</p>
-          <h1 className="text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
-            All Notifications
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {unreadCount > 0
-              ? `${unreadCount} unread`
-              : "You're all caught up."}
+        <div>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/advisor" className="inline-flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Clients
+            </Link>
+          </Button>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up."}
           </p>
         </div>
         <MarkAllReadButton notificationsExist={notifications.length > 0} />

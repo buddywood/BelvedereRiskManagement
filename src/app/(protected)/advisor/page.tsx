@@ -42,16 +42,13 @@ export default async function AdvisorClientsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header: client management + primary action */}
+      {/* Primary actions + optional greeting */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
-          <p className="editorial-kicker">Client management</p>
-          <h1 className="text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
-            {profile.user.firstName ?? profile.user.name ?? "Advisor"}
-          </h1>
-          {profile.firmName && (
-            <p className="text-sm text-muted-foreground">{profile.firmName}</p>
-          )}
+          <p className="text-sm text-muted-foreground">
+            Welcome back{profile.user.firstName ? `, ${profile.user.firstName}` : ""}
+            {profile.firmName ? ` · ${profile.firmName}` : ""}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Button asChild>
@@ -102,9 +99,9 @@ export default async function AdvisorClientsPage() {
                 <GitBranch className="h-5 w-5 text-primary" />
               </div>
               <div className="space-y-1">
-                <h3 className="font-semibold group-hover:text-primary">Client Pipeline</h3>
+                <h3 className="font-semibold group-hover:text-primary">Pipeline</h3>
                 <p className="text-sm text-muted-foreground">
-                  Track client workflow progression
+                  Real-time client workflow tracking — click any client for drill-down timeline view
                 </p>
               </div>
             </div>

@@ -79,7 +79,6 @@ async function IntelligenceContent() {
 export default function IntelligencePage() {
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Back to Dashboard link */}
       <div>
         <Link
           href="/advisor/dashboard"
@@ -89,20 +88,6 @@ export default function IntelligencePage() {
           Back to Dashboard
         </Link>
       </div>
-
-      {/* Hero section - static content that renders immediately */}
-      <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
-        <div className="space-y-2 sm:space-y-3">
-          <p className="editorial-kicker">Governance Intelligence</p>
-          <h2 className="text-3xl font-semibold text-balance sm:text-5xl">
-            Risk Intelligence
-          </h2>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-            Identify and prioritize governance risks across your portfolio. Monitor critical issues,
-            track family risk exposure, and focus attention where it's needed most.
-          </p>
-        </div>
-      </section>
 
       {/* Data-dependent content with Suspense streaming */}
       <Suspense fallback={<IntelligenceLoading />}>

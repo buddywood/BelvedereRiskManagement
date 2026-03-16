@@ -94,20 +94,6 @@ async function DashboardContent() {
 export default function AdvisorGovernanceDashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Hero section - static content that renders immediately */}
-      <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
-        <div className="space-y-2 sm:space-y-3">
-          <p className="editorial-kicker">Governance Intelligence</p>
-          <h2 className="text-3xl font-semibold text-balance sm:text-5xl">
-            Family Governance Dashboard
-          </h2>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-            Monitor governance scores, assess risk levels, and track assessment progress
-            across your assigned client families from a unified intelligence dashboard.
-          </p>
-        </div>
-      </section>
-
       {/* Quick navigation */}
       <div className="flex justify-center">
         <Link

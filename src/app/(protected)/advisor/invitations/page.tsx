@@ -24,7 +24,6 @@ export default async function InvitationsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Back link */}
       <div>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/advisor" className="inline-flex items-center gap-2">
@@ -32,17 +31,6 @@ export default async function InvitationsPage() {
             Back to Clients
           </Link>
         </Button>
-      </div>
-
-      {/* Header */}
-      <div className="space-y-1">
-        <p className="editorial-kicker">Client management</p>
-        <h1 className="text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
-          Client Invitations
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Send and manage invitations for client family governance assessments.
-        </p>
       </div>
 
       {/* Invite Form */}

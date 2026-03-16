@@ -5,21 +5,21 @@
 export function BelvedereLogoLockup({ className }: { className?: string }) {
   return (
     <svg
-      width="320"
+      width="260"
       height="80"
-      viewBox="0 0 320 80"
+      viewBox="0 0 260 80"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
       aria-label="Belvedere Governance Intelligence"
     >
-      {/* Radar symbol — right edge 6px left of "B" (B starts ~320 minus wordmark width; icon right at 174) */}
-      <g transform="translate(153,40)">
+      {/* Radar symbol */}
+      <g transform="translate(28,40)">
         <polygon
-          points="0,-22 21,-7 13,20 -13,20 -21,-7"
+          points="0,-20 19,-6 12,18 -12,18 -19,-6"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.8"
+          strokeWidth="1.4"
         />
         <line
           x1="0"
@@ -27,7 +27,7 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
           x2="0"
           y2="-22"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="0.9"
         />
         <line
           x1="0"
@@ -35,7 +35,7 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
           x2="21"
           y2="-7"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="0.9"
         />
         <line
           x1="0"
@@ -43,7 +43,7 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
           x2="13"
           y2="20"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="0.9"
         />
         <line
           x1="0"
@@ -51,7 +51,7 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
           x2="-13"
           y2="20"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="0.9"
         />
         <line
           x1="0"
@@ -59,29 +59,31 @@ export function BelvedereLogoLockup({ className }: { className?: string }) {
           x2="-21"
           y2="-7"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="0.9"
         />
-        <circle cx="0" cy="0" r="2.5" fill="var(--brand)" />
+        <circle cx="0" cy="0" r="2" fill="var(--brand)" />
       </g>
-      {/* Wordmark — 6px left of icon’s right edge (icon ends at 40+21=61, so text starts at 67) */}
+      {/* Wordmark */}
       <text
-        x="320"
-        y="38"
-        textAnchor="end"
+        x="54"
+        y="35.5"
+        textAnchor="start"
         fontFamily="var(--font-display), Georgia, serif"
         fontSize="24"
+        fontWeight="600"
         fill="var(--foreground)"
-        letterSpacing="1"
+        letterSpacing="0.8"
       >
-        BELVEDERE
+        AKILI
       </text>
       <text
-        x="320"
-        y="56"
-        textAnchor="end"
+        x="54"
+        y="53"
+        textAnchor="start"
         fontFamily="var(--font-sans), Inter, sans-serif"
-        fontSize="12"
+        fontSize="11.5"
         fill="var(--muted-foreground)"
+        letterSpacing="0.2"
       >
         Risk Intelligence
       </text>

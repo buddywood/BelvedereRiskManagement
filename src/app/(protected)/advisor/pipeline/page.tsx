@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { GitBranch } from "lucide-react";
 
 import { getClientPipelineData } from "@/lib/actions/pipeline-actions";
 import { PipelineView } from "./PipelineView";
@@ -68,21 +67,6 @@ async function PipelineContent() {
 export default function PipelinePage() {
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Hero section - static content that renders immediately */}
-      <section className="space-y-2 sm:space-y-3">
-        <div className="flex items-center gap-2">
-          <GitBranch className="h-5 w-5 text-primary" />
-          <p className="editorial-kicker">Client workflow</p>
-        </div>
-        <h1 className="text-3xl font-semibold text-balance sm:text-4xl">
-          Client Pipeline
-        </h1>
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-          Track client workflow progression and manage document requirements across all stages
-          of the advisory process.
-        </p>
-      </section>
-
       {/* Quick navigation */}
       <div className="flex justify-center">
         <Link
