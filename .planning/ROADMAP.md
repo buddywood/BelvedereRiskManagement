@@ -81,6 +81,13 @@ Plans:
 
 **Requirements:** NOTIFY-01, NOTIFY-02, NOTIFY-03, NOTIFY-04, NOTIFY-05
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 018-01-PLAN.md — Notification engine foundation: schema, service, preferences, templates
+- [ ] 018-02-PLAN.md — Event-driven triggers for registration and milestone notifications
+- [ ] 018-03-PLAN.md — Scheduled reminders, stalled workflow escalation, and preferences UI
+
 **Success Criteria:**
 1. System sends automated notifications for key workflow milestones without overwhelming users
 2. Client receives contextual reminder notifications for incomplete assessment stages
@@ -109,12 +116,12 @@ Plans:
 | 15 - Secure Client Invitations | Planned | 10 | ░░░░░░░░░░ 0% |
 | 16 - Client Status Pipeline | Planned | 8 | ░░░░░░░░░░ 0% |
 | 17 - Document Collection System | Planned | 5 | ░░░░░░░░░░ 0% |
-| 18 - Intelligent Notifications | Pending | 5 | ░░░░░░░░░░ 0% |
+| 18 - Intelligent Notifications | Planned | 5 | ░░░░░░░░░░ 0% |
 | 19 - Multi-Family Workflows | Pending | 5 | ░░░░░░░░░░ 0% |
 
 **Total Requirements:** 33 mapped, 0 remaining
 **Estimated Completion:** TBD
-**Next Phase:** Phase 17 - Document Collection System
+**Next Phase:** Phase 18 - Intelligent Notifications
 
 ---
 *Last updated: 2026-03-15*
