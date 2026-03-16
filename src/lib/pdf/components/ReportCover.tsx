@@ -1,11 +1,17 @@
-import { Page, Text, View } from '@react-pdf/renderer'
+import { Page, Text, View, Image } from '@react-pdf/renderer'
 import { styles } from '../styles'
+
+interface AdvisorBranding {
+  firmName?: string
+  logoUrl?: string
+}
 
 interface ReportCoverProps {
   assessmentDate: string
   completionPercentage: number
   overallScore: number
   riskLevel: string
+  advisorBranding?: AdvisorBranding
 }
 
 export function ReportCover({
@@ -13,6 +19,7 @@ export function ReportCover({
   completionPercentage,
   overallScore,
   riskLevel,
+  advisorBranding,
 }: ReportCoverProps) {
   const getRiskColor = (level: string) => {
     switch (level) {
@@ -32,8 +39,14 @@ export function ReportCover({
   return (
     <Page size="A4" style={styles.page}>
       <View style={{ textAlign: 'center', marginTop: 100 }}>
+        {advisorBranding?.logoUrl && (
+          <Image
+            src={advisorBranding.logoUrl}
+            style={{ maxHeight: 60, marginBottom: 20, alignSelf: 'center' }}
+          />
+        )}
         <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#1a1a2e', marginBottom: 40 }}>
-          Belvedere Risk Management
+          {advisorBranding?.firmName || "Belvedere Risk Management"}
         </Text>
 
         <Text style={styles.coverTitle}>
@@ -71,7 +84,7 @@ export function ReportCover({
       <View style={styles.confidential}>
         <Text>
           CONFIDENTIAL: This report contains sensitive family governance information and is intended solely for the assessed family.
-          Distribution outside the family without written consent is prohibited.
+          Distribution outside the family without written consent from {advisorBranding?.firmName || "Belvedere Risk Management"} is prohibited.
         </Text>
       </View>
     </Page>

@@ -105,8 +105,26 @@ export async function GET(
       },
     });
 
-    // 5. Load user email for report header
-    const userEmail = session.user.email || "Unknown User";
+    // 5. Look up advisor branding for this client
+    const clientAdvisorAssignment = await prisma.clientAdvisorAssignment.findFirst({
+      where: {
+        clientId: session.user.id,
+        status: 'ACTIVE',
+      },
+      include: {
+        advisor: {
+          select: {
+            firmName: true,
+            logoUrl: true,
+          },
+        },
+      },
+    });
+
+    const advisorBranding = clientAdvisorAssignment?.advisor ? {
+      firmName: clientAdvisorAssignment.advisor.firmName || undefined,
+      logoUrl: clientAdvisorAssignment.advisor.logoUrl || undefined,
+    } : undefined;
 
     // 6. Calculate completion percentage
     const totalResponses = responseCount;
@@ -162,14 +180,18 @@ export async function GET(
 
     // 9. Generate PDF buffer
     const pdfBuffer = await renderToBuffer(
-      <AssessmentReport data={reportData} householdProfile={householdProfile} />
+      <AssessmentReport data={reportData} householdProfile={householdProfile} advisorBranding={advisorBranding} />
     );
 
     // 10. Return PDF with appropriate headers
+    const firmSlug = advisorBranding?.firmName
+      ? advisorBranding.firmName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      : 'belvedere';
+
     return new NextResponse(pdfBuffer as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename="belvedere-governance-report.pdf"',
+        'Content-Disposition': `attachment; filename="${firmSlug}-governance-report.pdf"`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',

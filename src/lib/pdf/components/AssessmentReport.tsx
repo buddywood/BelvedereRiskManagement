@@ -43,12 +43,18 @@ interface HouseholdProfile {
   }>
 }
 
+interface AdvisorBranding {
+  firmName?: string
+  logoUrl?: string
+}
+
 interface AssessmentReportProps {
   data: AssessmentReportData
   householdProfile?: HouseholdProfile
+  advisorBranding?: AdvisorBranding
 }
 
-export function AssessmentReport({ data, householdProfile }: AssessmentReportProps) {
+export function AssessmentReport({ data, householdProfile, advisorBranding }: AssessmentReportProps) {
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -58,7 +64,7 @@ export function AssessmentReport({ data, householdProfile }: AssessmentReportPro
   return (
     <Document
       title="Family Governance Assessment Report"
-      author="Belvedere Risk Management"
+      author={advisorBranding?.firmName || "Belvedere Risk Management"}
       subject="Confidential Governance Assessment"
       creator="Belvedere Assessment Platform"
     >
@@ -68,6 +74,7 @@ export function AssessmentReport({ data, householdProfile }: AssessmentReportPro
         completionPercentage={data.completionPercentage}
         overallScore={data.score}
         riskLevel={data.riskLevel}
+        advisorBranding={advisorBranding}
       />
 
       {/* Page 2: Executive Summary */}
@@ -99,7 +106,7 @@ export function AssessmentReport({ data, householdProfile }: AssessmentReportPro
         <Page key={`footer-${pageIndex}`} size="A4" style={{ position: 'absolute' }}>
           <View style={styles.footer}>
             <Text>
-              Confidential - Page {pageIndex + 1} | Generated {currentDate} | Belvedere Risk Management
+              Confidential - Page {pageIndex + 1} | Generated {currentDate} | {advisorBranding?.firmName || "Belvedere Risk Management"}
             </Text>
           </View>
         </Page>
