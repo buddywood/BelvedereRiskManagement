@@ -1,0 +1,209 @@
+import "server-only";
+
+import { prisma } from "@/lib/db";
+import { shouldSendNotification } from "@/lib/notifications/preferences";
+import { sendNotification } from "@/lib/notifications/service";
+import { renderNotificationEmail } from "@/lib/notifications/templates";
+
+interface ProcessResult {
+  clientsReminded: number;
+}
+
+/**
+ * Processes assessment reminders for clients with incomplete assessments or intakes.
+ *
+ * Logic:
+ * - Finds clients with IntakeInterview IN_PROGRESS >7 days old OR Assessment IN_PROGRESS >14 days old
+ * - Checks notification preferences for each client
+ * - Prevents duplicate reminders within user-configured frequency window (default 7 days)
+ * - Sends reminder emails to CLIENTS (not advisors)
+ * - Uses assessment reminder email template
+ *
+ * Returns summary of processing results.
+ */
+export async function processAssessmentReminders(): Promise<ProcessResult> {
+  let clientsReminded = 0;
+
+  try {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 days for intake
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000); // 14 days for assessment
+
+    // Find client assignments with stalled intakes or assessments
+    const stalledClients = await prisma.clientAdvisorAssignment.findMany({
+      where: {
+        OR: [
+          {
+            // Stalled intake interviews (IN_PROGRESS >7 days)
+            client: {
+              intakeInterviews: {
+                some: {
+                  status: 'IN_PROGRESS',
+                  updatedAt: {
+                    lt: sevenDaysAgo,
+                  },
+                },
+              },
+            },
+          },
+          {
+            // Stalled assessments (IN_PROGRESS >14 days)
+            client: {
+              assessments: {
+                some: {
+                  status: 'IN_PROGRESS',
+                  updatedAt: {
+                    lt: fourteenDaysAgo,
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        client: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+            firstName: true,
+            lastName: true,
+            intakeInterviews: {
+              select: {
+                status: true,
+                updatedAt: true,
+              },
+              orderBy: {
+                updatedAt: 'desc',
+              },
+              take: 1,
+            },
+            assessments: {
+              select: {
+                status: true,
+                updatedAt: true,
+              },
+              orderBy: {
+                updatedAt: 'desc',
+              },
+              take: 1,
+            },
+          },
+        },
+        advisor: {
+          select: {
+            id: true,
+            firmName: true,
+            logoUrl: true,
+            user: {
+              select: {
+                name: true,
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    for (const assignment of stalledClients) {
+      try {
+        const client = assignment.client;
+        const advisor = assignment.advisor;
+
+        // Check if we should send notification based on preferences
+        const shouldSend = await shouldSendNotification(client.id, 'reminder', 'email');
+        if (!shouldSend) {
+          continue;
+        }
+
+        // Check for recent reminders to prevent spam
+        // Use the user's reminder frequency preference, default to 7 days
+        const userPreferences = await prisma.notificationPreference.findUnique({
+          where: { userId: client.id },
+          select: { reminderFrequencyDays: true },
+        });
+
+        const frequencyDays = userPreferences?.reminderFrequencyDays ?? 7;
+        const frequencyCutoff = new Date(Date.now() - frequencyDays * 24 * 60 * 60 * 1000);
+
+        // Check for recent reminder notifications to this client
+        const recentReminder = await prisma.advisorNotification.findFirst({
+          where: {
+            type: 'SYSTEM',
+            referenceId: client.id,
+            createdAt: {
+              gte: frequencyCutoff,
+            },
+          },
+        });
+
+        if (recentReminder) {
+          continue; // Skip - already sent reminder within frequency window
+        }
+
+        // Prepare client name
+        const clientName = client.name ||
+          (client.firstName && client.lastName ? `${client.firstName} ${client.lastName}` : null);
+
+        // Prepare advisor name
+        const advisorName = advisor.user.name ||
+          (advisor.user.firstName && advisor.user.lastName
+            ? `${advisor.user.firstName} ${advisor.user.lastName}`
+            : 'Your Advisor');
+
+        // Prepare firm name
+        const advisorFirmName = advisor.firmName || 'Belvedere Risk Management';
+
+        // Determine assessment URL based on what's incomplete
+        const hasIncompleteIntake = client.intakeInterviews?.[0]?.status === 'IN_PROGRESS';
+        const assessmentUrl = hasIncompleteIntake
+          ? `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/intake`
+          : `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/assessment`;
+
+        // Generate email HTML using the assessment reminder template
+        const emailHtml = renderNotificationEmail('reminder', {
+          clientName,
+          assessmentUrl,
+          advisorName,
+          firmName: advisorFirmName,
+          logoUrl: advisor.logoUrl || undefined,
+        });
+
+        // Send notification
+        const result = await sendNotification({
+          recipientUserId: client.id,
+          recipientEmail: client.email,
+          category: 'reminder',
+          title: 'Assessment Reminder',
+          message: `Your governance assessment is ready to complete`,
+          referenceId: client.id,
+          advisorProfileId: advisor.id,
+          emailSubject: 'Your Assessment is Waiting - Belvedere Risk Management',
+          emailHtml,
+        });
+
+        if (result.emailSent) {
+          clientsReminded++;
+          console.log(`Sent assessment reminder to ${client.email}`);
+        } else {
+          console.error(`Failed to send assessment reminder to ${client.email}`);
+        }
+
+      } catch (clientError) {
+        console.error(`Error processing assessment reminder for client ${assignment.clientId}:`, clientError);
+        // Continue processing other clients
+      }
+    }
+
+    console.log(`Assessment reminders processed: ${clientsReminded} clients reminded`);
+
+    return {
+      clientsReminded,
+    };
+  } catch (error) {
+    console.error("Error processing assessment reminders:", error);
+    throw error;
+  }
+}
