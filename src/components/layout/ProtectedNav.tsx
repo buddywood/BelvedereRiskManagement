@@ -9,6 +9,7 @@ const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/intake", label: "Intake" },
   { href: "/assessment", label: "Assessment" },
+  { href: "/documents", label: "Documents" },
   { href: "/profiles", label: "Profiles & Roles" },
   { href: "/settings", label: "Settings" },
 ];
