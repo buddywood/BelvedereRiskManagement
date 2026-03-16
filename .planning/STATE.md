@@ -12,12 +12,12 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 ## Current Position
 
 **Milestone:** v1.4 Advisor Workflow Pipeline
-**Phase:** Phase 17 - Document Collection System
-**Plan:** Plan 04 complete (4/4)
-**Status:** Complete - Document requirements seed data added
-**Progress:** [██████████] 100%
+**Phase:** Phase 18 - Intelligent Notifications
+**Plan:** Plan 01 complete (1/3)
+**Status:** Complete - Notification engine foundation built
+**Progress:** [███       ] 33%
 
-**Last activity:** 2026-03-16 — Completed Plan 017-04 (document requirements seed data)
+**Last activity:** 2026-03-16 — Completed Plan 018-01 (notification engine foundation)
 
 ## Performance Metrics
 
@@ -107,6 +107,14 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 - Advisor branding prop pattern established: { firmName?: string, logoUrl?: string }
 - CRON_SECRET authentication pattern for scheduled endpoints
 
+### Phase 18 Decisions
+
+- 24-hour deduplication window prevents notification spam while allowing reasonable re-notifications
+- Category-to-preference mapping enables granular notification control per notification type
+- Quiet hours stored as UTC strings for simple timezone-agnostic implementation
+- In-app notifications always created regardless of email preferences for advisor workflow continuity
+- Extended NotificationType enum to support registration, milestone, stalled workflow, and document upload events
+
 ### TODOs
 
 - [x] Plan Phase 15: Secure Client Invitations
@@ -120,12 +128,12 @@ None identified. Ready to proceed with phase planning.
 
 ## Session Continuity
 
-**Last Session:** 2026-03-16T04:08:20.374Z
-**Context:** Completed Phase 17 (document collection system)
+**Last Session:** 2026-03-16T09:43:38Z
+**Context:** Completed 018-01 (notification engine foundation)
 
-**Ready for:** Begin Phase 18 with `/gsd:plan-phase 18`
+**Ready for:** Continue with Plan 018-02 - Event-Driven Notifications
 
-**Next Action:** Plan Phase 18 - Intelligent Notifications
+**Next Action:** Execute Plan 018-02 with `/gsd:execute-plan 018 02`
 
 **Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
 
