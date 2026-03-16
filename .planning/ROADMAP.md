@@ -60,6 +60,13 @@ Plans:
 
 **Requirements:** DOC-03, DOC-04, DOC-05, BRAND-03, BRAND-05
 
+**Plans:** 3 plans
+
+Plans:
+- [ ] 017-01-PLAN.md — Schema extension, S3 upload infrastructure, and presigned URL API
+- [ ] 017-02-PLAN.md — Client document portal with advisor branding and drag-drop uploads
+- [ ] 017-03-PLAN.md — PDF report branding and automated document reminder system
+
 **Success Criteria:**
 1. Advisor can mark required documents for each client with clear specifications
 2. Client portal allows secure document upload with branded interface
@@ -101,13 +108,13 @@ Plans:
 |-------|--------|--------------|----------|
 | 15 - Secure Client Invitations | Planned | 10 | ░░░░░░░░░░ 0% |
 | 16 - Client Status Pipeline | Planned | 8 | ░░░░░░░░░░ 0% |
-| 17 - Document Collection System | Pending | 5 | ░░░░░░░░░░ 0% |
+| 17 - Document Collection System | Planned | 5 | ░░░░░░░░░░ 0% |
 | 18 - Intelligent Notifications | Pending | 5 | ░░░░░░░░░░ 0% |
 | 19 - Multi-Family Workflows | Pending | 5 | ░░░░░░░░░░ 0% |
 
 **Total Requirements:** 33 mapped, 0 remaining
 **Estimated Completion:** TBD
-**Next Phase:** Phase 16 - Client Status Pipeline
+**Next Phase:** Phase 17 - Document Collection System
 
 ---
 *Last updated: 2026-03-15*
