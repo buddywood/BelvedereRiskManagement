@@ -1,0 +1,71 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { requireAdvisorRole } from '@/lib/advisor/auth';
+import { getUserPreferences, updatePreferences } from '@/lib/notifications/preferences';
+
+// Zod schema for notification preferences
+const notificationPreferencesSchema = z.object({
+  emailEnabled: z.boolean(),
+  emailMilestones: z.boolean(),
+  emailReminders: z.boolean(),
+  emailStalled: z.boolean(),
+  emailRegistrations: z.boolean(),
+  reminderFrequencyDays: z.number().min(1).max(30),
+});
+
+export async function getNotificationPreferencesAction() {
+  try {
+    const { userId } = await requireAdvisorRole();
+
+    const preferences = await getUserPreferences(userId);
+
+    return {
+      success: true,
+      data: preferences,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get notification preferences';
+    return { success: false, error: message };
+  }
+}
+
+export async function updateNotificationPreferencesAction(formData: FormData) {
+  try {
+    const { userId } = await requireAdvisorRole();
+
+    // Parse form data
+    const rawData = {
+      emailEnabled: formData.get('emailEnabled') === 'true',
+      emailMilestones: formData.get('emailMilestones') === 'true',
+      emailReminders: formData.get('emailReminders') === 'true',
+      emailStalled: formData.get('emailStalled') === 'true',
+      emailRegistrations: formData.get('emailRegistrations') === 'true',
+      reminderFrequencyDays: parseInt(formData.get('reminderFrequencyDays')?.toString() || '7'),
+    };
+
+    const validatedData = notificationPreferencesSchema.safeParse(rawData);
+    if (!validatedData.success) {
+      return {
+        success: false,
+        error: 'Invalid form data',
+        fieldErrors: validatedData.error.flatten().fieldErrors,
+      };
+    }
+
+    // Update preferences
+    const updatedPreferences = await updatePreferences(userId, validatedData.data);
+
+    revalidatePath('/advisor/settings/notifications');
+    revalidatePath('/advisor/notifications');
+
+    return {
+      success: true,
+      data: updatedPreferences,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update notification preferences';
+    return { success: false, error: message };
+  }
+}

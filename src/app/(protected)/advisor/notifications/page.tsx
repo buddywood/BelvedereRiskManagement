@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationList } from "@/components/advisor/NotificationList";
 import { getAdvisorNotificationsAction, markAllNotificationsReadAction } from "@/lib/actions/advisor-actions";
@@ -48,7 +48,15 @@ export default async function NotificationsPage() {
             {unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up."}
           </p>
         </div>
-        <MarkAllReadButton notificationsExist={notifications.length > 0} />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/advisor/settings/notifications" className="inline-flex items-center gap-2">
+              <Settings className="h-3.5 w-3.5" />
+              Notification Settings
+            </Link>
+          </Button>
+          <MarkAllReadButton notificationsExist={notifications.length > 0} />
+        </div>
       </div>
 
       <NotificationList notifications={notifications} />
