@@ -187,6 +187,61 @@ async function main() {
 
   console.log('✅ Created client-advisor assignment');
 
+  // Create DocumentRequirement records for first client
+  const requirements = [
+    {
+      id: `doc-req-${clientUser.id}-1`,
+      name: 'Trust Agreement',
+      description: 'Current family trust documentation',
+      required: true,
+      fulfilled: false
+    },
+    {
+      id: `doc-req-${clientUser.id}-2`,
+      name: 'Tax Return (Most Recent)',
+      description: 'Most recent federal tax return',
+      required: true,
+      fulfilled: false
+    },
+    {
+      id: `doc-req-${clientUser.id}-3`,
+      name: 'Estate Plan Summary',
+      description: 'Summary of current estate planning documents',
+      required: true,
+      fulfilled: false
+    },
+    {
+      id: `doc-req-${clientUser.id}-4`,
+      name: 'Insurance Policies',
+      description: 'Life insurance and liability coverage details',
+      required: false,
+      fulfilled: false
+    }
+  ];
+
+  for (const req of requirements) {
+    await prisma.documentRequirement.upsert({
+      where: { id: req.id },
+      update: {
+        name: req.name,
+        description: req.description,
+        required: req.required,
+        fulfilled: req.fulfilled
+      },
+      create: {
+        id: req.id,
+        advisorId: advisorProfile.id,
+        clientId: clientUser.id,
+        name: req.name,
+        description: req.description,
+        required: req.required,
+        fulfilled: req.fulfilled
+      }
+    });
+  }
+
+  console.log(`✅ Created ${requirements.length} document requirements for ${clientUser.email}`);
+
   // Second client user for MFA testing (enable MFA in Settings to test verify flow)
   const client2User = await prisma.user.upsert({
     where: { email: 'client-mfa@test.com' },
@@ -294,6 +349,47 @@ async function main() {
   });
 
   console.log('✅ Created second client-advisor assignment');
+
+  // Create DocumentRequirement records for second client (MFA testing)
+  const requirements2 = [
+    {
+      id: `doc-req-${client2User.id}-1`,
+      name: 'Trust Agreement',
+      description: 'Current family trust documentation',
+      required: true,
+      fulfilled: false
+    },
+    {
+      id: `doc-req-${client2User.id}-2`,
+      name: 'Financial Statements',
+      description: 'Most recent financial statements',
+      required: true,
+      fulfilled: false
+    }
+  ];
+
+  for (const req of requirements2) {
+    await prisma.documentRequirement.upsert({
+      where: { id: req.id },
+      update: {
+        name: req.name,
+        description: req.description,
+        required: req.required,
+        fulfilled: req.fulfilled
+      },
+      create: {
+        id: req.id,
+        advisorId: advisorProfile.id,
+        clientId: client2User.id,
+        name: req.name,
+        description: req.description,
+        required: req.required,
+        fulfilled: req.fulfilled
+      }
+    });
+  }
+
+  console.log(`✅ Created ${requirements2.length} document requirements for ${client2User.email}`);
 
   console.log('\n🎉 Test data seeded successfully!');
   console.log('\n📋 Verification credentials:');
