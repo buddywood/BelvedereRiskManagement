@@ -13,11 +13,11 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Milestone:** v1.4 Advisor Workflow Pipeline
 **Phase:** Phase 18 - Intelligent Notifications
-**Plan:** Plan 01 complete (1/3)
-**Status:** Complete - Notification engine foundation built
+**Plan:** Plan 03 complete (3/3)
+**Status:** Complete - Scheduled reminder system implemented
 **Progress:** [██████████] 98%
 
-**Last activity:** 2026-03-16 — Completed Plan 018-01 (notification engine foundation)
+**Last activity:** 2026-03-16 — Completed Plan 018-03 (scheduled reminder system)
 
 ## Performance Metrics
 
@@ -114,6 +114,12 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 - Quiet hours stored as UTC strings for simple timezone-agnostic implementation
 - In-app notifications always created regardless of email preferences for advisor workflow continuity
 - Extended NotificationType enum to support registration, milestone, stalled workflow, and document upload events
+- Cron endpoint authentication via Bearer token for serverless compatibility
+- Assessment reminder thresholds: 7 days for intake, 14 days for assessment
+- Deduplication via user's reminderFrequencyDays preference (default 7 days)
+- Workflow stall detection using existing isStalled() logic (>7 days inactive)
+- Separate reminder processors for assessment (to clients) vs workflow (to advisors)
+- Checkbox UI over toggle switches for notification preferences
 
 ### TODOs
 
@@ -131,9 +137,9 @@ None identified. Ready to proceed with phase planning.
 **Last Session:** 2026-03-16T09:52:01.476Z
 **Context:** Completed 018-01 (notification engine foundation)
 
-**Ready for:** Continue with Plan 018-02 - Event-Driven Notifications
+**Ready for:** Phase 18 Complete - All intelligent notification features implemented
 
-**Next Action:** Execute Plan 018-02 with `/gsd:execute-plan 018 02`
+**Next Action:** Execute Phase 19 with `/gsd:plan-phase 19`
 
 **Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
 
