@@ -406,19 +406,23 @@ model AdvisorNotification {
 }
 
 model DocumentRequirement {
-  id          String   @id @default(cuid())
-  advisorId   String   // AdvisorProfile.id
-  clientId    String   // User.id (client)
-  name        String   // e.g., "Trust Agreement", "Tax Return"
-  description String?  // Additional details about what's needed
-  required    Boolean  @default(true)
-  fulfilled   Boolean  @default(false)
-  fulfilledAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  advisorId    String   // AdvisorProfile.id
+  clientId     String   // User.id (client)
+  name         String   // e.g., "Trust Agreement", "Tax Return"
+  description  String?  // Additional details about what's needed
+  required     Boolean  @default(true)
+  fulfilled    Boolean  @default(false)
+  fulfilledAt  DateTime?
+  fileKey      String?  // S3 object key
+  fileName     String?  // Original file name for display
+  fileSize     Int?     // File size in bytes
+  fileMimeType String?  // Validated MIME type
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  advisor     AdvisorProfile @relation(fields: [advisorId], references: [id], onDelete: Cascade)
-  client      User           @relation("ClientDocuments", fields: [clientId], references: [id], onDelete: Cascade)
+  advisor      AdvisorProfile @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+  client       User           @relation("ClientDocuments", fields: [clientId], references: [id], onDelete: Cascade)
 
   @@index([advisorId])
   @@index([clientId])
