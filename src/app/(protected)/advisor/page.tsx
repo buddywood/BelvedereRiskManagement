@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserPlus, Send, Settings } from "lucide-react";
+import { UserPlus, Send, Settings, GitBranch } from "lucide-react";
 import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
 import { ClientCard } from "@/components/advisor/ClientCard";
 import { NotificationBell } from "@/components/advisor/NotificationBell";
@@ -94,7 +94,23 @@ export default async function AdvisorClientsPage() {
       </div>
 
       {/* Navigation Cards */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Link href="/advisor/pipeline" className="group">
+          <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
+            <div className="flex items-start gap-4">
+              <div className="rounded-md bg-primary/10 p-2">
+                <GitBranch className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-semibold group-hover:text-primary">Client Pipeline</h3>
+                <p className="text-sm text-muted-foreground">
+                  Track client workflow progression
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
         <Link href="/advisor/invitations" className="group">
           <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
             <div className="flex items-start gap-4">
