@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
 import { requireAdvisorRole, getAdvisorProfileOrThrow } from '@/lib/advisor/auth';
-import { getClientPipeline, getPipelineMetrics } from '@/lib/pipeline/queries';
+import { getClientPipeline, getPipelineMetrics, getClientDetail } from '@/lib/pipeline/queries';
 import { prisma } from '@/lib/db';
 
 export async function getClientPipelineData() {
@@ -126,6 +126,23 @@ export async function removeDocumentRequirement(requirementId: string) {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to remove document requirement';
+    return { success: false, error: message };
+  }
+}
+
+export async function getClientDetailData(clientId: string) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const clientDetail = await getClientDetail(profile.id, clientId);
+
+    return {
+      success: true,
+      data: clientDetail,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get client detail data';
     return { success: false, error: message };
   }
 }

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/db";
-import type { PipelineClient, PipelineMetrics, ClientWorkflowStage } from "./types";
+import type { PipelineClient, PipelineMetrics, ClientWorkflowStage, ClientDetail, WorkflowEvent } from "./types";
 import { computeClientStage, computeProgress, isStalled } from "./status";
 
 /**
@@ -194,5 +194,285 @@ export function getPipelineMetrics(clients: PipelineClient[]): PipelineMetrics {
     byStage: allStages,
     documentsNeeded,
     stalled,
+  };
+}
+
+/**
+ * Fetches detailed data for a single client including timeline and requirements
+ */
+export async function getClientDetail(advisorProfileId: string, clientId: string): Promise<ClientDetail> {
+  // Verify advisor-client assignment exists (multi-tenant isolation)
+  const assignment = await prisma.clientAdvisorAssignment.findFirst({
+    where: {
+      advisorId: advisorProfileId,
+      clientId,
+      status: 'ACTIVE',
+    },
+    include: {
+      client: {
+        include: {
+          clientProfile: true,
+          intakeInterviews: {
+            orderBy: { updatedAt: 'desc' },
+          },
+          assessments: {
+            orderBy: { completedAt: 'desc' },
+            include: {
+              scores: {
+                orderBy: { calculatedAt: 'desc' },
+                take: 1,
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!assignment) {
+    throw new Error('Client not found or not assigned to you');
+  }
+
+  const client = assignment.client;
+
+  // Fetch invitation data
+  const invitation = await prisma.inviteCode.findFirst({
+    where: {
+      createdBy: advisorProfileId,
+      prefillEmail: client.email,
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Fetch document requirements
+  const documentRequirements = await prisma.documentRequirement.findMany({
+    where: {
+      advisorId: advisorProfileId,
+      clientId,
+    },
+    orderBy: { createdAt: 'asc' }
+  });
+
+  // Get the latest intake and assessment
+  const latestIntake = client.intakeInterviews[0];
+  const latestAssessment = client.assessments[0];
+
+  // Build timeline events
+  const events: WorkflowEvent[] = [];
+
+  // Client assignment
+  events.push({
+    stage: 'INVITED',
+    label: 'Client Assigned',
+    date: assignment.assignedAt,
+    detail: 'Advisor-client relationship established'
+  });
+
+  // Invitation events
+  if (invitation) {
+    events.push({
+      stage: 'INVITED',
+      label: 'Invitation Sent',
+      date: invitation.createdAt,
+      detail: `Invitation code: ${invitation.code}`
+    });
+
+    if (invitation.status !== 'SENT' && invitation.statusUpdatedAt) {
+      events.push({
+        stage: invitation.status === 'REGISTERED' ? 'REGISTERED' : 'INVITED',
+        label: invitation.status === 'REGISTERED' ? 'Client Registered' : 'Invitation Updated',
+        date: invitation.statusUpdatedAt,
+        detail: `Status changed to ${invitation.status.toLowerCase()}`
+      });
+    }
+  }
+
+  // Intake events
+  if (latestIntake) {
+    if (latestIntake.status === 'IN_PROGRESS') {
+      events.push({
+        stage: 'INTAKE_IN_PROGRESS',
+        label: 'Intake Started',
+        date: latestIntake.startedAt || latestIntake.updatedAt,
+        detail: 'Client began answering intake questions'
+      });
+    }
+
+    if (latestIntake.submittedAt) {
+      events.push({
+        stage: 'INTAKE_COMPLETE',
+        label: 'Intake Completed',
+        date: latestIntake.submittedAt,
+        detail: 'All intake questions answered'
+      });
+    }
+  }
+
+  // Assessment events
+  if (latestAssessment) {
+    events.push({
+      stage: 'ASSESSMENT_IN_PROGRESS',
+      label: 'Assessment Started',
+      date: latestAssessment.startedAt || latestAssessment.updatedAt,
+      detail: 'Risk assessment began'
+    });
+
+    if (latestAssessment.completedAt) {
+      const score = latestAssessment.scores[0]?.score;
+      events.push({
+        stage: 'ASSESSMENT_COMPLETE',
+        label: 'Assessment Completed',
+        date: latestAssessment.completedAt,
+        detail: score ? `Risk score: ${score}` : 'Assessment finished'
+      });
+    }
+  }
+
+  // Sort timeline chronologically
+  events.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  // Build document counts for stage computation
+  const docCounts = documentRequirements.reduce(
+    (acc, req) => {
+      if (req.fulfilled) acc.fulfilled++;
+      else acc.required++;
+      return acc;
+    },
+    { required: 0, fulfilled: 0 }
+  );
+
+  // Compute current stage and build pipeline client
+  const stage = computeClientStage({
+    invitation: invitation ? {
+      status: invitation.status,
+      statusUpdatedAt: invitation.statusUpdatedAt,
+    } : undefined,
+    intake: latestIntake ? {
+      status: latestIntake.status,
+      updatedAt: latestIntake.updatedAt,
+    } : undefined,
+    assessment: latestAssessment ? {
+      status: latestAssessment.status,
+      completedAt: latestAssessment.completedAt,
+      updatedAt: latestAssessment.updatedAt,
+    } : undefined,
+    documents: docCounts
+  });
+
+  // Get most recent activity
+  const activityDates = [
+    assignment.assignedAt,
+    invitation?.statusUpdatedAt,
+    latestIntake?.updatedAt,
+    latestAssessment?.updatedAt || latestAssessment?.completedAt,
+  ].filter(Boolean) as Date[];
+
+  const lastActivity = activityDates.length > 0
+    ? new Date(Math.max(...activityDates.map(d => d.getTime())))
+    : assignment.assignedAt;
+
+  const pipelineClient: PipelineClient = {
+    id: client.id,
+    name: client.name,
+    email: client.email,
+    assignedAt: assignment.assignedAt,
+    stage,
+    progress: computeProgress(stage),
+    lastActivity,
+    invitation: invitation ? {
+      status: invitation.status,
+      sentAt: invitation.createdAt,
+      code: invitation.code,
+    } : null,
+    intake: latestIntake ? {
+      status: latestIntake.status,
+      responseCount: await prisma.intakeResponse.count({
+        where: {
+          interviewId: latestIntake.id,
+          answeredAt: { not: null }
+        }
+      }),
+      submittedAt: latestIntake.submittedAt,
+    } : null,
+    assessment: latestAssessment ? {
+      status: latestAssessment.status,
+      completedAt: latestAssessment.completedAt,
+      score: latestAssessment.scores[0]?.score || null,
+    } : null,
+    documents: {
+      required: docCounts.required,
+      fulfilled: docCounts.fulfilled,
+    }
+  };
+
+  // Build intake details
+  let intakeDetails = null;
+  if (latestIntake) {
+    // Count questions based on responses since there's no template-based system
+    const totalResponses = await prisma.intakeResponse.count({
+      where: { interviewId: latestIntake.id }
+    });
+
+    const responseCount = await prisma.intakeResponse.count({
+      where: {
+        interviewId: latestIntake.id,
+        answeredAt: { not: null }
+      }
+    });
+
+    intakeDetails = {
+      status: latestIntake.status,
+      responseCount,
+      totalQuestions: totalResponses, // Use total response slots as proxy for questions
+      submittedAt: latestIntake.submittedAt,
+    };
+  }
+
+  // Build assessment details
+  let assessmentDetails = null;
+  if (latestAssessment && latestAssessment.scores[0]) {
+    const score = latestAssessment.scores[0];
+
+    // Get all pillar scores for this assessment
+    const pillarScores = await prisma.pillarScore.findMany({
+      where: { assessmentId: latestAssessment.id },
+      orderBy: { pillar: 'asc' }
+    });
+
+    assessmentDetails = {
+      status: latestAssessment.status,
+      score: score.score,
+      riskLevel: score.riskLevel,
+      completedAt: latestAssessment.completedAt,
+      pillarScores: pillarScores.map((pillar: any) => ({
+        pillar: pillar.pillar,
+        score: pillar.score,
+        riskLevel: pillar.riskLevel,
+      })),
+    };
+  } else if (latestAssessment) {
+    assessmentDetails = {
+      status: latestAssessment.status,
+      score: null,
+      riskLevel: null,
+      completedAt: latestAssessment.completedAt,
+      pillarScores: [],
+    };
+  }
+
+  return {
+    client: pipelineClient,
+    timeline: events,
+    documentRequirements: documentRequirements.map(req => ({
+      id: req.id,
+      name: req.name,
+      description: req.description,
+      required: !req.fulfilled,
+      fulfilled: req.fulfilled,
+      fulfilledAt: req.fulfilledAt,
+      createdAt: req.createdAt,
+    })),
+    intakeDetails,
+    assessmentDetails,
   };
 }

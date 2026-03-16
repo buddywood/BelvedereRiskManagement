@@ -52,3 +52,39 @@ export type PipelineFilters = {
   sortBy?: 'name' | 'stage' | 'progress' | 'lastActivity';
   sortDir?: 'asc' | 'desc';
 };
+
+// Client detail data for drill-down view
+export type ClientDetail = {
+  client: PipelineClient;
+  timeline: WorkflowEvent[];
+  documentRequirements: {
+    id: string;
+    name: string;
+    description: string | null;
+    required: boolean;
+    fulfilled: boolean;
+    fulfilledAt: Date | null;
+    createdAt: Date;
+  }[];
+  intakeDetails: {
+    status: string;
+    responseCount: number;
+    totalQuestions: number;
+    submittedAt: Date | null;
+  } | null;
+  assessmentDetails: {
+    status: string;
+    score: number | null;
+    riskLevel: string | null;
+    completedAt: Date | null;
+    pillarScores: { pillar: string; score: number; riskLevel: string }[];
+  } | null;
+};
+
+// Timeline event for workflow progression
+export type WorkflowEvent = {
+  stage: ClientWorkflowStage;
+  label: string;
+  date: Date;
+  detail?: string;
+};
