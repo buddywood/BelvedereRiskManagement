@@ -418,6 +418,7 @@ model DocumentRequirement {
   fileName     String?  // Original file name for display
   fileSize     Int?     // File size in bytes
   fileMimeType String?  // Validated MIME type
+  lastReminderSentAt DateTime? // Track when last reminder was sent to prevent spam
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
