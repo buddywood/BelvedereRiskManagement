@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { sendAdvisorIntakeNotification } from '@/lib/email';
 import { createNotification } from '@/lib/data/advisor';
+import { triggerMilestoneNotification } from '@/lib/notifications/triggers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
@@ -96,6 +97,9 @@ export async function POST(
         console.error(`Failed to notify advisor ${assignment.advisor.id}:`, advisorError);
       }
     }
+
+    // Also trigger milestone notification using the new system (fire-and-forget)
+    void triggerMilestoneNotification(interview.userId, 'Intake Complete');
 
     return NextResponse.json({ success: true, notifiedCount });
   } catch (error) {

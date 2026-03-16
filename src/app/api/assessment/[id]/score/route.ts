@@ -11,6 +11,7 @@ import {
   getEmphasisMultipliers,
   getVisibleQuestionIds,
 } from "@/lib/assessment/customization";
+import { triggerMilestoneNotification } from "@/lib/notifications/triggers";
 
 /**
  * Assessment Score API Routes
@@ -265,6 +266,9 @@ export async function POST(
         },
       }),
     ]);
+
+    // Trigger milestone notification for assessment completion (fire-and-forget)
+    void triggerMilestoneNotification(assessment.userId, 'Assessment Complete');
 
     const responseData: any = {
       score: pillarScore.score,

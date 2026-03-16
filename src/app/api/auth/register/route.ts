@@ -3,6 +3,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { verifyInviteToken, consumeInviteCode } from "@/lib/invite";
+import { triggerRegistrationNotification } from "@/lib/notifications/triggers";
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -79,10 +80,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Determine the name to use
+    const userName = name || inviteCode.clientName || undefined;
+
     // Use transaction to create user and link to advisor if invitation has createdBy
     const result = await prisma.$transaction(async (tx) => {
-      // Determine the name to use
-      const userName = name || inviteCode.clientName || undefined;
 
       // Create user (this form only creates USER role; advisors/admins are set up separately)
       const user = await tx.user.create({
@@ -135,6 +137,11 @@ export async function POST(request: NextRequest) {
     });
 
     const user = result;
+
+    // Trigger registration notification if invite code was used (fire-and-forget)
+    if (inviteCode.createdBy && user.id && userName && user.email) {
+      void triggerRegistrationNotification(user.id, userName, user.email);
+    }
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
