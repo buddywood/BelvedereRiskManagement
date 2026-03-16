@@ -62,15 +62,11 @@ export default async function DashboardPage() {
       <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
           <div className="space-y-2 sm:space-y-3">
-            <p className="editorial-kicker">Client Dashboard</p>
-            <h2 className="text-3xl font-semibold text-balance sm:text-5xl">
+            <p className="text-sm text-muted-foreground">
               Welcome back,{" "}
               {session.user.firstName ?? session.user.name ?? "Guest"}
-            </h2>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-              Review assessment progress, access results, and manage account
-              security from a workspace designed for discretion and clarity.
             </p>
+
           </div>
 
           <Card className="bg-background/60">

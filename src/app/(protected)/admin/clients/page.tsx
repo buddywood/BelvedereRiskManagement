@@ -7,13 +7,6 @@ export default async function AdminClientsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Clients</h2>
-        <p className="text-muted-foreground">
-          Users with the USER role. Assignments and activity counts are shown.
-        </p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Client accounts ({clients.length})</CardTitle>

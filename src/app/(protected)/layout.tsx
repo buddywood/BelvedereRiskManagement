@@ -3,6 +3,7 @@ import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ProtectedNav } from "@/components/layout/ProtectedNav";
+import { ClientPageHeaderFromPath } from "@/components/layout/ClientPageHeader";
 import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncompleteIntake";
 import { BelvedereLogoLockup } from "@/components/home/BelvedereLogoLockup";
 import { prisma } from "@/lib/db";
@@ -57,7 +58,7 @@ export default async function ProtectedLayout({
                   <div className="min-w-0">
                     <Link
                       href="/"
-                      className="block text-foreground"
+                      className="block text-foreground -ml-10 sm:-ml-12 lg:-ml-14"
                       aria-label="Belvedere home"
                     >
                       <BelvedereLogoLockup className="h-auto w-full max-w-[190px] lg:max-w-[220px]" />
@@ -110,7 +111,10 @@ export default async function ProtectedLayout({
           </header>
 
           <main className="px-4 py-5 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
-            {children}
+            <div className="space-y-6 sm:space-y-8">
+              <ClientPageHeaderFromPath />
+              {children}
+            </div>
           </main>
         </div>
       </div>

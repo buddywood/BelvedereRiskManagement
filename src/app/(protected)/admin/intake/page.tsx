@@ -14,13 +14,6 @@ export default async function AdminIntakePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Intake Management</h2>
-        <p className="text-muted-foreground">
-          All intake interviews and their status. Use for review and triage.
-        </p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Intake interviews ({interviews.length})</CardTitle>

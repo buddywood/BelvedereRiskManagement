@@ -51,19 +51,7 @@ export default async function SettingsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
       <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <div className="space-y-2 sm:space-y-3">
-            <p className="editorial-kicker">Account Settings</p>
-            <h1 className="text-3xl font-semibold text-balance sm:text-5xl">
-              Security posture and access controls
-            </h1>
-            <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-              Review account identity, secure your workspace with multi-factor authentication,
-              and keep recovery access in good standing.
-            </p>
-          </div>
-
-          <Card className="bg-background/60">
+        <Card className="bg-background/60 max-w-xl">
             <CardContent className="grid gap-3 pt-5 sm:grid-cols-2 sm:pt-6">
               <div>
                 <p className="editorial-kicker">Email</p>
@@ -77,7 +65,6 @@ export default async function SettingsPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">

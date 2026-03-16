@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { isAdminUser } from "@/lib/admin/auth";
+import { AdminPageHeaderFromPath } from "@/components/layout/AdminPageHeader";
 
 export default async function AdminLayout({
   children,
@@ -17,5 +18,10 @@ export default async function AdminLayout({
     redirect("/dashboard?error=unauthorized");
   }
 
-  return <>{children}</>;
+  return (
+    <div className="space-y-6 sm:space-y-8">
+      <AdminPageHeaderFromPath />
+      {children}
+    </div>
+  );
 }

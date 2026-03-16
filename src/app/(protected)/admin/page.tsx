@@ -16,13 +16,6 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Admin</h2>
-        <p className="text-muted-foreground">
-          Manage advisors, clients, intake, and assessments. Use the links above or below.
-        </p>
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map(({ href, label, description }) => (
           <Link key={href} href={href}>

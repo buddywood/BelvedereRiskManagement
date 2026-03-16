@@ -8,13 +8,6 @@ export default async function AdminSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Admin Settings</h2>
-        <p className="text-muted-foreground">
-          System and account settings. Extend with feature flags, defaults, or integrations.
-        </p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Account</CardTitle>

@@ -23,19 +23,6 @@ export default async function ProfilesPage() {
       <section className="hero-surface overflow-hidden px-4 py-5 sm:px-8 sm:py-8">
         <div className="app-grid gap-5 sm:gap-8 xl:grid-cols-[minmax(0,1.4fr)_minmax(22rem,0.85fr)]">
           <div className="space-y-4 sm:space-y-5">
-            <div className="space-y-2 sm:space-y-3">
-              <p className="editorial-kicker">Profiles & Roles</p>
-              <div className="space-y-2 sm:space-y-3">
-                <h1 className="text-3xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
-                  Household member profiles built for governance planning.
-                </h1>
-                <p className="max-w-2xl text-sm leading-5 text-muted-foreground sm:text-base sm:leading-6">
-                  Capture the people in your household, clarify how they participate in
-                  governance, and keep an up-to-date operating picture for the rest of the
-                  assessment workflow.
-                </p>
-              </div>
-            </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="outline">{members.length} household profiles</Badge>
               <Badge variant="secondary">{residentCount} living in household</Badge>

@@ -7,13 +7,6 @@ export default async function AdminAdvisorsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Advisors</h2>
-        <p className="text-muted-foreground">
-          Users with the ADVISOR role and their profiles.
-        </p>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Advisor accounts ({advisors.length})</CardTitle>

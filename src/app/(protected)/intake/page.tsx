@@ -36,17 +36,6 @@ export default async function IntakePage() {
   return (
     <div className="max-w-2xl mx-auto py-8 sm:py-12">
       <div className="space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-[-0.03em]">
-            Family Governance Intake Interview
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Before your assessment, we'd like to learn about your family through a brief audio interview.
-            An advisor will review your responses.
-          </p>
-        </div>
-
         {/* Interview Overview Card */}
         <Card className="p-6 sm:p-8 space-y-6">
           <div className="space-y-4">
