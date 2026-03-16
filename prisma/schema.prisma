@@ -40,6 +40,7 @@ model User {
   clientProfile  ClientProfile?
   clientAssignments ClientAdvisorAssignment[] @relation("ClientAssignments")
   documentRequirements DocumentRequirement[] @relation("ClientDocuments")
+  notificationPreference NotificationPreference?
 
   @@index([email])
 }
@@ -275,6 +276,10 @@ enum NotificationType {
   INTAKE_UPDATED
   NEW_LEAD
   SYSTEM
+  CLIENT_REGISTERED
+  MILESTONE_COMPLETE
+  WORKFLOW_STALLED
+  DOCUMENT_UPLOADED
 }
 
 enum FamilyComplexity {
@@ -428,4 +433,29 @@ model DocumentRequirement {
   @@index([advisorId])
   @@index([clientId])
   @@index([advisorId, clientId])
+}
+
+model NotificationPreference {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Email notification toggles
+  emailEnabled          Boolean @default(true)
+  emailMilestones       Boolean @default(true)   // NOTIFY-03: milestone completions
+  emailReminders        Boolean @default(true)    // NOTIFY-02: assessment reminders
+  emailStalled          Boolean @default(true)    // NOTIFY-04: stalled workflow alerts
+  emailRegistrations    Boolean @default(true)    // NOTIFY-01: client registrations
+
+  // Frequency control
+  reminderFrequencyDays Int     @default(7)       // Min days between reminder emails
+
+  // Quiet hours (optional, store as "HH:MM" strings, UTC)
+  quietStart   String?  // e.g., "22:00"
+  quietEnd     String?  // e.g., "08:00"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId])
 }
