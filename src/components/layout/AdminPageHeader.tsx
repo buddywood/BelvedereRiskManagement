@@ -78,7 +78,15 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
 ];
 
 function getHeaderConfig(pathname: string): AdminPageHeaderConfig | null {
-  const match = ADMIN_HEADER_CONFIG.find(({ path }) => pathname === path);
+  // Try exact match first
+  let match = ADMIN_HEADER_CONFIG.find(({ path }) => pathname === path);
+
+  // Fall back to parent path if no exact match
+  if (!match) {
+    const parentPath = pathname.split('/').slice(0, -1).join('/');
+    match = ADMIN_HEADER_CONFIG.find(({ path }) => path === parentPath);
+  }
+
   return match?.config ?? null;
 }
 

@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { User, FileText, Clock, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -15,8 +18,9 @@ function formatLocation(profile: NonNullable<AdvisorDashboardClient["clientProfi
 }
 
 export function ClientCard({ client }: ClientCardProps) {
-  const { name, email, assignedAt, latestInterview, clientProfile } = client;
+  const { id, name, email, assignedAt, latestInterview, clientProfile } = client;
   const location = clientProfile ? formatLocation(clientProfile) : null;
+  const router = useRouter();
 
   // Status badge configuration
   const getStatusConfig = (status: string) => {
@@ -59,7 +63,19 @@ export function ClientCard({ client }: ClientCardProps) {
 
   return (
     <Card className="h-full transition-colors hover:bg-muted/30">
-      <CardHeader className="pb-3">
+      <CardHeader
+        className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={() => router.push(`/advisor/pipeline/${id}`)}
+        role="button"
+        tabIndex={0}
+        aria-label={`View pipeline for ${name || "Unnamed Client"}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            router.push(`/advisor/pipeline/${id}`);
+          }
+        }}
+      >
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
             <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />

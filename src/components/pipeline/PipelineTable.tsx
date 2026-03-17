@@ -73,15 +73,15 @@ export function PipelineTable({ clients }: PipelineTableProps) {
         const displayName = client.name || 'Unnamed Client';
 
         return (
-          <div className="space-y-1">
-            <Link
-              href={`/advisor/pipeline/${client.id}`}
-              className="font-medium text-primary hover:underline"
-            >
+          <Link
+            href={`/advisor/pipeline/${client.id}`}
+            className="block space-y-1 cursor-pointer hover:bg-muted/50 rounded p-2 -m-2 transition-colors"
+          >
+            <div className="font-medium text-primary hover:underline">
               {displayName}
-            </Link>
+            </div>
             <p className="text-sm text-muted-foreground">{client.email}</p>
-          </div>
+          </Link>
         );
       },
       enableSorting: true,
@@ -221,7 +221,7 @@ export function PipelineTable({ clients }: PipelineTableProps) {
             {table.getRowModel().rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b last:border-b-0 hover:bg-muted/50 cursor-pointer transition-colors"
+                className="border-b last:border-b-0 hover:bg-muted/50 transition-colors"
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-4 py-3">

@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ type FormData = z.infer<typeof formSchema>;
 export function InviteClientForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdLink, setCreatedLink] = useState<{ url: string; emailSent: boolean; reason?: string } | null>(null);
+  const router = useRouter();
 
   const {
     register,
@@ -58,7 +60,7 @@ export function InviteClientForm() {
         if (emailSent !== false) {
           toast.success(`Invitation sent to ${data.clientEmail}`);
           reset();
-          window.location.reload();
+          router.refresh();
         } else {
           setCreatedLink({ url, emailSent: false, reason: emailNotSentReason });
           reset();
@@ -116,7 +118,7 @@ export function InviteClientForm() {
                   <Copy className="h-4 w-4" />
                 </Button>
               </div>
-              <Button type="button" variant="secondary" size="sm" onClick={() => { setCreatedLink(null); window.location.reload(); }}>
+              <Button type="button" variant="secondary" size="sm" onClick={() => { setCreatedLink(null); router.refresh(); }}>
                 Done
               </Button>
             </div>

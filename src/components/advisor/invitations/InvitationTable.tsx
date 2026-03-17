@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { formatDistanceToNow, format } from 'date-fns';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ interface InvitationTableProps {
 
 export function InvitationTable({ invitations }: InvitationTableProps) {
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleResend = async (invitation: InvitationWithDetails) => {
     if (processingId) return;
@@ -27,7 +29,7 @@ export function InvitationTable({ invitations }: InvitationTableProps) {
 
       if (result.success) {
         toast.success('Invitation resent successfully');
-        window.location.reload();
+        router.refresh();
       } else {
         toast.error(result.error);
       }
@@ -55,7 +57,7 @@ export function InvitationTable({ invitations }: InvitationTableProps) {
 
       if (result.success) {
         toast.success('Invitation expired successfully');
-        window.location.reload();
+        router.refresh();
       } else {
         toast.error(result.error);
       }
