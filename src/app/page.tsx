@@ -9,7 +9,11 @@ export default async function Home() {
   const session = await auth();
 
   return (
-    <main className="min-h-screen py-6 sm:py-8">
+    <>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+      <main id="main-content" className="min-h-screen py-6 sm:py-8" tabIndex={-1}>
       <div className="page-shell">
         <div className="hero-surface app-grid grid min-h-[calc(100vh-3rem)] overflow-hidden rounded-[2rem] px-6 py-8 sm:px-8 lg:grid-cols-[1.2fr_0.8fr] lg:px-12 lg:py-10">
           <section className="flex flex-col justify-between gap-8 lg:gap-10">
@@ -287,5 +291,6 @@ export default async function Home() {
         </p>
       </div>
     </main>
+    </>
   );
 }

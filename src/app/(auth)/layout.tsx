@@ -84,7 +84,7 @@ export default function AuthLayout({
                 <AkiliLogoLockup className="h-auto w-full max-w-[280px]" />
               </Link>
             </div>
-            <div className="flex w-full max-w-xl flex-1 items-center justify-center">{children}</div>
+            <div id="main-content" className="flex w-full max-w-xl flex-1 items-center justify-center" tabIndex={-1}>{children}</div>
           </section>
         </div>
       </div>
