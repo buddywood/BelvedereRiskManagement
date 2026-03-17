@@ -24,9 +24,9 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
     config: {
       icon: Shield,
       kicker: "Administration",
-      title: "Admin",
+      title: "System Administration",
       subtitle:
-        "Manage advisors, clients, intake, and assessments. Use the links below to navigate.",
+        "Platform oversight and user management",
     },
   },
   {
@@ -35,7 +35,7 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
       icon: Users,
       kicker: "User management",
       title: "Advisors",
-      subtitle: "Users with the ADVISOR role and their profiles.",
+      subtitle: "Advisor accounts and professional profiles",
     },
   },
   {
@@ -44,35 +44,35 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
       icon: UserCircle,
       kicker: "User management",
       title: "Clients",
-      subtitle: "Users with the USER role. Assignments and activity counts are shown.",
+      subtitle: "Client accounts and advisor assignments",
     },
   },
   {
     path: "/admin/intake",
     config: {
       icon: FileText,
-      kicker: "Intake",
+      kicker: "Content management",
       title: "Intake Management",
-      subtitle: "All intake interviews and their status. Use for review and triage.",
+      subtitle: "Client intake interviews and status oversight",
     },
   },
   {
     path: "/admin/assessment",
     config: {
       icon: ClipboardCheck,
-      kicker: "Assessments",
+      kicker: "Content management",
       title: "Assessment Management",
-      subtitle: "All governance assessments. Status and progress are shown.",
+      subtitle: "Governance assessment oversight and progress tracking",
     },
   },
   {
     path: "/admin/settings",
     config: {
       icon: Settings,
-      kicker: "Administration",
+      kicker: "System configuration",
       title: "Admin Settings",
       subtitle:
-        "System and account settings. Extend with feature flags, defaults, or integrations.",
+        "Platform configuration and integration management",
     },
   },
 ];
@@ -93,30 +93,52 @@ function getHeaderConfig(pathname: string): AdminPageHeaderConfig | null {
 export function AdminPageHeader(props: AdminPageHeaderConfig) {
   const { icon: Icon, kicker, title, subtitle } = props;
   return (
-    <section className="space-y-2 sm:space-y-3">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-primary" aria-hidden />
-        <p className="editorial-kicker">{kicker}</p>
-      </div>
-      <h1 className="text-3xl font-semibold text-balance sm:text-4xl tracking-[-0.03em]">
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-          {subtitle}
+    <header role="banner" className="admin-header professional-header space-y-3 sm:space-y-4">
+      <div className="flex items-center gap-3 header-section-spacing">
+        <div className="professional-icon" role="img" aria-label={`${title} section icon`}>
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <p className="professional-kicker" id="admin-section-context" role="doc-subtitle">
+          {kicker}
         </p>
-      )}
-    </section>
+      </div>
+      <div className="header-section-spacing">
+        <h1
+          className="professional-title text-balance"
+          aria-describedby="admin-section-context admin-subtitle"
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p
+            className="professional-subtitle"
+            id="admin-subtitle"
+            role="doc-subtitle"
+            aria-label={`Page description: ${subtitle}`}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </header>
   );
 }
 
 /**
- * Renders the shared admin page header (icon + kicker + title + subtitle) based on current path.
- * Use in admin layout so every admin page gets the same header style.
+ * Enhanced admin page header with professional accessibility features.
+ * Renders the shared admin page header with skip-to-content functionality.
  */
 export function AdminPageHeaderFromPath() {
   const pathname = usePathname();
   const config = getHeaderConfig(pathname);
   if (!config) return null;
-  return <AdminPageHeader {...config} />;
+
+  return (
+    <>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+      <AdminPageHeader {...config} />
+    </>
+  );
 }

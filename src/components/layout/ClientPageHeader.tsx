@@ -22,50 +22,50 @@ const CLIENT_HEADER_CONFIG: { path: string; config: ClientPageHeaderConfig }[] =
     path: "/dashboard",
     config: {
       icon: LayoutDashboard,
-      kicker: "Client Dashboard",
+      kicker: "Client Portal",
       title: "Dashboard",
       subtitle:
-        "Review assessment progress, access results, and manage account security from a workspace designed for discretion and clarity.",
+        "Assessment progress, results, and secure account management",
     },
   },
   {
     path: "/intake",
     config: {
       icon: FileText,
-      kicker: "Intake",
-      title: "Family Governance Intake Interview",
+      kicker: "Family Assessment",
+      title: "Family Governance Intake",
       subtitle:
-        "Before your assessment, we'd like to learn about your family through a brief audio interview. An advisor will review your responses.",
+        "Confidential family governance intake interview",
     },
   },
   {
     path: "/assessment",
     config: {
       icon: ClipboardCheck,
-      kicker: "Assessment Workspace",
-      title: "Family Governance Assessment",
+      kicker: "Family Assessment",
+      title: "Governance Assessment",
       subtitle:
-        "A guided evaluation of governance structure, succession planning, communication, and decision-making practices designed for families operating with institutional rigor.",
+        "Comprehensive evaluation of governance structure and family decision-making practices",
     },
   },
   {
     path: "/profiles",
     config: {
       icon: Users,
-      kicker: "Profiles & Roles",
+      kicker: "Family Structure",
       title: "Household Profiles",
       subtitle:
-        "Capture the people in your household, clarify how they participate in governance, and keep an up-to-date operating picture for the rest of the assessment workflow.",
+        "Family member profiles and governance participation roles",
     },
   },
   {
     path: "/settings",
     config: {
       icon: Settings,
-      kicker: "Account Settings",
-      title: "Security & access",
+      kicker: "Account Security",
+      title: "Security & Access",
       subtitle:
-        "Review account identity, secure your workspace with multi-factor authentication, and keep recovery access in good standing.",
+        "Account identity verification and multi-factor authentication",
     },
   },
 ];
@@ -78,30 +78,52 @@ function getHeaderConfig(pathname: string): ClientPageHeaderConfig | null {
 export function ClientPageHeader(props: ClientPageHeaderConfig) {
   const { icon: Icon, kicker, title, subtitle } = props;
   return (
-    <section className="space-y-2 sm:space-y-3">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-primary" aria-hidden />
-        <p className="editorial-kicker">{kicker}</p>
-      </div>
-      <h1 className="text-3xl font-semibold text-balance sm:text-4xl tracking-[-0.03em]">
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-          {subtitle}
+    <header role="banner" className="client-header professional-header space-y-3 sm:space-y-4">
+      <div className="flex items-center gap-3 header-section-spacing">
+        <div className="professional-icon" role="img" aria-label={`${title} section icon`}>
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <p className="professional-kicker" id="client-section-context" role="doc-subtitle">
+          {kicker}
         </p>
-      )}
-    </section>
+      </div>
+      <div className="header-section-spacing">
+        <h1
+          className="professional-title text-balance"
+          aria-describedby="client-section-context client-subtitle"
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p
+            className="professional-subtitle"
+            id="client-subtitle"
+            role="doc-subtitle"
+            aria-label={`Page description: ${subtitle}`}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </header>
   );
 }
 
 /**
- * Renders the shared client page header (icon + kicker + title + subtitle) based on current path.
+ * Enhanced client page header with professional accessibility features.
  * Returns null for non-client routes (e.g. /advisor/*). Use in protected layout so client pages get the same header style.
  */
 export function ClientPageHeaderFromPath() {
   const pathname = usePathname();
   const config = getHeaderConfig(pathname);
   if (!config) return null;
-  return <ClientPageHeader {...config} />;
+
+  return (
+    <>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+      <ClientPageHeader {...config} />
+    </>
+  );
 }

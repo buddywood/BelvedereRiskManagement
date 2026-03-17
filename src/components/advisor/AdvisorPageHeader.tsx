@@ -17,16 +17,21 @@ export interface AdvisorPageHeaderConfig {
   kicker: string;
   title: string;
   subtitle?: string;
+  metadata?: {
+    timestamp?: string;
+    userRole?: string;
+    pathname?: string;
+  };
 }
 
 const ADVISOR_HEADER_CONFIG: { path: string; config: AdvisorPageHeaderConfig }[] = [
-  { path: "/advisor", config: { icon: Users, kicker: "Client management", title: "Clients", subtitle: "Manage your clients and track their progress through the advisory workflow." } },
-  { path: "/advisor/pipeline", config: { icon: GitBranch, kicker: "Client workflow", title: "Client Pipeline", subtitle: "Track client workflow progression and manage document requirements across all stages of the advisory process." } },
-  { path: "/advisor/invitations", config: { icon: Send, kicker: "Client management", title: "Client Invitations", subtitle: "Send and manage invitations for client family governance assessments." } },
-  { path: "/advisor/dashboard", config: { icon: LayoutDashboard, kicker: "Governance Intelligence", title: "Family Governance Dashboard", subtitle: "Monitor governance scores, assess risk levels, and track assessment progress across your assigned client families from a unified intelligence dashboard." } },
-  { path: "/advisor/intelligence", config: { icon: Shield, kicker: "Governance Intelligence", title: "Risk Intelligence", subtitle: "Identify and prioritize governance risks across your portfolio. Monitor critical issues, track family risk exposure, and focus attention where it's needed most." } },
-  { path: "/advisor/notifications", config: { icon: Bell, kicker: "Notifications", title: "All Notifications", subtitle: "Stay updated on client activity and advisor alerts." } },
-  { path: "/advisor/settings", config: { icon: Settings, kicker: "Account management", title: "Settings", subtitle: "Manage branding and view your profile used in invitations." } },
+  { path: "/advisor", config: { icon: Users, kicker: "Client Portfolio", title: "Clients", subtitle: "Client portfolio management and engagement tracking" } },
+  { path: "/advisor/pipeline", config: { icon: GitBranch, kicker: "Workflow Management", title: "Client Pipeline", subtitle: "Client workflow progression and document requirements oversight" } },
+  { path: "/advisor/invitations", config: { icon: Send, kicker: "Client Engagement", title: "Client Invitations", subtitle: "Assessment invitation management and client onboarding" } },
+  { path: "/advisor/dashboard", config: { icon: LayoutDashboard, kicker: "Portfolio Intelligence", title: "Governance Dashboard", subtitle: "Comprehensive governance analytics and client family risk assessment overview" } },
+  { path: "/advisor/intelligence", config: { icon: Shield, kicker: "Risk Management", title: "Risk Intelligence", subtitle: "Portfolio risk assessment and governance vulnerability analysis" } },
+  { path: "/advisor/notifications", config: { icon: Bell, kicker: "Activity Management", title: "Notifications", subtitle: "Client activity updates and priority alerts" } },
+  { path: "/advisor/settings", config: { icon: Settings, kicker: "Professional Profile", title: "Settings", subtitle: "Professional profile and client-facing branding configuration" } },
 ];
 
 function getHeaderConfig(pathname: string): AdvisorPageHeaderConfig | null {
@@ -36,32 +41,88 @@ function getHeaderConfig(pathname: string): AdvisorPageHeaderConfig | null {
 }
 
 export function AdvisorPageHeader(props: AdvisorPageHeaderConfig) {
-  const { icon: Icon, kicker, title, subtitle } = props;
+  const { icon: Icon, kicker, title, subtitle, metadata } = props;
   return (
-    <section className="space-y-2 sm:space-y-3">
-      <div className="flex items-center gap-2">
-        <Icon className="h-5 w-5 text-primary" aria-hidden />
-        <p className="editorial-kicker">{kicker}</p>
+    <header role="banner" className="advisor-header professional-header">
+      <div className="header-icon-section">
+        <div className="professional-icon" role="img" aria-label={`${title} section icon`}>
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </div>
+        {metadata && (
+          <div className="hidden sm:block text-center mt-2">
+            <time className="professional-timestamp text-xs text-muted-foreground font-medium">
+              {metadata.timestamp}
+            </time>
+          </div>
+        )}
       </div>
-      <h1 className="text-3xl font-semibold text-balance sm:text-4xl tracking-[-0.03em]">
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
-          {subtitle}
-        </p>
-      )}
-    </section>
+      <div className="header-content">
+        <div className="flex items-center justify-between">
+          <p className="professional-kicker" id="advisor-section-context" role="doc-subtitle">
+            {kicker}
+          </p>
+          {metadata && (
+            <div className="hidden md:flex items-center gap-3">
+              <span className="header-metadata" role="status" aria-label="User role">
+                {metadata.userRole}
+              </span>
+            </div>
+          )}
+        </div>
+        <h1
+          className="professional-title text-balance"
+          aria-describedby="advisor-section-context advisor-subtitle"
+        >
+          {title}
+        </h1>
+        {subtitle && (
+          <p
+            className="professional-subtitle"
+            id="advisor-subtitle"
+            role="doc-subtitle"
+            aria-label={`Page description: ${subtitle}`}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </header>
   );
 }
 
 /**
- * Renders the shared advisor page header (icon + kicker + title + subtitle) based on current path.
- * Use in advisor layout so every advisor page gets the same header style.
+ * Enhanced advisor page header with professional metadata and accessibility features.
+ * Renders contextual information appropriate for professional advisory workflows.
  */
 export function AdvisorPageHeaderFromPath() {
   const pathname = usePathname();
   const config = getHeaderConfig(pathname);
+
   if (!config) return null;
-  return <AdvisorPageHeader {...config} />;
+
+  // Add contextual metadata for professional display
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  const enhancedConfig = {
+    ...config,
+    metadata: {
+      timestamp: currentDate,
+      userRole: 'Advisor',
+      pathname: pathname
+    }
+  };
+
+  return (
+    <>
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+      <AdvisorPageHeader {...enhancedConfig} />
+    </>
+  );
 }
