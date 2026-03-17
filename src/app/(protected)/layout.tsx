@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ProtectedNav } from "@/components/layout/ProtectedNav";
 import { ClientPageHeaderFromPath } from "@/components/layout/ClientPageHeader";
 import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncompleteIntake";
-import { BelvedereLogoLockup } from "@/components/home/BelvedereLogoLockup";
+import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
 import { prisma } from "@/lib/db";
 
 export default async function ProtectedLayout({
@@ -59,9 +59,9 @@ export default async function ProtectedLayout({
                     <Link
                       href="/"
                       className="block text-foreground -ml-10 sm:-ml-12 lg:-ml-14"
-                      aria-label="Belvedere home"
+                      aria-label="AKILI home"
                     >
-                      <BelvedereLogoLockup className="h-auto w-full max-w-[190px] lg:max-w-[220px]" />
+                      <AkiliLogoLockup className="h-auto w-full max-w-[190px] lg:max-w-[220px]" />
                     </Link>
 
                     <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
@@ -90,7 +90,7 @@ export default async function ProtectedLayout({
                   </div>
                   <div className="min-w-0 xl:max-w-[560px] xl:text-right">
                     <p className="editorial-kicker mb-1">
-                      Belvedere Risk Management
+                      AKILI Risk Intelligence
                     </p>
                     <h1 className="text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]">
                       Governance Assessment Workspace

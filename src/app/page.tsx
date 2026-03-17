@@ -3,7 +3,7 @@ import { ArrowRight, ShieldCheck, Sparkles, Waypoints } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { BelvedereLogoLockup } from "@/components/home/BelvedereLogoLockup";
+import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
 
 export default async function Home() {
   const session = await auth();
@@ -168,7 +168,7 @@ export default async function Home() {
 
           <aside className="mt-12 flex flex-col items-stretch gap-8 lg:mt-0 lg:pl-10">
             <div className="flex w-full justify-end text-foreground">
-              <BelvedereLogoLockup className="h-auto w-full max-w-[280px]" />
+              <AkiliLogoLockup className="h-auto w-full max-w-[280px]" />
             </div>
             <Card className="w-full overflow-hidden">
               <CardContent className="space-y-8 pt-8">
@@ -259,7 +259,7 @@ export default async function Home() {
           <div className="grid gap-6 sm:grid-cols-2 lg:gap-8">
             <div>
               <h3 className="text-sm font-semibold text-foreground">
-                Belvedere Governance Score
+                AKILI Governance Score
               </h3>
               <p className="mt-2 text-2xl font-semibold tabular-nums text-foreground sm:text-3xl">
                 7.2{" "}
@@ -283,7 +283,7 @@ export default async function Home() {
         </section>
 
         <p className="mt-10 text-center text-sm text-muted-foreground">
-          Built for the advisory process used by Belvedere Risk Management.
+          Built for the advisory process used by AKILI Risk Intelligence.
         </p>
       </div>
     </main>
