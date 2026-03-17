@@ -36,6 +36,9 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
 
     // Find all client advisor assignments with complete data for stage computation
     const assignments = await prisma.clientAdvisorAssignment.findMany({
+      where: {
+        status: 'ACTIVE',
+      },
       include: {
         client: {
           select: {
@@ -60,13 +63,6 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
                 lastName: true,
               },
             },
-          },
-        },
-        // Include invitation data
-        invitation: {
-          select: {
-            status: true,
-            statusUpdatedAt: true,
           },
         },
       },
@@ -114,14 +110,29 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
 
         if (!clientData) continue;
 
+        // Get invitation data if exists (separate query since it's not directly linked)
+        const invitation = await prisma.inviteCode.findFirst({
+          where: {
+            status: 'REGISTERED',
+            createdBy: assignment.advisorId,
+          },
+          orderBy: {
+            statusUpdatedAt: 'desc',
+          },
+          select: {
+            status: true,
+            statusUpdatedAt: true,
+          },
+        });
+
         // Prepare data for stage computation
         const latestIntake = clientData.intakeInterviews?.[0];
         const latestAssessment = clientData.assessments?.[0];
 
         const stageData = {
-          invitation: assignment.invitation ? {
-            status: assignment.invitation.status,
-            statusUpdatedAt: assignment.invitation.statusUpdatedAt,
+          invitation: invitation ? {
+            status: invitation.status,
+            statusUpdatedAt: invitation.statusUpdatedAt,
           } : undefined,
           intake: latestIntake ? {
             status: latestIntake.status,
@@ -152,8 +163,8 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
           lastActivity = latestAssessment.updatedAt;
         } else if (latestIntake?.updatedAt) {
           lastActivity = latestIntake.updatedAt;
-        } else if (assignment.invitation?.statusUpdatedAt) {
-          lastActivity = assignment.invitation.statusUpdatedAt;
+        } else if (invitation?.statusUpdatedAt) {
+          lastActivity = invitation.statusUpdatedAt;
         } else {
           lastActivity = assignment.assignedAt;
         }

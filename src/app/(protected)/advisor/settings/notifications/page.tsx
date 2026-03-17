@@ -40,7 +40,7 @@ export default async function NotificationSettingsPage() {
       </div>
 
       <NotificationPreferencesForm
-        preferences={result.data}
+        preferences={result.data!}
         updatePreferencesAction={updateNotificationPreferencesAction}
       />
     </div>

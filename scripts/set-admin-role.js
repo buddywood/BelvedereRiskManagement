@@ -33,7 +33,20 @@ async function main() {
     },
   });
 
+  // Ensure admin has an AdvisorProfile so they can use /advisor (clients, pipeline, etc.)
+  await prisma.advisorProfile.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: {
+      userId: user.id,
+      specializations: ["governance", "risk-assessment"],
+      firmName: "Admin",
+      bio: "Admin account with advisor portal access.",
+    },
+  });
+
   console.log("✅ Set role to ADMIN for", user.email);
+  console.log("✅ Advisor profile ensured for", user.email, "(can use /advisor).");
   console.log("   Sign out and sign in again to see the Admin nav and access /admin.");
 }
 

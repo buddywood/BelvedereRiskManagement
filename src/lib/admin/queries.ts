@@ -11,6 +11,8 @@ export async function getAdvisorsForAdmin() {
       id: true,
       email: true,
       name: true,
+      firstName: true,
+      lastName: true,
       createdAt: true,
       advisorProfile: {
         select: {
@@ -18,6 +20,9 @@ export async function getAdvisorsForAdmin() {
           firmName: true,
           licenseNumber: true,
           specializations: true,
+          phone: true,
+          jobTitle: true,
+          bio: true,
           _count: { select: { clientAssignments: true } },
         },
       },
@@ -25,6 +30,33 @@ export async function getAdvisorsForAdmin() {
     orderBy: { email: "asc" },
   });
   return advisors;
+}
+
+/** Fetch a single advisor by user id for admin edit form. */
+export async function getAdvisorForAdmin(userId: string) {
+  await requireAdminRole();
+  const user = await prisma.user.findFirst({
+    where: { id: userId, role: "ADVISOR" },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      firstName: true,
+      lastName: true,
+      advisorProfile: {
+        select: {
+          id: true,
+          firmName: true,
+          licenseNumber: true,
+          specializations: true,
+          phone: true,
+          jobTitle: true,
+          bio: true,
+        },
+      },
+    },
+  });
+  return user;
 }
 
 export async function getClientsForAdmin() {

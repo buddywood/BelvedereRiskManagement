@@ -164,7 +164,7 @@ export async function processAssessmentReminders(): Promise<ProcessResult> {
 
         // Generate email HTML using the assessment reminder template
         const emailHtml = renderNotificationEmail('reminder', {
-          clientName,
+          clientName: clientName || undefined,
           assessmentUrl,
           advisorName,
           firmName: advisorFirmName,
