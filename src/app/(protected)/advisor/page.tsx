@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { UserPlus, Send, Settings, GitBranch, Shield } from "lucide-react";
+import { UserPlus, Send, Settings, GitBranch, Shield, UserSearch } from "lucide-react";
 import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
 import { ClientCard } from "@/components/advisor/ClientCard";
 import { NotificationBell } from "@/components/advisor/NotificationBell";
@@ -118,6 +118,22 @@ export default async function AdvisorClientsPage() {
                 <h3 className="font-semibold group-hover:text-primary">Cyber Risk</h3>
                 <p className="text-sm text-muted-foreground">
                   View client cyber risk scores and assessment status
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/advisor/identity-risk" className="group">
+          <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
+            <div className="flex items-start gap-4">
+              <div className="rounded-md bg-primary/10 p-2">
+                <UserSearch className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="font-semibold group-hover:text-primary">Identity Risk</h3>
+                <p className="text-sm text-muted-foreground">
+                  Monitor client identity exposure and privacy risk scores
                 </p>
               </div>
             </div>

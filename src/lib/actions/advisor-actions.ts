@@ -456,6 +456,104 @@ export async function getCyberRiskDashboardData() {
   }
 }
 
+export async function getIdentityRiskDashboardData() {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    // Get advisor's assigned clients
+    const assignments = await prisma.clientAdvisorAssignment.findMany({
+      where: {
+        advisorId: profile.id,
+        status: 'ACTIVE',
+      },
+      include: {
+        client: {
+          include: {
+            assessments: {
+              where: {
+                status: 'COMPLETED',
+              },
+              include: {
+                scores: {
+                  where: {
+                    pillar: 'identity-risk',
+                  },
+                  orderBy: {
+                    calculatedAt: 'desc',
+                  },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Build identity risk client data
+    type IdentityRiskClient = {
+      id: string;
+      name: string | null;
+      email: string;
+      identityScore: number | null;
+      riskLevel: RiskLevel | null;
+      assessedAt: Date | null;
+    };
+
+    const clients: IdentityRiskClient[] = assignments.map(assignment => {
+      const identityAssessments = assignment.client.assessments.filter(a =>
+        a.scores.some(s => s.pillar === 'identity-risk')
+      );
+      const latestIdentityAssessment = identityAssessments[0] || null;
+      const latestIdentityScore = latestIdentityAssessment?.scores[0] || null;
+
+      return {
+        id: assignment.client.id,
+        name: assignment.client.name,
+        email: assignment.client.email,
+        identityScore: latestIdentityScore?.score || null,
+        riskLevel: latestIdentityScore?.riskLevel || null,
+        assessedAt: latestIdentityScore?.calculatedAt || null,
+      };
+    });
+
+    // Calculate metrics
+    type IdentityRiskMetrics = {
+      totalClients: number;
+      assessedClients: number;
+      averageScore: number | null;
+      clientsAtRisk: number;
+    };
+
+    const assessedClients = clients.filter(c => c.identityScore !== null);
+    const clientsAtRisk = assessedClients.filter(c =>
+      c.riskLevel === 'HIGH' || c.riskLevel === 'CRITICAL'
+    ).length;
+    const averageScore = assessedClients.length > 0
+      ? assessedClients.reduce((sum, c) => sum + c.identityScore!, 0) / assessedClients.length
+      : null;
+
+    const metrics: IdentityRiskMetrics = {
+      totalClients: clients.length,
+      assessedClients: assessedClients.length,
+      averageScore,
+      clientsAtRisk,
+    };
+
+    return {
+      success: true,
+      data: {
+        clients,
+        metrics,
+      },
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get identity risk dashboard data';
+    return { success: false, error: message };
+  }
+}
+
 export async function updateAdvisorBranding(formData: FormData) {
   try {
     const { userId } = await requireAdvisorRole();
