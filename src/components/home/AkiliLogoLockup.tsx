@@ -146,11 +146,11 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
       </text>
       {/* Professional trademark indicator - positioned right after AKILI */}
       <text
-        x="168"
+        x="152"
         y="28"
         textAnchor="start"
         fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
-        fontSize="12"
+        fontSize="10"
         fontWeight="600"
         fill="var(--trust-accent, #F59E0B)"
       >
