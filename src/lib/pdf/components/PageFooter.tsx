@@ -12,16 +12,19 @@ interface PageFooterProps {
 }
 
 export function PageFooter({ companyName }: PageFooterProps) {
-  const displayCompany = companyName || "AKILI Risk Intelligence";
+  const displayCompany = companyName || "Belvedere Risk Management";
+  const baseText = `Confidential | Generated ${generatedDate} | ${displayCompany}`;
 
   return (
-    <View style={styles.footerContainer} fixed>
+    <>
+      <Text style={styles.footerTextStatic} fixed>
+        {baseText}
+      </Text>
       <Text
-        style={styles.footerText}
-        render={({ pageNumber, totalPages }) =>
-          `Confidential - Page ${pageNumber} of ${totalPages} | Generated ${generatedDate} | ${displayCompany}`
-        }
+        style={styles.footerTextPage}
+        fixed
+        render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`}
       />
-    </View>
+    </>
   );
 }

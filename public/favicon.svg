@@ -1,0 +1,61 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      :root {
+        --brand-primary: #4EA5D9;
+        --trust-accent: #D97706;
+        --background: #ffffff;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --brand-primary: #7DD3FC;
+          --trust-accent: #F59E0B;
+          --background: #1e293b;
+        }
+      }
+
+      .brand-primary { fill: var(--brand-primary); }
+      .trust-accent { fill: var(--trust-accent); stroke: var(--trust-accent); }
+      .background { fill: var(--background); }
+    </style>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="16" cy="16" r="15" class="background" stroke="var(--brand-primary)" stroke-width="2"/>
+
+  <!-- Risk assessment radar rings -->
+  <g transform="translate(16,16)">
+    <!-- Outer ring -->
+    <polygon points="0,-10 7,-3 4,8 -4,8 -7,-3"
+             fill="none"
+             stroke="var(--brand-primary)"
+             stroke-width="1.5"
+             stroke-linejoin="round"
+             opacity="0.8"/>
+
+    <!-- Inner ring -->
+    <polygon points="0,-6 4,-2 2.5,5 -2.5,5 -4,-2"
+             fill="none"
+             stroke="var(--brand-primary)"
+             stroke-width="1.2"
+             stroke-linejoin="round"
+             opacity="0.6"/>
+
+    <!-- Risk assessment data polygon -->
+    <polygon points="0,-8 5,-2 3,6 -2,4 -5,-1"
+             fill="var(--trust-accent)"
+             fill-opacity="0.3"
+             stroke="var(--trust-accent)"
+             stroke-width="1.5"
+             stroke-linejoin="round"/>
+
+    <!-- Center point -->
+    <circle cx="0" cy="0" r="2" class="brand-primary"/>
+
+    <!-- Key risk indicator dots -->
+    <circle cx="0" cy="-8" r="1.2" class="trust-accent"/>
+    <circle cx="5" cy="-2" r="1.2" class="trust-accent"/>
+    <circle cx="3" cy="6" r="1.2" class="trust-accent"/>
+  </g>
+</svg>

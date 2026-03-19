@@ -71,12 +71,40 @@ export const styles = StyleSheet.create({
     right: 0,
     width: '100%',
     paddingHorizontal: 72,
+    alignItems: 'center',
   },
 
   footerText: {
     textAlign: 'center',
     fontSize: 9,
-    color: '#6b7280',
+    color: '#4b5563',
+  },
+
+  footerPageText: {
+    textAlign: 'center',
+    fontSize: 9,
+    marginTop: 1,
+    color: '#4b5563',
+  },
+
+  footerTextStatic: {
+    position: 'absolute',
+    bottom: 24,
+    left: 72,
+    right: 72,
+    textAlign: 'center',
+    fontSize: 9,
+    color: '#4b5563',
+  },
+
+  footerTextPage: {
+    position: 'absolute',
+    bottom: 12,
+    left: 72,
+    right: 72,
+    textAlign: 'center',
+    fontSize: 9,
+    color: '#4b5563',
   },
 
   coverTitle: {
@@ -99,14 +127,16 @@ export const styles = StyleSheet.create({
 
   scoreDisplay: {
     textAlign: 'center',
+    alignItems: 'center',
     marginVertical: 40,
   },
 
   scoreNumber: {
     fontSize: 48,
+    lineHeight: 1.1,
     fontWeight: 'bold',
     color: '#1a1a2e',
-    marginBottom: 8,
+    marginBottom: 14,
   },
 
   riskBadge: {
@@ -116,7 +146,7 @@ export const styles = StyleSheet.create({
     borderRadius: 9999,
     textAlign: 'center',
     alignSelf: 'center',
-    marginTop: 10,
+    marginTop: 0,
   },
 
   riskBadgeText: {
