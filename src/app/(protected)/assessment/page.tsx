@@ -16,6 +16,7 @@ import type { Pillar } from "@/lib/assessment/types";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { allQuestions } from "@/lib/assessment/questions";
 import { cyberRiskPillar, allCyberQuestions } from "@/lib/cyber-risk/questions";
+import { identityRiskPillar, allIdentityQuestions } from "@/lib/identity-risk/questions";
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CustomizationConfig } from "@/lib/assessment/customization";
@@ -106,6 +107,10 @@ const ASSESSMENT_PILLARS = [
   {
     pillar: cyberRiskPillar,
     questions: allCyberQuestions,
+  },
+  {
+    pillar: identityRiskPillar,
+    questions: allIdentityQuestions,
   },
 ];
 
@@ -399,7 +404,7 @@ export default function AssessmentHubPage() {
           <CardContent className="pt-6">
             <OverallProgress
               completedPillars={store.completedPillars}
-              totalPillars={2}
+              totalPillars={3}
               currentPillar={store.currentPillar || undefined}
             />
           </CardContent>
