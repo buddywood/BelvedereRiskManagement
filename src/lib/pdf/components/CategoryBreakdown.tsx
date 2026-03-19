@@ -1,5 +1,6 @@
 import { Page, Text, View } from '@react-pdf/renderer'
 import { styles } from '../styles'
+import { PageFooter } from './PageFooter'
 
 interface CategoryScore {
   name: string
@@ -10,9 +11,49 @@ interface CategoryScore {
 
 interface CategoryBreakdownProps {
   breakdown: CategoryScore[]
+  companyName?: string
 }
 
-export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
+export function CategoryBreakdown({ breakdown, companyName }: CategoryBreakdownProps) {
+  const columnStyles = {
+    row: {
+      flexDirection: 'row' as const,
+      width: '100%',
+      alignItems: 'stretch' as const,
+    },
+    categoryCol: {
+      width: '50%',
+      borderStyle: 'solid' as const,
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 8,
+    },
+    scoreCol: {
+      width: '20%',
+      borderStyle: 'solid' as const,
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 8,
+    },
+    progressCol: {
+      width: '30%',
+      borderStyle: 'solid' as const,
+      borderWidth: 1,
+      borderColor: '#e5e7eb',
+      borderLeftWidth: 0,
+      borderTopWidth: 0,
+      padding: 8,
+    },
+    headerCell: {
+      backgroundColor: '#f9fafb',
+      fontWeight: 'bold' as const,
+    },
+  }
+
   const getScoreColor = (score: number, maxScore: number) => {
     const percentage = (score / maxScore) * 100
     if (percentage >= 75) return '#10b981' // green
@@ -32,15 +73,15 @@ export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
 
       <View style={styles.table}>
         {/* Table Header */}
-        <View style={[styles.tableRow, styles.tableHeader]}>
-          <View style={[styles.tableCol, { flex: 3 }]}>
-            <Text>Category</Text>
+        <View style={columnStyles.row}>
+          <View style={[columnStyles.categoryCol, columnStyles.headerCell]}>
+            <Text style={{ fontWeight: 'bold' }}>Category</Text>
           </View>
-          <View style={[styles.tableCol, { flex: 1 }]}>
-            <Text>Score</Text>
+          <View style={[columnStyles.scoreCol, columnStyles.headerCell]}>
+            <Text style={{ fontWeight: 'bold' }}>Score</Text>
           </View>
-          <View style={[styles.tableCol, { flex: 2 }]}>
-            <Text>Progress</Text>
+          <View style={[columnStyles.progressCol, columnStyles.headerCell]}>
+            <Text style={{ fontWeight: 'bold' }}>Progress</Text>
           </View>
         </View>
 
@@ -50,8 +91,8 @@ export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
           const scoreColor = getScoreColor(category.score, category.maxScore)
 
           return (
-            <View key={index} style={styles.tableRow}>
-              <View style={[styles.tableCol, { flex: 3 }]}>
+            <View key={index} style={columnStyles.row}>
+              <View style={columnStyles.categoryCol}>
                 <Text style={{ fontWeight: 'bold', marginBottom: 2 }}>
                   {category.name}
                 </Text>
@@ -59,7 +100,7 @@ export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
                   {category.subcategoryCount} subcategories assessed
                 </Text>
               </View>
-              <View style={[styles.tableCol, { flex: 1 }]}>
+              <View style={columnStyles.scoreCol}>
                 <Text style={{ fontWeight: 'bold', color: scoreColor }}>
                   {category.score.toFixed(1)}/{category.maxScore}
                 </Text>
@@ -67,7 +108,7 @@ export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
                   ({percentage.toFixed(0)}%)
                 </Text>
               </View>
-              <View style={[styles.tableCol, { flex: 2 }]}>
+              <View style={columnStyles.progressCol}>
                 <View style={styles.progressBar}>
                   <View
                     style={[
@@ -103,6 +144,8 @@ export function CategoryBreakdown({ breakdown }: CategoryBreakdownProps) {
           where 10 indicates best-practice controls and 0 represents significant gaps.
         </Text>
       </View>
+
+      <PageFooter companyName={companyName} />
     </Page>
   )
 }

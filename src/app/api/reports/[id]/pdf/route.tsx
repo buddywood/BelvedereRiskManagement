@@ -44,6 +44,8 @@ export async function GET(
     }
 
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const requestedPillar = searchParams.get("pillar");
 
     // 2. Ownership check
     const assessment = await prisma.assessment.findUnique({
@@ -76,19 +78,28 @@ export async function GET(
       );
     }
 
-    // 3. Score check
-    const pillarScore = await prisma.pillarScore.findUnique({
-      where: {
-        assessmentId_pillar: {
-          assessmentId: id,
-          pillar: "family-governance",
-        },
-      },
-    });
+    // 3. Score check (allow explicit pillar, otherwise use most recently calculated)
+    const pillarScore = requestedPillar
+      ? await prisma.pillarScore.findUnique({
+          where: {
+            assessmentId_pillar: {
+              assessmentId: id,
+              pillar: requestedPillar,
+            },
+          },
+        })
+      : await prisma.pillarScore.findFirst({
+          where: { assessmentId: id },
+          orderBy: { calculatedAt: "desc" },
+        });
 
     if (!pillarScore) {
       return NextResponse.json(
-        { error: "Complete assessment to generate report" },
+        {
+          error: requestedPillar
+            ? `No score found for pillar: ${requestedPillar}`
+            : "Complete assessment to generate report",
+        },
         { status: 404 }
       );
     }
@@ -187,11 +198,15 @@ export async function GET(
     const firmSlug = advisorBranding?.firmName
       ? advisorBranding.firmName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
       : 'belvedere';
+    const pillarSlug = pillarScore.pillar
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
 
     return new NextResponse(pdfBuffer as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${firmSlug}-governance-report.pdf"`,
+        'Content-Disposition': `attachment; filename="${firmSlug}-${pillarSlug}-report.pdf"`,
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0',

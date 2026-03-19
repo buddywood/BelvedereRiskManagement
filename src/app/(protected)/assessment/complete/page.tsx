@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAssessmentStore } from '@/lib/assessment/store';
+import { resolveScoringPillar } from '@/lib/assessment/scoring-pillar';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -17,7 +18,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 export default function AssessmentCompletePage() {
   const router = useRouter();
-  const { assessmentId } = useAssessmentStore();
+  const { assessmentId, currentPillar } = useAssessmentStore();
   const [isCalculating, setIsCalculating] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReadyForRedirects, setIsReadyForRedirects] = useState(false);
@@ -43,8 +44,12 @@ export default function AssessmentCompletePage() {
         setIsCalculating(true);
         setError(null);
 
+        const pillar = await resolveScoringPillar(assessmentId, currentPillar);
+
         const response = await fetch(`/api/assessment/${assessmentId}/score`, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pillar }),
         });
 
         if (!response.ok) {
@@ -63,7 +68,7 @@ export default function AssessmentCompletePage() {
     };
 
     calculateScore();
-  }, [assessmentId, router, isReadyForRedirects]);
+  }, [assessmentId, currentPillar, router, isReadyForRedirects]);
 
   const handleRetry = () => {
     setError(null);

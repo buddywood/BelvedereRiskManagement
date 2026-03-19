@@ -290,6 +290,11 @@ export default function QuestionPage({ params }: QuestionPageProps) {
             currentAnswer={currentAnswer}
             onAnswer={handleAnswer}
             onSkip={!currentQuestion.required ? handleSkip : undefined}
+            questionPosition={{
+              index: questionIndex + 1,
+              total: visibleQuestions.length,
+            }}
+            moduleName={currentPillar?.name}
           />
 
           <NavigationButtons

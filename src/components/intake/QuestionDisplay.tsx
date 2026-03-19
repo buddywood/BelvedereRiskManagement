@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Lightbulb, Loader2, Square, Volume2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Lightbulb } from "lucide-react";
+import { QuestionTtsPlayButton } from "@/components/common/QuestionTtsPlayButton";
 
 /**
  * Question Display Component
@@ -25,108 +24,6 @@ interface QuestionDisplayProps {
 }
 
 export function QuestionDisplay({ question, totalQuestions }: QuestionDisplayProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const objectUrlRef = useRef<string | null>(null);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [audioReady, setAudioReady] = useState(false);
-
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-        objectUrlRef.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    if (objectUrlRef.current) {
-      URL.revokeObjectURL(objectUrlRef.current);
-      objectUrlRef.current = null;
-    }
-    setIsSpeaking(false);
-    setIsGenerating(false);
-    setAudioReady(false);
-  }, [question.id]);
-
-  const createAndPlayAudio = async (audioUrl: string) => {
-    const audio = new Audio(audioUrl);
-    audioRef.current = audio;
-
-    audio.onended = () => setIsSpeaking(false);
-    audio.onerror = () => setIsSpeaking(false);
-
-    setIsSpeaking(true);
-    await audio.play();
-  };
-
-  const handleSpeak = async () => {
-    if (audioRef.current && audioReady) {
-      audioRef.current.currentTime = 0;
-      setIsSpeaking(true);
-      await audioRef.current.play();
-      return;
-    }
-
-    setIsGenerating(true);
-
-    try {
-      const response = await fetch("/api/intake/tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          questionText: question.questionText,
-          context: question.context,
-          recordingTips: question.recordingTips,
-          questionNumber: question.questionNumber,
-          totalQuestions,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate question audio");
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-
-      if (objectUrlRef.current) {
-        URL.revokeObjectURL(objectUrlRef.current);
-      }
-      objectUrlRef.current = audioUrl;
-      setAudioReady(true);
-
-      await createAndPlayAudio(audioUrl);
-    } catch (error) {
-      console.error("Question TTS playback error:", error);
-      setIsSpeaking(false);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleStop = () => {
-    if (!audioRef.current) {
-      setIsSpeaking(false);
-      return;
-    }
-
-    audioRef.current.pause();
-    audioRef.current.currentTime = 0;
-    setIsSpeaking(false);
-  };
-
   return (
     <div className="py-8 sm:py-12 max-w-2xl mx-auto">
       {/* Question number - editorial kicker style */}
@@ -139,34 +36,16 @@ export function QuestionDisplay({ question, totalQuestions }: QuestionDisplayPro
         <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
           {question.questionText}
         </h1>
-        {isSpeaking ? (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleStop}
-            className="shrink-0"
-          >
-            <Square className="size-4" />
-            Stop
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleSpeak}
-            disabled={isGenerating}
-            className="shrink-0"
-          >
-            {isGenerating ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Volume2 className="size-4" />
-            )}
-            {isGenerating ? "Preparing Audio" : audioReady ? "Replay Question" : "Play Question"}
-          </Button>
-        )}
+        <QuestionTtsPlayButton
+          contentKey={question.id}
+          endpoint="/api/intake/tts"
+          questionText={question.questionText}
+          context={question.context}
+          recordingTips={question.recordingTips}
+          questionNumber={question.questionNumber}
+          totalQuestions={totalQuestions}
+          className="shrink-0"
+        />
       </div>
 
       {/* Context - secondary guidance */}

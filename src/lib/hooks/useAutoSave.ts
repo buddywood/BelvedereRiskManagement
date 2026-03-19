@@ -37,8 +37,9 @@ export function useAutoSave(assessmentId: string | null): UseAutoSaveReturn {
   const [debouncedAnswer] = useDebounce(pendingAnswer, 1000);
   const lastSaved = useAssessmentStore((state) => state.lastSaved);
 
-  // Mutation for saving answer
-  const mutation = useMutation({
+  // Mutation for saving answer — use `mutate` in effects, not the full `mutation` object:
+  // the object identity changes when isPending updates, which would retrigger the effect and loop POSTs.
+  const { mutate, isPending } = useMutation({
     mutationFn: async (params: SaveAnswerParams) => {
       if (!assessmentId) {
         throw new Error('No assessment ID');
@@ -71,9 +72,9 @@ export function useAutoSave(assessmentId: string | null): UseAutoSaveReturn {
   // Execute mutation when debounced answer changes
   useEffect(() => {
     if (debouncedAnswer) {
-      mutation.mutate(debouncedAnswer);
+      mutate(debouncedAnswer);
     }
-  }, [debouncedAnswer, mutation]);
+  }, [debouncedAnswer, mutate]);
 
   const saveAnswer = (params: SaveAnswerParams) => {
     // Update Zustand store immediately for optimistic UI
@@ -93,7 +94,7 @@ export function useAutoSave(assessmentId: string | null): UseAutoSaveReturn {
 
   return {
     saveAnswer,
-    isSaving: mutation.isPending,
+    isSaving: isPending,
     lastSaved,
   };
 }

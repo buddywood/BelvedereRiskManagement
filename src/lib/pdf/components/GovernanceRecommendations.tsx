@@ -1,5 +1,6 @@
 import { Page, Text, View } from '@react-pdf/renderer'
 import { styles } from '../styles'
+import { PageFooter } from './PageFooter'
 
 interface HouseholdMember {
   fullName: string
@@ -16,11 +17,13 @@ interface MissingControl {
 interface GovernanceRecommendationsProps {
   members: HouseholdMember[]
   missingControls: MissingControl[]
+  companyName?: string
 }
 
 export function GovernanceRecommendations({
   members,
   missingControls,
+  companyName,
 }: GovernanceRecommendationsProps) {
   const formatRoleName = (role: string) => {
     return role
@@ -175,6 +178,8 @@ export function GovernanceRecommendations({
           with complex governance structures and ensure legal compliance.
         </Text>
       </View>
+
+      <PageFooter companyName={companyName} />
     </Page>
   )
 }

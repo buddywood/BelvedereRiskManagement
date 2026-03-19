@@ -1,5 +1,6 @@
 import { Page, Text, View, Image } from '@react-pdf/renderer'
 import { styles } from '../styles'
+import { PageFooter } from './PageFooter'
 
 interface AdvisorBranding {
   firmName?: string
@@ -50,7 +51,7 @@ export function ReportCover({
         </Text>
 
         <Text style={styles.coverTitle}>
-          Family Governance Assessment Report
+          {"Family Governance\nAssessment Report"}
         </Text>
 
         <Text style={styles.coverSubtitle}>
@@ -65,7 +66,7 @@ export function ReportCover({
               { backgroundColor: getRiskColor(riskLevel) },
             ]}
           >
-            <Text>{riskLevel} RISK</Text>
+            <Text style={styles.riskBadgeText}>{riskLevel} RISK</Text>
           </View>
         </View>
 
@@ -87,6 +88,8 @@ export function ReportCover({
           Distribution outside the family without written consent from {advisorBranding?.firmName || "Belvedere Risk Management"} is prohibited.
         </Text>
       </View>
+
+      <PageFooter companyName={advisorBranding?.firmName} />
     </Page>
   )
 }

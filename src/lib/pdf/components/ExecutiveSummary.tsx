@@ -1,11 +1,13 @@
 import { Page, Text, View } from '@react-pdf/renderer'
 import { styles } from '../styles'
+import { PageFooter } from './PageFooter'
 
 interface ExecutiveSummaryProps {
   score: number
   riskLevel: string
   categoryCount: number
   missingControlsCount: number
+  companyName?: string
 }
 
 export function ExecutiveSummary({
@@ -13,6 +15,7 @@ export function ExecutiveSummary({
   riskLevel,
   categoryCount,
   missingControlsCount,
+  companyName,
 }: ExecutiveSummaryProps) {
   const getRiskInterpretation = (level: string) => {
     switch (level) {
@@ -89,6 +92,8 @@ export function ExecutiveSummary({
           Fundamental governance gaps threaten family harmony and wealth preservation.
         </Text>
       </View>
+
+      <PageFooter companyName={companyName} />
     </Page>
   )
 }

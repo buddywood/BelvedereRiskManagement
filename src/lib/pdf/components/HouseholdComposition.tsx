@@ -1,5 +1,6 @@
 import { Page, Text, View } from '@react-pdf/renderer'
 import { styles } from '../styles'
+import { PageFooter } from './PageFooter'
 
 interface HouseholdMember {
   fullName: string
@@ -11,9 +12,10 @@ interface HouseholdMember {
 
 interface HouseholdCompositionProps {
   members: HouseholdMember[]
+  companyName?: string
 }
 
-export function HouseholdComposition({ members }: HouseholdCompositionProps) {
+export function HouseholdComposition({ members, companyName }: HouseholdCompositionProps) {
   const formatRelationship = (relationship: string) => {
     return relationship
       .toLowerCase()
@@ -94,6 +96,8 @@ export function HouseholdComposition({ members }: HouseholdCompositionProps) {
           {members.filter((m) => m.governanceRoles.length > 0).length}
         </Text>
       </View>
+
+      <PageFooter companyName={companyName} />
     </Page>
   )
 }

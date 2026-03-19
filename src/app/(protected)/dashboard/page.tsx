@@ -265,7 +265,7 @@ export default async function DashboardPage() {
                                       </Button>
                                       <Button asChild size="lg" variant="outline">
                                         <a
-                                          href={`/api/reports/${assessment.id}/pdf`}
+                                          href={`/api/reports/${assessment.id}/pdf?pillar=${encodeURIComponent(latestScore.pillar)}`}
                                           download
                                         >
                                           Download Report

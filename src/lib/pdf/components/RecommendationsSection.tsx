@@ -1,5 +1,6 @@
 import { Page, Text, View } from '@react-pdf/renderer'
 import { styles } from '../styles'
+import { PageFooter } from './PageFooter'
 
 interface MissingControl {
   category: string
@@ -11,9 +12,10 @@ interface MissingControl {
 
 interface RecommendationsSectionProps {
   missingControls: MissingControl[]
+  companyName?: string
 }
 
-export function RecommendationsSection({ missingControls }: RecommendationsSectionProps) {
+export function RecommendationsSection({ missingControls, companyName }: RecommendationsSectionProps) {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high':
@@ -66,6 +68,8 @@ export function RecommendationsSection({ missingControls }: RecommendationsSecti
             • Engage family members in ongoing governance education
           </Text>
         </View>
+
+        <PageFooter companyName={companyName} />
       </Page>
     )
   }
@@ -136,6 +140,8 @@ export function RecommendationsSection({ missingControls }: RecommendationsSecti
           Best practice enhancements that provide additional governance sophistication.
         </Text>
       </View>
+
+      <PageFooter companyName={companyName} />
     </Page>
   )
 }

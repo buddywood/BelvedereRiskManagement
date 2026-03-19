@@ -75,10 +75,13 @@ export const styles = StyleSheet.create({
   },
 
   coverTitle: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#1a1a2e',
     textAlign: 'center',
+    lineHeight: 1.2,
+    maxWidth: 460,
+    alignSelf: 'center',
     marginBottom: 40,
   },
 
@@ -98,16 +101,24 @@ export const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: 'bold',
     color: '#1a1a2e',
+    marginBottom: 8,
   },
 
   riskBadge: {
     backgroundColor: '#dc2626',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 9999,
+    textAlign: 'center',
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+
+  riskBadgeText: {
     color: 'white',
-    padding: '8 16',
     fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 10,
   },
 
   progressBar: {

@@ -10,6 +10,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAssessmentStore } from "@/lib/assessment/store";
+import { resolveScoringPillar } from "@/lib/assessment/scoring-pillar";
 import { ScoreDisplay } from "@/components/assessment/ScoreDisplay";
 import { RiskDrivers } from "@/components/assessment/RiskDrivers";
 import { ActionPlan } from "@/components/assessment/ActionPlan";
@@ -50,6 +51,8 @@ export default function AssessmentResultsPage() {
   const router = useRouter();
   const { assessmentId, markPillarComplete, currentPillar, completedPillars } = useAssessmentStore();
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
+  /** Pillar we actually loaded/scored (may differ from `currentPillar` if store was stale). */
+  const [resultsPillar, setResultsPillar] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReadyForRedirects, setIsReadyForRedirects] = useState(false);
@@ -70,12 +73,11 @@ export default function AssessmentResultsPage() {
         return;
       }
 
-      // Determine which pillar was just completed
-      const targetPillar = currentPillar || "family-governance";
-
       try {
         setIsLoading(true);
         setError(null);
+
+        const targetPillar = await resolveScoringPillar(assessmentId, currentPillar);
 
         // Try to fetch existing score for the current pillar
         let response = await fetch(`/api/assessment/${assessmentId}/score?pillar=${targetPillar}`);
@@ -98,6 +100,7 @@ export default function AssessmentResultsPage() {
         }
 
         const data = await response.json();
+        setResultsPillar(targetPillar);
         setScoreData(data);
 
         // Mark pillar as complete in store
@@ -172,7 +175,7 @@ export default function AssessmentResultsPage() {
   const answeredPercentage = (answeredCount / totalQuestions) * 100;
 
   // Determine pillar display info
-  const targetPillar = currentPillar || "family-governance";
+  const targetPillar = resultsPillar ?? currentPillar ?? "family-governance";
   const pillarDisplayName = targetPillar === "cyber-risk" ? "Cyber Risk" :
                             targetPillar === "identity-risk" ? "Identity Risk" : "Family Governance";
   const pillarDescription = targetPillar === "cyber-risk" ?

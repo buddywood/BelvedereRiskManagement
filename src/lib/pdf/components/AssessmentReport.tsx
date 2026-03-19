@@ -1,72 +1,71 @@
-import { Document, Page, Text, View } from '@react-pdf/renderer'
-import { styles } from '../styles'
-import { ReportCover } from './ReportCover'
-import { ExecutiveSummary } from './ExecutiveSummary'
-import { CategoryBreakdown } from './CategoryBreakdown'
-import { RecommendationsSection } from './RecommendationsSection'
-import { HouseholdComposition } from './HouseholdComposition'
-import { GovernanceRecommendations } from './GovernanceRecommendations'
+import { Document } from "@react-pdf/renderer";
+import { ReportCover } from "./ReportCover";
+import { ExecutiveSummary } from "./ExecutiveSummary";
+import { CategoryBreakdown } from "./CategoryBreakdown";
+import { RecommendationsSection } from "./RecommendationsSection";
+import { HouseholdComposition } from "./HouseholdComposition";
+import { GovernanceRecommendations } from "./GovernanceRecommendations";
 
 interface CategoryScore {
-  name: string
-  score: number
-  maxScore: number
-  subcategoryCount: number
+  name: string;
+  score: number;
+  maxScore: number;
+  subcategoryCount: number;
 }
 
 interface MissingControl {
-  category: string
-  subcategory: string
-  description: string
-  recommendation: string
-  severity: 'high' | 'medium' | 'low'
+  category: string;
+  subcategory: string;
+  description: string;
+  recommendation: string;
+  severity: "high" | "medium" | "low";
 }
 
 interface AssessmentReportData {
-  score: number
-  riskLevel: string
-  breakdown: CategoryScore[]
-  missingControls: MissingControl[]
-  assessmentDate: string
-  completionPercentage: number
-  categoryCount: number
-  missingControlsCount: number
+  score: number;
+  riskLevel: string;
+  breakdown: CategoryScore[];
+  missingControls: MissingControl[];
+  assessmentDate: string;
+  completionPercentage: number;
+  categoryCount: number;
+  missingControlsCount: number;
 }
 
 interface HouseholdProfile {
   members: Array<{
-    fullName: string
-    relationship: string
-    age: number | null
-    governanceRoles: string[]
-    isResident: boolean
-  }>
+    fullName: string;
+    relationship: string;
+    age: number | null;
+    governanceRoles: string[];
+    isResident: boolean;
+  }>;
 }
 
 interface AdvisorBranding {
-  firmName?: string
-  logoUrl?: string
+  firmName?: string;
+  logoUrl?: string;
 }
 
 interface AssessmentReportProps {
-  data: AssessmentReportData
-  householdProfile?: HouseholdProfile
-  advisorBranding?: AdvisorBranding
+  data: AssessmentReportData;
+  householdProfile?: HouseholdProfile;
+  advisorBranding?: AdvisorBranding;
 }
 
-export function AssessmentReport({ data, householdProfile, advisorBranding }: AssessmentReportProps) {
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+export function AssessmentReport({
+  data,
+  householdProfile,
+  advisorBranding,
+}: AssessmentReportProps) {
+  const companyName = advisorBranding?.firmName || "Belvedere Risk Management";
 
   return (
     <Document
       title="Family Governance Assessment Report"
-      author={advisorBranding?.firmName || "Belvedere Risk Management"}
+      author={advisorBranding?.firmName || "AKILI Risk Intelligence"}
       subject="Confidential Governance Assessment"
-      creator="Belvedere Assessment Platform"
+      creator="AKILI Assessment Platform"
     >
       {/* Page 1: Cover */}
       <ReportCover
@@ -83,34 +82,35 @@ export function AssessmentReport({ data, householdProfile, advisorBranding }: As
         riskLevel={data.riskLevel}
         categoryCount={data.categoryCount}
         missingControlsCount={data.missingControlsCount}
+        companyName={companyName}
       />
 
       {/* Page 3: Household Composition (if household profile exists) */}
       {householdProfile && householdProfile.members.length > 0 && (
-        <HouseholdComposition members={householdProfile.members} />
+        <HouseholdComposition
+          members={householdProfile.members}
+          companyName={companyName}
+        />
       )}
 
       {/* Page 4: Category Breakdown */}
-      <CategoryBreakdown breakdown={data.breakdown} />
+      <CategoryBreakdown breakdown={data.breakdown} companyName={companyName} />
 
       {/* Page 5+: Recommendations */}
-      <RecommendationsSection missingControls={data.missingControls} />
+      <RecommendationsSection
+        missingControls={data.missingControls}
+        companyName={companyName}
+      />
 
       {/* Page 6+: Governance Recommendations (if household profile has governance roles) */}
-      {householdProfile && householdProfile.members.some(m => m.governanceRoles.length > 0) && (
-        <GovernanceRecommendations members={householdProfile.members} missingControls={data.missingControls} />
-      )}
-
-      {/* Footer on all pages */}
-      {[...Array(4)].map((_, pageIndex) => (
-        <Page key={`footer-${pageIndex}`} size="A4" style={{ position: 'absolute' }}>
-          <View style={styles.footer}>
-            <Text>
-              Confidential - Page {pageIndex + 1} | Generated {currentDate} | {advisorBranding?.firmName || "Belvedere Risk Management"}
-            </Text>
-          </View>
-        </Page>
-      ))}
+      {householdProfile &&
+        householdProfile.members.some((m) => m.governanceRoles.length > 0) && (
+          <GovernanceRecommendations
+            members={householdProfile.members}
+            missingControls={data.missingControls}
+            companyName={companyName}
+          />
+        )}
     </Document>
-  )
+  );
 }

@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { QuestionTtsPlayButton } from "@/components/common/QuestionTtsPlayButton";
 
 /**
  * QuestionCard Component
@@ -30,6 +31,10 @@ interface QuestionCardProps {
   currentAnswer: unknown;
   onAnswer: (answer: unknown) => void;
   onSkip?: () => void;
+  /** 1-based index and total for TTS (“Question 3 of 12”). */
+  questionPosition: { index: number; total: number };
+  /** Pillar / module label read before the question (e.g. “Cyber Risk”). */
+  moduleName?: string;
 }
 
 export function QuestionCard({
@@ -38,6 +43,8 @@ export function QuestionCard({
   currentAnswer,
   onAnswer,
   onSkip,
+  questionPosition,
+  moduleName,
 }: QuestionCardProps) {
   // Create dynamic validation schema based on question
   const createSchema = () => {
@@ -174,9 +181,22 @@ export function QuestionCard({
           <p className="editorial-kicker">
             {question.required ? "Required Question" : "Optional Question"}
           </p>
-          <h2 className="text-2xl font-semibold leading-tight text-balance text-foreground sm:text-4xl">
-            {personalizedText || question.text}
-          </h2>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <h2 className="text-2xl font-semibold leading-tight text-balance text-foreground sm:text-4xl">
+              {personalizedText || question.text}
+            </h2>
+            <QuestionTtsPlayButton
+              contentKey={question.id}
+              endpoint="/api/assessment/tts"
+              moduleName={moduleName}
+              questionText={personalizedText || question.text}
+              context={question.helpText}
+              learnMore={question.learnMore}
+              questionNumber={questionPosition.index}
+              totalQuestions={questionPosition.total}
+              className="shrink-0"
+            />
+          </div>
         </div>
 
         {question.subCategory ? (
