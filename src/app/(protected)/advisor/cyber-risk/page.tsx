@@ -158,13 +158,15 @@ async function CyberRiskContent() {
                       {client.riskLevel ? (
                         <Badge
                           variant={
-                            client.riskLevel === 'CRITICAL' ? 'destructive' :
-                            client.riskLevel === 'HIGH' ? 'default' :
+                            client.riskLevel === 'CRITICAL' ? 'warning' :
+                            client.riskLevel === 'HIGH' ? 'warning' :
                             client.riskLevel === 'MEDIUM' ? 'secondary' :
-                            'outline'
+                            'success'
                           }
                           className={
-                            client.riskLevel === 'HIGH'
+                            client.riskLevel === 'CRITICAL'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                              : client.riskLevel === 'HIGH'
                               ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
                               : ''
                           }
