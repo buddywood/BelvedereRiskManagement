@@ -8,12 +8,16 @@ A complete governance intelligence platform for wealth advisors managing multipl
 
 Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
 
-## Current Milestone: Next Milestone Planning
+## Current Milestone: v1.5 Cyber Risk Intelligence
 
-**Status:** v1.4 Advisor Workflow Pipeline completed 2026-03-19
+**Goal:** Expand beyond family governance into comprehensive family risk intelligence by adding cyber risk as a distinct, independently-scored pillar that feeds into a unified risk profile.
 
-**Planning next milestone focused on:**
-- TBD - requires requirements gathering
+**Target features:**
+- Independent cyber risk assessment with scoring algorithm
+- Identity risk insights and financial cyber security evaluation
+- Automated cyber risk recommendations and advisor-guided action plans
+- Unified family risk profile combining governance and cyber through weighted composite model
+- Platform shows individual pillar scores and highlights risk domain interactions
 
 ## Requirements
 
@@ -50,7 +54,15 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 
 ### Active
 
-<!-- Next milestone scope. Will be defined during new milestone planning. -->
+<!-- v1.5 Cyber Risk Intelligence scope. Building toward these. -->
+
+- [ ] Independent cyber risk assessment with scoring algorithm
+- [ ] Identity risk insights and digital footprint analysis
+- [ ] Financial cyber security practices evaluation
+- [ ] Automated cyber risk recommendations system
+- [ ] Advisor-guided cyber risk action plans
+- [ ] Unified family risk profile with weighted composite scoring
+- [ ] Risk domain interaction and compounding analysis
 
 ### Out of Scope
 
@@ -129,4 +141,4 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - **Scope**: Family Governance pillar only — validated as sufficient for governance intelligence platform
 
 ---
-*Last updated: 2026-03-19 after v1.4 milestone completion*
+*Last updated: 2026-03-19 after v1.5 milestone start*

@@ -1,23 +1,23 @@
 # Project State
 
-**Last Updated:** 2026-03-16
+**Last Updated:** 2026-03-19
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-03-15)
 
 **Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
-**Current focus:** v1.4 Advisor Workflow Pipeline
+**Current focus:** v1.5 Cyber Risk Intelligence
 
 ## Current Position
 
-**Milestone:** v1.4 Advisor Workflow Pipeline
-**Phase:** Phase 18 - Intelligent Notifications
-**Plan:** Plan 03 complete (3/3)
-**Status:** v1.4 milestone complete
-**Progress:** [██████████] 98%
+**Milestone:** v1.5 Cyber Risk Intelligence
+**Phase:** Not started (defining requirements)
+**Plan:** —
+**Status:** Defining requirements for cyber risk pillar
+**Progress:** [░░░░░░░░░░] 0%
 
-**Last activity:** 2026-03-16 — Completed Plan 018-03 (scheduled reminder system)
+**Last activity:** 2026-03-19 — Started v1.5 milestone with cyber risk intelligence goals
 
 ## Performance Metrics
 
