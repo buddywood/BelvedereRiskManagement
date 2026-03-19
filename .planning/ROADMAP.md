@@ -33,8 +33,14 @@ Plans:
 ### Phase 20: Identity Risk Intelligence
 **Dependencies:** Phase 19 (cyber risk foundation)
 **Requirements:** IDENTITY-01, IDENTITY-02
+**Plans:** 3 plans
 
 **Goal:** Enable comprehensive identity exposure monitoring and analysis
+
+Plans:
+- [ ] 20-01-PLAN.md -- Identity risk question bank, types, and scoring wrapper
+- [ ] 20-02-PLAN.md -- Assessment UI integration for identity risk pillar
+- [ ] 20-03-PLAN.md -- AI recommendations engine and advisor identity risk dashboard
 
 **Success Criteria:**
 1. System analyzes family member social media exposure and assigns risk scores
@@ -71,7 +77,7 @@ Plans:
 | Phase | Status | Plans | Tasks | Completion |
 |-------|--------|-------|-------|------------|
 | 19 - Cyber Foundation | Planned | 0/3 | 0/7 | ░░░░░░░░░░ 0% |
-| 20 - Identity Intelligence | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
+| 20 - Identity Intelligence | Planned | 0/3 | 0/6 | ░░░░░░░░░░ 0% |
 | 21 - Unified Intelligence | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
 | 22 - Advanced Reporting | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
 
