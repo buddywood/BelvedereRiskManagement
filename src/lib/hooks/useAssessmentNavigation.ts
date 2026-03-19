@@ -38,6 +38,7 @@ export interface UseAssessmentNavigationReturn {
 
 export interface UseAssessmentNavigationOptions {
   visibleSubCategories?: string[];
+  questions?: Question[];
 }
 
 export function useAssessmentNavigation(
@@ -48,8 +49,9 @@ export function useAssessmentNavigation(
   const router = useRouter();
   const { answers, setCurrentPosition, householdProfile } = useAssessmentStore();
 
-  // Filter questions for current pillar
-  const pillarQuestions = allQuestions.filter((q) => q.pillar === pillarSlug);
+  // Use provided questions or default to allQuestions, then filter for current pillar
+  const questionSet = options?.questions || allQuestions;
+  const pillarQuestions = questionSet.filter((q) => q.pillar === pillarSlug);
 
   // Apply subcategory filtering first (for customization)
   const subcategoryFiltered = options?.visibleSubCategories?.length
@@ -72,7 +74,7 @@ export function useAssessmentNavigation(
     }
 
     return detectBranchingChanges(previousAnswers, answers, subcategoryFiltered, householdProfile);
-  }, [answers, pillarQuestions]);
+  }, [answers, subcategoryFiltered]);
 
   // Update previous answers ref after change detection
   useEffect(() => {

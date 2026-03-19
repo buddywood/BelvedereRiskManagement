@@ -13,12 +13,15 @@ import { SectionProgress } from '@/components/assessment/ProgressBar';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import type { CustomizationConfig } from '@/lib/assessment/customization';
+import { allQuestions } from '@/lib/assessment/questions';
+import { allCyberQuestions, cyberRiskPillar } from '@/lib/cyber-risk/questions';
+import { Question, Pillar } from '@/lib/assessment/types';
 
 /**
  * Dynamic Question Route Page
  *
  * One-question-per-screen assessment flow.
- * URL pattern: /assessment/family-governance/0
+ * URL pattern: /assessment/{pillar-slug}/{question-index}
  *
  * Handles:
  * - Question display with answer options
@@ -26,7 +29,35 @@ import type { CustomizationConfig } from '@/lib/assessment/customization';
  * - Navigation with branching logic
  * - Progress tracking
  * - Validation
+ * - Multi-pillar support (governance and cyber-risk)
  */
+
+/**
+ * Helper function to get questions and pillar info for a given pillar slug
+ */
+function getQuestionsForPillar(pillarSlug: string): { questions: Question[]; pillar: Pillar | null } {
+  switch (pillarSlug) {
+    case 'family-governance':
+      return {
+        questions: allQuestions,
+        pillar: {
+          id: "family-governance",
+          name: "Family Governance",
+          slug: "family-governance",
+          description: "Evaluate your family's governance structures, decision-making processes, and succession planning.",
+          estimatedMinutes: 25,
+          subCategories: [],
+        }
+      };
+    case 'cyber-risk':
+      return {
+        questions: allCyberQuestions,
+        pillar: cyberRiskPillar
+      };
+    default:
+      return { questions: [], pillar: null };
+  }
+}
 
 interface QuestionPageProps {
   params: Promise<{
@@ -47,7 +78,10 @@ export default function QuestionPage({ params }: QuestionPageProps) {
   // Household profile for personalization
   const { profile } = useHouseholdProfile();
 
-  // Fetch customization configuration
+  // Get questions and pillar info for current pillar
+  const { questions: pillarQuestions, pillar: currentPillar } = getQuestionsForPillar(pillarSlug);
+
+  // Fetch customization configuration (only applicable to family-governance pillar)
   const { data: customizationConfig, isLoading: customizationLoading } = useQuery<CustomizationConfig>({
     queryKey: ['assessment-customization'],
     queryFn: async () => {
@@ -60,14 +94,17 @@ export default function QuestionPage({ params }: QuestionPageProps) {
       return response.json();
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: pillarSlug === 'family-governance', // Only fetch for governance pillar
   });
 
-  // Extract visible subcategories for navigation filtering
-  const visibleSubCategories = customizationConfig?.isCustomized && customizationConfig.visibleSubCategories.length > 0
+  // Extract visible subcategories for navigation filtering (governance only)
+  const visibleSubCategories = pillarSlug === 'family-governance' &&
+    customizationConfig?.isCustomized &&
+    customizationConfig.visibleSubCategories.length > 0
     ? customizationConfig.visibleSubCategories
     : undefined;
 
-  // Navigation logic (with customization filtering)
+  // Navigation logic (with customization filtering and pillar-specific questions)
   const {
     currentQuestion,
     goNext,
@@ -77,7 +114,10 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     progress,
     visibleQuestions,
     branchingChange,
-  } = useAssessmentNavigation(pillarSlug, questionIndex, { visibleSubCategories });
+  } = useAssessmentNavigation(pillarSlug, questionIndex, {
+    visibleSubCategories,
+    questions: pillarQuestions
+  });
 
   // Store profile in zustand on load
   useEffect(() => {
@@ -106,8 +146,8 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     }
   }, [questionIndex, visibleQuestions.length, pillarSlug, router]);
 
-  // Show loading while customization config is being fetched
-  if (customizationLoading) {
+  // Show loading while customization config is being fetched (governance only)
+  if (pillarSlug === 'family-governance' && customizationLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -196,7 +236,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
           <SectionProgress
             answeredCount={progress.answered}
             totalCount={progress.total}
-            pillarName="Family Governance"
+            pillarName={currentPillar?.name || 'Assessment'}
           />
 
           <div className="flex flex-wrap gap-2 sm:hidden">

@@ -5,7 +5,9 @@ import { Prisma, RiskLevel as PrismaRiskLevel } from "@prisma/client";
 import { calculatePillarScore, calculateCustomizedPillarScore } from "@/lib/assessment/scoring";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
-import { Question } from "@/lib/assessment/types";
+import { cyberRiskPillar, cyberRiskQuestions } from "@/lib/cyber-risk/questions";
+import { calculateCyberRiskScore } from "@/lib/cyber-risk/scoring";
+import { Question, Pillar } from "@/lib/assessment/types";
 import {
   getCustomizationConfig,
   getEmphasisMultipliers,
@@ -39,6 +41,20 @@ function mapRiskLevelToPrisma(riskLevel: string): PrismaRiskLevel {
 }
 
 /**
+ * Helper function to get pillar configuration and questions
+ */
+function getPillarConfig(pillar: string): { pillarData: Pillar; questions: Question[] } | null {
+  switch (pillar) {
+    case 'family-governance':
+      return { pillarData: familyGovernancePillar, questions: allQuestions };
+    case 'cyber-risk':
+      return { pillarData: cyberRiskPillar, questions: cyberRiskQuestions };
+    default:
+      return null;
+  }
+}
+
+/**
  * GET /api/assessment/[id]/score
  * Retrieve cached score data for an assessment
  */
@@ -57,6 +73,8 @@ export async function GET(
     }
 
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const pillar = searchParams.get('pillar') || 'family-governance';
 
     // Verify ownership
     const assessment = await prisma.assessment.findUnique({
@@ -83,7 +101,7 @@ export async function GET(
       where: {
         assessmentId_pillar: {
           assessmentId: id,
-          pillar: "family-governance",
+          pillar: pillar,
         },
       },
     });
@@ -130,6 +148,8 @@ export async function POST(
     }
 
     const { id } = await params;
+    const body = await request.json().catch(() => ({}));
+    const pillar = body.pillar || 'family-governance';
 
     // Verify ownership
     const assessment = await prisma.assessment.findUnique({
@@ -151,10 +171,20 @@ export async function POST(
       );
     }
 
-    // Load all responses
+    // Get pillar configuration
+    const pillarConfig = getPillarConfig(pillar);
+    if (!pillarConfig) {
+      return NextResponse.json(
+        { error: `Unsupported pillar: ${pillar}` },
+        { status: 400 }
+      );
+    }
+
+    // Load all responses for this pillar
     const responses = await prisma.assessmentResponse.findMany({
       where: {
         assessmentId: id,
+        pillar: pillar,
         skipped: false, // Exclude skipped questions
       },
     });
@@ -165,10 +195,10 @@ export async function POST(
       answers[response.questionId] = response.answer;
     });
 
-    // Check for customization from linked approval
+    // Check for customization from linked approval (governance pillar only)
     let customizationConfig = null;
     let customizationMetadata = null;
-    if (assessment.approvalId) {
+    if (pillar === 'family-governance' && assessment.approvalId) {
       const approval = await prisma.intakeApproval.findUnique({
         where: { id: assessment.approvalId },
         select: { focusAreas: true },
@@ -187,12 +217,12 @@ export async function POST(
     let visibleQuestions: Question[];
     let visibleIds: string[];
     if (customizationConfig) {
-      // Use customization to filter questions by subcategory
-      visibleIds = getVisibleQuestionIds(customizationConfig.visibleSubCategories, allQuestions);
-      visibleQuestions = allQuestions.filter(q => visibleIds.includes(q.id));
+      // Use customization to filter questions by subcategory (governance only)
+      visibleIds = getVisibleQuestionIds(customizationConfig.visibleSubCategories, pillarConfig.questions);
+      visibleQuestions = pillarConfig.questions.filter(q => visibleIds.includes(q.id));
     } else {
       // Standard branching logic
-      visibleQuestions = getVisibleQuestions(answers, allQuestions);
+      visibleQuestions = getVisibleQuestions(answers, pillarConfig.questions);
       visibleIds = visibleQuestions.map(q => q.id);
     }
 
@@ -212,20 +242,25 @@ export async function POST(
 
     // Calculate pillar score - customized or standard
     let scoreResult;
-    if (customizationConfig) {
+    if (pillar === 'cyber-risk') {
+      // Use cyber risk scoring wrapper
+      scoreResult = calculateCyberRiskScore(answers, visibleIds);
+    } else if (customizationConfig) {
+      // Use customization for governance pillar
       const emphasisMultipliers = getEmphasisMultipliers(customizationConfig);
       scoreResult = calculateCustomizedPillarScore(
         answers,
-        familyGovernancePillar,
-        allQuestions,
+        pillarConfig.pillarData,
+        pillarConfig.questions,
         visibleIds,
         emphasisMultipliers
       );
     } else {
+      // Standard scoring
       scoreResult = calculatePillarScore(
         answers,
-        familyGovernancePillar,
-        allQuestions,
+        pillarConfig.pillarData,
+        pillarConfig.questions,
         visibleIds
       );
     }
@@ -239,12 +274,12 @@ export async function POST(
         where: {
           assessmentId_pillar: {
             assessmentId: id,
-            pillar: "family-governance",
+            pillar: pillar,
           },
         },
         create: {
           assessmentId: id,
-          pillar: "family-governance",
+          pillar: pillar,
           score: scoreResult.score,
           riskLevel: prismaRiskLevel,
           breakdown: scoreResult.breakdown as unknown as Prisma.InputJsonValue,
@@ -258,6 +293,8 @@ export async function POST(
           calculatedAt: new Date(),
         },
       }),
+      // Only update assessment to COMPLETED if both pillars are complete
+      // For now, keep existing behavior for backwards compatibility
       prisma.assessment.update({
         where: { id },
         data: {
