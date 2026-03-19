@@ -1,91 +1,84 @@
-# Roadmap: Belvedere Risk Management
+# Roadmap: v1.5 Cyber Risk Intelligence
 
-## Milestones
+**Goal:** Expand beyond family governance into comprehensive family risk intelligence by adding cyber risk as a distinct, independently-scored pillar that feeds into a unified risk profile.
 
-- ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-02-20)
-- ✅ **v1.1 Household Profiles** — Phases 5-7 (shipped 2026-02-21)
-- ✅ **v1.2 Audio Interview Foundation** — Phases 8-10 (shipped 2026-03-14)
-- ✅ **v1.3 Governance Intelligence** — Phases 11-14 (shipped 2026-03-15)
-- ✅ **v1.4 Advisor Workflow Pipeline** — Phases 15-18 (shipped 2026-03-19)
+**Phases:** 4
+**Depth:** Quick
+**Coverage:** 9/9 requirements mapped ✓
 
-## Phases
+## Overview
 
-<details>
-<summary>✅ v1.0 MVP (Phases 1-4) — SHIPPED 2026-02-20</summary>
+Builds cyber risk assessment capabilities as parallel pillar alongside existing governance system. Maintains strict domain separation while enabling unified family risk profiles that give advisors holistic visibility into both governance and cyber security posture.
 
-- [x] Phase 1: Authentication Security (3/3 plans) — completed 2026-02-18
-- [x] Phase 2: Assessment Engine Core Scoring (6/6 plans) — completed 2026-02-19
-- [x] Phase 3: Branching Logic (2/2 plans) — completed 2026-02-19
-- [x] Phase 4: Reports Templates (3/3 plans) — completed 2026-02-20
+## Phase Structure
 
-</details>
+### Phase 19: Cyber Risk Foundation
+**Dependencies:** None (builds on existing v1.4 platform)
+**Requirements:** CYBER-01, CYBER-02, FINANCE-01, FINANCE-02
 
-<details>
-<summary>✅ v1.1 Household Profiles (Phases 5-7) — SHIPPED 2026-02-21</summary>
+**Goal:** Establish independent cyber risk assessment with financial security evaluation
 
-- [x] Phase 5: Profile Foundation (2/2 plans) — completed 2026-02-21
-- [x] Phase 6: Assessment Integration (2/2 plans) — completed 2026-02-21
-- [x] Phase 7: Household Reporting (2/2 plans) — completed 2026-02-21
+**Success Criteria:**
+1. Family can complete cyber risk assessment with numerical scoring (0-10 scale matching governance)
+2. System generates automated cyber risk recommendations based on assessment results
+3. Advisor can view client cyber risk scores in separate portal section
+4. Assessment evaluates banking security practices and payment method risks with actionable feedback
 
-</details>
+### Phase 20: Identity Risk Intelligence
+**Dependencies:** Phase 19 (cyber risk foundation)
+**Requirements:** IDENTITY-01, IDENTITY-02
 
-<details>
-<summary>✅ v1.2 Audio Interview Foundation (Phases 8-10) — SHIPPED 2026-03-14</summary>
+**Goal:** Enable comprehensive identity exposure monitoring and analysis
 
-- [x] Phase 8: Audio Interview Foundation (6/6 plans) — completed 2026-03-13
-- [x] Phase 9: Advisor Portal Access (6/6 plans) — completed 2026-03-14
-- [x] Phase 10: Assessment Customization (4/4 plans) — completed 2026-03-14
+**Success Criteria:**
+1. System analyzes family member social media exposure and assigns risk scores
+2. Family receives public information visibility assessment with privacy recommendations
+3. Advisor dashboard displays identity risk metrics alongside existing governance analytics
+4. Platform identifies specific identity exposure gaps and generates remediation steps
 
-</details>
+### Phase 21: Unified Risk Intelligence
+**Dependencies:** Phase 20 (identity assessment complete)
+**Requirements:** UNIFIED-01, UNIFIED-02
 
-<details>
-<summary>✅ v1.3 Governance Intelligence (Phases 11-14) — SHIPPED 2026-03-15</summary>
+**Goal:** Combine governance and cyber risk into holistic family risk profiles
 
-- [x] Phase 11: Dashboard Foundation (3/3 plans) — completed 2026-03-14
-- [x] Phase 12: Analytics Engine (2/2 plans) — completed 2026-03-14
-- [x] Phase 13: Intelligence Features (3/3 plans) — completed 2026-03-15
-- [x] Phase 14: Family Dashboard (2/2 plans) — completed 2026-03-15
+**Success Criteria:**
+1. Advisor dashboard shows combined risk profile with weighted composite scoring (governance + cyber)
+2. Platform displays individual pillar scores and highlights risk domain interactions
+3. Family dashboard shows unified risk view with both governance and cyber metrics
+4. Advisor can create action plans that address both governance and cyber risk domains
 
-</details>
+### Phase 22: Advanced Reporting
+**Dependencies:** Phase 21 (unified scoring complete)
+**Requirements:** REPORT-01
 
-<details>
-<summary>✅ v1.4 Advisor Workflow Pipeline (Phases 15-18) — SHIPPED 2026-03-19</summary>
+**Goal:** Deliver comprehensive risk reporting with client-friendly cyber insights
 
-- [x] Phase 15: Secure Client Invitations (4/4 plans) — completed 2026-03-15
-- [x] Phase 16: Client Status Pipeline (3/3 plans) — completed 2026-03-15
-- [x] Phase 17: Document Collection System (4/4 plans) — completed 2026-03-16
-- [x] Phase 18: Intelligent Notifications (3/3 plans) — completed 2026-03-16
+**Success Criteria:**
+1. Advisor can generate unified risk reports combining governance and cyber risk insights
+2. PDF reports include client-friendly cyber risk explanations and action steps
+3. Reports show risk domain interactions and compounding effects
+4. Automated report generation maintains existing branded template system
 
-Full details: [milestones/v1.4-ROADMAP.md](milestones/v1.4-ROADMAP.md)
+## Progress Tracking
 
-</details>
+| Phase | Status | Plans | Tasks | Completion |
+|-------|--------|-------|-------|------------|
+| 19 - Cyber Foundation | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
+| 20 - Identity Intelligence | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
+| 21 - Unified Intelligence | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
+| 22 - Advanced Reporting | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
 
-### 🚧 Next Milestone (Planning Phase)
+**Overall:** ░░░░░░░░░░ 0% (0/4 phases complete)
 
-Ready to plan next milestone with `/gsd:new-milestone`
+## Architecture Notes
 
-## Progress
+**Domain Separation:** Cyber risk runs as parallel pillar to governance, preventing data model contamination while enabling unified views through materialized scoring.
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Authentication Security | v1.0 | 3/3 | Complete | 2026-02-18 |
-| 2. Assessment Engine Core Scoring | v1.0 | 6/6 | Complete | 2026-02-19 |
-| 3. Branching Logic | v1.0 | 2/2 | Complete | 2026-02-19 |
-| 4. Reports Templates | v1.0 | 3/3 | Complete | 2026-02-20 |
-| 5. Profile Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 6. Assessment Integration | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 7. Household Reporting | v1.1 | 2/2 | Complete | 2026-02-21 |
-| 8. Audio Interview Foundation | v1.2 | 6/6 | Complete | 2026-03-13 |
-| 9. Advisor Portal Access | v1.2 | 6/6 | Complete | 2026-03-14 |
-| 10. Assessment Customization | v1.2 | 4/4 | Complete | 2026-03-14 |
-| 11. Dashboard Foundation | v1.3 | 3/3 | Complete | 2026-03-14 |
-| 12. Analytics Engine | v1.3 | 2/2 | Complete | 2026-03-14 |
-| 13. Intelligence Features | v1.3 | 3/3 | Complete | 2026-03-15 |
-| 14. Family Dashboard | v1.3 | 2/2 | Complete | 2026-03-15 |
-| 15. Secure Client Invitations | v1.4 | 4/4 | Complete | 2026-03-15 |
-| 16. Client Status Pipeline | v1.4 | 3/3 | Complete | 2026-03-15 |
-| 17. Document Collection System | v1.4 | 4/4 | Complete | 2026-03-16 |
-| 18. Intelligent Notifications | v1.4 | 3/3 | Complete | 2026-03-16 |
+**Security Isolation:** Multi-tenant cyber risk data maintains same row-level security as governance system, with separate schemas for cyber-specific data.
+
+**Performance Strategy:** Async cyber risk processing with cached results, never blocking workflows on external threat intelligence APIs.
 
 ---
-*Last updated: 2026-03-19*
+*Roadmap created: 2026-03-19*
+*Next phase: 19*
