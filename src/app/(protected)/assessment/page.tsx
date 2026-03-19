@@ -279,7 +279,7 @@ export default function AssessmentHubPage() {
     const pillarSlug = pillar.slug;
 
     // Determine pillar status
-    const getPillarStatus = () => {
+    const getPillarStatus = (): 'not-started' | 'in-progress' | 'completed' => {
       if (!store.assessmentId) return "not-started";
       if (store.completedPillars.includes(pillarSlug)) return "completed";
 

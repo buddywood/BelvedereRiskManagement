@@ -6,7 +6,7 @@
  */
 
 // Re-export core types from assessment system
-export {
+export type {
   Question,
   Pillar,
   SubCategory,

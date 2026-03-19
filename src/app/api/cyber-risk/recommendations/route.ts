@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 import { generateCyberRecommendations, CyberRecommendation } from "@/lib/cyber-risk/recommendations";
 import { ScoreResult, CategoryScore, MissingControl } from "@/lib/assessment/types";
 
@@ -94,8 +95,8 @@ export async function POST(request: NextRequest) {
     const scoreResult: ScoreResult = {
       score: pillarScore.score,
       riskLevel: pillarScore.riskLevel.toLowerCase() as 'low' | 'medium' | 'high' | 'critical',
-      breakdown: pillarScore.breakdown as CategoryScore[],
-      missingControls: (pillarScore.missingControls as MissingControl[]) || [],
+      breakdown: pillarScore.breakdown as unknown as CategoryScore[],
+      missingControls: (pillarScore.missingControls as unknown as MissingControl[]) || [],
     };
 
     // Generate AI recommendations
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
         },
       },
       data: {
-        missingControls: updatedMissingControls,
+        missingControls: updatedMissingControls as unknown as Prisma.InputJsonValue,
       },
     });
 
