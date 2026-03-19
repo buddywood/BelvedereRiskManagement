@@ -1,77 +1,54 @@
-# Requirements: Belvedere Risk Management
+# Requirements: Belvedere Risk Management v1.5
 
-**Defined:** 2026-03-15
+**Defined:** 2026-03-19
 **Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
-
-## v1.4 Requirements
-
-Requirements for Advisor Workflow Pipeline milestone. Each maps to roadmap phases.
-
-### Client Invitations
-
-- [ ] **INVITE-01**: Advisor can send secure email invitations to new clients with registration links
-- [ ] **INVITE-02**: Client receives branded email invitation with personalized advisor message
-- [ ] **INVITE-03**: Invitation email includes secure registration link with expiration date
-- [ ] **INVITE-04**: Client can register through invitation link and access assessment portal
-- [ ] **INVITE-05**: System tracks invitation status (sent, opened, registered, expired)
-- [ ] **INVITE-06**: Advisor can resend invitations for unopened or expired links
-- [ ] **INVITE-07**: Invitation link automatically expires after configurable duration (e.g., 7 days)
-
-### Status Tracking
-
-- [ ] **STATUS-01**: Advisor dashboard displays real-time client pipeline with visual progress indicators
-- [ ] **STATUS-02**: Each client shows current stage (invited, registered, intake complete, assessment in progress, etc.)
-- [ ] **STATUS-03**: Pipeline displays completion percentage for each workflow stage
-- [ ] **STATUS-04**: Advisor can filter and sort clients by status, date invited, or progress
-- [ ] **STATUS-05**: Dashboard refreshes automatically to show real-time status updates
-- [ ] **STATUS-06**: Advisor can click a client to view detailed workflow progress
-
-### Automated Notifications
-
-- [ ] **NOTIFY-01**: System sends automated email when client registers from invitation
-- [ ] **NOTIFY-02**: Client receives reminder notifications for incomplete assessment stages
-- [ ] **NOTIFY-03**: Advisor receives notifications when client completes key milestones
-- [ ] **NOTIFY-04**: System sends deadline reminders for stalled client workflows
-- [ ] **NOTIFY-05**: Users can configure notification preferences for frequency and types
-
-### Document Collection
-
-- [ ] **DOC-01**: Advisor can mark required documents for each client
-- [ ] **DOC-02**: Status dashboard shows document collection progress for each client
-- [ ] **DOC-03**: Client portal allows document upload with secure file handling
-- [ ] **DOC-04**: System tracks uploaded vs missing documents for each client
-- [ ] **DOC-05**: Clients receive automated reminders for missing documents
-
-### White-Label Branding
-
-- [ ] **BRAND-01**: Advisor can upload custom logo for platform branding
-- [ ] **BRAND-02**: Email templates include advisor branding and color scheme
-- [ ] **BRAND-03**: Client portal displays advisor branding throughout user experience
-- [ ] **BRAND-04**: Advisor can customize invitation message template content
-- [ ] **BRAND-05**: PDF governance reports include advisor branding and logo
-
-### Family Governance Workflows
-
-- [ ] **WORKFLOW-01**: Advisor can invite multiple family members with different governance roles
-- [ ] **WORKFLOW-02**: Family members receive role-specific invitations and portal access
-- [ ] **WORKFLOW-03**: Status tracking displays progress for multi-member family assessments
-- [ ] **WORKFLOW-04**: System coordinates workflow dependencies between family members
-- [ ] **WORKFLOW-05**: Advisor can manage complex family invitation sequences and approvals
 
 ## v1.5 Requirements
 
+Requirements for cyber risk intelligence milestone. Each maps to roadmap phases.
+
+### Cyber Risk Assessment
+
+- [ ] **CYBER-01**: Core cyber risk scoring engine based on practical client risk factors (identity exposure, financial security practices, and digital hygiene)
+- [ ] **CYBER-02**: Automated cyber risk recommendations based on scoring results
+
+### Identity Risk Intelligence
+
+- [ ] **IDENTITY-01**: Social media exposure analysis for family member profiles
+- [ ] **IDENTITY-02**: Public information visibility scoring and assessment
+
+### Financial Cybersecurity
+
+- [ ] **FINANCE-01**: Banking security practices evaluation and scoring
+- [ ] **FINANCE-02**: Payment method risk assessment for family financial tools
+
+### Unified Risk Profiling
+
+- [ ] **UNIFIED-01**: Combined scoring dashboard with governance + cyber weighted composite view
+- [ ] **UNIFIED-02**: Advisor-guided action plans across governance and cyber risk domains
+
+### Reporting & Communication
+
+- [ ] **REPORT-01**: Advisor-facing client risk summary report (exportable PDF) with client-friendly cyber risk insights and action steps
+
+## v2 Requirements
+
 Deferred to future release. Tracked but not in current roadmap.
 
-### Advanced Analytics
+### Advanced Identity Intelligence
 
-- **ANALYTICS-01**: Compliance audit trail with detailed governance decision tracking
-- **ANALYTICS-02**: Regulatory export capabilities for audit documentation
-- **ANALYTICS-03**: Advisor performance analytics across client pipeline
+- **IDENTITY-03**: Dark web monitoring for family credentials and information
+- **IDENTITY-04**: Real-time reconnaissance detection and alerting
 
-### AI Features
+### Advanced Financial Security
 
-- **AI-01**: Predictive engagement analytics to identify at-risk clients
-- **AI-02**: Personalized onboarding path recommendations based on family complexity
+- **FINANCE-03**: API security compliance scoring (PCI DSS 4.0, DORA)
+- **FINANCE-04**: Financial account exposure analysis and monitoring
+
+### Predictive Analytics
+
+- **PREDICT-01**: AI-powered risk interaction modeling and prediction
+- **PREDICT-02**: FAIR methodology integration for quantitative risk communication
 
 ## Out of Scope
 
@@ -79,11 +56,11 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Built-in CRM functionality | Not our expertise, existing CRM integration preferred |
-| Complex project management features | Over-engineering for governance-specific use case |
-| Marketing automation beyond onboarding | Scope creep, dilutes governance intelligence focus |
-| Video conferencing integration | Commodity feature, existing platforms preferred |
-| Social media integration | Outside wealth management compliance scope |
+| Real-time threat intelligence feeds | High cost and complexity, batch processing sufficient for wealth management use case |
+| Penetration testing automation | Requires specialized security expertise beyond platform scope |
+| Compliance framework mapping | Generic compliance is too broad, focus on wealth management specific risks |
+| Mobile device management | Outside governance intelligence platform scope |
+| Network security monitoring | Infrastructure security separate from family risk assessment |
 
 ## Traceability
 
@@ -91,45 +68,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INVITE-01 | Phase 15 | Pending |
-| INVITE-02 | Phase 15 | Pending |
-| INVITE-03 | Phase 15 | Pending |
-| INVITE-04 | Phase 15 | Pending |
-| INVITE-05 | Phase 15 | Pending |
-| INVITE-06 | Phase 15 | Pending |
-| INVITE-07 | Phase 15 | Pending |
-| STATUS-01 | Phase 16 | Pending |
-| STATUS-02 | Phase 16 | Pending |
-| STATUS-03 | Phase 16 | Pending |
-| STATUS-04 | Phase 16 | Pending |
-| STATUS-05 | Phase 16 | Pending |
-| STATUS-06 | Phase 16 | Pending |
-| NOTIFY-01 | Phase 18 | Pending |
-| NOTIFY-02 | Phase 18 | Pending |
-| NOTIFY-03 | Phase 18 | Pending |
-| NOTIFY-04 | Phase 18 | Pending |
-| NOTIFY-05 | Phase 18 | Pending |
-| DOC-01 | Phase 16 | Pending |
-| DOC-02 | Phase 16 | Pending |
-| DOC-03 | Phase 17 | Pending |
-| DOC-04 | Phase 17 | Pending |
-| DOC-05 | Phase 17 | Pending |
-| BRAND-01 | Phase 15 | Pending |
-| BRAND-02 | Phase 15 | Pending |
-| BRAND-03 | Phase 17 | Pending |
-| BRAND-04 | Phase 15 | Pending |
-| BRAND-05 | Phase 17 | Pending |
-| WORKFLOW-01 | Phase 19 | Pending |
-| WORKFLOW-02 | Phase 19 | Pending |
-| WORKFLOW-03 | Phase 19 | Pending |
-| WORKFLOW-04 | Phase 19 | Pending |
-| WORKFLOW-05 | Phase 19 | Pending |
+| CYBER-01 | TBD | Pending |
+| CYBER-02 | TBD | Pending |
+| IDENTITY-01 | TBD | Pending |
+| IDENTITY-02 | TBD | Pending |
+| FINANCE-01 | TBD | Pending |
+| FINANCE-02 | TBD | Pending |
+| UNIFIED-01 | TBD | Pending |
+| UNIFIED-02 | TBD | Pending |
+| REPORT-01 | TBD | Pending |
 
 **Coverage:**
-- v1.4 requirements: 33 total
-- Mapped to phases: 33
-- Unmapped: 0 ✓
+- v1.5 requirements: 9 total
+- Mapped to phases: 0
+- Unmapped: 9 ⚠️
 
 ---
-*Requirements defined: 2026-03-15*
-*Last updated: 2026-03-15 after roadmap creation*
+*Requirements defined: 2026-03-19*
+*Last updated: 2026-03-19 after initial definition*
