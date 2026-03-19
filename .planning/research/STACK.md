@@ -1,148 +1,144 @@
-# Technology Stack
+# Stack Research
 
-**Project:** Belvedere Risk Management v1.4 - Advisor Workflow Pipeline
-**Researched:** 2026-03-15
+**Domain:** Cyber Risk Intelligence
+**Researched:** 2026-03-18
+**Confidence:** HIGH
 
 ## Recommended Stack
 
-### Client Invitation System
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Existing Prisma Schema | 7.4.0 | Database foundation | Extend existing models; proven across 4 milestones |
-| Existing Resend | 6.9.2 | Email delivery | Already integrated for advisor notifications; reliable foundation |
-| crypto (Node.js built-in) | Node 20+ | Invitation code generation | Secure random token generation without dependencies |
+### Core Technologies
 
-### Status Tracking Dashboard
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Existing TanStack React Table | 8.21.3 | Status pipeline display | Already proven for governance dashboard; supports custom sorting |
-| Existing Recharts | 3.8.0 | Progress visualizations | Consistent with existing analytics; TypeScript support |
-| Server-Sent Events (SSE) | Native | Real-time status updates | Simple, production-ready for one-way updates; no external deps |
-| Existing TanStack Query | 5.90.21 | Status data management | Proven caching and invalidation for dashboard updates |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| ae-cvss-calculator | ^1.0.11 | CVSS v3.0, v3.1, v4.0 scoring | TypeScript-native, supports latest CVSS 4.0 standard, active maintenance |
+| mathjs | ^13.1.1 | Risk calculation engine | Handles FAIR methodology, composite scoring algorithms, precision math |
+| @snyk/snyk | ^1.1293.0 | Vulnerability scanning | Industry standard, real-time updates, CI/CD integration for supply chain security |
 
-### Automated Notification System
-| Technology | Version | Purpose | Why |
-|------------|---------|---------|-----|
-| Existing AdvisorNotification model | Current | In-app notifications | Foundation exists; extend for pipeline events |
-| Existing Resend templates | 6.9.2 | Email notifications | Proven HTML email templates; consistent branding |
-| Node.js setTimeout | Native | Deadline reminders | Simple scheduling for short-term notifications |
+### Supporting Libraries
 
-## Extensions to Existing Stack
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| d3-scale | ^4.0.2 | Risk scoring scales | Quantitative risk mapping, score normalization |
+| d3-array | ^3.2.4 | Statistical analysis | Risk data aggregation, percentile calculations |
+| node-cron | ^3.0.3 | Automated assessments | Scheduled vulnerability scans, periodic risk updates |
+| helmet | ^8.0.0 | Security headers | Enhanced API protection for sensitive risk data endpoints |
+| express-rate-limit | ^7.4.1 | Request throttling | Protect assessment APIs from abuse, resource management |
+| lodash | ^4.17.21 | Data utilities | Risk score aggregation, data normalization helpers |
 
-### Database Schema Extensions
-| Model | Purpose | Integration Point |
-|-------|---------|-------------------|
-| ClientInvitation | Track invitation codes and status | Extends User model relationships |
-| ClientStatus | Pipeline stage tracking | Links User to status enum |
-| NotificationType enum | Add pipeline events | Extend existing enum with INVITATION_SENT, STATUS_CHANGED, etc. |
+### Development Tools
 
-### API Route Extensions
-| Route | Purpose | Existing Pattern |
-|-------|---------|------------------|
-| `/api/invitations` | Invitation CRUD | Follow `/api/auth/register` pattern |
-| `/api/status/[id]` | Status updates | Follow `/api/intake/[id]` pattern |
-| `/api/notifications/sse` | Real-time updates | New SSE endpoint using Route Handlers |
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| @types/lodash | TypeScript definitions | Required for risk calculation utilities |
+| @types/d3-scale | TypeScript definitions | Type safety for scoring algorithms |
+| @types/d3-array | TypeScript definitions | Statistical calculation types |
 
 ## Installation
 
 ```bash
-# No new dependencies required
-# All features use existing stack:
-# - Prisma 7.4.0 (schema extensions only)
-# - Resend 6.9.2 (new email templates)
-# - TanStack Query/Table/React (existing versions)
-# - Recharts 3.8.0 (new status charts)
+# Core cyber risk libraries
+npm install ae-cvss-calculator mathjs @snyk/snyk
+
+# Data analysis and visualization components
+npm install d3-scale d3-array lodash
+
+# Security and scheduling
+npm install helmet express-rate-limit node-cron
+
+# Dev dependencies
+npm install -D @types/lodash @types/d3-scale @types/d3-array
 ```
 
-## Architecture Integration
+## Alternatives Considered
 
-### Invitation System
-- **Database**: Extend existing User/AdvisorProfile relationships
-- **Email**: Reuse existing Resend infrastructure
-- **Auth**: Integrate with existing Auth.js v5 flow
-- **UI**: Follow existing card-based design patterns
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| ae-cvss-calculator | cvssjs/cvssjs | Legacy projects requiring older CVSS versions only |
+| mathjs | Custom calculation engine | Simple linear scoring (but loses FAIR methodology support) |
+| d3-scale/d3-array | Chart.js data utilities | Projects not using existing Recharts infrastructure |
+| Snyk | Socket.dev | Startups prioritizing cost over enterprise features |
 
-### Status Tracking
-- **Real-time**: SSE for live updates (simpler than WebSocket for one-way data)
-- **Dashboard**: Extend existing advisor portal layout
-- **Caching**: TanStack Query for optimistic updates
-- **Charts**: Recharts for pipeline progression visualization
+## What NOT to Use
 
-### Notifications
-- **In-app**: Extend existing AdvisorNotification system
-- **Email**: New Resend templates following existing patterns
-- **Scheduling**: Native setTimeout for deadline notifications (< 24hr)
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| TensorFlow.js/ML libraries | Complexity overkill for rule-based scoring | Proven algorithms (CVSS, FAIR) |
+| Real-time threat intelligence APIs | High cost, complexity for wealth advisor use case | Assessment-time risk factors |
+| Custom cryptography libraries | Security risk, reinventing the wheel | Node.js built-in crypto module |
+| Blockchain risk APIs | Unproven ROI for family governance context | Standard financial security practices |
 
-## What NOT to Add
+## Stack Patterns by Variant
 
-| Technology | Why Avoid | Alternative |
-|------------|-----------|-------------|
-| Socket.IO | Overkill for one-way status updates | Server-Sent Events |
-| Bull/Redis queues | Complex for simple deadline notifications | setTimeout for short-term |
-| Separate notification service | Added complexity | Extend existing notification system |
-| Push notifications | Not needed for advisor workflow | Email + in-app sufficient |
-| External status tracking APIs | Unnecessary dependency | Build on existing dashboard |
-| Separate invitation service | Already have user management | Extend current auth system |
+**If implementing basic cyber risk assessment:**
+- Use ae-cvss-calculator + mathjs core
+- Because CVSS provides standardized vulnerability scoring
 
-## Integration Points
+**If adding digital footprint monitoring:**
+- Use ae-cvss-calculator + Snyk + node-cron
+- Because automated scanning requires scheduled vulnerability checks
 
-### With Existing v1.3 Features
-- **Advisor Dashboard**: Add invitation management to existing multi-client view
-- **Client Portal**: Status tracking integration with family dashboard
-- **Notification Bell**: Extend existing NotificationBell component
-- **Email System**: Add templates to existing email.ts infrastructure
+**If building unified risk profiles:**
+- Use full stack including d3-scale/d3-array
+- Because composite scoring needs statistical normalization
 
-### Database Relationships
+## Version Compatibility
+
+| Package A | Compatible With | Notes |
+|-----------|-----------------|-------|
+| ae-cvss-calculator@1.0.11 | TypeScript ^5.0 | Native TypeScript implementation |
+| mathjs@13.1.1 | Node.js 18+ | Requires modern JavaScript features |
+| d3-scale@4.0.2 | d3-array@3.2.4 | Designed to work together for data analysis |
+
+## Integration with Existing Stack
+
+### Database Schema Extensions
 ```prisma
-// Extend existing User model
-model User {
-  // ... existing fields
-  sentInvitations     ClientInvitation[] @relation("InvitedBy")
-  receivedInvitation  ClientInvitation?  @relation("InvitedClient")
-  clientStatus        ClientStatus?
+model CyberRiskAssessment {
+  id            String           @id @default(cuid())
+  userId        String
+  cvssScore     Float?
+  fairScore     Float?
+  digitalFootprint Json?
+  riskFactors   Json
+
+  user          User             @relation(fields: [userId], references: [id])
+  responses     CyberRiskResponse[]
 }
 
-// New models integrate with existing patterns
-model ClientInvitation {
-  id          String            @id @default(cuid())
-  code        String            @unique
-  email       String
-  status      InvitationStatus  @default(PENDING)
-  expiresAt   DateTime
-  // ... relations to existing User model
+model UnifiedRiskProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  governanceScore Float?   // Existing governance pillar
+  cyberScore      Float?   // New cyber risk pillar
+  compositeScore  Float    // Weighted combination
+  riskLevel       RiskLevel
+
+  user            User     @relation(fields: [userId], references: [id])
 }
 ```
 
-## Performance Considerations
+### API Architecture
+- Leverage existing Next.js 15 server actions pattern
+- Use existing Prisma 7 transaction handling
+- Integrate with existing Auth.js v5 authentication
+- Extend existing assessment workflow with cyber risk pillar
 
-| Feature | Load Pattern | Optimization |
-|---------|--------------|--------------|
-| Status Dashboard | Real-time updates for 50+ clients | SSE + TanStack Query caching |
-| Invitation Tracking | Bulk operations | Database indexes on status/email |
-| Notifications | High-frequency pipeline events | Batching via existing notification system |
-
-## Security Considerations
-
-| Component | Security Measure | Implementation |
-|-----------|------------------|----------------|
-| Invitation Codes | Cryptographically secure | crypto.randomBytes(32) |
-| Status Updates | Role-based access | Extend existing ownership patterns |
-| Email Templates | XSS protection | Existing Resend HTML sanitization |
-| SSE Endpoints | Authentication | Auth.js v5 session verification |
+### Visualization Integration
+- Continue using existing Recharts library (already in package.json)
+- Add d3 utilities for score normalization only
+- Maintain existing dashboard component patterns
 
 ## Sources
 
-**Stack Research:**
-- [Real-Time Notifications with Server-Sent Events (SSE) in Next.js - Pedro Alonso](https://www.pedroalonso.net/blog/sse-nextjs-real-time-notifications/)
-- [Building Real-Time Notifications with Upstash Redis, Next.js Server Actions and Vercel](https://upstash.com/blog/realtime-notifications)
-- [Implementing Push Notifications in Next.js using Web Push and Server Actions](https://medium.com/@amirjld/implementing-push-notifications-in-next-js-using-web-push-and-server-actions-f4b95d68091f)
+- [ae-cvss-calculator - npm](https://www.npmjs.com/package/ae-cvss-calculator) — MEDIUM confidence (npm registry verified)
+- [OWASP Risk Rating Methodology](https://owasp.org/www-community/OWASP_Risk_Rating_Methodology) — HIGH confidence (official OWASP documentation)
+- [Top Risk Assessment Tools for 2026](https://cynomi.com/learn/risk-assessment-tools/) — MEDIUM confidence (industry analysis)
+- [7 Methods For Calculating Cybersecurity Risk Scores](https://www.centraleyes.com/7-methods-for-calculating-cybersecurity-risk-scores/) — MEDIUM confidence (methodology overview)
+- [Top Cybersecurity Trends for 2026 Every Financial Leader Must Know](https://www.jackhenry.com/fintalk/top-cybersecurity-trends-for-2026-every-financial-leader-must-know) — MEDIUM confidence (financial sector specific)
+- [Financial Services API Security Compliance Guide](https://www.apisec.ai/blog/financial-services-api-security-compliance) — HIGH confidence (API security standards)
+- [6 Best JavaScript Charting Libraries for Dashboards in 2026](https://embeddable.com/blog/javascript-charting-libraries) — MEDIUM confidence (library comparison)
+- [Recharts GitHub](https://github.com/recharts/recharts) — HIGH confidence (official repository)
 
-**Pipeline & Status Tracking:**
-- [12 Free Client List Templates for Tracking Contacts in 2026](https://clickup.com/blog/client-list-templates/)
-- [10 Best Data Pipeline Monitoring Tools for ETL & Cloud Data Transformation (2026)](https://www.integrate.io/blog/data-pipeline-monitoring-tools/)
-- [GitHub - meirwah/awesome-workflow-engines](https://github.com/meirwah/awesome-workflow-engines)
-
-**Database Schema Patterns:**
-- [Prisma Schema API | Prisma Documentation](https://www.prisma.io/docs/orm/reference/prisma-schema-reference)
-- [Advanced Database Schema Management with Atlas & Prisma ORM](https://www.prisma.io/blog/advanced-database-schema-management-with-atlas-and-prisma-orm)
-- [The Complete Guide to Storing Multiple Enums in Database: 2026 Best Practices](https://copyprogramming.com/howto/best-way-to-store-multiple-enums-in-database)
+---
+*Stack research for: Cyber Risk Intelligence*
+*Researched: 2026-03-18*

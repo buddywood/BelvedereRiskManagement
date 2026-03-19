@@ -1,262 +1,209 @@
 # Architecture Research
 
-**Domain:** Governance intelligence dashboards for Next.js assessment platform
-**Researched:** 2026-03-14
+**Domain:** Cyber Risk Integration with Governance Platform
+**Researched:** March 18, 2026
 **Confidence:** HIGH
 
-## Standard Architecture
-
-### System Overview
+## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                      Presentation Layer                            │
-├─────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
-│  │   Client    │  │   Advisor   │  │  Dashboard  │  │  Analytics  │ │
-│  │ Dashboard   │  │ Management  │  │  Widgets    │  │   Views     │ │
-│  └─────┬───────┘  └─────┬───────┘  └─────┬───────┘  └─────┬───────┘ │
-│        │                │                │                │         │
-├────────┴────────────────┴────────────────┴────────────────┴─────────┤
-│                      Business Logic Layer                          │
-├─────────────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │           Server Actions + API Routes                       │   │
-│  │  • Assessment aggregation  • Report generation             │   │
-│  │  • Multi-client analytics  • Real-time data sync           │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-├─────────────────────────────────────────────────────────────────────┤
-│                      Data Access Layer                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
-│  │   Prisma     │  │    Caching   │  │   External   │              │
-│  │   Client     │  │   (Redis)    │  │   Services   │              │
-│  └──────────────┘  └──────────────┘  └──────────────┘              │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                      Presentation Layer                      │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐        │
+│  │Advisor  │  │ Cyber   │  │Unified  │  │Family   │        │
+│  │Portal   │  │Risk     │  │Risk     │  │Portal   │        │
+│  │         │  │Portal   │  │Dashboard│  │         │        │
+│  └────┬────┘  └────┬────┘  └────┬────┘  └────┬────┘        │
+│       │            │            │            │              │
+├───────┴────────────┴────────────┴────────────┴──────────────┤
+│                      API Layer (Next.js)                    │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │              Business Logic Layer                   │    │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐           │    │
+│  │  │Governance│ │Cyber Risk│ │ Unified  │           │    │
+│  │  │Engine    │ │Engine    │ │Scoring   │           │    │
+│  │  └──────────┘ └──────────┘ └──────────┘           │    │
+│  └─────────────────────────────────────────────────────┘    │
+├─────────────────────────────────────────────────────────────┤
+│                     Data Layer                              │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                   │
+│  │PostgreSQL│  │   Row    │  │External  │                   │
+│  │Multi-Ten │  │  Level   │  │ Cyber    │                   │
+│  │Database  │  │Security  │  │Feeds API │                   │
+│  └──────────┘  └──────────┘  └──────────┘                   │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Component Responsibilities
+## Cyber Risk Integration Architecture
 
-| Component | Responsibility | Typical Implementation |
+### New Component Responsibilities
+
+| Component | Responsibility | Implementation Pattern |
 |-----------|----------------|------------------------|
-| Dashboard Widgets | Real-time data display, charts, KPIs | React components with SWR/React Query |
-| Analytics Views | Historical trends, comparative analysis | Server Components with Prisma aggregations |
-| Multi-Client Manager | Tenant isolation, client filtering | Row-level security with Prisma middleware |
-| Assessment Aggregator | Score calculations, trend analysis | Background jobs + cached results |
-| Report Generator | PDF generation, template processing | React-PDF with server-side rendering |
+| **CyberRiskEngine** | Parallel assessment scoring, threat integration | Follows existing AssessmentEngine patterns |
+| **CyberRiskQuestions** | Cyber-specific question framework | Extends existing question structure |
+| **UnifiedScoring** | Combines governance + cyber risk scores | Uses existing weighted scoring algorithms |
+| **ThreatFeedConnector** | External threat intelligence integration | New API service pattern |
+| **CyberRiskPortal** | Advisor interface for cyber risk analysis | Extends existing portal pattern |
 
-## Integration with Existing Architecture
+### Modified Components
 
-### Current System Enhancement Points
+| Existing Component | Modification Required | Integration Point |
+|-------------------|----------------------|-------------------|
+| **Intelligence Queries** | Add cyber risk pillar support | Extend getTopRisksForFamily to include cyber risks |
+| **Assessment API** | Add cyber assessment type | Extend route.ts to handle cyber assessments |
+| **Unified Dashboard** | Display combined risk profiles | Merge governance + cyber visualizations |
+| **PDF Reports** | Include cyber risk sections | Extend ReportCover.tsx and scoring displays |
 
-**Existing Foundation:**
-- Next.js 15 with App Router ✓
-- PostgreSQL + Prisma 7 ✓
-- Role-based authentication (USER/ADVISOR/ADMIN) ✓
-- Assessment engine with scoring pipeline ✓
-- PDF generation + server actions ✓
+## Data Architecture Integration
 
-**New Dashboard Components:**
+### New Database Models
 
 ```typescript
-// Extend existing Prisma models
-model DashboardWidget {
-  id         String   @id @default(cuid())
-  advisorId  String
-  type       WidgetType
-  config     Json
-  position   Json
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+// Extends existing Assessment pattern
+model CyberRiskAssessment {
+  id            String                 @id @default(cuid())
+  userId        String                 // Same tenant isolation pattern
+  version       Int                    @default(1)
+  status        AssessmentStatus       @default(IN_PROGRESS)
+  currentDomain String?                // cyber-security, data-protection, etc.
+  currentQuestionIndex Int?            @default(0)
+  startedAt     DateTime              @default(now())
+  completedAt   DateTime?
+  updatedAt     DateTime              @updatedAt
 
-  advisor    AdvisorProfile @relation(fields: [advisorId], references: [id])
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses     CyberRiskResponse[]
+  scores        CyberRiskScore[]
+  threatFeeds   ThreatFeedData[]
+
+  @@index([userId])
+  @@index([status])
 }
 
-model AssessmentMetrics {
-  id           String   @id @default(cuid())
-  assessmentId String   @unique
-  completedAt  DateTime
-  totalScore   Float
-  riskTrend    Float?   // Month-over-month change
-  advisorNotes String?
+model CyberRiskScore {
+  id           String        @id @default(cuid())
+  assessmentId String
+  domain       String        // cyber-security, data-protection, incident-response
+  score        Float         // 0-10 scale matching governance scoring
+  riskLevel    RiskLevel     // LOW, MEDIUM, HIGH, CRITICAL
+  breakdown    Json          // Domain-specific breakdown
+  threatContext Json?        // External threat intelligence context
+  calculatedAt DateTime     @default(now())
 
-  assessment   Assessment @relation(fields: [assessmentId], references: [id])
+  assessment   CyberRiskAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@unique([assessmentId, domain])
+  @@index([assessmentId])
+}
+
+// Unified risk combining governance + cyber
+model UnifiedRiskProfile {
+  id                  String    @id @default(cuid())
+  userId              String
+  governanceScore     Float     // From existing Assessment
+  cyberRiskScore      Float     // From CyberRiskAssessment
+  combinedScore       Float     // Weighted combination
+  riskInteractions    Json      // How risks compound each other
+  lastCalculated      DateTime  @default(now())
+
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@index([userId])
 }
 ```
 
-### Modified vs New Components
-
-| Component Type | Status | Rationale |
-|---------------|--------|-----------|
-| **Advisor Layout** | MODIFY | Add dashboard nav, extend existing `/advisor` layout |
-| **Client Cards** | EXTEND | Add metrics overlay to existing ClientCard component |
-| **Assessment API** | EXTEND | Add aggregation endpoints to existing `/api/assessment` |
-| **Dashboard Views** | NEW | Create `/advisor/dashboard` with analytics widgets |
-| **Metrics Engine** | NEW | Background calculation service for trends |
-| **Data Aggregation** | NEW | Prisma aggregation queries + caching layer |
-
-## Recommended Project Structure
+### Data Flow Patterns
 
 ```
-src/
-├── app/(protected)/advisor/
-│   ├── dashboard/              # NEW: Multi-client analytics dashboard
-│   │   ├── page.tsx           # Dashboard overview with widgets
-│   │   ├── analytics/         # Detailed analytics views
-│   │   └── clients/[id]/      # Per-client drill-down views
-│   ├── layout.tsx             # MODIFY: Add dashboard navigation
-│   └── page.tsx               # EXTEND: Add dashboard preview cards
-├── components/dashboard/       # NEW: Dashboard-specific components
-│   ├── widgets/               # Chart components, KPI cards
-│   ├── analytics/             # Trend analysis, comparisons
-│   └── client-insights/       # Client-specific visualizations
-├── lib/dashboard/             # NEW: Dashboard business logic
-│   ├── aggregation.ts         # Data aggregation functions
-│   ├── metrics.ts             # Metric calculation engines
-│   └── caching.ts             # Dashboard data caching
-├── lib/actions/
-│   └── dashboard-actions.ts   # NEW: Server actions for dashboard
-└── app/api/dashboard/         # NEW: Real-time data endpoints
-    ├── metrics/route.ts       # Aggregate metrics API
-    └── widgets/[id]/route.ts  # Widget-specific data
+User Action (Cyber Assessment)
+    ↓
+CyberRiskEngine → ThreatFeedConnector → External APIs
+    ↓                    ↓                    ↓
+CyberRiskScore ← ThreatContext ← Live Threat Data
+    ↓
+UnifiedScoring (governance + cyber weights)
+    ↓
+UnifiedRiskProfile → Intelligence Dashboard
 ```
 
-### Structure Rationale
+## Architectural Integration Patterns
 
-- **dashboard/:** Dedicated folder for new functionality avoids disrupting existing assessment flows
-- **components/dashboard/:** Reusable widgets prevent code duplication across advisor views
-- **lib/dashboard/:** Business logic separation allows for easy testing and caching strategies
+### Pattern 1: Parallel Assessment Architecture
 
-## Architectural Patterns
-
-### Pattern 1: Multi-Tenant Row-Level Security
-
-**What:** Use Prisma middleware to automatically filter queries by advisor-client relationships
-**When to use:** All dashboard data access to ensure tenant isolation
-**Trade-offs:** Performance overhead vs data security guarantee
+**What:** Cyber risk runs independently alongside governance assessment
+**When to use:** Family needs separate cyber risk evaluation with optional combination
+**Trade-offs:** More complex but allows independent progression and specialized scoring
 
 **Example:**
 ```typescript
-// lib/db.ts - Extend existing Prisma client
-prisma.$use(async (params, next) => {
-  if (params.model && ['Assessment', 'PillarScore'].includes(params.model)) {
-    const session = await getServerSession();
-    if (session?.user?.role === 'ADVISOR') {
-      // Auto-inject advisor filter
-      params.args.where = {
-        ...params.args.where,
-        user: {
-          clientAssignments: {
-            some: {
-              advisorId: session.user.advisorProfile?.id
-            }
-          }
-        }
-      };
-    }
-  }
-  return next(params);
-});
+// Parallel assessment creation
+const createParallelAssessments = async (userId: string) => {
+  const [governance, cyber] = await Promise.all([
+    prisma.assessment.create({ data: { userId, type: 'GOVERNANCE' } }),
+    prisma.cyberRiskAssessment.create({ data: { userId, type: 'CYBER' } })
+  ]);
+  return { governance, cyber };
+};
 ```
 
-### Pattern 2: Cached Aggregation Pipeline
+### Pattern 2: Unified Risk Scoring
 
-**What:** Pre-calculate dashboard metrics using background jobs + Redis caching
-**When to use:** Complex multi-client analytics that don't need real-time updates
-**Trade-offs:** Stale data (5-15min delay) vs sub-second dashboard load times
+**What:** Combines governance and cyber scores using configurable weights
+**When to use:** Advisor needs holistic family risk view with domain interactions
+**Trade-offs:** Complex weighting algorithm but provides comprehensive risk picture
 
 **Example:**
 ```typescript
-// lib/dashboard/aggregation.ts
-export async function calculateAdvisorMetrics(advisorId: string) {
-  const cacheKey = `advisor:${advisorId}:metrics`;
-  const cached = await redis.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
-  const metrics = await prisma.assessment.aggregate({
-    _avg: { scores: { score: true } },
-    _count: { status: { completed: true } },
-    where: {
-      user: {
-        clientAssignments: {
-          some: { advisorId }
-        }
-      }
-    }
-  });
-
-  await redis.setex(cacheKey, 900, JSON.stringify(metrics)); // 15min cache
-  return metrics;
-}
+// Unified scoring calculation
+const calculateUnifiedScore = (governance: number, cyber: number, weights: RiskWeights) => {
+  const baseScore = (governance * weights.governance) + (cyber * weights.cyber);
+  const interactionMultiplier = calculateRiskInteraction(governance, cyber);
+  return baseScore * interactionMultiplier;
+};
 ```
 
-### Pattern 3: Streaming Dashboard Updates
+### Pattern 3: Tenant Isolation Consistency
 
-**What:** Use Server-Sent Events for real-time dashboard updates without WebSocket overhead
-**When to use:** Live assessment progress tracking for advisor monitoring
-**Trade-offs:** Simpler than WebSockets but less flexible for bidirectional communication
-
-## Data Flow
-
-### Dashboard Request Flow
-
-```
-[Advisor Dashboard Load]
-    ↓
-[Server Component] → [Dashboard Actions] → [Cached Aggregations] → [PostgreSQL]
-    ↓                      ↓                       ↓                    ↓
-[Rendered HTML] ← [Metric Calculations] ← [Prisma Queries] ← [Row-Level Security]
-    ↓
-[Client Hydration] → [Real-time Updates] → [SSE Endpoint]
-```
-
-### Assessment Integration Flow
-
-```
-[Assessment Completion]
-    ↓
-[Scoring Pipeline] → [Dashboard Metrics Update] → [Cache Invalidation]
-    ↓                        ↓                         ↓
-[Advisor Notification] ← [Background Job] ← [Redis Cache Clear]
-```
-
-### Key Data Flows
-
-1. **Multi-Client Overview:** Aggregates scores across all assigned clients with trend calculations
-2. **Real-time Progress:** Streams live assessment progress to advisor dashboard via SSE
-3. **Historical Analysis:** Combines assessment data with time-series analysis for trend insights
+**What:** Cyber risk data follows same row-level security patterns as governance data
+**When to use:** Always - maintains existing security architecture
+**Trade-offs:** No additional complexity, leverages proven patterns
 
 ## Scaling Considerations
 
 | Scale | Architecture Adjustments |
 |-------|--------------------------|
-| 1-50 advisors | Current PostgreSQL + Redis cache handles load easily |
-| 50-500 advisors | Add read replicas, optimize Prisma queries, implement query batching |
-| 500+ advisors | Consider database sharding by advisor region, microservice separation |
+| 0-1k families | Single database, unified Next.js app handles both assessment types |
+| 1k-10k families | Add read replicas for cyber threat feed processing, cache threat intelligence |
+| 10k+ families | Consider microservice for threat feed processing, separate cyber risk scoring service |
 
 ### Scaling Priorities
 
-1. **First bottleneck:** Dashboard aggregation queries - solve with materialized views and smart caching
-2. **Second bottleneck:** Real-time updates - implement rate limiting and selective updates
+1. **First bottleneck:** External threat feed API rate limits - implement caching and batch processing
+2. **Second bottleneck:** Combined scoring calculations - move to background jobs for complex unified scoring
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Real-time Everything
+### Anti-Pattern 1: Separate Cyber Risk Platform
 
-**What people do:** Make every dashboard widget update in real-time via WebSocket/polling
-**Why it's wrong:** Overwhelms database with unnecessary queries, degrades UX with constant reloading
-**Do this instead:** Use cached aggregations (15min updates) for trends, real-time only for active assessments
+**What people do:** Build completely separate application for cyber risk
+**Why it's wrong:** Breaks unified family risk view, duplicates authentication/authorization
+**Do this instead:** Extend existing platform with cyber risk modules using same architecture patterns
 
-### Anti-Pattern 2: Client-Side Aggregation
+### Anti-Pattern 2: Real-time Threat Feed Integration
 
-**What people do:** Fetch raw assessment data to browser and calculate metrics client-side
-**Why it's wrong:** Security risk (exposes other clients' data), poor performance, breaks on large datasets
-**Do this instead:** Server-side aggregation with Prisma, return only processed metrics to client
+**What people do:** Call external threat APIs for every assessment question
+**Why it's wrong:** Creates performance bottlenecks and external service dependencies
+**Do this instead:** Batch threat intelligence updates, cache results, and apply contextually during scoring
 
-### Anti-Pattern 3: Single Mega-Dashboard
+### Anti-Pattern 3: Combined Assessment Questions
 
-**What people do:** Cram all possible metrics into one overwhelming dashboard page
-**Why it's wrong:** Slow loading, cognitive overload for advisors, difficult maintenance
-**Do this instead:** Modular widget system with drill-down capability and customizable layouts
+**What people do:** Mix cyber and governance questions in single assessment flow
+**Why it's wrong:** Reduces modularity, makes scoring complex, harder to evolve separately
+**Do this instead:** Keep assessments parallel, combine only at scoring/reporting level
 
 ## Integration Points
 
@@ -264,55 +211,48 @@ export async function calculateAdvisorMetrics(advisorId: string) {
 
 | Service | Integration Pattern | Notes |
 |---------|---------------------|-------|
-| Existing Assessment Engine | Direct Prisma queries | Leverage existing scoring pipeline |
-| PDF Report System | Extend existing routes | Add dashboard snapshot generation |
-| Email Notifications | Extend existing system | Add assessment completion alerts |
+| **Threat Intelligence APIs** | Batch processing with caching | Update threat context daily, not per assessment |
+| **Security Frameworks (NIST)** | Static mapping in scoring engine | Map assessment responses to framework controls |
+| **Vulnerability Databases** | Scheduled background sync | Enrich cyber risk context with current threat landscape |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| Dashboard ↔ Assessment | Shared Prisma models | Use existing Assessment/PillarScore schema |
-| Advisor ↔ Client data | Row-level security | Enforced via Prisma middleware |
-| Real-time updates ↔ Cache | Event-driven invalidation | Redis pub/sub for cache coordination |
+| **Governance ↔ Cyber Risk** | Unified scoring service | Combine scores using weighted algorithms |
+| **Assessment ↔ Intelligence** | Shared database queries | Extend existing intelligence queries for cyber data |
+| **Portal ↔ Risk Engines** | RESTful API patterns | Maintain existing API patterns for consistency |
 
-## Build Order Recommendation
+## Build Order for Integration
 
-### Phase 1: Foundation (Week 1-2)
-1. Extend Prisma schema with dashboard models
-2. Create basic `/advisor/dashboard` layout
-3. Implement row-level security middleware
-4. Add Redis caching infrastructure
+### Phase 1: Cyber Risk Foundation
+1. **Cyber risk database models** - Extend existing schema patterns
+2. **Cyber risk question framework** - Mirror governance question structure
+3. **Basic cyber risk scoring** - Adapt existing scoring algorithms
 
-### Phase 2: Core Widgets (Week 3-4)
-1. Client overview cards with basic metrics
-2. Assessment completion tracking
-3. Simple trend calculations (month-over-month)
-4. Export existing PDF functionality to dashboard
+### Phase 2: Assessment Integration
+1. **Parallel assessment UI** - Extend existing assessment portal
+2. **Cyber risk API endpoints** - Follow existing API patterns
+3. **Independent cyber risk reports** - Extend PDF generation
 
-### Phase 3: Advanced Analytics (Week 5-6)
-1. Historical trend analysis
-2. Comparative client performance
-3. Risk level distribution charts
-4. Real-time progress streaming
+### Phase 3: Unified Risk Intelligence
+1. **Unified scoring algorithms** - Combine governance + cyber scores
+2. **Risk interaction modeling** - How risks compound each other
+3. **Enhanced intelligence dashboard** - Show combined risk views
 
-### Phase 4: Polish & Performance (Week 7-8)
-1. Customizable dashboard layouts
-2. Advanced caching optimization
-3. Background job implementation
-4. Performance monitoring and alerting
+### Phase 4: Advanced Features
+1. **Threat feed integration** - External intelligence APIs
+2. **Real-time risk monitoring** - Background threat context updates
+3. **Predictive risk analytics** - ML-based risk forecasting
 
 ## Sources
 
-- [Next.js SaaS Dashboard Development: Scalability & Best Practices](https://www.ksolves.com/blog/next-js/best-practices-for-saas-dashboards)
-- [How to Build an Admin Dashboard with shadcn/ui and Next.js (2026 Guide)](https://adminlte.io/blog/build-admin-dashboard-shadcn-nextjs/)
-- [Next.js App Router: The Patterns That Actually Matter in 2026](https://dev.to/teguh_coding/nextjs-app-router-the-patterns-that-actually-matter-in-2026-146)
-- [Next.js 16 Real-Time Analytics Dashboard: A Production Guide](https://www.shsxnk.com/blog/realtime-analytics-dashboard)
-- [How to use Prisma ORM and Prisma Postgres with Next.js and Vercel](https://www.prisma.io/docs/guides/nextjs)
-- [What is multi-tenant architecture? A complete guide for 2026](https://www.future-processing.com/blog/multi-tenant-architecture/)
-- [Multi-Tenant Deployment: 2026 Complete Guide & Examples](https://qrvey.com/blog/multi-tenant-deployment/)
-- [The 2026 Multi-Tenant Data Integration Playbook for Scalable SaaS](https://cdatasoftware.medium.com/the-2026-multi-tenant-data-integration-playbook-for-scalable-saas-1371986d2c2c)
+- [Top 12 Cyber Security Risk Assessment Tools For 2026](https://www.sentinelone.com/cybersecurity-101/cybersecurity/cyber-security-risk-assessment-tools/)
+- [Multi-Tenant Database Architecture Patterns Explained](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/)
+- [AI-Powered Cyber Risk Forecasting 2026](https://informatix.systems/blog/cyber-threat-intelligence-services/ai-powered-cyber-risk-forecasting-2026/)
+- [Cyber Insights 2026: API Security](https://www.securityweek.com/cyber-insights-2026-api-security/)
+- [How to Build a Fullstack App with Next.js, Prisma, and Postgres](https://vercel.com/kb/guide/nextjs-prisma-postgres)
 
 ---
-*Architecture research for: Governance intelligence dashboards for Next.js assessment platform*
-*Researched: 2026-03-14*
+*Architecture research for: Cyber Risk Integration with Governance Platform*
+*Researched: March 18, 2026*
