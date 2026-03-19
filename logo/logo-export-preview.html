@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKILI Logo Variations - Export Preview</title>
+    <style>
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+            background: #ffffff;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1rem;
+        }
+
+        /* Individual logo containers for export */
+        #stacked-export {
+            background: white;
+            padding: 40px;
+            display: inline-block;
+        }
+
+        #horizontal-export {
+            background: white;
+            padding: 40px;
+            display: inline-block;
+        }
+
+        #trademark-export {
+            background: white;
+            padding: 40px;
+            display: inline-block;
+        }
+
+        .export-instructions {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #4EA5D9;
+            max-width: 600px;
+            margin-top: 2rem;
+        }
+
+        .export-instructions h3 {
+            margin-top: 0;
+            color: #1e293b;
+        }
+
+        .export-instructions code {
+            background: #e2e8f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4EA5D9;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .dark {
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+
+        .dark .logo-container {
+            background: #1e293b;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .logo-title {
+            color: #f1f5f9;
+        }
+
+        .dark #stacked-export,
+        .dark #horizontal-export,
+        .dark #trademark-export {
+            background: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+
+    <h1 style="color: #1e293b; text-align: center; margin-bottom: 3rem;">AKILI Logo Variations</h1>
+
+    <!-- Stacked Version -->
+    <div class="logo-container">
+        <div class="logo-title">Stacked Version</div>
+        <div id="stacked-export">
+            <svg width="200" height="280" viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <style>
+                        :root {
+                            --brand-primary: #4EA5D9;
+                            --trust-accent: #D97706;
+                            --foreground: #1e293b;
+                            --muted-foreground: #64748b;
+                        }
+
+                        .dark {
+                            --brand-primary: #7DD3FC;
+                            --trust-accent: #F59E0B;
+                            --foreground: #f1f5f9;
+                            --muted-foreground: #94a3b8;
+                        }
+
+                        .brand-primary { fill: var(--brand-primary); }
+                        .trust-accent { fill: var(--trust-accent); stroke: var(--trust-accent); }
+                        .foreground { fill: var(--foreground); }
+                        .muted-foreground { fill: var(--muted-foreground); }
+                    </style>
+
+                    <linearGradient id="dataFill1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--trust-accent)" stop-opacity="0.15" />
+                        <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0.08" />
+                    </linearGradient>
+                </defs>
+
+                <g transform="translate(100,70)">
+                    <polygon points="0,-35 28,-11 18,30 -18,30 -28,-11" fill="none" stroke="var(--brand-primary)" stroke-width="2.5" stroke-linejoin="round" opacity="0.8"/>
+                    <polygon points="0,-22 18,-7 11,19 -11,19 -18,-7" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linejoin="round" opacity="0.6"/>
+                    <polygon points="0,-12 10,-4 6,10 -6,10 -10,-4" fill="none" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linejoin="round" opacity="0.4"/>
+
+                    <line x1="0" y1="0" x2="0" y2="-35" stroke="var(--brand-primary)" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="28" y2="-11" stroke="var(--brand-primary)" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="18" y2="30" stroke="var(--brand-primary)" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="-18" y2="30" stroke="var(--brand-primary)" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="-28" y2="-11" stroke="var(--brand-primary)" stroke-width="1.8" stroke-linecap="round" opacity="0.7" />
+
+                    <polygon points="0,-28 22,-6 12,20 -8,15 -20,-6" fill="url(#dataFill1)" stroke="var(--trust-accent)" stroke-width="2.5" stroke-linejoin="round"/>
+
+                    <circle cx="0" cy="-28" r="3" class="trust-accent"/>
+                    <circle cx="22" cy="-6" r="3" class="trust-accent"/>
+                    <circle cx="12" cy="20" r="3" class="trust-accent"/>
+                    <circle cx="-8" cy="15" r="3" class="trust-accent"/>
+                    <circle cx="-20" cy="-6" r="3" class="trust-accent"/>
+                    <circle cx="0" cy="0" r="4" class="brand-primary"/>
+                </g>
+
+                <text x="100" y="165" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="48" font-weight="800" class="foreground" letter-spacing="1.2">AKILI</text>
+                <text x="145" y="125" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" class="trust-accent">®</text>
+                <line x1="50" y1="200" x2="150" y2="200" stroke="var(--muted-foreground)" stroke-width="1" opacity="0.6"/>
+                <text x="100" y="230" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="18" font-weight="600" class="muted-foreground" letter-spacing="0.5">Risk Intelligence</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Horizontal Compact Version -->
+    <div class="logo-container">
+        <div class="logo-title">Horizontal Compact (Icon + AKILI)</div>
+        <div id="horizontal-export">
+            <svg width="240" height="80" viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="dataFill2" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="var(--trust-accent)" stop-opacity="0.15" />
+                        <stop offset="100%" stop-color="var(--brand-primary)" stop-opacity="0.08" />
+                    </linearGradient>
+                </defs>
+
+                <g transform="translate(40,40)">
+                    <polygon points="0,-22 20,-7 13,19 -13,19 -20,-7" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linejoin="round" opacity="0.8"/>
+                    <polygon points="0,-14 12.5,-4.5 8,12 -8,12 -12.5,-4.5" fill="none" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linejoin="round" opacity="0.6"/>
+                    <polygon points="0,-8 7,-2.5 4.5,6.5 -4.5,6.5 -7,-2.5" fill="none" stroke="var(--brand-primary)" stroke-width="1.2" stroke-linejoin="round" opacity="0.4"/>
+
+                    <line x1="0" y1="0" x2="0" y2="-22" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="20" y2="-7" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="13" y2="19" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="-13" y2="19" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+                    <line x1="0" y1="0" x2="-20" y2="-7" stroke="var(--brand-primary)" stroke-width="1.5" stroke-linecap="round" opacity="0.7" />
+
+                    <polygon points="0,-18 16,-4 9,14 -6,10 -14,-4" fill="url(#dataFill2)" stroke="var(--trust-accent)" stroke-width="2" stroke-linejoin="round"/>
+
+                    <circle cx="0" cy="-18" r="2.5" class="trust-accent"/>
+                    <circle cx="16" cy="-4" r="2.5" class="trust-accent"/>
+                    <circle cx="9" cy="14" r="2.5" class="trust-accent"/>
+                    <circle cx="-6" cy="10" r="2.5" class="trust-accent"/>
+                    <circle cx="-14" cy="-4" r="2.5" class="trust-accent"/>
+                    <circle cx="0" cy="0" r="3" class="brand-primary"/>
+                </g>
+
+                <text x="75" y="50" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="36" font-weight="800" class="foreground" letter-spacing="1">AKILI</text>
+                <text x="218" y="19" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="10" font-weight="600" class="trust-accent">®</text>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Trademark Only Version -->
+    <div class="logo-container">
+        <div class="logo-title">AKILI with Trademark Only</div>
+        <div id="trademark-export">
+            <svg width="210" height="60" viewBox="0 0 210 60" xmlns="http://www.w3.org/2000/svg">
+                <text x="20" y="40" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="42" font-weight="800" class="foreground" letter-spacing="1.2">AKILI</text>
+                <text x="191" y="8" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" class="trust-accent">®</text>
+            </svg>
+        </div>
+    </div>
+
+    <div class="export-instructions">
+        <h3>Export Instructions for JPG Versions:</h3>
+        <ol>
+            <li><strong>Browser Screenshot Method:</strong> Right-click each logo container and "Save image as" or use browser dev tools to screenshot the individual logo sections.</li>
+            <li><strong>SVG to JPG Conversion:</strong> Use online tools like <code>convertio.co</code> or <code>cloudconvert.com</code> to convert the SVG files to JPG.</li>
+            <li><strong>Command Line (if ImageMagick installed):</strong>
+                <br><code>convert akili-stacked.svg akili-stacked.jpg</code>
+                <br><code>convert akili-horizontal-compact.svg akili-horizontal-compact.jpg</code>
+                <br><code>convert akili-trademark-only.svg akili-trademark-only.jpg</code>
+            </li>
+            <li><strong>Design Tools:</strong> Open SVG files in Figma, Adobe Illustrator, or Sketch and export as JPG with desired resolution (recommended: 300 DPI for print, 72 DPI for web).</li>
+        </ol>
+
+        <p><strong>Recommended JPG settings:</strong></p>
+        <ul>
+            <li>Quality: 90-95% for best results</li>
+            <li>Background: White or transparent (PNG preferred for transparent)</li>
+            <li>Resolution: 300 DPI for print materials, 72-96 DPI for web use</li>
+        </ul>
+    </div>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            const button = document.querySelector('.dark-mode-toggle');
+            const isDark = document.body.classList.contains('dark');
+            button.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+        }
+    </script>
+</body>
+</html>

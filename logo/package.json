@@ -1,0 +1,16 @@
+{
+  "name": "akili-logo-converter",
+  "version": "1.0.0",
+  "description": "Converts AKILI logo SVG files to JPG format",
+  "main": "convert-to-jpg.js",
+  "scripts": {
+    "convert": "node convert-to-jpg.js",
+    "install-deps": "npm install sharp"
+  },
+  "dependencies": {
+    "sharp": "^0.33.0"
+  },
+  "keywords": ["logo", "svg", "jpg", "akili", "conversion"],
+  "author": "AKILI Risk Intelligence",
+  "license": "ISC"
+}
