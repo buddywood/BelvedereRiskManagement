@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { RiskLevel } from '@prisma/client';
+import { prisma } from '@/lib/db';
 
 import { requireAdvisorRole, getAdvisorProfileOrThrow } from '@/lib/advisor/auth';
 import {
@@ -352,6 +354,104 @@ export async function getFamilyRiskDetailData(familyId: string) {
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get family risk detail data';
+    return { success: false, error: message };
+  }
+}
+
+export async function getCyberRiskDashboardData() {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    // Get advisor's assigned clients
+    const assignments = await prisma.clientAdvisorAssignment.findMany({
+      where: {
+        advisorId: profile.id,
+        status: 'ACTIVE',
+      },
+      include: {
+        client: {
+          include: {
+            assessments: {
+              where: {
+                status: 'COMPLETED',
+              },
+              include: {
+                scores: {
+                  where: {
+                    pillar: 'cyber-risk',
+                  },
+                  orderBy: {
+                    calculatedAt: 'desc',
+                  },
+                  take: 1,
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Build cyber risk client data
+    type CyberRiskClient = {
+      id: string;
+      name: string | null;
+      email: string;
+      cyberScore: number | null;
+      riskLevel: RiskLevel | null;
+      assessedAt: Date | null;
+    };
+
+    const clients: CyberRiskClient[] = assignments.map(assignment => {
+      const cyberAssessments = assignment.client.assessments.filter(a =>
+        a.scores.some(s => s.pillar === 'cyber-risk')
+      );
+      const latestCyberAssessment = cyberAssessments[0] || null;
+      const latestCyberScore = latestCyberAssessment?.scores[0] || null;
+
+      return {
+        id: assignment.client.id,
+        name: assignment.client.name,
+        email: assignment.client.email,
+        cyberScore: latestCyberScore?.score || null,
+        riskLevel: latestCyberScore?.riskLevel || null,
+        assessedAt: latestCyberScore?.calculatedAt || null,
+      };
+    });
+
+    // Calculate metrics
+    type CyberRiskMetrics = {
+      totalClients: number;
+      assessedClients: number;
+      averageScore: number | null;
+      clientsAtRisk: number;
+    };
+
+    const assessedClients = clients.filter(c => c.cyberScore !== null);
+    const clientsAtRisk = assessedClients.filter(c =>
+      c.riskLevel === 'HIGH' || c.riskLevel === 'CRITICAL'
+    ).length;
+    const averageScore = assessedClients.length > 0
+      ? assessedClients.reduce((sum, c) => sum + c.cyberScore!, 0) / assessedClients.length
+      : null;
+
+    const metrics: CyberRiskMetrics = {
+      totalClients: clients.length,
+      assessedClients: assessedClients.length,
+      averageScore,
+      clientsAtRisk,
+    };
+
+    return {
+      success: true,
+      data: {
+        clients,
+        metrics,
+      },
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get cyber risk dashboard data';
     return { success: false, error: message };
   }
 }
