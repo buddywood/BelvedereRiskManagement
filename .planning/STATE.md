@@ -14,7 +14,7 @@ See: .planning/PROJECT.md (updated 2026-03-15)
 **Milestone:** v1.4 Advisor Workflow Pipeline
 **Phase:** Phase 18 - Intelligent Notifications
 **Plan:** Plan 03 complete (3/3)
-**Status:** Complete - Scheduled reminder system implemented
+**Status:** v1.4 milestone complete
 **Progress:** [██████████] 98%
 
 **Last activity:** 2026-03-16 — Completed Plan 018-03 (scheduled reminder system)

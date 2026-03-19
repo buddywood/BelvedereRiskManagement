@@ -1,127 +1,91 @@
-# Roadmap: v1.4 Advisor Workflow Pipeline
+# Roadmap: Belvedere Risk Management
 
-**Created:** 2026-03-15
-**Milestone:** v1.4 Advisor Workflow Pipeline
-**Scope:** Automate complete client journey from advisor invite through governance report delivery with status tracking and intelligent notifications
+## Milestones
 
-## Overview
-
-Transform the governance intelligence platform into a complete advisor workflow automation system. Delivers secure client invitation system, real-time status tracking dashboard, and intelligent notification engine while maintaining enterprise-grade security for wealth management compliance.
+- ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-02-20)
+- ✅ **v1.1 Household Profiles** — Phases 5-7 (shipped 2026-02-21)
+- ✅ **v1.2 Audio Interview Foundation** — Phases 8-10 (shipped 2026-03-14)
+- ✅ **v1.3 Governance Intelligence** — Phases 11-14 (shipped 2026-03-15)
+- ✅ **v1.4 Advisor Workflow Pipeline** — Phases 15-18 (shipped 2026-03-19)
 
 ## Phases
 
-### Phase 15: Secure Client Invitations
-**Goal:** Advisors can invite clients through secure branded email system with complete invitation lifecycle management
+<details>
+<summary>✅ v1.0 MVP (Phases 1-4) — SHIPPED 2026-02-20</summary>
 
-**Dependencies:** None (extends existing auth system)
+- [x] Phase 1: Authentication Security (3/3 plans) — completed 2026-02-18
+- [x] Phase 2: Assessment Engine Core Scoring (6/6 plans) — completed 2026-02-19
+- [x] Phase 3: Branching Logic (2/2 plans) — completed 2026-02-19
+- [x] Phase 4: Reports Templates (3/3 plans) — completed 2026-02-20
 
-**Requirements:** INVITE-01, INVITE-02, INVITE-03, INVITE-04, INVITE-05, INVITE-06, INVITE-07, BRAND-01, BRAND-02, BRAND-04
+</details>
 
-**Plans:** 4 plans
+<details>
+<summary>✅ v1.1 Household Profiles (Phases 5-7) — SHIPPED 2026-02-21</summary>
 
-Plans:
-- [ ] 015-01-PLAN.md — Schema extension and invitation business logic
-- [ ] 015-02-PLAN.md — Branded email template and server actions
-- [ ] 015-03-PLAN.md — Registration flow update with advisor linking
-- [ ] 015-04-PLAN.md — Advisor invitation management UI and branding settings
+- [x] Phase 5: Profile Foundation (2/2 plans) — completed 2026-02-21
+- [x] Phase 6: Assessment Integration (2/2 plans) — completed 2026-02-21
+- [x] Phase 7: Household Reporting (2/2 plans) — completed 2026-02-21
 
-**Success Criteria:**
-1. Advisor can send secure email invitations with custom branding and personalized messages
-2. Client receives branded invitation email with secure registration link that expires appropriately
-3. Client can register through invitation link and access assessment portal seamlessly
-4. Advisor can track invitation status (sent, opened, registered, expired) in real-time
-5. Advisor can resend invitations for unopened or expired links without creating duplicate accounts
+</details>
 
-### Phase 16: Client Status Pipeline
-**Goal:** Advisors have real-time visibility into complete client workflow progression through visual dashboard
+<details>
+<summary>✅ v1.2 Audio Interview Foundation (Phases 8-10) — SHIPPED 2026-03-14</summary>
 
-**Dependencies:** Phase 15 (invitation system provides initial status data)
+- [x] Phase 8: Audio Interview Foundation (6/6 plans) — completed 2026-03-13
+- [x] Phase 9: Advisor Portal Access (6/6 plans) — completed 2026-03-14
+- [x] Phase 10: Assessment Customization (4/4 plans) — completed 2026-03-14
 
-**Requirements:** STATUS-01, STATUS-02, STATUS-03, STATUS-04, STATUS-05, STATUS-06, DOC-01, DOC-02
+</details>
 
-**Plans:** 3 plans
+<details>
+<summary>✅ v1.3 Governance Intelligence (Phases 11-14) — SHIPPED 2026-03-15</summary>
 
-Plans:
-- [ ] 016-01-PLAN.md — Schema extension, pipeline types, status computation, and query layer
-- [ ] 016-02-PLAN.md — SSE endpoint, real-time hooks, and pipeline dashboard with TanStack Table
-- [ ] 016-03-PLAN.md — Client detail drill-down with workflow timeline and document management
+- [x] Phase 11: Dashboard Foundation (3/3 plans) — completed 2026-03-14
+- [x] Phase 12: Analytics Engine (2/2 plans) — completed 2026-03-14
+- [x] Phase 13: Intelligence Features (3/3 plans) — completed 2026-03-15
+- [x] Phase 14: Family Dashboard (2/2 plans) — completed 2026-03-15
 
-**Success Criteria:**
-1. Advisor dashboard displays real-time client pipeline with visual progress indicators for all stages
-2. Each client shows current stage with completion percentage and next action required
-3. Advisor can filter and sort clients by status, progress, or timeline for workflow management
-4. Dashboard refreshes automatically with real-time updates without page reload
-5. Advisor can click any client to view detailed workflow progress and document collection status
+</details>
 
-### Phase 17: Document Collection System
-**Goal:** Clients can upload required documents while advisors track collection progress for compliance
+<details>
+<summary>✅ v1.4 Advisor Workflow Pipeline (Phases 15-18) — SHIPPED 2026-03-19</summary>
 
-**Dependencies:** Phase 16 (status system tracks document requirements)
+- [x] Phase 15: Secure Client Invitations (4/4 plans) — completed 2026-03-15
+- [x] Phase 16: Client Status Pipeline (3/3 plans) — completed 2026-03-15
+- [x] Phase 17: Document Collection System (4/4 plans) — completed 2026-03-16
+- [x] Phase 18: Intelligent Notifications (3/3 plans) — completed 2026-03-16
 
-**Requirements:** DOC-03, DOC-04, DOC-05, BRAND-03, BRAND-05
+Full details: [milestones/v1.4-ROADMAP.md](milestones/v1.4-ROADMAP.md)
 
-**Plans:** 3 plans
+</details>
 
-Plans:
-- [ ] 017-01-PLAN.md — Schema extension, S3 upload infrastructure, and presigned URL API
-- [ ] 017-02-PLAN.md — Client document portal with advisor branding and drag-drop uploads
-- [ ] 017-03-PLAN.md — PDF report branding and automated document reminder system
+### 🚧 Next Milestone (Planning Phase)
 
-**Success Criteria:**
-1. Advisor can mark required documents for each client with clear specifications
-2. Client portal allows secure document upload with branded interface
-3. System tracks uploaded vs missing documents with automated client reminders
-4. PDF governance reports include advisor branding and uploaded document references
-5. Clients receive automated reminders for missing documents based on workflow timeline
-
-### Phase 18: Intelligent Notifications
-**Goal:** Automated notification system prevents workflow stalls while avoiding alert fatigue
-
-**Dependencies:** Phase 16 (status system provides notification triggers)
-
-**Requirements:** NOTIFY-01, NOTIFY-02, NOTIFY-03, NOTIFY-04, NOTIFY-05
-
-**Plans:** 3 plans
-
-Plans:
-- [ ] 018-01-PLAN.md — Notification engine foundation: schema, service, preferences, templates
-- [ ] 018-02-PLAN.md — Event-driven triggers for registration and milestone notifications
-- [ ] 018-03-PLAN.md — Scheduled reminders, stalled workflow escalation, and preferences UI
-
-**Success Criteria:**
-1. System sends automated notifications for key workflow milestones without overwhelming users
-2. Client receives contextual reminder notifications for incomplete assessment stages
-3. Advisor receives notifications when clients complete milestones requiring advisor action
-4. Users can configure notification preferences for frequency and types of alerts
-5. System sends deadline reminders for stalled workflows with escalation paths
-
-### Phase 19: Multi-Family Workflows
-**Goal:** Advisors can manage complex family governance structures with role-based invitation coordination
-
-**Dependencies:** Phase 15 (invitation system), Phase 16 (status tracking), Phase 18 (notifications)
-
-**Requirements:** WORKFLOW-01, WORKFLOW-02, WORKFLOW-03, WORKFLOW-04, WORKFLOW-05
-
-**Success Criteria:**
-1. Advisor can invite multiple family members with different governance roles and permissions
-2. Family members receive role-specific invitations and access appropriate portal sections
-3. Status tracking displays coordinated progress for multi-member family assessments
-4. System manages workflow dependencies between family members automatically
-5. Advisor can orchestrate complex family invitation sequences and approval workflows
+Ready to plan next milestone with `/gsd:new-milestone`
 
 ## Progress
 
-| Phase | Status | Requirements | Progress |
-|-------|--------|--------------|----------|
-| 15 - Secure Client Invitations | Planned | 10 | ░░░░░░░░░░ 0% |
-| 16 - Client Status Pipeline | Planned | 8 | ░░░░░░░░░░ 0% |
-| 17 - Document Collection System | Planned | 5 | ░░░░░░░░░░ 0% |
-| 18 - Intelligent Notifications | Planned | 5 | ░░░░░░░░░░ 0% |
-| 19 - Multi-Family Workflows | Pending | 5 | ░░░░░░░░░░ 0% |
-
-**Total Requirements:** 33 mapped, 0 remaining
-**Estimated Completion:** TBD
-**Next Phase:** Phase 18 - Intelligent Notifications
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Authentication Security | v1.0 | 3/3 | Complete | 2026-02-18 |
+| 2. Assessment Engine Core Scoring | v1.0 | 6/6 | Complete | 2026-02-19 |
+| 3. Branching Logic | v1.0 | 2/2 | Complete | 2026-02-19 |
+| 4. Reports Templates | v1.0 | 3/3 | Complete | 2026-02-20 |
+| 5. Profile Foundation | v1.1 | 2/2 | Complete | 2026-02-21 |
+| 6. Assessment Integration | v1.1 | 2/2 | Complete | 2026-02-21 |
+| 7. Household Reporting | v1.1 | 2/2 | Complete | 2026-02-21 |
+| 8. Audio Interview Foundation | v1.2 | 6/6 | Complete | 2026-03-13 |
+| 9. Advisor Portal Access | v1.2 | 6/6 | Complete | 2026-03-14 |
+| 10. Assessment Customization | v1.2 | 4/4 | Complete | 2026-03-14 |
+| 11. Dashboard Foundation | v1.3 | 3/3 | Complete | 2026-03-14 |
+| 12. Analytics Engine | v1.3 | 2/2 | Complete | 2026-03-14 |
+| 13. Intelligence Features | v1.3 | 3/3 | Complete | 2026-03-15 |
+| 14. Family Dashboard | v1.3 | 2/2 | Complete | 2026-03-15 |
+| 15. Secure Client Invitations | v1.4 | 4/4 | Complete | 2026-03-15 |
+| 16. Client Status Pipeline | v1.4 | 3/3 | Complete | 2026-03-15 |
+| 17. Document Collection System | v1.4 | 4/4 | Complete | 2026-03-16 |
+| 18. Intelligent Notifications | v1.4 | 3/3 | Complete | 2026-03-16 |
 
 ---
-*Last updated: 2026-03-15*
+*Last updated: 2026-03-19*

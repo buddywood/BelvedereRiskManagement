@@ -49,3 +49,13 @@
 
 ---
 
+
+## v1.4 Advisor Workflow Pipeline (Shipped: 2026-03-19)
+
+**Phases completed:** 18 phases, 60 plans, 52 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+

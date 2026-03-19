@@ -8,14 +8,12 @@ A complete governance intelligence platform for wealth advisors managing multipl
 
 Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations.
 
-## Current Milestone: v1.4 Advisor Workflow Pipeline
+## Current Milestone: Next Milestone Planning
 
-**Goal:** Automate the complete client journey from advisor invite through governance report delivery with status tracking and intelligent notifications.
+**Status:** v1.4 Advisor Workflow Pipeline completed 2026-03-19
 
-**Target features:**
-- Client invite system with registration links and invitation tracking
-- Status tracking dashboard showing visual client pipeline progression
-- Automated notifications for stage transitions, pending reviews, and deadlines
+**Planning next milestone focused on:**
+- TBD - requires requirements gathering
 
 ## Requirements
 
@@ -45,14 +43,14 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - ✓ Governance analytics with trend visualizations and historical tracking — v1.3 (VIZ-01 through VIZ-05)
 - ✓ Automated risk intelligence with portfolio-wide insights and drill-down capabilities — v1.3 (INTEL-01 through INTEL-04)
 - ✓ Family self-service dashboard with household member display and advisor emphasis indicators — v1.3 (FAMILY-01 through FAMILY-04)
+- ✓ Advisor client invitation system with registration link generation — v1.4 (INVITE-01 through INVITE-07, BRAND-01, BRAND-02, BRAND-04)
+- ✓ Client status tracking with visual pipeline progression — v1.4 (STATUS-01 through STATUS-06, DOC-01, DOC-02)
+- ✓ Automated notification system for workflow stage transitions — v1.4 (NOTIFY-01 through NOTIFY-05)
+- ✓ Document collection system with advisor branding and automated reminders — v1.4 (DOC-03 through DOC-05, BRAND-03, BRAND-05)
 
 ### Active
 
-<!-- Current scope. Building toward these. -->
-
-- [ ] Advisor client invitation system with registration link generation
-- [ ] Client status tracking with visual pipeline progression
-- [ ] Automated notification system for workflow stage transitions
+<!-- Next milestone scope. Will be defined during new milestone planning. -->
 
 ### Out of Scope
 
@@ -65,18 +63,20 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 
 ## Current State
 
-**Version:** v1.3 Governance Intelligence shipped 2026-03-15
-**Codebase:** ~25,811 lines TypeScript/TSX (+9,339 lines this milestone)
-**Tech Stack:** Next.js 15, Prisma 7, PostgreSQL, Auth.js v5, @react-pdf/renderer, docxtemplater, TanStack Query & React Table, Recharts, OpenAI Whisper API
+**Version:** v1.4 Advisor Workflow Pipeline shipped 2026-03-19
+**Codebase:** ~2.5M lines TypeScript/TSX (comprehensive platform)
+**Tech Stack:** Next.js 15, Prisma 7, PostgreSQL, Auth.js v5, @react-pdf/renderer, docxtemplater, TanStack Query & React Table, Recharts, OpenAI Whisper API, AWS S3, Resend
 **Assessment Coverage:** 68 questions with household-aware personalization, intelligent filtering, and advisor-customized emphasis
-**Security:** TOTP MFA, Argon2id password hashing, AES-256-GCM encryption, rate limiting, row-level data isolation
-**Deliverables:** Advisor-customized PDF reports + 7 pre-filled governance policy templates with household composition
+**Security:** TOTP MFA, Argon2id password hashing, AES-256-GCM encryption, rate limiting, row-level data isolation, secure document uploads
+**Deliverables:** Branded PDF reports + 7 pre-filled governance policy templates + document collection system
 
-**User Flow:** Registration → MFA setup → Audio intake interview → Advisor review & approval → Customized 12-15 minute assessment → Deliverables with emphasis on advisor-selected risk areas
+**Complete Advisor Workflow:** Client invitation → Registration → Audio intake → Assessment → Document collection → Branded reports with real-time status tracking and intelligent notifications
 
-**Advisor Flow:** Portal access → Client intake review with audio playback → Risk area selection → Assessment approval → Multi-client dashboard with governance analytics → Risk intelligence insights → Client score trend tracking
+**User Flow:** Invitation email → Registration via secure link → MFA setup → Audio intake interview → Advisor review & approval → Customized assessment → Document upload → Deliverables
 
-**Family Flow:** Secure login → Family governance dashboard → Household member display → Current score with pillar breakdown → Historical assessment trends → Advisor emphasis indicators
+**Advisor Flow:** Send branded invitations → Real-time pipeline tracking → Client intake review → Risk area selection → Assessment approval → Document management → Multi-client analytics dashboard → Intelligent notifications
+
+**Family Flow:** Receive invitation → Register → Complete intake → Assessment → Upload documents → View branded governance dashboard with household member display and advisor emphasis indicators
 
 ## Key Decisions
 
@@ -111,6 +111,15 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 | PILLAR_WEIGHTS exported for intelligence module reuse | Share scoring constants between analytics and intelligence | ✓ Good — single source of truth for calculations |
 | User-scoped family dashboard queries | Families access their own data without advisor relationship | ✓ Good — enables self-service portal experience |
 | Extend existing ownership patterns for advisor relationships | Reuse proven authorization rather than rebuild | ✓ Good — maintains security consistency |
+| 7-day TTL for client invitations | Separate invitation lifecycle from authentication flows | ✓ Good — appropriate security balance for advisor workflows |
+| HTTPS-only logo validation | Security requirement for advisor branding | ✓ Good — prevents mixed content and maintains trust |
+| Stage computation from data rather than storage | Avoid sync issues in client pipeline tracking | ✓ Good — eliminates data consistency problems |
+| SSE polling every 30 seconds | Simplicity over WebSocket complexity for real-time updates | ✓ Good — sufficient for advisor dashboard needs |
+| AWS S3 presigned URLs | Secure client-side document uploads without credential exposure | ✓ Good — scalable and secure file handling |
+| 24-hour deduplication window for notifications | Prevent notification spam while allowing reasonable frequency | ✓ Good — balances engagement without fatigue |
+| Cron endpoint authentication via Bearer token | Serverless compatibility for scheduled reminders | ✓ Good — works with modern deployment patterns |
+| Assessment reminder thresholds (7 days intake, 14 days assessment) | Evidence-based timing for workflow engagement | ✓ Good — prevents abandonment without being pushy |
+| Checkbox UI over toggle switches for notification preferences | Better usability for multiple preference categories | ✓ Good — clearer state representation for users |
 
 ## Constraints
 
@@ -120,4 +129,4 @@ Prevent family wealth from becoming family conflict through systematic risk asse
 - **Scope**: Family Governance pillar only — validated as sufficient for governance intelligence platform
 
 ---
-*Last updated: 2026-03-15 after v1.4 milestone start*
+*Last updated: 2026-03-19 after v1.4 milestone completion*
