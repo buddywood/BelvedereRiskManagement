@@ -9,14 +9,14 @@
 ## Current Position
 
 **Milestone:** v1.5 Cyber Risk Intelligence
-**Phase:** 19 - Cyber Risk Foundation
-**Plan:** 3 of 3 (19-01, 19-02 complete, 19-03 complete)
-**Status:** Phase Complete
+**Phase:** 20 - Identity Risk Intelligence
+**Plan:** 1 of 3 (20-01 complete)
+**Status:** In Progress
 
-**Progress Bar:** █░░░░░░░░░ 10% (Phase 19 of 22)
+**Progress Bar:** █░░░░░░░░░ 11% (Phase 20 of 22)
 
-### Phase 19 Goal
-Establish independent cyber risk assessment with financial security evaluation
+### Phase 20 Goal
+Establish identity risk assessment as third pillar with threat intelligence integration
 
 **Success Criteria:**
 1. Family can complete cyber risk assessment with numerical scoring (0-10 scale matching governance)
@@ -62,6 +62,8 @@ Establish independent cyber risk assessment with financial security evaluation
 - **Weight Distribution:** Banking Security sub-category weighted 4 (vs 3 for others) to emphasize financial risk evaluation focus
 - **AI recommendation caching in missingControls JSON field for performance**
 - **gpt-4o-mini model selection for cost-effective structured output**
+- **Identity Risk Subcategory Weighting:** Social Exposure and Public Information weighted 4 (vs 3 for Digital Footprint and Family Visibility) reflecting primary identity theft vectors
+- **Identity Risk Question Bank Size:** 21 questions providing comprehensive coverage while maintaining assessment efficiency and user experience
 
 ### Architecture Approach
 - **Foundation:** Builds on proven v1.4 platform patterns (Next.js/Prisma/PostgreSQL)
@@ -83,12 +85,11 @@ Establish independent cyber risk assessment with financial security evaluation
 ## Active TODOs
 
 ### Immediate
-- [x] Execute Plan 19-01 - Cyber Risk Foundation (complete)
-- [x] Execute Plan 19-02 - Assessment UI Integration (complete)
-- [x] Execute Plan 19-03 - AI-Powered Recommendations & Advisor Portal (complete)
+- [x] Execute Plan 20-01 - Identity Risk Foundation (complete)
+- [ ] Execute Plan 20-02 - Assessment UI Integration
+- [ ] Execute Plan 20-03 - Threat Intelligence Integration
 
 ### Upcoming
-- [ ] Plan Phase 20 - Identity Risk Intelligence
 - [ ] Plan Phase 21 - Unified Risk Intelligence
 - [ ] Plan Phase 22 - Advanced Reporting
 
@@ -110,17 +111,17 @@ None identified. Ready to proceed with Phase 19 planning.
 
 ## Session Continuity
 
-**Last Action:** Completed Plan 19-01 (Cyber Risk Foundation)
+**Last Action:** Completed Plan 20-01 (Identity Risk Foundation)
 **Files Created:**
-- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/src/lib/cyber-risk/types.ts`
-- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/src/lib/cyber-risk/questions.ts`
-- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/src/lib/cyber-risk/scoring.ts`
-- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/19-cyber-risk-foundation/19-01-SUMMARY.md`
+- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/src/lib/identity-risk/types.ts`
+- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/src/lib/identity-risk/questions.ts`
+- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/src/lib/identity-risk/scoring.ts`
+- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/phases/20-identity-risk-intelligence/20-01-SUMMARY.md`
 
-**Next Action:** Plan Phase 20 (Identity Risk Intelligence)
+**Next Action:** Execute Plan 20-02 (Assessment UI Integration)
 
-**Context Preservation:** Phase 19 complete - families can complete cyber risk assessments with AI-powered recommendations, and advisors can view client cyber risk scores in dedicated portal section
+**Context Preservation:** Identity risk domain layer complete with 21-question bank across 4 subcategories, following proven cyber-risk patterns for consistency
 
 ---
 *State updated: 2026-03-19*
-*Stopped at: Completed 19-03-PLAN.md*
+*Stopped at: Completed 20-01-PLAN.md*
