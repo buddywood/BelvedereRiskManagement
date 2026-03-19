@@ -15,76 +15,118 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
       role="img"
       aria-label="AKILI Risk Intelligence"
     >
-      {/* Enhanced radar symbol - enterprise authority with gradient and hierarchy */}
+      {/* Enhanced radar chart - professional data visualization symbol */}
       <defs>
         <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="var(--brand, #2563EB)" stopOpacity="0.08" />
           <stop offset="100%" stopColor="var(--brand-secondary, #3B82F6)" stopOpacity="0.04" />
         </linearGradient>
+        <linearGradient id="dataFill" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--trust-accent, #F59E0B)" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="var(--brand, #2563EB)" stopOpacity="0.08" />
+        </linearGradient>
       </defs>
 
       <g transform="translate(30,40)">
-        {/* Outer pentagon - enhanced authority weight */}
+        {/* Radar chart concentric rings */}
         <polygon
           points="0,-22 20,-7 13,19 -13,19 -20,-7"
-          fill="url(#radarGradient)"
-          stroke="var(--brand, #2563EB)"
-          strokeWidth="1.8"
+          fill="none"
+          stroke="var(--border, #E2E8F0)"
+          strokeWidth="1"
           strokeLinejoin="round"
+          opacity="0.6"
+        />
+        <polygon
+          points="0,-15 14,-4.5 9,13 -9,13 -14,-4.5"
+          fill="none"
+          stroke="var(--border, #E2E8F0)"
+          strokeWidth="1"
+          strokeLinejoin="round"
+          opacity="0.4"
+        />
+        <polygon
+          points="0,-8 7,-2.5 4.5,6.5 -4.5,6.5 -7,-2.5"
+          fill="none"
+          stroke="var(--border, #E2E8F0)"
+          strokeWidth="1"
+          strokeLinejoin="round"
+          opacity="0.3"
         />
 
-        {/* Radar sweep lines - refined precision weight */}
+        {/* Radar chart axis lines */}
         <line
           x1="0"
           y1="0"
           x2="0"
-          y2="-23"
+          y2="-22"
           stroke="var(--brand, #2563EB)"
           strokeWidth="1.2"
           strokeLinecap="round"
+          opacity="0.7"
         />
         <line
           x1="0"
           y1="0"
-          x2="21"
-          y2="-7.5"
+          x2="20"
+          y2="-7"
           stroke="var(--brand, #2563EB)"
           strokeWidth="1.2"
           strokeLinecap="round"
+          opacity="0.7"
         />
         <line
           x1="0"
           y1="0"
-          x2="14"
-          y2="20"
+          x2="13"
+          y2="19"
           stroke="var(--brand, #2563EB)"
           strokeWidth="1.2"
           strokeLinecap="round"
+          opacity="0.7"
         />
         <line
           x1="0"
           y1="0"
-          x2="-14"
-          y2="20"
+          x2="-13"
+          y2="19"
           stroke="var(--brand, #2563EB)"
           strokeWidth="1.2"
           strokeLinecap="round"
+          opacity="0.7"
         />
         <line
           x1="0"
           y1="0"
-          x2="-21"
-          y2="-7.5"
+          x2="-20"
+          y2="-7"
           stroke="var(--brand, #2563EB)"
           strokeWidth="1.2"
           strokeLinecap="round"
+          opacity="0.7"
         />
 
-        {/* Enhanced center point - improved visibility */}
+        {/* Data visualization - risk assessment polygon */}
+        <polygon
+          points="0,-18 16,-3 8,12 -6,8 -14,-3"
+          fill="url(#dataFill)"
+          stroke="var(--trust-accent, #F59E0B)"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+
+        {/* Data points on radar chart */}
+        <circle cx="0" cy="-18" r="2" fill="var(--trust-accent, #F59E0B)" />
+        <circle cx="16" cy="-3" r="2" fill="var(--trust-accent, #F59E0B)" />
+        <circle cx="8" cy="12" r="2" fill="var(--trust-accent, #F59E0B)" />
+        <circle cx="-6" cy="8" r="2" fill="var(--trust-accent, #F59E0B)" />
+        <circle cx="-14" cy="-3" r="2" fill="var(--trust-accent, #F59E0B)" />
+
+        {/* Center point */}
         <circle
           cx="0"
           cy="0"
-          r="3"
+          r="2.5"
           fill="var(--brand, #2563EB)"
         />
       </g>
@@ -102,14 +144,14 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
       >
         AKILI
       </text>
-      {/* Professional trademark indicator */}
+      {/* Professional trademark indicator - positioned right after AKILI */}
       <text
-        x="152"
-        y="30"
+        x="168"
+        y="28"
         textAnchor="start"
         fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
-        fontSize="10"
-        fontWeight="500"
+        fontSize="12"
+        fontWeight="600"
         fill="var(--trust-accent, #F59E0B)"
       >
         ®
@@ -165,12 +207,29 @@ export function AkiliIcon({ className, size = 32 }: { className?: string; size?:
       </defs>
 
       <g transform="translate(30,30)">
-        {/* Simplified pentagon with subtle fill for authority */}
+        {/* Simplified radar chart for small sizes */}
         <polygon
           points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5"
-          fill="url(#iconGradient)"
+          fill="none"
           stroke="var(--brand, #2563EB)"
           strokeWidth="2.5"
+          strokeLinejoin="round"
+        />
+        <polygon
+          points="0,-9 8,-2.75 5,7.5 -5,7.5 -8,-2.75"
+          fill="none"
+          stroke="var(--brand, #2563EB)"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+          opacity="0.6"
+        />
+
+        {/* Simplified data visualization */}
+        <polygon
+          points="0,-12 10,-2 6,8 -4,5 -8,-2"
+          fill="url(#iconGradient)"
+          stroke="var(--trust-accent, #F59E0B)"
+          strokeWidth="2"
           strokeLinejoin="round"
         />
 
@@ -178,7 +237,7 @@ export function AkiliIcon({ className, size = 32 }: { className?: string; size?:
         <circle
           cx="0"
           cy="0"
-          r="4"
+          r="3"
           fill="var(--brand, #2563EB)"
         />
       </g>
@@ -208,19 +267,34 @@ export function AkiliHorizontal({ className }: { className?: string }) {
         </linearGradient>
       </defs>
 
-      {/* Enhanced compact radar symbol */}
+      {/* Enhanced compact radar chart */}
       <g transform="translate(20,20)">
         <polygon
           points="0,-12 11,-4 7,10 -7,10 -11,-4"
-          fill="url(#horizontalGradient)"
+          fill="none"
           stroke="var(--brand, #2563EB)"
           strokeWidth="1.4"
           strokeLinejoin="round"
         />
-        <line x1="0" y1="0" x2="0" y2="-13" stroke="var(--brand, #2563EB)" strokeWidth="1.0" strokeLinecap="round" />
-        <line x1="0" y1="0" x2="12" y2="-4" stroke="var(--brand, #2563EB)" strokeWidth="1.0" strokeLinecap="round" />
-        <line x1="0" y1="0" x2="8" y2="11" stroke="var(--brand, #2563EB)" strokeWidth="1.0" strokeLinecap="round" />
-        <circle cx="0" cy="0" r="2" fill="var(--brand, #2563EB)" />
+        <polygon
+          points="0,-6 5.5,-2 3.5,5 -3.5,5 -5.5,-2"
+          fill="none"
+          stroke="var(--brand, #2563EB)"
+          strokeWidth="1"
+          strokeLinejoin="round"
+          opacity="0.5"
+        />
+
+        {/* Compact data visualization */}
+        <polygon
+          points="0,-9 8,-2 5,7 -3,4 -6,-2"
+          fill="url(#horizontalGradient)"
+          stroke="var(--trust-accent, #F59E0B)"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+
+        <circle cx="0" cy="0" r="1.5" fill="var(--brand, #2563EB)" />
       </g>
 
       {/* Enhanced compact wordmark */}
@@ -238,13 +312,13 @@ export function AkiliHorizontal({ className }: { className?: string }) {
         AKILI
       </text>
 
-      {/* Professional trademark */}
+      {/* Professional trademark - positioned right after AKILI */}
       <text
-        x="82"
+        x="88"
         y="14"
         textAnchor="start"
         fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
-        fontSize="7"
+        fontSize="8"
         fontWeight="600"
         fill="var(--trust-accent, #F59E0B)"
       >

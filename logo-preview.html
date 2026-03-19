@@ -254,23 +254,43 @@
                                 <stop offset="0%" stop-color="var(--brand)" stop-opacity="0.08" />
                                 <stop offset="100%" stop-color="var(--brand-secondary)" stop-opacity="0.04" />
                             </linearGradient>
+                            <linearGradient id="dataFill" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--trust-accent)" stop-opacity="0.15" />
+                                <stop offset="100%" stop-color="var(--brand)" stop-opacity="0.08" />
+                            </linearGradient>
                         </defs>
                         <g transform="translate(30,40)">
-                            <polygon points="0,-22 20,-7 13,19 -13,19 -20,-7" fill="url(#radarGradient)" stroke="var(--brand)" stroke-width="1.8" stroke-linejoin="round" />
-                            <line x1="0" y1="0" x2="0" y2="-23" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
-                            <line x1="0" y1="0" x2="21" y2="-7.5" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
-                            <line x1="0" y1="0" x2="14" y2="20" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
-                            <line x1="0" y1="0" x2="-14" y2="20" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
-                            <line x1="0" y1="0" x2="-21" y2="-7.5" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
-                            <circle cx="0" cy="0" r="3" fill="var(--brand)" />
+                            <!-- Radar chart rings -->
+                            <polygon points="0,-22 20,-7 13,19 -13,19 -20,-7" fill="none" stroke="var(--border)" stroke-width="1" stroke-linejoin="round" opacity="0.6" />
+                            <polygon points="0,-15 14,-4.5 9,13 -9,13 -14,-4.5" fill="none" stroke="var(--border)" stroke-width="1" stroke-linejoin="round" opacity="0.4" />
+                            <polygon points="0,-8 7,-2.5 4.5,6.5 -4.5,6.5 -7,-2.5" fill="none" stroke="var(--border)" stroke-width="1" stroke-linejoin="round" opacity="0.3" />
+
+                            <!-- Axis lines -->
+                            <line x1="0" y1="0" x2="0" y2="-22" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
+                            <line x1="0" y1="0" x2="20" y2="-7" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
+                            <line x1="0" y1="0" x2="13" y2="19" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
+                            <line x1="0" y1="0" x2="-13" y2="19" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
+                            <line x1="0" y1="0" x2="-20" y2="-7" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" opacity="0.7" />
+
+                            <!-- Data visualization -->
+                            <polygon points="0,-18 16,-3 8,12 -6,8 -14,-3" fill="url(#dataFill)" stroke="var(--trust-accent)" stroke-width="1.5" stroke-linejoin="round" />
+
+                            <!-- Data points -->
+                            <circle cx="0" cy="-18" r="2" fill="var(--trust-accent)" />
+                            <circle cx="16" cy="-3" r="2" fill="var(--trust-accent)" />
+                            <circle cx="8" cy="12" r="2" fill="var(--trust-accent)" />
+                            <circle cx="-6" cy="8" r="2" fill="var(--trust-accent)" />
+                            <circle cx="-14" cy="-3" r="2" fill="var(--trust-accent)" />
+
+                            <circle cx="0" cy="0" r="2.5" fill="var(--brand)" />
                         </g>
                         <text x="58" y="36" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="28" font-weight="800" fill="var(--foreground)" letter-spacing="0.8">AKILI</text>
-                        <text x="152" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="10" font-weight="500" fill="var(--trust-accent)">®</text>
+                        <text x="168" y="28" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" fill="var(--trust-accent)">®</text>
                         <line x1="58" y1="44" x2="180" y2="44" stroke="var(--border)" stroke-width="0.5" />
                         <text x="58" y="56" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--muted-foreground)" letter-spacing="0.4">Risk Intelligence</text>
                     </svg>
                     <h4>Enhanced Full Lockup</h4>
-                    <p>IBM Plex Sans typography, stronger stroke hierarchy, professional separator, trademark symbol</p>
+                    <p>Professional radar chart visualization, IBM Plex Sans typography, data points showing risk assessment</p>
                 </div>
             </div>
         </div>
@@ -288,12 +308,14 @@
                             </linearGradient>
                         </defs>
                         <g transform="translate(30,30)">
-                            <polygon points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5" fill="url(#iconGradient)" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round" />
-                            <circle cx="0" cy="0" r="4" fill="var(--brand)" />
+                            <polygon points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round" />
+                            <polygon points="0,-9 8,-2.75 5,7.5 -5,7.5 -8,-2.75" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linejoin="round" opacity="0.6" />
+                            <polygon points="0,-12 10,-2 6,8 -4,5 -8,-2" fill="url(#iconGradient)" stroke="var(--trust-accent)" stroke-width="2" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="3" fill="var(--brand)" />
                         </g>
                     </svg>
                     <h4>Enhanced Icon</h4>
-                    <p>Simplified for small sizes, bold 2.5px stroke, larger center point</p>
+                    <p>Simplified radar chart for small sizes, dual rings, data visualization overlay</p>
                 </div>
 
                 <div class="logo-item">
@@ -305,14 +327,13 @@
                             </linearGradient>
                         </defs>
                         <g transform="translate(20,20)">
-                            <polygon points="0,-12 11,-4 7,10 -7,10 -11,-4" fill="url(#horizontalGradient)" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round" />
-                            <line x1="0" y1="0" x2="0" y2="-13" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
-                            <line x1="0" y1="0" x2="12" y2="-4" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
-                            <line x1="0" y1="0" x2="8" y2="11" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
-                            <circle cx="0" cy="0" r="2" fill="var(--brand)" />
+                            <polygon points="0,-12 11,-4 7,10 -7,10 -11,-4" fill="none" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round" />
+                            <polygon points="0,-6 5.5,-2 3.5,5 -3.5,5 -5.5,-2" fill="none" stroke="var(--brand)" stroke-width="1" stroke-linejoin="round" opacity="0.5" />
+                            <polygon points="0,-9 8,-2 5,7 -3,4 -6,-2" fill="url(#horizontalGradient)" stroke="var(--trust-accent)" stroke-width="1.2" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="1.5" fill="var(--brand)" />
                         </g>
                         <text x="40" y="18" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="800" fill="var(--foreground)" letter-spacing="0.4" dominant-baseline="middle">AKILI</text>
-                        <text x="82" y="14" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" fill="var(--trust-accent)">®</text>
+                        <text x="88" y="14" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="8" font-weight="600" fill="var(--trust-accent)">®</text>
                         <text x="40" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="9" font-weight="600" fill="var(--muted-foreground)" letter-spacing="0.25">Risk Intelligence</text>
                     </svg>
                     <h4>Horizontal Lockup</h4>
@@ -341,7 +362,7 @@
                             <circle cx="0" cy="0" r="2" fill="var(--brand)" />
                         </g>
                         <text x="40" y="18" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="800" fill="var(--foreground)" letter-spacing="0.4" dominant-baseline="middle">AKILI</text>
-                        <text x="82" y="14" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" fill="var(--trust-accent)">®</text>
+                        <text x="88" y="14" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="8" font-weight="600" fill="var(--trust-accent)">®</text>
                         <text x="40" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="9" font-weight="600" fill="var(--muted-foreground)" letter-spacing="0.25">Risk Intelligence</text>
                     </svg>
                     <div class="nav-links">
@@ -412,7 +433,7 @@
                             <circle cx="0" cy="0" r="2" fill="var(--brand)" />
                         </g>
                         <text x="40" y="18" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="800" fill="var(--foreground)">AKILI</text>
-                        <text x="82" y="14" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" fill="var(--trust-accent)">®</text>
+                        <text x="88" y="14" font-family="IBM Plex Sans, sans-serif" font-size="8" font-weight="600" fill="var(--trust-accent)">®</text>
                         <text x="40" y="30" font-family="IBM Plex Sans, sans-serif" font-size="9" font-weight="600" fill="var(--muted-foreground)">Risk Intelligence</text>
                     </svg>
                     <p style="font-size: 0.8rem; margin-top: 0.5rem;">Header Navigation</p>
@@ -425,7 +446,7 @@
                             <circle cx="0" cy="0" r="3" fill="var(--brand)" />
                         </g>
                         <text x="58" y="36" font-family="IBM Plex Sans, sans-serif" font-size="28" font-weight="800" fill="var(--foreground)" letter-spacing="0.8">AKILI</text>
-                        <text x="152" y="30" font-family="IBM Plex Sans, sans-serif" font-size="10" font-weight="500" fill="var(--trust-accent)">®</text>
+                        <text x="168" y="28" font-family="IBM Plex Sans, sans-serif" font-size="12" font-weight="600" fill="var(--trust-accent)">®</text>
                         <text x="58" y="56" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--muted-foreground)">Risk Intelligence</text>
                     </svg>
                     <p style="font-size: 0.8rem; margin-top: 0.5rem;">Hero Section</p>
@@ -442,8 +463,8 @@
                     <p>IBM Plex Sans font family - the gold standard for financial services and enterprise software</p>
                 </div>
                 <div class="improvement-item">
-                    <h5>Visual Hierarchy</h5>
-                    <p>Enhanced stroke weights: 1.8px pentagon (authority) vs 1.2px lines (precision)</p>
+                    <h5>Radar Chart Symbol</h5>
+                    <p>True radar chart with concentric rings, data visualization, and risk assessment polygon</p>
                 </div>
                 <div class="improvement-item">
                     <h5>Trust Indicators</h5>
@@ -456,6 +477,10 @@
                 <div class="improvement-item">
                     <h5>Subtle Gradients</h5>
                     <p>Professional depth without compromising clarity at small sizes</p>
+                </div>
+                <div class="improvement-item">
+                    <h5>Data Visualization</h5>
+                    <p>Actual risk assessment polygon with data points communicates intelligence and analysis</p>
                 </div>
                 <div class="improvement-item">
                     <h5>Improved Scaling</h5>
