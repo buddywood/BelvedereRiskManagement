@@ -48,7 +48,7 @@ interface ScoreData {
 
 export default function AssessmentResultsPage() {
   const router = useRouter();
-  const { assessmentId, markPillarComplete } = useAssessmentStore();
+  const { assessmentId, markPillarComplete, currentPillar, completedPillars } = useAssessmentStore();
   const [scoreData, setScoreData] = useState<ScoreData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,17 +70,22 @@ export default function AssessmentResultsPage() {
         return;
       }
 
+      // Determine which pillar was just completed
+      const targetPillar = currentPillar || "family-governance";
+
       try {
         setIsLoading(true);
         setError(null);
 
-        // Try to fetch existing score
-        let response = await fetch(`/api/assessment/${assessmentId}/score`);
+        // Try to fetch existing score for the current pillar
+        let response = await fetch(`/api/assessment/${assessmentId}/score?pillar=${targetPillar}`);
 
         if (response.status === 404) {
           // No score exists yet, trigger calculation
           response = await fetch(`/api/assessment/${assessmentId}/score`, {
             method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pillar: targetPillar }),
           });
 
           if (!response.ok) {
@@ -96,7 +101,7 @@ export default function AssessmentResultsPage() {
         setScoreData(data);
 
         // Mark pillar as complete in store
-        markPillarComplete("family-governance");
+        markPillarComplete(targetPillar);
       } catch (err) {
         console.error("Error loading score:", err);
         setError(err instanceof Error ? err.message : "Failed to load results");
@@ -106,14 +111,17 @@ export default function AssessmentResultsPage() {
     }
 
     loadScore();
-  }, [assessmentId, router, markPillarComplete, isReadyForRedirects]);
+  }, [assessmentId, router, markPillarComplete, currentPillar, isReadyForRedirects]);
 
   if (isLoading || !isReadyForRedirects) {
+    const targetPillar = currentPillar || "family-governance";
+    const pillarDisplayName = targetPillar === "cyber-risk" ? "cyber risk" : "governance";
+
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-brand mx-auto" />
-          <p className="text-muted-foreground">Calculating your governance assessment results...</p>
+          <p className="text-muted-foreground">Calculating your {pillarDisplayName} assessment results...</p>
         </div>
       </div>
     );
@@ -162,6 +170,13 @@ export default function AssessmentResultsPage() {
   );
   const answeredPercentage = (answeredCount / totalQuestions) * 100;
 
+  // Determine pillar display info
+  const targetPillar = currentPillar || "family-governance";
+  const pillarDisplayName = targetPillar === "cyber-risk" ? "Cyber Risk" : "Family Governance";
+  const pillarDescription = targetPillar === "cyber-risk" ?
+    "digital security practices and cyber risk exposure" :
+    "governance structures, decision-making processes, and succession planning";
+
   return (
     <div className="mx-auto max-w-6xl space-y-8">
       <section className="hero-surface rounded-[1.75rem] p-6 sm:p-8">
@@ -169,7 +184,7 @@ export default function AssessmentResultsPage() {
           <div className="space-y-3">
             <p className="editorial-kicker">Assessment Complete</p>
             <h1 className="text-4xl font-semibold text-balance sm:text-5xl">
-              Family Governance Assessment Results
+              {pillarDisplayName} Assessment Results
             </h1>
             <p className="text-sm leading-7 text-muted-foreground sm:text-base">
               Completed on {format(new Date(scoreData.completedAt), "MMMM d, yyyy 'at' h:mm a")}
@@ -224,24 +239,26 @@ export default function AssessmentResultsPage() {
           <CardContent className="pt-8">
             <ActionPlan
               missingControls={scoreData.missingControls}
-              pillarName="Family Governance"
+              pillarName={pillarDisplayName}
             />
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <Card>
-          <CardContent className="pt-8">
-            <DownloadSection assessmentId={assessmentId} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-8">
-            <TemplateList assessmentId={assessmentId} />
-          </CardContent>
-        </Card>
-      </div>
+      {targetPillar === "family-governance" && (
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Card>
+            <CardContent className="pt-8">
+              <DownloadSection assessmentId={assessmentId} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-8">
+              <TemplateList assessmentId={assessmentId} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <section className="flex flex-col gap-3 border-t section-divider pt-6 sm:flex-row sm:items-center sm:justify-between">
         <Button
@@ -250,11 +267,31 @@ export default function AssessmentResultsPage() {
         >
           Review Answers
         </Button>
-        <Button
-          onClick={() => router.push("/dashboard")}
-        >
-          Return to Dashboard
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {(() => {
+            // Check if there's another pillar to complete
+            const allPillars = ["family-governance", "cyber-risk"];
+            const incompletePillar = allPillars.find(p => !completedPillars.includes(p));
+
+            if (incompletePillar && incompletePillar !== targetPillar) {
+              const nextPillarName = incompletePillar === "cyber-risk" ? "Cyber Risk" : "Family Governance";
+              return (
+                <Button
+                  onClick={() => router.push("/assessment")}
+                  variant="outline"
+                >
+                  Continue to {nextPillarName}
+                </Button>
+              );
+            }
+            return null;
+          })()}
+          <Button
+            onClick={() => router.push("/dashboard")}
+          >
+            Return to Dashboard
+          </Button>
+        </div>
       </section>
     </div>
   );
