@@ -51,8 +51,14 @@ Plans:
 ### Phase 21: Unified Risk Intelligence
 **Dependencies:** Phase 20 (identity assessment complete)
 **Requirements:** UNIFIED-01, UNIFIED-02
+**Plans:** 3 plans
 
-**Goal:** Combine governance and cyber risk into holistic family risk profiles
+**Goal:** Combine governance, cyber risk, and identity risk into holistic family risk profiles
+
+Plans:
+- [ ] 21-01-PLAN.md -- Unified risk types, composite scoring engine, and data queries
+- [ ] 21-02-PLAN.md -- Advisor unified risk dashboard with composite portfolio view
+- [ ] 21-03-PLAN.md -- Family dashboard unified risk section and cross-domain action plans
 
 **Success Criteria:**
 1. Advisor dashboard shows combined risk profile with weighted composite scoring (governance + cyber)
@@ -78,7 +84,7 @@ Plans:
 |-------|--------|-------|-------|------------|
 | 19 - Cyber Foundation | Planned | 0/3 | 0/7 | ░░░░░░░░░░ 0% |
 | 20 - Identity Intelligence | Planned | 0/3 | 0/6 | ░░░░░░░░░░ 0% |
-| 21 - Unified Intelligence | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
+| 21 - Unified Intelligence | Planned | 0/3 | 0/6 | ░░░░░░░░░░ 0% |
 | 22 - Advanced Reporting | Pending | 0/0 | 0/0 | ░░░░░░░░░░ 0% |
 
 **Overall:** ░░░░░░░░░░ 0% (0/4 phases complete)
