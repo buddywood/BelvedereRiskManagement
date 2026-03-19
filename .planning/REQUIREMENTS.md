@@ -68,21 +68,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CYBER-01 | TBD | Pending |
-| CYBER-02 | TBD | Pending |
-| IDENTITY-01 | TBD | Pending |
-| IDENTITY-02 | TBD | Pending |
-| FINANCE-01 | TBD | Pending |
-| FINANCE-02 | TBD | Pending |
-| UNIFIED-01 | TBD | Pending |
-| UNIFIED-02 | TBD | Pending |
-| REPORT-01 | TBD | Pending |
+| CYBER-01 | Phase 19 | Pending |
+| CYBER-02 | Phase 19 | Pending |
+| FINANCE-01 | Phase 19 | Pending |
+| FINANCE-02 | Phase 19 | Pending |
+| IDENTITY-01 | Phase 20 | Pending |
+| IDENTITY-02 | Phase 20 | Pending |
+| UNIFIED-01 | Phase 21 | Pending |
+| UNIFIED-02 | Phase 21 | Pending |
+| REPORT-01 | Phase 22 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠️
+- Mapped to phases: 9
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-19*
-*Last updated: 2026-03-19 after initial definition*
+*Last updated: 2026-03-18 after roadmap creation*

@@ -1,147 +1,113 @@
 # Project State
 
-**Last Updated:** 2026-03-19
-
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-15)
+**Core Value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
 
-**Core value:** Prevent family wealth from becoming family conflict through systematic risk assessment and actionable governance recommendations
-**Current focus:** v1.5 Cyber Risk Intelligence
+**Current Focus:** v1.5 Cyber Risk Intelligence — Expand beyond family governance into comprehensive family risk intelligence by adding cyber risk as distinct pillar with unified risk profiling
 
 ## Current Position
 
 **Milestone:** v1.5 Cyber Risk Intelligence
-**Phase:** Not started (defining requirements)
-**Plan:** —
-**Status:** Defining requirements for cyber risk pillar
-**Progress:** [░░░░░░░░░░] 0%
+**Phase:** 19 - Cyber Risk Foundation
+**Plan:** None (roadmap complete, ready for planning)
+**Status:** Roadmap Created
 
-**Last activity:** 2026-03-19 — Started v1.5 milestone with cyber risk intelligence goals
+**Progress Bar:** ░░░░░░░░░░ 0% (Phase 19 of 22)
+
+### Phase 19 Goal
+Establish independent cyber risk assessment with financial security evaluation
+
+**Success Criteria:**
+1. Family can complete cyber risk assessment with numerical scoring (0-10 scale matching governance)
+2. System generates automated cyber risk recommendations based on assessment results
+3. Advisor can view client cyber risk scores in separate portal section
+4. Assessment evaluates banking security practices and payment method risks with actionable feedback
+
+**Requirements:** CYBER-01, CYBER-02, FINANCE-01, FINANCE-02
 
 ## Performance Metrics
 
-**Velocity (last 4 milestones):**
+### Milestone Progress
+- **Phases:** 0/4 complete
+- **Requirements:** 9 total, 0 completed
+- **Coverage:** 100% (all requirements mapped)
+
+### Development Velocity
+- **Started:** 2026-03-18 (roadmap creation)
+- **Current:** Day 1
+- **Estimated:** TBD (needs planning)
+
+### Historical Velocity
+**Previous milestones:**
 - v1.0 (4 phases): 22 days
 - v1.1 (3 phases): 1 day
 - v1.2 (3 phases): 1 day
 - v1.3 (4 phases): 26 days
-
-**v1.3 execution metrics:**
-- Total phases: 4
-- Total plans: 10
-- Files modified: 104
-- Lines added: 9,339
-- Duration: 26 days (2026-02-17 → 2026-03-15)
+- v1.4 (4 phases): 4 days
 
 **Technical Health:**
-- Codebase: ~25,811 lines TypeScript/TSX
-- Architecture: Next.js 15, Prisma 7, PostgreSQL, TanStack React Table, Recharts
-- Security: TOTP MFA, Argon2id, AES-256-GCM, rate limiting, row-level data isolation
-- Test Coverage: Unit testing for customization and scoring logic
-
-**Quality Indicators:**
-- Assessment completion time: 12-15 minutes (target achieved)
-- Dashboard performance: <2 seconds for 50 families (target achieved)
-- Security: Multi-tenant data isolation enforced
-- Analytics: Trend visualization with historical tracking operational
+- Codebase: ~2.5M lines TypeScript/TSX (comprehensive platform)
+- Architecture: Next.js 15, Prisma 7, PostgreSQL, Auth.js v5, TanStack Query & React Table, Recharts
+- Security: TOTP MFA, Argon2id password hashing, AES-256-GCM encryption, rate limiting, row-level data isolation
+- Assessment Coverage: 68 questions with household-aware personalization and advisor customization
 
 ## Accumulated Context
 
-### v1.4 Roadmap Decisions
+### Key Decisions
+- **Domain Separation Strategy:** Cyber risk implemented as parallel pillar to governance, maintaining strict boundaries while enabling unified views
+- **Security Architecture:** Multi-tenant cyber risk data uses same row-level security as existing governance system
+- **Performance Model:** Async processing with cached results, avoiding blocking workflows on external APIs
 
-**Phase Structure (5 phases):**
-- Phase 15: Secure Client Invitations (10 requirements)
-- Phase 16: Client Status Pipeline (8 requirements)
-- Phase 17: Document Collection System (5 requirements)
-- Phase 18: Intelligent Notifications (5 requirements)
-- Phase 19: Multi-Family Workflows (5 requirements)
+### Architecture Approach
+- **Foundation:** Builds on proven v1.4 platform patterns (Next.js/Prisma/PostgreSQL)
+- **Data Model:** Separate schemas for cyber-specific data, materialized views for unified scoring
+- **Integration:** Leverages ae-cvss-calculator for CVSS 4.0 scoring, mathjs for composite risk calculations
 
-**Key Architectural Decisions:**
-- Extend existing Prisma schema with ClientInvitation and ClientStatus models
-- Use Server-Sent Events for real-time dashboard updates (simpler than WebSockets)
-- Leverage existing Resend email infrastructure for invitation system
-- Maintain multi-tenant data isolation patterns from existing codebase
+### Phase Dependencies
+1. Phase 19: No dependencies (builds on v1.4 foundation)
+2. Phase 20: Requires Phase 19 cyber risk foundation
+3. Phase 21: Requires Phase 20 identity assessment complete
+4. Phase 22: Requires Phase 21 unified scoring complete
 
-**Critical Success Factors:**
-- Multi-tenant security boundaries must be established in Phase 15 foundation
-- Status tracking dashboard provides foundation for intelligent notifications
-- Document collection integrates with existing PDF report generation
-- Notification system prevents alert fatigue through preference management
+### Research Insights
+- **Foundation Strategy:** Must establish domain boundaries and data architecture before any implementation to prevent contamination
+- **External Integration Isolation:** Threat intelligence APIs require proper caching and tenant isolation to prevent security cascades
+- **Unified Scoring Mathematics:** Risk aggregation requires mature individual assessment systems to ensure mathematical validity
+- **User Experience Separation:** Maintain separate assessment flows, use unified dashboards for combined results only
 
-### Research Insights Applied
+## Active TODOs
 
-- Security-first approach: Multi-tenant isolation cannot be retrofitted
-- Real-time updates via SSE rather than polling for advisor dashboard efficiency
-- Notification intelligence over automation to prevent advisor workflow interruption
-- White-label branding throughout client journey for professional advisor experience
+### Immediate
+- [ ] Plan Phase 19 - Cyber Risk Foundation (ready for `/gsd:plan-phase 19`)
 
-### Phase 15 Decisions
+### Upcoming
+- [ ] Plan Phase 20 - Identity Risk Intelligence
+- [ ] Plan Phase 21 - Unified Risk Intelligence
+- [ ] Plan Phase 22 - Advanced Reporting
 
-- Used React Hook Form with Zod validation for consistent form patterns throughout invitation UI
-- Implemented logo URL validation requiring HTTPS for security best practices
-- Added pending invitations metric to advisor dashboard for workflow visibility
-- Created dedicated advisor settings page for branding configuration
-- Integrated invitation management into existing advisor portal navigation
+## Known Blockers
 
-### Phase 16 Decisions
+None identified. Ready to proceed with Phase 19 planning.
 
-- Stage computed from data rather than stored to avoid sync issues
-- DocumentRequirement model supports future Phase 17 document collection
-- Pipeline types include all workflow states from invitation to completion
-- Multi-tenant isolation maintained through advisor-scoped queries
-- SSE polling every 30 seconds for simplicity over WebSocket complexity
-- TanStack Table for consistent table patterns with existing dashboard components
-- Visual step indicator shows abbreviated stage labels for compact table display
-- Pipeline navigation placed as first card in advisor portal for primary workflow
-- Client detail drill-down with comprehensive workflow timeline visualization
-- Document requirement management with inline CRUD operations
-- Suspense streaming for progressive loading of complex client data
+## Research Flags
 
-### Phase 17 Decisions
+**Phase 20:** Complex vendor integrations require API security research and threat intelligence provider evaluation during planning
+**Phase 22:** Social media analysis and FAIR methodology implementation need domain-specific research
 
-- Used HTTP cron endpoint instead of node-cron for serverless compatibility
-- Implemented 3-day grace period and 7-day deduplication for reminder timing
-- Grouped documents by client to send single email per client
-- Added advisor logo validation requiring HTTPS URLs for security
-- Advisor branding prop pattern established: { firmName?: string, logoUrl?: string }
-- CRON_SECRET authentication pattern for scheduled endpoints
-
-### Phase 18 Decisions
-
-- 24-hour deduplication window prevents notification spam while allowing reasonable re-notifications
-- Category-to-preference mapping enables granular notification control per notification type
-- Quiet hours stored as UTC strings for simple timezone-agnostic implementation
-- In-app notifications always created regardless of email preferences for advisor workflow continuity
-- Extended NotificationType enum to support registration, milestone, stalled workflow, and document upload events
-- Cron endpoint authentication via Bearer token for serverless compatibility
-- Assessment reminder thresholds: 7 days for intake, 14 days for assessment
-- Deduplication via user's reminderFrequencyDays preference (default 7 days)
-- Workflow stall detection using existing isStalled() logic (>7 days inactive)
-- Separate reminder processors for assessment (to clients) vs workflow (to advisors)
-- Checkbox UI over toggle switches for notification preferences
-
-### TODOs
-
-- [x] Plan Phase 15: Secure Client Invitations
-- [ ] Plan Phase 16: Client Status Pipeline
-- [ ] Research deeper notification patterns during Phase 18 planning
-- [ ] Validate complex family workflow patterns during Phase 19 planning
-
-### Blockers
-
-None identified. Ready to proceed with phase planning.
+**Phases 19, 21:** Follow established patterns, skip research-phase
 
 ## Session Continuity
 
-**Last Session:** 2026-03-16T09:52:01.476Z
-**Context:** Completed 018-01 (notification engine foundation)
+**Last Action:** Roadmap creation for v1.5 milestone
+**Files Created:**
+- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/milestones/v1.5-ROADMAP.md`
+- `/Users/bwoodtalton/Projects/BelvedereRiskManagement/.planning/STATE.md`
 
-**Ready for:** Phase 18 Complete - All intelligent notification features implemented
+**Next Action:** `/gsd:plan-phase 19` when ready to begin implementation
 
-**Next Action:** Execute Phase 19 with `/gsd:plan-phase 19`
-
-**Coverage Status:** ✓ All 33 v1.4 requirements mapped to phases
+**Context Preservation:** All v1.5 requirements mapped to phases, success criteria derived, architecture decisions documented
 
 ---
-*Next action: Plan Phase 15 with /gsd:plan-phase 15*
+*State updated: 2026-03-18*
+*Ready for: Phase 19 planning*
