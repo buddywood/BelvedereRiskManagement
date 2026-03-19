@@ -115,7 +115,8 @@ export default function AssessmentResultsPage() {
 
   if (isLoading || !isReadyForRedirects) {
     const targetPillar = currentPillar || "family-governance";
-    const pillarDisplayName = targetPillar === "cyber-risk" ? "cyber risk" : "governance";
+    const pillarDisplayName = targetPillar === "cyber-risk" ? "cyber risk" :
+                              targetPillar === "identity-risk" ? "identity risk" : "governance";
 
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -172,9 +173,12 @@ export default function AssessmentResultsPage() {
 
   // Determine pillar display info
   const targetPillar = currentPillar || "family-governance";
-  const pillarDisplayName = targetPillar === "cyber-risk" ? "Cyber Risk" : "Family Governance";
+  const pillarDisplayName = targetPillar === "cyber-risk" ? "Cyber Risk" :
+                            targetPillar === "identity-risk" ? "Identity Risk" : "Family Governance";
   const pillarDescription = targetPillar === "cyber-risk" ?
     "digital security practices and cyber risk exposure" :
+    targetPillar === "identity-risk" ?
+    "personal information exposure and identity theft vulnerability" :
     "governance structures, decision-making processes, and succession planning";
 
   return (
@@ -270,11 +274,12 @@ export default function AssessmentResultsPage() {
         <div className="flex flex-col gap-3 sm:flex-row">
           {(() => {
             // Check if there's another pillar to complete
-            const allPillars = ["family-governance", "cyber-risk"];
+            const allPillars = ["family-governance", "cyber-risk", "identity-risk"];
             const incompletePillar = allPillars.find(p => !completedPillars.includes(p));
 
             if (incompletePillar && incompletePillar !== targetPillar) {
-              const nextPillarName = incompletePillar === "cyber-risk" ? "Cyber Risk" : "Family Governance";
+              const nextPillarName = incompletePillar === "cyber-risk" ? "Cyber Risk" :
+                                       incompletePillar === "identity-risk" ? "Identity Risk" : "Family Governance";
               return (
                 <Button
                   onClick={() => router.push("/assessment")}

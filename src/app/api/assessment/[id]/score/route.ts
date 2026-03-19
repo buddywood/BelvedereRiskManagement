@@ -7,6 +7,8 @@ import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
 import { cyberRiskPillar, cyberRiskQuestions } from "@/lib/cyber-risk/questions";
 import { calculateCyberRiskScore } from "@/lib/cyber-risk/scoring";
+import { identityRiskPillar, identityRiskQuestions } from "@/lib/identity-risk/questions";
+import { calculateIdentityRiskScore } from "@/lib/identity-risk/scoring";
 import { Question, Pillar } from "@/lib/assessment/types";
 import {
   getCustomizationConfig,
@@ -49,6 +51,8 @@ function getPillarConfig(pillar: string): { pillarData: Pillar; questions: Quest
       return { pillarData: familyGovernancePillar, questions: allQuestions };
     case 'cyber-risk':
       return { pillarData: cyberRiskPillar, questions: cyberRiskQuestions };
+    case 'identity-risk':
+      return { pillarData: identityRiskPillar, questions: identityRiskQuestions };
     default:
       return null;
   }
@@ -245,6 +249,9 @@ export async function POST(
     if (pillar === 'cyber-risk') {
       // Use cyber risk scoring wrapper
       scoreResult = calculateCyberRiskScore(answers, visibleIds);
+    } else if (pillar === 'identity-risk') {
+      // Use identity risk scoring wrapper
+      scoreResult = calculateIdentityRiskScore(answers, visibleIds);
     } else if (customizationConfig) {
       // Use customization for governance pillar
       const emphasisMultipliers = getEmphasisMultipliers(customizationConfig);

@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation';
 import type { CustomizationConfig } from '@/lib/assessment/customization';
 import { allQuestions } from '@/lib/assessment/questions';
 import { allCyberQuestions, cyberRiskPillar } from '@/lib/cyber-risk/questions';
+import { allIdentityQuestions, identityRiskPillar } from '@/lib/identity-risk/questions';
 import { Question, Pillar } from '@/lib/assessment/types';
 
 /**
@@ -53,6 +54,11 @@ function getQuestionsForPillar(pillarSlug: string): { questions: Question[]; pil
       return {
         questions: allCyberQuestions,
         pillar: cyberRiskPillar
+      };
+    case 'identity-risk':
+      return {
+        questions: allIdentityQuestions,
+        pillar: identityRiskPillar
       };
     default:
       return { questions: [], pillar: null };
