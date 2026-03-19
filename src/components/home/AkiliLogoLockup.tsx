@@ -144,13 +144,13 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
       >
         AKILI
       </text>
-      {/* Professional trademark indicator - positioned right after AKILI */}
+      {/* Professional trademark superscript - upper-right corner */}
       <text
-        x="152"
-        y="28"
+        x="132"
+        y="22"
         textAnchor="start"
         fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
-        fontSize="10"
+        fontSize="8"
         fontWeight="600"
         fill="var(--trust-accent, #F59E0B)"
       >
@@ -312,13 +312,13 @@ export function AkiliHorizontal({ className }: { className?: string }) {
         AKILI
       </text>
 
-      {/* Professional trademark - positioned right after AKILI */}
+      {/* Professional trademark superscript - upper-right corner */}
       <text
-        x="88"
-        y="14"
+        x="78"
+        y="10"
         textAnchor="start"
         fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
-        fontSize="8"
+        fontSize="6"
         fontWeight="600"
         fill="var(--trust-accent, #F59E0B)"
       >
