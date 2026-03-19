@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import type { Pillar } from "@/lib/assessment/types";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { allQuestions } from "@/lib/assessment/questions";
+import { cyberRiskPillar, allCyberQuestions } from "@/lib/cyber-risk/questions";
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CustomizationConfig } from "@/lib/assessment/customization";
@@ -31,8 +32,85 @@ import {
  * Enhanced with smart resume to navigate to exact next required question.
  */
 
-// MVP: Single pillar with 8 sub-categories (will expand in future phases)
-const FAMILY_GOVERNANCE_PILLAR: Pillar = {
+// Pillar configurations for multi-pillar assessment hub
+const ASSESSMENT_PILLARS = [
+  {
+    pillar: {
+      id: "family-governance",
+      name: "Family Governance",
+      slug: "family-governance",
+      description:
+        "Evaluate your family's governance structures, decision-making processes, and succession planning.",
+      estimatedMinutes: 25,
+      subCategories: [
+        {
+          id: "governance-structure",
+          name: "Governance Structure",
+          description: "Family councils and decision-making bodies",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "decision-making",
+          name: "Decision Making",
+          description: "Processes and protocols",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "conflict-resolution",
+          name: "Conflict Resolution",
+          description: "Dispute handling mechanisms",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "succession-planning",
+          name: "Succession Planning",
+          description: "Leadership transition strategies",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "communication",
+          name: "Communication",
+          description: "Family communication frameworks",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "education",
+          name: "Education",
+          description: "Next generation preparation",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "values-mission",
+          name: "Values & Mission",
+          description: "Family purpose and principles",
+          weight: 1,
+          questionIds: [],
+        },
+        {
+          id: "documentation",
+          name: "Documentation",
+          description: "Policies and formal agreements",
+          weight: 1,
+          questionIds: [],
+        },
+      ],
+    },
+    questions: allQuestions,
+  },
+  {
+    pillar: cyberRiskPillar,
+    questions: allCyberQuestions,
+  },
+];
+
+// Legacy constant for backwards compatibility
+const FAMILY_GOVERNANCE_PILLAR: Pillar = ASSESSMENT_PILLARS[0].pillar;
   id: "family-governance",
   name: "Family Governance",
   slug: "family-governance",
@@ -205,26 +283,37 @@ export default function AssessmentHubPage() {
     },
     onSuccess: (data) => {
       store.setAssessmentId(data.id);
-      store.setCurrentPosition("family-governance", 0);
+      // Will be set by handleStartAssessment based on pillar
       toast.success("Assessment started");
-      router.push("/assessment/family-governance/0");
     },
     onError: () => {
       toast.error("Failed to start assessment");
     },
   });
 
-  const handleStartAssessment = () => {
-    createAssessmentMutation.mutate();
+  const handleStartAssessment = (pillarSlug: string) => {
+    createAssessmentMutation.mutate(undefined, {
+      onSuccess: (data) => {
+        store.setCurrentPosition(pillarSlug, 0);
+        router.push(`/assessment/${pillarSlug}/0`);
+      },
+    });
   };
 
-  const handleContinueAssessment = () => {
+  const handleContinueAssessment = (pillarSlug: string) => {
     // Clean orphaned answers before resuming
     store.cleanOrphanedAnswers();
 
+    // Find the pillar config
+    const pillarConfig = ASSESSMENT_PILLARS.find(p => p.pillar.slug === pillarSlug);
+    if (!pillarConfig) {
+      toast.error("Pillar configuration not found");
+      return;
+    }
+
     // Smart resume: Find next unanswered question using branching logic
-    const pillarQuestions = allQuestions.filter(
-      (q) => q.pillar === "family-governance",
+    const pillarQuestions = pillarConfig.questions.filter(
+      (q) => q.pillar === pillarSlug,
     );
     const visibleQuestions = getVisibleQuestions(
       store.answers,
@@ -247,56 +336,71 @@ export default function AssessmentHubPage() {
       }
     }
 
-    const pillar = store.currentPillar || "family-governance";
-    router.push(`/assessment/${pillar}/${nextQuestionIndex}`);
+    router.push(`/assessment/${pillarSlug}/${nextQuestionIndex}`);
   };
 
-  // Determine pillar status
-  const getPillarStatus = () => {
-    if (!store.assessmentId) return "not-started";
-    if (store.completedPillars.includes("family-governance"))
-      return "completed";
-    return "in-progress";
-  };
+  // Calculate pillar statistics for each pillar
+  const pillarStats = ASSESSMENT_PILLARS.map(({ pillar, questions }) => {
+    const pillarSlug = pillar.slug;
 
-  const pillarStatus = getPillarStatus();
+    // Determine pillar status
+    const getPillarStatus = () => {
+      if (!store.assessmentId) return "not-started";
+      if (store.completedPillars.includes(pillarSlug)) return "completed";
 
-  // Calculate accurate question count using branching logic and customization
-  const pillarQuestions = allQuestions.filter(
-    (q) => q.pillar === "family-governance",
-  );
+      // Check if any questions from this pillar have been answered
+      const pillarQuestions = questions.filter((q) => q.pillar === pillarSlug);
+      const answeredQuestions = pillarQuestions.filter((q) => {
+        const answer = store.answers[q.id];
+        return answer !== undefined && answer !== null;
+      });
 
-  // Apply customization filtering if config is available and assessment is customized
-  const baseQuestions =
-    customizationConfig?.isCustomized &&
-    customizationConfig.visibleSubCategories.length > 0
-      ? pillarQuestions.filter((q) =>
-          customizationConfig.visibleSubCategories.includes(q.subCategory),
-        )
-      : pillarQuestions;
+      return answeredQuestions.length > 0 ? "in-progress" : "not-started";
+    };
 
-  const visibleQuestions = getVisibleQuestions(
-    store.answers,
-    baseQuestions,
-    profile,
-  );
-  const questionsAnswered = visibleQuestions.filter((q) => {
-    const answer = store.answers[q.id];
-    return answer !== undefined && answer !== null;
-  }).length;
-  const totalQuestions = visibleQuestions.length || baseQuestions.length;
+    // Calculate question counts using branching logic and customization
+    const pillarQuestions = questions.filter((q) => q.pillar === pillarSlug);
 
-  // Calculate customized duration if applicable
-  const estimatedDuration =
-    customizationConfig?.isCustomized &&
-    customizationConfig.visibleSubCategories.length > 0
-      ? estimateCompletionMinutes(
-          customizationConfig.visibleSubCategories,
-          allQuestions,
-        )
-      : FAMILY_GOVERNANCE_PILLAR.estimatedMinutes;
+    // Apply customization filtering only for governance pillar (cyber risk doesn't have customization yet)
+    const baseQuestions = pillarSlug === "family-governance" &&
+      customizationConfig?.isCustomized &&
+      customizationConfig.visibleSubCategories.length > 0
+        ? pillarQuestions.filter((q) =>
+            customizationConfig.visibleSubCategories.includes(q.subCategory),
+          )
+        : pillarQuestions;
 
-  // Calculate focus area count for customization banner
+    const visibleQuestions = getVisibleQuestions(
+      store.answers,
+      baseQuestions,
+      profile,
+    );
+    const questionsAnswered = visibleQuestions.filter((q) => {
+      const answer = store.answers[q.id];
+      return answer !== undefined && answer !== null;
+    }).length;
+    const totalQuestions = visibleQuestions.length || baseQuestions.length;
+
+    // Calculate customized duration if applicable (governance only)
+    const estimatedDuration = pillarSlug === "family-governance" &&
+      customizationConfig?.isCustomized &&
+      customizationConfig.visibleSubCategories.length > 0
+        ? estimateCompletionMinutes(
+            customizationConfig.visibleSubCategories,
+            allQuestions,
+          )
+        : pillar.estimatedMinutes;
+
+    return {
+      pillar,
+      status: getPillarStatus(),
+      questionsAnswered,
+      totalQuestions,
+      estimatedDuration,
+    };
+  });
+
+  // Calculate focus area count for customization banner (governance only)
   const focusAreaCount = customizationConfig?.visibleSubCategories.length || 0;
 
   // Show loading skeleton until hydrated
@@ -333,16 +437,14 @@ export default function AssessmentHubPage() {
         </div>
       </section>
 
-      {pillarStatus === "in-progress" && store.assessmentId && (
+      {store.assessmentId && pillarStats.some(p => p.status === "in-progress") && (
         <Alert variant="info">
           <AlertTitle className="text-lg font-semibold">
             Welcome back
           </AlertTitle>
           <AlertDescription className="space-y-2">
             <p>
-              You&apos;ve completed <strong>{questionsAnswered}</strong> of{" "}
-              <strong>{totalQuestions}</strong> visible questions. Continue from
-              where you left off.
+              Continue your assessment from where you left off. Progress is saved automatically.
             </p>
             {store.lastSaved && (
               <p className="text-sm flex items-center gap-2">
@@ -362,7 +464,7 @@ export default function AssessmentHubPage() {
           <CardContent className="pt-6">
             <OverallProgress
               completedPillars={store.completedPillars}
-              totalPillars={1}
+              totalPillars={2}
               currentPillar={store.currentPillar || undefined}
             />
           </CardContent>
@@ -373,7 +475,7 @@ export default function AssessmentHubPage() {
         <CustomizationBanner
           advisorName={customizationConfig.advisorName}
           focusAreaCount={focusAreaCount}
-          estimatedMinutes={estimatedDuration}
+          estimatedMinutes={pillarStats.find(p => p.pillar.slug === "family-governance")?.estimatedDuration || 25}
         />
       )}
 
@@ -384,17 +486,20 @@ export default function AssessmentHubPage() {
         </div>
 
         <div className="grid gap-4">
-          <PillarCard
-            pillar={FAMILY_GOVERNANCE_PILLAR}
-            status={pillarStatus}
-            questionsAnswered={questionsAnswered}
-            totalQuestions={totalQuestions}
-            onClick={
-              pillarStatus === "not-started"
-                ? handleStartAssessment
-                : handleContinueAssessment
-            }
-          />
+          {pillarStats.map(({ pillar, status, questionsAnswered, totalQuestions }) => (
+            <PillarCard
+              key={pillar.id}
+              pillar={pillar}
+              status={status}
+              questionsAnswered={questionsAnswered}
+              totalQuestions={totalQuestions}
+              onClick={
+                status === "not-started"
+                  ? () => handleStartAssessment(pillar.slug)
+                  : () => handleContinueAssessment(pillar.slug)
+              }
+            />
+          ))}
         </div>
       </section>
 
@@ -402,70 +507,96 @@ export default function AssessmentHubPage() {
         <div className="flex flex-col items-start gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl space-y-2">
             <p className="editorial-kicker">Next Step</p>
-            {pillarStatus === "not-started" ? (
-              <p className="text-base leading-7 text-muted-foreground">
-                Ready to begin? This assessment will take approximately{" "}
-                {estimatedDuration} minutes and saves progress automatically.
-              </p>
-            ) : pillarStatus === "in-progress" ? (
-              <p className="text-base leading-7 text-muted-foreground">
-                Continue your assessment to receive tailored governance
-                recommendations and a scored summary.
-              </p>
-            ) : (
-              <p className="text-base leading-7 text-muted-foreground">
-                Your assessment is complete. Review your results, risk drivers,
-                and recommended actions.
-              </p>
-            )}
+            {(() => {
+              const completedCount = pillarStats.filter(p => p.status === "completed").length;
+              const inProgressCount = pillarStats.filter(p => p.status === "in-progress").length;
+              const notStartedCount = pillarStats.filter(p => p.status === "not-started").length;
+
+              if (completedCount === pillarStats.length) {
+                return (
+                  <p className="text-base leading-7 text-muted-foreground">
+                    All assessments complete! Review your results, risk drivers,
+                    and recommended actions for each area.
+                  </p>
+                );
+              } else if (inProgressCount > 0) {
+                return (
+                  <p className="text-base leading-7 text-muted-foreground">
+                    Continue your assessment to receive tailored recommendations
+                    and scored summaries for each risk area.
+                  </p>
+                );
+              } else {
+                return (
+                  <p className="text-base leading-7 text-muted-foreground">
+                    Ready to begin? Start with either assessment pillar. Each takes 15-25 minutes and saves progress automatically.
+                  </p>
+                );
+              }
+            })()}
           </div>
 
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            {pillarStatus === "not-started" ? (
-              <Button
-                size="lg"
-                onClick={handleStartAssessment}
-                disabled={createAssessmentMutation.isPending}
-              >
-                {createAssessmentMutation.isPending ? (
+            {(() => {
+              const completedCount = pillarStats.filter(p => p.status === "completed").length;
+              const inProgressPillar = pillarStats.find(p => p.status === "in-progress");
+
+              if (completedCount === pillarStats.length) {
+                return (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Starting...
+                    <Button
+                      size="lg"
+                      onClick={() => router.push("/assessment/results")}
+                    >
+                      View Results
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => router.push("/dashboard")}
+                    >
+                      Return to Dashboard
+                    </Button>
                   </>
-                ) : (
-                  "Begin Assessment"
-                )}
-              </Button>
-            ) : pillarStatus === "in-progress" ? (
-              <>
-                <Button size="lg" onClick={handleContinueAssessment}>
-                  Continue Assessment
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => router.push("/assessment/family-governance/0")}
-                >
-                  Review from Start
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  size="lg"
-                  onClick={() => router.push("/assessment/results")}
-                >
-                  View Results
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => router.push("/dashboard")}
-                >
-                  Return to Dashboard
-                </Button>
-              </>
-            )}
+                );
+              } else if (inProgressPillar) {
+                return (
+                  <>
+                    <Button
+                      size="lg"
+                      onClick={() => handleContinueAssessment(inProgressPillar.pillar.slug)}
+                    >
+                      Continue {inProgressPillar.pillar.name}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => router.push(`/assessment/${inProgressPillar.pillar.slug}/0`)}
+                    >
+                      Review from Start
+                    </Button>
+                  </>
+                );
+              } else {
+                const governancePillar = pillarStats.find(p => p.pillar.slug === "family-governance");
+                return (
+                  <Button
+                    size="lg"
+                    onClick={() => governancePillar ? handleStartAssessment(governancePillar.pillar.slug) : undefined}
+                    disabled={createAssessmentMutation.isPending}
+                  >
+                    {createAssessmentMutation.isPending ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Starting...
+                      </>
+                    ) : (
+                      "Begin Assessment"
+                    )}
+                  </Button>
+                );
+              }
+            })()}
           </div>
         </div>
       </section>
