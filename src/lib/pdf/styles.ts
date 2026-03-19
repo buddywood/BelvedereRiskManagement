@@ -64,11 +64,16 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
 
-  footer: {
+  footerContainer: {
     position: 'absolute',
-    bottom: 30,
-    left: 72,
-    right: 72,
+    bottom: 18,
+    left: 0,
+    right: 0,
+    width: '100%',
+    paddingHorizontal: 72,
+  },
+
+  footerText: {
     textAlign: 'center',
     fontSize: 9,
     color: '#6b7280',
