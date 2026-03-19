@@ -1,7 +1,8 @@
 /**
  * AKILI logo lockup: radar symbol + wordmark + tagline.
- * Professional version with consistent stroke weights and unified typography.
- * SVG optimized for scalability and professional appearance.
+ * Enhanced professional version with IBM Plex Sans typography, trust indicators,
+ * and refined stroke weights for enterprise-grade authority.
+ * SVG optimized for scalability and financial services appearance.
  */
 export function AkiliLogoLockup({ className }: { className?: string }) {
   return (
@@ -14,25 +15,32 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
       role="img"
       aria-label="AKILI Risk Intelligence"
     >
-      {/* Radar symbol - professional version with consistent stroke weights */}
+      {/* Enhanced radar symbol - enterprise authority with gradient and hierarchy */}
+      <defs>
+        <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--brand, #2563EB)" stopOpacity="0.08" />
+          <stop offset="100%" stopColor="var(--brand-secondary, #3B82F6)" stopOpacity="0.04" />
+        </linearGradient>
+      </defs>
+
       <g transform="translate(30,40)">
-        {/* Outer pentagon */}
+        {/* Outer pentagon - enhanced authority weight */}
         <polygon
           points="0,-22 20,-7 13,19 -13,19 -20,-7"
-          fill="none"
+          fill="url(#radarGradient)"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.5"
+          strokeWidth="1.8"
           strokeLinejoin="round"
         />
 
-        {/* Radar sweep lines - consistent 1.5px stroke */}
+        {/* Radar sweep lines - refined precision weight */}
         <line
           x1="0"
           y1="0"
           x2="0"
           y2="-23"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.5"
+          strokeWidth="1.2"
           strokeLinecap="round"
         />
         <line
@@ -41,7 +49,7 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
           x2="21"
           y2="-7.5"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.5"
+          strokeWidth="1.2"
           strokeLinecap="round"
         />
         <line
@@ -50,7 +58,7 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
           x2="14"
           y2="20"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.5"
+          strokeWidth="1.2"
           strokeLinecap="round"
         />
         <line
@@ -59,7 +67,7 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
           x2="-14"
           y2="20"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.5"
+          strokeWidth="1.2"
           strokeLinecap="round"
         />
         <line
@@ -68,43 +76,65 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
           x2="-21"
           y2="-7.5"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.5"
+          strokeWidth="1.2"
           strokeLinecap="round"
         />
 
-        {/* Center point */}
+        {/* Enhanced center point - improved visibility */}
         <circle
           cx="0"
           cy="0"
-          r="2.5"
+          r="3"
           fill="var(--brand, #2563EB)"
         />
       </g>
 
-      {/* Wordmark - unified sans-serif typography */}
+      {/* Enhanced wordmark - IBM Plex Sans for financial trust */}
       <text
         x="58"
         y="36"
         textAnchor="start"
-        fontFamily="var(--font-sans), Inter, -apple-system, system-ui, sans-serif"
-        fontSize="26"
-        fontWeight="700"
+        fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
+        fontSize="28"
+        fontWeight="800"
         fill="var(--foreground, #1E293B)"
-        letterSpacing="0.5"
+        letterSpacing="0.8"
       >
         AKILI
       </text>
+      {/* Professional trademark indicator */}
+      <text
+        x="152"
+        y="30"
+        textAnchor="start"
+        fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
+        fontSize="10"
+        fontWeight="500"
+        fill="var(--trust-accent, #F59E0B)"
+      >
+        ®
+      </text>
 
-      {/* Tagline - consistent sans-serif family */}
+      {/* Professional separator line */}
+      <line
+        x1="58"
+        y1="44"
+        x2="180"
+        y2="44"
+        stroke="var(--border, #E2E8F0)"
+        strokeWidth="0.5"
+      />
+
+      {/* Enhanced tagline - refined professional hierarchy */}
       <text
         x="58"
-        y="54"
+        y="56"
         textAnchor="start"
-        fontFamily="var(--font-sans), Inter, -apple-system, system-ui, sans-serif"
-        fontSize="12"
-        fontWeight="500"
+        fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
+        fontSize="13"
+        fontWeight="600"
         fill="var(--muted-foreground, #64748B)"
-        letterSpacing="0.3"
+        letterSpacing="0.4"
       >
         Risk Intelligence
       </text>
@@ -113,7 +143,8 @@ export function AkiliLogoLockup({ className }: { className?: string }) {
 }
 
 /**
- * Simplified icon-only version for small applications (favicons, avatars)
+ * Enhanced icon-only version for small applications (favicons, avatars)
+ * Optimized for clarity at small sizes with bold strokes
  */
 export function AkiliIcon({ className, size = 32 }: { className?: string; size?: number }) {
   return (
@@ -126,50 +157,28 @@ export function AkiliIcon({ className, size = 32 }: { className?: string; size?:
       role="img"
       aria-label="AKILI"
     >
+      <defs>
+        <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--brand, #2563EB)" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="var(--brand-secondary, #3B82F6)" stopOpacity="0.06" />
+        </linearGradient>
+      </defs>
+
       <g transform="translate(30,30)">
-        {/* Simplified pentagon for small sizes */}
+        {/* Simplified pentagon with subtle fill for authority */}
         <polygon
           points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5"
-          fill="none"
+          fill="url(#iconGradient)"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinejoin="round"
         />
 
-        {/* Simplified radar lines */}
-        <line
-          x1="0"
-          y1="0"
-          x2="0"
-          y2="-19"
-          stroke="var(--brand, #2563EB)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <line
-          x1="0"
-          y1="0"
-          x2="17"
-          y2="-6"
-          stroke="var(--brand, #2563EB)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <line
-          x1="0"
-          y1="0"
-          x2="11"
-          y2="16"
-          stroke="var(--brand, #2563EB)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-
-        {/* Center point */}
+        {/* Enhanced center point for small-size visibility */}
         <circle
           cx="0"
           cy="0"
-          r="3"
+          r="4"
           fill="var(--brand, #2563EB)"
         />
       </g>
@@ -178,59 +187,80 @@ export function AkiliIcon({ className, size = 32 }: { className?: string; size?:
 }
 
 /**
- * Horizontal lockup version for headers and navigation
+ * Enhanced horizontal lockup version for headers and navigation
+ * Professional compact design with IBM Plex Sans
  */
 export function AkiliHorizontal({ className }: { className?: string }) {
   return (
     <svg
-      width="180"
+      width="190"
       height="40"
-      viewBox="0 0 180 40"
+      viewBox="0 0 190 40"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       role="img"
       aria-label="AKILI Risk Intelligence"
     >
-      {/* Compact radar symbol */}
+      <defs>
+        <linearGradient id="horizontalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--brand, #2563EB)" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="var(--brand-secondary, #3B82F6)" stopOpacity="0.03" />
+        </linearGradient>
+      </defs>
+
+      {/* Enhanced compact radar symbol */}
       <g transform="translate(20,20)">
         <polygon
           points="0,-12 11,-4 7,10 -7,10 -11,-4"
-          fill="none"
+          fill="url(#horizontalGradient)"
           stroke="var(--brand, #2563EB)"
-          strokeWidth="1.2"
+          strokeWidth="1.4"
           strokeLinejoin="round"
         />
-        <line x1="0" y1="0" x2="0" y2="-13" stroke="var(--brand, #2563EB)" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="0" y1="0" x2="12" y2="-4" stroke="var(--brand, #2563EB)" strokeWidth="1.2" strokeLinecap="round" />
-        <line x1="0" y1="0" x2="8" y2="11" stroke="var(--brand, #2563EB)" strokeWidth="1.2" strokeLinecap="round" />
-        <circle cx="0" cy="0" r="1.5" fill="var(--brand, #2563EB)" />
+        <line x1="0" y1="0" x2="0" y2="-13" stroke="var(--brand, #2563EB)" strokeWidth="1.0" strokeLinecap="round" />
+        <line x1="0" y1="0" x2="12" y2="-4" stroke="var(--brand, #2563EB)" strokeWidth="1.0" strokeLinecap="round" />
+        <line x1="0" y1="0" x2="8" y2="11" stroke="var(--brand, #2563EB)" strokeWidth="1.0" strokeLinecap="round" />
+        <circle cx="0" cy="0" r="2" fill="var(--brand, #2563EB)" />
       </g>
 
-      {/* Compact wordmark */}
+      {/* Enhanced compact wordmark */}
       <text
         x="40"
-        y="20"
+        y="18"
         textAnchor="start"
-        fontFamily="var(--font-sans), Inter, -apple-system, system-ui, sans-serif"
-        fontSize="14"
-        fontWeight="700"
+        fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
+        fontSize="15"
+        fontWeight="800"
         fill="var(--foreground, #1E293B)"
-        letterSpacing="0.3"
+        letterSpacing="0.4"
         dominantBaseline="middle"
       >
         AKILI
       </text>
 
-      {/* Compact tagline */}
+      {/* Professional trademark */}
+      <text
+        x="82"
+        y="14"
+        textAnchor="start"
+        fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
+        fontSize="7"
+        fontWeight="600"
+        fill="var(--trust-accent, #F59E0B)"
+      >
+        ®
+      </text>
+
+      {/* Enhanced compact tagline */}
       <text
         x="40"
-        y="28"
+        y="30"
         textAnchor="start"
-        fontFamily="var(--font-sans), Inter, -apple-system, system-ui, sans-serif"
-        fontSize="8"
-        fontWeight="500"
+        fontFamily="IBM Plex Sans, -apple-system, system-ui, sans-serif"
+        fontSize="9"
+        fontWeight="600"
         fill="var(--muted-foreground, #64748B)"
-        letterSpacing="0.2"
+        letterSpacing="0.25"
       >
         Risk Intelligence
       </text>
