@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKILI Logo Preview - Enhanced Professional Version</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Light theme colors */
+            --background: #fafbfc;
+            --foreground: #1e293b;
+            --border: #e2e8f0;
+            --muted-foreground: #64748b;
+            --brand: #2563eb;
+            --brand-secondary: #3b82f6;
+            --trust-accent: #f59e0b;
+        }
+
+        .dark {
+            /* Dark theme colors */
+            --background: #0f172a;
+            --foreground: #f1f5f9;
+            --border: #334155;
+            --muted-foreground: #94a3b8;
+            --brand: #60a5fa;
+            --brand-secondary: #93c5fd;
+            --trust-accent: #fbbf24;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-secondary) 100%);
+            color: white;
+            border-radius: 1rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+            padding: 2rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--brand);
+        }
+
+        .logo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .logo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        .logo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-item h4 {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+
+        .logo-item p {
+            margin-top: 0.5rem;
+            color: var(--muted-foreground);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .context-demo {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .navbar-demo {
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            color: var(--muted-foreground);
+        }
+
+        .business-card {
+            background: linear-gradient(135deg, var(--brand) 0%, var(--brand-secondary) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .business-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+
+        .improvements-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .improvement-item {
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--brand) 5%, transparent 5%);
+            border-left: 4px solid var(--trust-accent);
+            border-radius: 0.25rem;
+        }
+
+        .improvement-item h5 {
+            color: var(--brand);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: var(--brand);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            background: var(--brand-secondary);
+            transform: translateY(-1px);
+        }
+
+        .size-demo {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .bg-demo {
+            padding: 2rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .bg-white { background: white; }
+        .bg-gray { background: #f8fafc; }
+        .bg-dark { background: #1e293b; }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .logo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>AKILI Logo Enhancement Preview</h1>
+            <p>Professional enterprise-grade improvements for risk management authority</p>
+        </div>
+
+        <!-- Main Logo Lockup -->
+        <div class="section">
+            <h3 class="section-title">Enhanced Main Logo Lockup</h3>
+            <div class="logo-grid">
+                <div class="logo-item">
+                    <svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AKILI Risk Intelligence">
+                        <defs>
+                            <linearGradient id="radarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--brand)" stop-opacity="0.08" />
+                                <stop offset="100%" stop-color="var(--brand-secondary)" stop-opacity="0.04" />
+                            </linearGradient>
+                        </defs>
+                        <g transform="translate(30,40)">
+                            <polygon points="0,-22 20,-7 13,19 -13,19 -20,-7" fill="url(#radarGradient)" stroke="var(--brand)" stroke-width="1.8" stroke-linejoin="round" />
+                            <line x1="0" y1="0" x2="0" y2="-23" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="21" y2="-7.5" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="14" y2="20" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="-14" y2="20" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="-21" y2="-7.5" stroke="var(--brand)" stroke-width="1.2" stroke-linecap="round" />
+                            <circle cx="0" cy="0" r="3" fill="var(--brand)" />
+                        </g>
+                        <text x="58" y="36" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="28" font-weight="800" fill="var(--foreground)" letter-spacing="0.8">AKILI</text>
+                        <text x="152" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="10" font-weight="500" fill="var(--trust-accent)">®</text>
+                        <line x1="58" y1="44" x2="180" y2="44" stroke="var(--border)" stroke-width="0.5" />
+                        <text x="58" y="56" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--muted-foreground)" letter-spacing="0.4">Risk Intelligence</text>
+                    </svg>
+                    <h4>Enhanced Full Lockup</h4>
+                    <p>IBM Plex Sans typography, stronger stroke hierarchy, professional separator, trademark symbol</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logo Variants -->
+        <div class="section">
+            <h3 class="section-title">Logo Variants</h3>
+            <div class="logo-grid">
+                <div class="logo-item">
+                    <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AKILI">
+                        <defs>
+                            <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--brand)" stop-opacity="0.12" />
+                                <stop offset="100%" stop-color="var(--brand-secondary)" stop-opacity="0.06" />
+                            </linearGradient>
+                        </defs>
+                        <g transform="translate(30,30)">
+                            <polygon points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5" fill="url(#iconGradient)" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="4" fill="var(--brand)" />
+                        </g>
+                    </svg>
+                    <h4>Enhanced Icon</h4>
+                    <p>Simplified for small sizes, bold 2.5px stroke, larger center point</p>
+                </div>
+
+                <div class="logo-item">
+                    <svg width="190" height="40" viewBox="0 0 190 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AKILI Risk Intelligence">
+                        <defs>
+                            <linearGradient id="horizontalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--brand)" stop-opacity="0.06" />
+                                <stop offset="100%" stop-color="var(--brand-secondary)" stop-opacity="0.03" />
+                            </linearGradient>
+                        </defs>
+                        <g transform="translate(20,20)">
+                            <polygon points="0,-12 11,-4 7,10 -7,10 -11,-4" fill="url(#horizontalGradient)" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round" />
+                            <line x1="0" y1="0" x2="0" y2="-13" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="12" y2="-4" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="8" y2="11" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
+                            <circle cx="0" cy="0" r="2" fill="var(--brand)" />
+                        </g>
+                        <text x="40" y="18" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="800" fill="var(--foreground)" letter-spacing="0.4" dominant-baseline="middle">AKILI</text>
+                        <text x="82" y="14" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" fill="var(--trust-accent)">®</text>
+                        <text x="40" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="9" font-weight="600" fill="var(--muted-foreground)" letter-spacing="0.25">Risk Intelligence</text>
+                    </svg>
+                    <h4>Horizontal Lockup</h4>
+                    <p>Compact navigation version with professional trademark placement</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Context Demonstrations -->
+        <div class="section">
+            <h3 class="section-title">Real-World Context</h3>
+            <div class="context-demo">
+                <div class="navbar-demo">
+                    <svg width="140" height="30" viewBox="0 0 190 40" xmlns="http://www.w3.org/2000/svg" style="transform: scale(0.75);">
+                        <defs>
+                            <linearGradient id="navGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="var(--brand)" stop-opacity="0.06" />
+                                <stop offset="100%" stop-color="var(--brand-secondary)" stop-opacity="0.03" />
+                            </linearGradient>
+                        </defs>
+                        <g transform="translate(20,20)">
+                            <polygon points="0,-12 11,-4 7,10 -7,10 -11,-4" fill="url(#navGradient)" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round" />
+                            <line x1="0" y1="0" x2="0" y2="-13" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="12" y2="-4" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
+                            <line x1="0" y1="0" x2="8" y2="11" stroke="var(--brand)" stroke-width="1.0" stroke-linecap="round" />
+                            <circle cx="0" cy="0" r="2" fill="var(--brand)" />
+                        </g>
+                        <text x="40" y="18" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="800" fill="var(--foreground)" letter-spacing="0.4" dominant-baseline="middle">AKILI</text>
+                        <text x="82" y="14" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" fill="var(--trust-accent)">®</text>
+                        <text x="40" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="9" font-weight="600" fill="var(--muted-foreground)" letter-spacing="0.25">Risk Intelligence</text>
+                    </svg>
+                    <div class="nav-links">
+                        <span>Dashboard</span>
+                        <span>Assessments</span>
+                        <span>Reports</span>
+                        <span>Settings</span>
+                    </div>
+                </div>
+
+                <div class="business-card">
+                    <div style="position: relative; z-index: 1;">
+                        <svg width="200" height="60" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg" style="transform: scale(0.7);">
+                            <defs>
+                                <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="rgba(255,255,255,0.15)" stop-opacity="0.08" />
+                                    <stop offset="100%" stop-color="rgba(255,255,255,0.1)" stop-opacity="0.04" />
+                                </linearGradient>
+                            </defs>
+                            <g transform="translate(30,40)">
+                                <polygon points="0,-22 20,-7 13,19 -13,19 -20,-7" fill="url(#cardGradient)" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" stroke-linejoin="round" />
+                                <line x1="0" y1="0" x2="0" y2="-23" stroke="rgba(255,255,255,0.8)" stroke-width="1.2" stroke-linecap="round" />
+                                <line x1="0" y1="0" x2="21" y2="-7.5" stroke="rgba(255,255,255,0.8)" stroke-width="1.2" stroke-linecap="round" />
+                                <line x1="0" y1="0" x2="14" y2="20" stroke="rgba(255,255,255,0.8)" stroke-width="1.2" stroke-linecap="round" />
+                                <line x1="0" y1="0" x2="-14" y2="20" stroke="rgba(255,255,255,0.8)" stroke-width="1.2" stroke-linecap="round" />
+                                <line x1="0" y1="0" x2="-21" y2="-7.5" stroke="rgba(255,255,255,0.8)" stroke-width="1.2" stroke-linecap="round" />
+                                <circle cx="0" cy="0" r="3" fill="rgba(255,255,255,0.9)" />
+                            </g>
+                            <text x="58" y="36" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="28" font-weight="800" fill="white" letter-spacing="0.8">AKILI</text>
+                            <text x="152" y="30" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="10" font-weight="500" fill="#fbbf24">®</text>
+                            <line x1="58" y1="44" x2="180" y2="44" stroke="rgba(255,255,255,0.3)" stroke-width="0.5" />
+                            <text x="58" y="56" text-anchor="start" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="rgba(255,255,255,0.8)" letter-spacing="0.4">Risk Intelligence</text>
+                        </svg>
+                        <p style="margin-top: 1rem; font-weight: 600;">Professional Business Context</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Size Demonstrations -->
+        <div class="section">
+            <h3 class="section-title">Scalability Test</h3>
+            <div class="size-demo">
+                <div style="text-align: center;">
+                    <svg width="32" height="32" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="translate(30,30)">
+                            <polygon points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="4" fill="var(--brand)" />
+                        </g>
+                    </svg>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem;">32px Favicon</p>
+                </div>
+
+                <div style="text-align: center;">
+                    <svg width="48" height="48" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="translate(30,30)">
+                            <polygon points="0,-18 16,-5.5 10,15 -10,15 -16,-5.5" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="4" fill="var(--brand)" />
+                        </g>
+                    </svg>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem;">48px Mobile</p>
+                </div>
+
+                <div style="text-align: center;">
+                    <svg width="140" height="35" viewBox="0 0 190 40" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="translate(20,20)">
+                            <polygon points="0,-12 11,-4 7,10 -7,10 -11,-4" fill="none" stroke="var(--brand)" stroke-width="1.4" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="2" fill="var(--brand)" />
+                        </g>
+                        <text x="40" y="18" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="800" fill="var(--foreground)">AKILI</text>
+                        <text x="82" y="14" font-family="IBM Plex Sans, sans-serif" font-size="7" font-weight="600" fill="var(--trust-accent)">®</text>
+                        <text x="40" y="30" font-family="IBM Plex Sans, sans-serif" font-size="9" font-weight="600" fill="var(--muted-foreground)">Risk Intelligence</text>
+                    </svg>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem;">Header Navigation</p>
+                </div>
+
+                <div style="text-align: center;">
+                    <svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
+                        <g transform="translate(30,40)">
+                            <polygon points="0,-22 20,-7 13,19 -13,19 -20,-7" fill="rgba(37, 99, 235, 0.05)" stroke="var(--brand)" stroke-width="1.8" stroke-linejoin="round" />
+                            <circle cx="0" cy="0" r="3" fill="var(--brand)" />
+                        </g>
+                        <text x="58" y="36" font-family="IBM Plex Sans, sans-serif" font-size="28" font-weight="800" fill="var(--foreground)" letter-spacing="0.8">AKILI</text>
+                        <text x="152" y="30" font-family="IBM Plex Sans, sans-serif" font-size="10" font-weight="500" fill="var(--trust-accent)">®</text>
+                        <text x="58" y="56" font-family="IBM Plex Sans, sans-serif" font-size="13" font-weight="600" fill="var(--muted-foreground)">Risk Intelligence</text>
+                    </svg>
+                    <p style="font-size: 0.8rem; margin-top: 0.5rem;">Hero Section</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Improvements -->
+        <div class="section">
+            <h3 class="section-title">Key Professional Improvements</h3>
+            <div class="improvements-list">
+                <div class="improvement-item">
+                    <h5>Typography Authority</h5>
+                    <p>IBM Plex Sans font family - the gold standard for financial services and enterprise software</p>
+                </div>
+                <div class="improvement-item">
+                    <h5>Visual Hierarchy</h5>
+                    <p>Enhanced stroke weights: 1.8px pentagon (authority) vs 1.2px lines (precision)</p>
+                </div>
+                <div class="improvement-item">
+                    <h5>Trust Indicators</h5>
+                    <p>Professional ® trademark symbol and separator line for credibility</p>
+                </div>
+                <div class="improvement-item">
+                    <h5>Enhanced Colors</h5>
+                    <p>Brand-secondary and trust-accent colors for professional depth</p>
+                </div>
+                <div class="improvement-item">
+                    <h5>Subtle Gradients</h5>
+                    <p>Professional depth without compromising clarity at small sizes</p>
+                </div>
+                <div class="improvement-item">
+                    <h5>Improved Scaling</h5>
+                    <p>Optimized center points and stroke weights for all sizes from favicon to billboard</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+
+            if (body.classList.contains('dark')) {
+                body.classList.remove('dark');
+                button.textContent = '🌙 Dark Mode';
+            } else {
+                body.classList.add('dark');
+                button.textContent = '☀️ Light Mode';
+            }
+        }
+
+        // Add some interactive hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoItems = document.querySelectorAll('.logo-item');
+
+            logoItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    const svg = this.querySelector('svg');
+                    if (svg) {
+                        svg.style.transform = 'scale(1.05)';
+                        svg.style.transition = 'transform 0.3s ease';
+                    }
+                });
+
+                item.addEventListener('mouseleave', function() {
+                    const svg = this.querySelector('svg');
+                    if (svg) {
+                        svg.style.transform = 'scale(1)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
