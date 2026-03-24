@@ -84,7 +84,7 @@ export default async function Home() {
                         className="w-full sm:min-w-0 sm:flex-1"
                       >
                         <Link
-                          href="/signin"
+                          href="/signin?portal=advisor"
                           title="Sign in to the advisor portal"
                         >
                           Advisor Portal

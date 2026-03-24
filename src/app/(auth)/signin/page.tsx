@@ -15,6 +15,7 @@ import { safeAfterSignInPath } from "@/lib/auth-callback-path";
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
+  const isAdvisorPortal = searchParams.get("portal") === "advisor";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -52,7 +53,7 @@ function SignInForm() {
 
   return (
     <AuthPanel
-      eyebrow="Client Access"
+      eyebrow={isAdvisorPortal ? "Advisor Portal" : "Client Access"}
       title="Sign in"
       description="Continue your assessment workspace with a streamlined, security-conscious sign-in flow."
       footer={
