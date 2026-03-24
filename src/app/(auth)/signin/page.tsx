@@ -61,7 +61,11 @@ function SignInForm() {
           <span>
             Don&apos;t have an account?{" "}
             <Link
-              href={callbackUrl ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}` : "/signup"}
+              href={
+                callbackUrl
+                  ? `/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`
+                  : "/signup"
+              }
               className="font-semibold text-foreground hover:underline"
             >
               Sign up
@@ -122,7 +126,13 @@ function SignInForm() {
 
 export default function SignInPage() {
   return (
-    <Suspense fallback={<div className="py-12 text-center text-sm text-muted-foreground">Loading sign-in experience...</div>}>
+    <Suspense
+      fallback={
+        <div className="py-12 text-center text-sm text-muted-foreground">
+          Loading sign-in experience...
+        </div>
+      }
+    >
       <SignInForm />
     </Suspense>
   );
