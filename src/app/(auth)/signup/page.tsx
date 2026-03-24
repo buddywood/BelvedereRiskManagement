@@ -10,12 +10,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { safeAfterSignInPath } from "@/lib/auth-callback-path";
 
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("invite") ?? "";
-  const callbackUrl = searchParams.get("callbackUrl") ?? (inviteToken ? "/intake" : "/dashboard");
+  const defaultAfterAuth = inviteToken ? "/intake" : "/dashboard";
+  const callbackUrl = safeAfterSignInPath(
+    searchParams.get("callbackUrl"),
+    defaultAfterAuth,
+  );
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -138,17 +143,13 @@ function SignUpForm() {
         redirect: false,
       });
 
-      if (result?.error) {
+      if (result?.error || result?.ok === false) {
         setError("Account created but sign in failed. Please try signing in.");
         setIsLoading(false);
         return;
       }
 
-      console.info("Account created and sign in successful", { email, callbackUrl });
-
-      // Redirect to callback destination after successful account creation
-      router.push(callbackUrl);
-      router.refresh();
+      window.location.assign(callbackUrl);
     } catch (err) {
       console.error("Sign up error:", err);
       setError("An unexpected error occurred");

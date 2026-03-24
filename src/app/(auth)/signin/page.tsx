@@ -3,16 +3,16 @@
 import { useState, FormEvent, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { AuthPanel } from "@/components/auth/AuthPanel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { safeAfterSignInPath } from "@/lib/auth-callback-path";
 
 function SignInForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const [email, setEmail] = useState("");
@@ -32,19 +32,17 @@ function SignInForm() {
         redirect: false,
       });
 
-      if (result?.error) {
+      if (result?.error || result?.ok === false) {
         setError("Invalid email or password");
         setIsLoading(false);
         return;
       }
 
-      // Temporary auth logging while the sign-in flow is being validated.
-      const redirectTo = callbackUrl || "/dashboard";
-      console.info("Sign in successful", { email, callbackUrl: redirectTo });
-
-      // Redirect to callback URL or dashboard
-      router.push(redirectTo);
-      router.refresh();
+      const redirectTo = safeAfterSignInPath(callbackUrl);
+      // Full navigation so the next document request includes the session cookie.
+      // router.push + refresh can run before the browser applies Set-Cookie from
+      // the credentials callback, so auth() on the server sees no session.
+      window.location.assign(redirectTo);
     } catch (err) {
       console.error("Sign in error:", err);
       setError("An unexpected error occurred");
