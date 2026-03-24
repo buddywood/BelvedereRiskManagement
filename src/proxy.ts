@@ -7,10 +7,17 @@ import { getToken } from "next-auth/jwt";
  * Protects routes and enforces MFA redirect using JWT claims only.
  */
 export default async function proxy(req: NextRequest) {
+  // Must match Auth.js cookie naming: `__Secure-authjs.session-token` on HTTPS,
+  // `authjs.session-token` on HTTP (local dev). Wrong salt/cookieName breaks JWT
+  // decode and makes getToken() always null on Vercel.
+  const proto = req.headers.get("x-forwarded-proto");
+  const secureCookie =
+    proto === "https" || req.nextUrl.protocol === "https:";
+
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
-    salt: "authjs.session-token",
+    secureCookie,
   });
 
   const isAuthenticated = !!token;
