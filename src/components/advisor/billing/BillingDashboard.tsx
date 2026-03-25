@@ -435,6 +435,16 @@ export function BillingDashboard({
           setCheckoutError(res.error);
           return;
         }
+        if (!res.url?.trim()) {
+          setCheckoutError("Checkout did not return a valid link. Try again or contact support.");
+          return;
+        }
+        try {
+          new URL(res.url);
+        } catch {
+          setCheckoutError("Checkout link was invalid. Check AUTH_URL in production.");
+          return;
+        }
         window.location.href = res.url;
       });
     },
@@ -447,6 +457,16 @@ export function BillingDashboard({
       const res = await createPortalSession();
       if (!res.success) {
         setCheckoutError(res.error);
+        return;
+      }
+      if (!res.url?.trim()) {
+        setCheckoutError("Portal did not return a valid link.");
+        return;
+      }
+      try {
+        new URL(res.url);
+      } catch {
+        setCheckoutError("Portal link was invalid.");
         return;
       }
       window.location.href = res.url;

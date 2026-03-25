@@ -13,21 +13,13 @@ import {
   validateCheckoutPrice,
 } from "@/lib/billing/subscription-service";
 import { prisma } from "@/lib/db";
+import { resolvePublicAppUrl } from "@/lib/public-app-url";
 import { getStripe } from "@/lib/stripe";
 
 const checkoutSchema = z.object({
   tier: z.enum(["STARTER", "GROWTH", "PROFESSIONAL"]),
   billingCycle: z.enum(["MONTHLY", "ANNUAL"]),
 });
-
-function appBaseUrl(): string {
-  const base =
-    process.env.AUTH_URL ||
-    process.env.NEXT_PUBLIC_URL ||
-    process.env.NEXTAUTH_URL ||
-    "http://localhost:3000";
-  return base.replace(/\/$/, "");
-}
 
 export type BillingActionError = { success: false; error: string };
 export type BillingCheckoutResult =
@@ -138,12 +130,26 @@ export async function createCheckoutSession(
       where: { userId },
     });
 
+    const base = await resolvePublicAppUrl();
+    const successUrl = `${base}/advisor/billing?checkout=success`;
+    const cancelUrl = `${base}/advisor/billing?checkout=cancel`;
+    try {
+      new URL(successUrl);
+      new URL(cancelUrl);
+    } catch {
+      return {
+        success: false,
+        error:
+          "Billing redirect URL is invalid. Open the app from your real site URL (not an IP or stale tab), and set AUTH_URL in Vercel to https://your-domain.com with no trailing path.",
+      };
+    }
+
     const stripe = getStripe();
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${appBaseUrl()}/advisor/billing?checkout=success`,
-      cancel_url: `${appBaseUrl()}/advisor/billing?checkout=cancel`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       client_reference_id: userId,
       metadata: {
         userId,
@@ -169,7 +175,11 @@ export async function createCheckoutSession(
     return { success: true, url: session.url };
   } catch (e) {
     const message = e instanceof Error ? e.message : "Checkout failed";
-    return { success: false, error: message };
+    const hint =
+      /url/i.test(message) && process.env.VERCEL === "1"
+        ? " Check AUTH_URL / NEXT_PUBLIC_URL in Vercel (full https:// URL, no quotes or line breaks)."
+        : "";
+    return { success: false, error: message + hint };
   }
 }
 
@@ -192,16 +202,36 @@ export async function createPortalSession(): Promise<BillingPortalResult> {
       };
     }
 
+    const base = await resolvePublicAppUrl();
+    const returnUrl = `${base}/advisor/billing`;
+    try {
+      new URL(returnUrl);
+    } catch {
+      return {
+        success: false,
+        error:
+          "Billing return URL is invalid. Set AUTH_URL in Vercel to your public https origin (e.g. https://your-domain.com).",
+      };
+    }
+
     const stripe = getStripe();
     const session = await stripe.billingPortal.sessions.create({
       customer: sub.stripeCustomerId,
-      return_url: `${appBaseUrl()}/advisor/billing`,
+      return_url: returnUrl,
     });
+
+    if (!session.url) {
+      return { success: false, error: "Could not start billing portal session." };
+    }
 
     return { success: true, url: session.url };
   } catch (e) {
     const message = e instanceof Error ? e.message : "Portal session failed";
-    return { success: false, error: message };
+    const hint =
+      /url/i.test(message) && process.env.VERCEL === "1"
+        ? " Check AUTH_URL / NEXT_PUBLIC_URL in Vercel (full https:// URL, no quotes or line breaks)."
+        : "";
+    return { success: false, error: message + hint };
   }
 }
 
