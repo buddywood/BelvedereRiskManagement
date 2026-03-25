@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import {
+  assertCanAddClientForAdvisorProfile,
+  ClientLimitError,
+} from "@/lib/billing/subscription-service";
 import { prisma } from "@/lib/db";
 import { verifyInviteToken, consumeInviteCode } from "@/lib/invite";
 import { triggerRegistrationNotification } from "@/lib/notifications/triggers";
@@ -102,6 +106,8 @@ export async function POST(request: NextRequest) {
 
       // If this is an advisor-initiated invitation, create the client-advisor relationship
       if (inviteCode.createdBy) {
+        await assertCanAddClientForAdvisorProfile(inviteCode.createdBy, tx);
+
         // Create ClientProfile for the new user
         await tx.clientProfile.create({
           data: {
@@ -145,6 +151,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(user, { status: 201 });
   } catch (error) {
+    if (error instanceof ClientLimitError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: "CLIENT_LIMIT",
+        },
+        { status: 403 }
+      );
+    }
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Internal server error" },

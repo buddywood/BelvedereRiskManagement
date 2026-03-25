@@ -9,6 +9,7 @@ import {
   Shield,
   Bell,
   Settings,
+  CreditCard,
   type LucideIcon,
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ const ADVISOR_HEADER_CONFIG: { path: string; config: AdvisorPageHeaderConfig }[]
   { path: "/advisor/dashboard", config: { icon: LayoutDashboard, kicker: "Portfolio Intelligence", title: "Governance Dashboard", subtitle: "Comprehensive governance analytics and client family risk assessment overview" } },
   { path: "/advisor/intelligence", config: { icon: Shield, kicker: "Risk Management", title: "Risk Intelligence", subtitle: "Portfolio risk assessment and governance vulnerability analysis" } },
   { path: "/advisor/notifications", config: { icon: Bell, kicker: "Activity Management", title: "Notifications", subtitle: "Client activity updates and priority alerts" } },
+  { path: "/advisor/billing", config: { icon: CreditCard, kicker: "Subscription", title: "Billing", subtitle: "Plan, usage, and Stripe invoices for your practice" } },
   { path: "/advisor/settings", config: { icon: Settings, kicker: "Professional Profile", title: "Settings", subtitle: "Professional profile and client-facing branding configuration" } },
 ];
 

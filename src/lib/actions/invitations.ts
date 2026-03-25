@@ -2,6 +2,10 @@
 
 import { requireAdvisorRole, getAdvisorProfileOrThrow } from "@/lib/advisor/auth";
 import {
+  assertCanAddClientForAdvisorProfile,
+  ClientLimitError,
+} from "@/lib/billing/subscription-service";
+import {
   createAdvisorInvitation,
   resendInvitation,
   expireInvitation,
@@ -35,6 +39,8 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
 
     const validatedInput = createInvitationSchema.parse(rawData);
 
+    await assertCanAddClientForAdvisorProfile(profile.id);
+
     // Create the invitation
     const invitation = await createAdvisorInvitation(profile.id, validatedInput);
 
@@ -66,6 +72,9 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
       },
     };
   } catch (error) {
+    if (error instanceof ClientLimitError) {
+      return { success: false, error: error.message };
+    }
     // Handle duplicate email gracefully
     if (error instanceof Error) {
       if (error.message.includes("Unique constraint")) {

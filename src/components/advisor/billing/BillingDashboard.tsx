@@ -1,0 +1,521 @@
+"use client";
+
+import { useCallback, useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { CreditCard, ExternalLink } from "lucide-react";
+
+import {
+  createCheckoutSession,
+  createPortalSession,
+  switchSubscriptionPlan,
+  type BillingInvoiceDTO,
+  type SubscriptionDetailsDTO,
+} from "@/lib/actions/billing";
+import { TIER_LIMITS } from "@/lib/billing/constants";
+import type { PlanPricesForUi } from "@/lib/billing/plan-prices-ui";
+import type { BillingCycle, SubscriptionTier } from "@prisma/client";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+const TIER_ORDER: SubscriptionTier[] = ["STARTER", "GROWTH", "PROFESSIONAL"];
+
+const TIER_RANK: Record<SubscriptionTier, number> = {
+  STARTER: 0,
+  GROWTH: 1,
+  PROFESSIONAL: 2,
+};
+
+const TIER_LABEL: Record<SubscriptionTier, string> = {
+  STARTER: "Starter",
+  GROWTH: "Growth",
+  PROFESSIONAL: "Professional",
+};
+
+function formatMoney(amount: number, currency: string) {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: currency.toUpperCase(),
+    minimumFractionDigits: 2,
+  }).format(amount / 100);
+}
+
+function SubscriptionOverview({
+  data,
+}: {
+  data: SubscriptionDetailsDTO;
+}) {
+  const periodEnd = new Date(data.currentPeriodEnd);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <CreditCard className="h-5 w-5" aria-hidden />
+          Current plan
+        </CardTitle>
+        <CardDescription>
+          Subscription status and renewal information synced from Stripe.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-2 text-sm">
+        <div className="flex flex-wrap justify-between gap-2">
+          <span className="text-muted-foreground">Plan</span>
+          <span className="font-medium">{TIER_LABEL[data.tier]}</span>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
+          <span className="text-muted-foreground">Status</span>
+          <span className="font-medium">{data.status.replace(/_/g, " ")}</span>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
+          <span className="text-muted-foreground">Billing</span>
+          <span className="font-medium">
+            {data.billingCycle === "ANNUAL" ? "Annual" : "Monthly"}
+          </span>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
+          <span className="text-muted-foreground">Current period ends</span>
+          <span className="font-medium">{periodEnd.toLocaleDateString()}</span>
+        </div>
+        {data.cancelAtPeriodEnd ? (
+          <p className="text-amber-600 dark:text-amber-500 pt-2">
+            Your subscription is set to cancel at the end of this billing period.
+          </p>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function UsageMonitor({ data }: { data: SubscriptionDetailsDTO }) {
+  const pct = Math.min(
+    100,
+    data.clientLimit > 0 ? (data.currentClientCount / data.clientLimit) * 100 : 0
+  );
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Client usage</CardTitle>
+        <CardDescription>
+          Active clients linked to your practice versus your plan limit.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex justify-between text-sm">
+          <span>
+            <span className="font-semibold">{data.currentClientCount}</span>
+            <span className="text-muted-foreground"> / {data.clientLimit} clients</span>
+          </span>
+          {!data.canAddClient ? (
+            <span className="text-destructive font-medium">At limit</span>
+          ) : (
+            <span className="text-muted-foreground">Room available</span>
+          )}
+        </div>
+        <div
+          className="h-2 w-full overflow-hidden rounded-full bg-muted"
+          role="progressbar"
+          aria-valuenow={data.currentClientCount}
+          aria-valuemin={0}
+          aria-valuemax={data.clientLimit}
+          aria-label="Client usage"
+        >
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        {!data.canAddClient ? (
+          <p className="text-sm text-muted-foreground">
+            Upgrade your plan to invite more clients, or wait until a slot opens.
+          </p>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+type CommittedPlan = { tier: SubscriptionTier; billingCycle: BillingCycle };
+
+function PlanSelector({
+  billingCycle,
+  onBillingCycleChange,
+  onSelectPlan,
+  busy,
+  error,
+  planPrices,
+  changePlanMode,
+  committedPlan,
+  subscriptionStatus,
+}: {
+  billingCycle: BillingCycle;
+  onBillingCycleChange: (c: BillingCycle) => void;
+  onSelectPlan: (tier: SubscriptionTier) => void;
+  busy: boolean;
+  error: string | null;
+  planPrices: PlanPricesForUi;
+  changePlanMode: "checkout" | "stripe_update";
+  committedPlan: CommittedPlan | null;
+  subscriptionStatus: string;
+}) {
+  const awaitingCheckoutOnly =
+    changePlanMode === "checkout" &&
+    committedPlan !== null &&
+    subscriptionStatus !== "CANCELLED" &&
+    subscriptionStatus !== "NONE";
+
+  const description =
+    changePlanMode === "stripe_update"
+      ? "Upgrade, downgrade, or switch between monthly and annual billing. Stripe applies proration. Use Manage payment for cards, invoices, and cancellation."
+      : awaitingCheckoutOnly
+        ? `You have a plan on file (${TIER_LABEL[committedPlan!.tier]}, ${committedPlan!.billingCycle === "ANNUAL" ? "annual" : "monthly"} billing) but payment is not linked yet. Pick any tier or interval, then complete Checkout—you can downgrade before paying.`
+        : "Choose a tier and billing interval. You will complete payment securely on Stripe Checkout.";
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Plans</CardTitle>
+        <CardDescription>{description}</CardDescription>
+        <div className="flex gap-2 pt-2">
+          <Button
+            type="button"
+            size="sm"
+            variant={billingCycle === "MONTHLY" ? "default" : "outline"}
+            onClick={() => onBillingCycleChange("MONTHLY")}
+          >
+            Monthly
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant={billingCycle === "ANNUAL" ? "default" : "outline"}
+            onClick={() => onBillingCycleChange("ANNUAL")}
+          >
+            Annual (1 month free)
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="grid gap-4 sm:grid-cols-3">
+        {TIER_ORDER.map((tier) => {
+          const hasCommitted = committedPlan !== null;
+          const isSameTier = hasCommitted && tier === committedPlan!.tier;
+          const isSamePlan =
+            hasCommitted &&
+            tier === committedPlan!.tier &&
+            billingCycle === committedPlan!.billingCycle;
+          const committedRank = hasCommitted ? TIER_RANK[committedPlan!.tier] : -1;
+          const tierRank = TIER_RANK[tier];
+
+          let buttonLabel = "Subscribe";
+          if (changePlanMode === "stripe_update" && isSamePlan) {
+            buttonLabel = "Current plan";
+          } else if (isSamePlan && awaitingCheckoutOnly) {
+            buttonLabel = "Add payment in Stripe";
+          } else if (isSamePlan && subscriptionStatus === "CANCELLED") {
+            buttonLabel = "Resubscribe";
+          } else if (hasCommitted && isSameTier && !isSamePlan) {
+            buttonLabel = "Switch billing";
+          } else if (hasCommitted && tierRank > committedRank) {
+            buttonLabel = "Upgrade";
+          } else if (hasCommitted && tierRank < committedRank) {
+            buttonLabel = "Downgrade";
+          }
+
+          const planButtonVariant:
+            | "billingCurrent"
+            | "billingUpgrade"
+            | "billingDowngrade"
+            | "default" = (() => {
+            if (changePlanMode === "stripe_update" && isSamePlan) {
+              return "billingCurrent";
+            }
+            if (hasCommitted && tierRank > committedRank) {
+              return "billingUpgrade";
+            }
+            if (hasCommitted && tierRank < committedRank) {
+              return "billingDowngrade";
+            }
+            return "default";
+          })();
+
+          const disabled =
+            busy || (changePlanMode === "stripe_update" && isSamePlan);
+
+          const busyLabel =
+            changePlanMode === "stripe_update" ? "Updating…" : "Redirecting…";
+
+          const priceLine =
+            billingCycle === "MONTHLY"
+              ? planPrices[tier].monthly
+              : planPrices[tier].annual;
+
+          return (
+            <div
+              key={tier}
+              className="flex flex-col rounded-lg border bg-card/50 p-4 shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold">{TIER_LABEL[tier]}</h3>
+                {isSameTier && hasCommitted ? (
+                  <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                    Your plan
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Up to {TIER_LIMITS[tier]} clients
+              </p>
+              {priceLine ? (
+                <p className="mt-3 text-lg font-semibold tabular-nums tracking-tight">
+                  {priceLine}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">Price unavailable</p>
+              )}
+              <Button
+                className="mt-4"
+                type="button"
+                variant={planButtonVariant}
+                disabled={disabled}
+                onClick={() => onSelectPlan(tier)}
+              >
+                {busy ? busyLabel : buttonLabel}
+              </Button>
+            </div>
+          );
+        })}
+      </CardContent>
+      {error ? (
+        <CardFooter>
+          <p className="text-sm text-destructive" role="alert">
+            {error}
+          </p>
+        </CardFooter>
+      ) : null}
+    </Card>
+  );
+}
+
+function BillingHistory({ invoices }: { invoices: BillingInvoiceDTO[] }) {
+  if (invoices.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Invoices</CardTitle>
+          <CardDescription>No invoices yet. They will appear after your first payment.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Invoices</CardTitle>
+        <CardDescription>Recent billing history from Stripe.</CardDescription>
+      </CardHeader>
+      <CardContent className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-muted-foreground">
+              <th className="pb-2 pr-4 font-medium">Date</th>
+              <th className="pb-2 pr-4 font-medium">Invoice</th>
+              <th className="pb-2 pr-4 font-medium">Status</th>
+              <th className="pb-2 font-medium">Amount</th>
+              <th className="pb-2 pl-4 font-medium" />
+            </tr>
+          </thead>
+          <tbody>
+            {invoices.map((inv) => (
+              <tr key={inv.id} className="border-b border-border/60">
+                <td className="py-2 pr-4 whitespace-nowrap">
+                  {new Date(inv.created).toLocaleDateString()}
+                </td>
+                <td className="py-2 pr-4">{inv.number ?? inv.id.slice(0, 12)}</td>
+                <td className="py-2 pr-4 capitalize">{inv.status ?? "—"}</td>
+                <td className="py-2 whitespace-nowrap">
+                  {formatMoney(inv.amountPaid, inv.currency)}
+                </td>
+                <td className="py-2 pl-4">
+                  {inv.hostedUrl ? (
+                    <a
+                      href={inv.hostedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      View
+                      <ExternalLink className="h-3 w-3" aria-hidden />
+                    </a>
+                  ) : inv.pdfUrl ? (
+                    <a
+                      href={inv.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-primary hover:underline"
+                    >
+                      PDF
+                      <ExternalLink className="h-3 w-3" aria-hidden />
+                    </a>
+                  ) : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function BillingDashboard({
+  initialSubscription,
+  initialInvoices,
+  checkoutNotice,
+  billingEnabled,
+  planPrices,
+}: {
+  initialSubscription: SubscriptionDetailsDTO | null;
+  initialInvoices: BillingInvoiceDTO[];
+  checkoutNotice: "success" | "cancel" | null;
+  billingEnabled: boolean;
+  planPrices: PlanPricesForUi;
+}) {
+  const router = useRouter();
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("MONTHLY");
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const data =
+    initialSubscription ??
+    ({
+      tier: "STARTER",
+      status: "NONE",
+      clientLimit: TIER_LIMITS.STARTER,
+      billingCycle: "MONTHLY",
+      currentPeriodEnd: new Date().toISOString(),
+      cancelAtPeriodEnd: false,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      currentClientCount: 0,
+      canAddClient: true,
+    } satisfies SubscriptionDetailsDTO);
+
+  const changePlanMode: "checkout" | "stripe_update" =
+    Boolean(data.stripeSubscriptionId) && data.status !== "CANCELLED"
+      ? "stripe_update"
+      : "checkout";
+
+  const committedPlan: CommittedPlan | null =
+    data.status === "NONE"
+      ? null
+      : { tier: data.tier, billingCycle: data.billingCycle };
+
+  const onSelectPlan = useCallback(
+    (tier: SubscriptionTier) => {
+      setCheckoutError(null);
+      startTransition(async () => {
+        if (changePlanMode === "stripe_update") {
+          const res = await switchSubscriptionPlan({ tier, billingCycle });
+          if (!res.success) {
+            setCheckoutError(res.error);
+            return;
+          }
+          router.refresh();
+          return;
+        }
+        const res = await createCheckoutSession({ tier, billingCycle });
+        if (!res.success) {
+          setCheckoutError(res.error);
+          return;
+        }
+        window.location.href = res.url;
+      });
+    },
+    [billingCycle, changePlanMode, router]
+  );
+
+  const onPortal = useCallback(() => {
+    setCheckoutError(null);
+    startTransition(async () => {
+      const res = await createPortalSession();
+      if (!res.success) {
+        setCheckoutError(res.error);
+        return;
+      }
+      window.location.href = res.url;
+    });
+  }, []);
+
+  if (!billingEnabled) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Billing</CardTitle>
+          <CardDescription>
+            Billing features are turned off for this environment (
+            <code className="text-xs">ENABLE_BILLING_FEATURES=false</code>).
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {checkoutNotice === "success" ? (
+        <div
+          className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100"
+          role="status"
+        >
+          Checkout completed. Your subscription will update in a few seconds once Stripe confirms
+          payment.
+        </div>
+      ) : null}
+      {checkoutNotice === "cancel" ? (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+          role="status"
+        >
+          Checkout was canceled. No changes were made.
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/advisor">Back to Clients</Link>
+        </Button>
+        {data.stripeCustomerId ? (
+          <Button type="button" variant="outline" disabled={pending} onClick={onPortal}>
+            Manage payment &amp; cancellation
+          </Button>
+        ) : null}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SubscriptionOverview data={data} />
+        <UsageMonitor data={data} />
+      </div>
+
+      <PlanSelector
+        billingCycle={billingCycle}
+        onBillingCycleChange={setBillingCycle}
+        onSelectPlan={onSelectPlan}
+        busy={pending}
+        error={checkoutError}
+        planPrices={planPrices}
+        changePlanMode={changePlanMode}
+        committedPlan={committedPlan}
+        subscriptionStatus={data.status}
+      />
+
+      <BillingHistory invoices={initialInvoices} />
+    </div>
+  );
+}

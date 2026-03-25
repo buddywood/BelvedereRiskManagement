@@ -20,6 +20,15 @@ const buttonVariants = cva(
         ghost:
           "text-muted-foreground hover:bg-secondary/80 hover:text-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        /** Billing plan grid: current tier (usually disabled) */
+        billingCurrent:
+          "border border-border/90 bg-muted text-muted-foreground shadow-none hover:bg-muted disabled:!opacity-100 disabled:cursor-not-allowed",
+        /** Billing plan grid: upgrade — same emphasis as primary */
+        billingUpgrade:
+          "bg-primary text-primary-foreground shadow-[0_16px_36px_-22px_rgba(26,24,20,0.75)] hover:bg-primary/92 hover:shadow-[0_20px_42px_-24px_rgba(26,24,20,0.85)]",
+        /** Billing plan grid: downgrade — cooler, lower-energy (chart-3 + muted) */
+        billingDowngrade:
+          "border border-chart-3/20 bg-chart-3/[0.11] text-chart-3 shadow-none hover:bg-chart-3/[0.18] hover:text-chart-3 dark:border-chart-3/30 dark:bg-chart-3/15 dark:text-chart-3 dark:hover:bg-chart-3/25",
       },
       size: {
         default: "h-10 px-5 py-2.5 has-[>svg]:px-4",

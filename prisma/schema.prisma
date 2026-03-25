@@ -41,8 +41,64 @@ model User {
   clientAssignments ClientAdvisorAssignment[] @relation("ClientAssignments")
   documentRequirements DocumentRequirement[] @relation("ClientDocuments")
   notificationPreference NotificationPreference?
+  subscription            Subscription?
 
   @@index([email])
+}
+
+enum SubscriptionTier {
+  STARTER
+  GROWTH
+  PROFESSIONAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  UNPAID
+  GRACE_PERIOD
+}
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  stripeCustomerId     String?            @unique
+  stripePriceId        String?
+  stripeSubscriptionId String?            @unique
+  tier                 SubscriptionTier
+  status               SubscriptionStatus
+  clientLimit          Int
+  billingCycle         BillingCycle
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auditLogs SubscriptionAuditLog[]
+
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+model SubscriptionAuditLog {
+  id               String            @id @default(cuid())
+  subscriptionId   String
+  action           String
+  previousTier     SubscriptionTier?
+  newTier          SubscriptionTier?
+  metadata         Json?
+  timestamp        DateTime          @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
 }
 
 model Account {
