@@ -1,18 +1,36 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { prisma } from '@/lib/db';
 
-// Initialize S3 client
+// Must match the bucket’s actual region (see `aws s3api head-bucket --bucket ...` → x-amz-bucket-region).
+// Wrong region → PermanentRedirect, presigned host mismatch, or OPTIONS 500 on the wrong regional endpoint.
+// Prefer S3_BRANDING_REGION when other AWS calls use a different AWS_REGION.
+const BRANDING_S3_REGION =
+  process.env.S3_BRANDING_REGION?.trim() ||
+  process.env.AWS_REGION?.trim() ||
+  'us-east-2';
+
+// Initialize S3 client (WHEN_REQUIRED avoids default CRC checksum params on presigned PUTs that break browser uploads)
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
+  region: BRANDING_S3_REGION,
+  followRegionRedirects: true,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
+  requestChecksumCalculation: 'WHEN_REQUIRED',
 });
 
 const BUCKET_NAME = process.env.S3_BRANDING_BUCKET || 'akili-advisor-assets';
-const CDN_BASE_URL = process.env.CLOUDFRONT_BASE_URL || `https://${BUCKET_NAME}.s3.amazonaws.com`;
+const CDN_BASE_URL =
+  process.env.CLOUDFRONT_BASE_URL ||
+  `https://${BUCKET_NAME}.s3.${BRANDING_S3_REGION}.amazonaws.com`;
 
 interface UploadUrlRequest {
   advisorId: string;
@@ -187,10 +205,92 @@ export async function generateLogoUploadUrl(request: UploadUrlRequest): Promise<
 }
 
 /**
+ * Persists logo metadata after a successful S3 object write (browser presign or server PutObject).
+ */
+async function persistAdvisorLogo(
+  advisorId: string,
+  s3Key: string,
+  actualType: string,
+  actualSize: number
+): Promise<ConfirmUploadResponse> {
+  const logoUrl = `${CDN_BASE_URL}/${s3Key}`;
+
+  const advisor = await prisma.advisorProfile.findUnique({
+    where: { id: advisorId },
+    select: { logoS3Key: true },
+  });
+
+  if (!advisor) {
+    throw new Error('Advisor profile not found');
+  }
+
+  await prisma.advisorProfile.update({
+    where: { id: advisorId },
+    data: {
+      logoS3Key: s3Key,
+      logoContentType: actualType,
+      logoFileSize: actualSize,
+      logoUploadedAt: new Date(),
+      logoUrl: logoUrl,
+    },
+  });
+
+  if (advisor.logoS3Key && advisor.logoS3Key !== s3Key) {
+    try {
+      await deleteS3Object(advisor.logoS3Key);
+    } catch (error) {
+      console.error('Failed to delete old logo:', error);
+    }
+  }
+
+  return { logoUrl, s3Key };
+}
+
+/**
+ * Upload logo bytes from the app server (avoids browser → S3 CORS on presigned PUT).
+ */
+export async function uploadLogoFromBuffer(
+  advisorId: string,
+  fileName: string,
+  fileType: string,
+  body: Uint8Array
+): Promise<ConfirmUploadResponse> {
+  const fileSize = body.byteLength;
+  validateUploadRequest({ advisorId, fileName, fileType, fileSize });
+  const s3Key = generateS3Key(advisorId, fileName);
+
+  try {
+    await s3Client.send(
+      new PutObjectCommand({
+        Bucket: BUCKET_NAME,
+        Key: s3Key,
+        Body: body,
+        ContentType: fileType,
+        ContentLength: fileSize,
+        Metadata: {
+          'advisor-id': advisorId,
+          'original-filename': fileName,
+          'upload-timestamp': Date.now().toString(),
+        },
+      })
+    );
+
+    return await persistAdvisorLogo(advisorId, s3Key, fileType, fileSize);
+  } catch (error) {
+    try {
+      await deleteS3Object(s3Key);
+    } catch (cleanupError) {
+      console.error('Failed to cleanup failed upload:', cleanupError);
+    }
+    throw error instanceof Error ? error : new Error('Logo upload failed');
+  }
+}
+
+/**
  * Confirms successful S3 upload and updates database
  */
 export async function confirmLogoUpload(request: ConfirmUploadRequest): Promise<ConfirmUploadResponse> {
-  const { uploadId, s3Key, originalFileName } = request;
+  const { uploadId, s3Key } = request;
 
   // Retrieve upload info
   const uploadInfo = getUploadInfo(uploadId);
@@ -214,49 +314,16 @@ export async function confirmLogoUpload(request: ConfirmUploadRequest): Promise<
       throw new Error('Uploaded file size does not match expected size');
     }
 
-    // Generate public URL (CDN or direct S3 URL)
-    const logoUrl = `${CDN_BASE_URL}/${s3Key}`;
+    const result = await persistAdvisorLogo(
+      uploadInfo.advisorId,
+      s3Key,
+      actualType,
+      actualSize
+    );
 
-    // Get current advisor profile to clean up old logo
-    const advisor = await prisma.advisorProfile.findUnique({
-      where: { id: uploadInfo.advisorId },
-      select: { logoS3Key: true, logoUrl: true },
-    });
-
-    if (!advisor) {
-      throw new Error('Advisor profile not found');
-    }
-
-    // Update advisor profile with new logo
-    await prisma.advisorProfile.update({
-      where: { id: uploadInfo.advisorId },
-      data: {
-        logoS3Key: s3Key,
-        logoContentType: actualType,
-        logoFileSize: actualSize,
-        logoUploadedAt: new Date(),
-        // Update logoUrl for backward compatibility
-        logoUrl: logoUrl,
-      },
-    });
-
-    // Clean up old logo if it exists and is different
-    if (advisor.logoS3Key && advisor.logoS3Key !== s3Key) {
-      try {
-        await deleteS3Object(advisor.logoS3Key);
-      } catch (error) {
-        console.error('Failed to delete old logo:', error);
-        // Don't fail the upload for cleanup issues
-      }
-    }
-
-    // Clean up upload tracking
     uploadTracking.delete(uploadId);
 
-    return {
-      logoUrl,
-      s3Key,
-    };
+    return result;
   } catch (error) {
     // Clean up failed upload
     try {
@@ -322,6 +389,30 @@ async function deleteS3Object(s3Key: string): Promise<void> {
  */
 export function generateAssetUrl(s3Key: string): string {
   return `${CDN_BASE_URL}/${s3Key}`;
+}
+
+/**
+ * Fetch logo bytes from S3 (for authenticated app proxy when objects are not public-read).
+ */
+export async function getBrandingLogoObjectBytes(
+  s3Key: string
+): Promise<{ data: Uint8Array; contentType: string }> {
+  const obj = await s3Client.send(
+    new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+    })
+  );
+
+  if (!obj.Body) {
+    throw new Error('Empty S3 object body');
+  }
+
+  const data = await obj.Body.transformToByteArray();
+  return {
+    data,
+    contentType: obj.ContentType || 'application/octet-stream',
+  };
 }
 
 /**

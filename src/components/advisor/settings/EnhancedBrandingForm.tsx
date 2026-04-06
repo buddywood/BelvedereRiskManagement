@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
@@ -18,6 +18,7 @@ import { FileUpload } from '@/components/ui/file-upload';
 import { PreviewContainer } from '@/components/advisor/settings/BrandingPreview';
 import { brandingUpdateSchema, BrandingFormData, SubscriptionFeatures } from '@/lib/validation/branding';
 import { updateAdvisorBrandingAction } from '@/lib/actions/advisor-branding-actions';
+import { resolveAdvisorLogoSrcForPreview } from '@/lib/branding/advisor-logo-display';
 import { cn } from '@/lib/utils';
 import {
   Building,
@@ -101,6 +102,14 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
   // Live preview (don't mirror watch() into state — new object every render → infinite loop)
   const watchedValues = watch();
 
+  const brandingForPreview = useMemo(
+    () => ({
+      ...watchedValues,
+      logoUrl: resolveAdvisorLogoSrcForPreview(watchedValues.logoUrl || profile.logoUrl || null),
+    }),
+    [watchedValues, profile.logoUrl]
+  );
+
   useEffect(() => {
     setValue('brandName', brandNameFromFirm, { shouldDirty: false, shouldValidate: false });
   }, [brandNameFromFirm, setValue]);
@@ -159,54 +168,23 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
   // Handle logo upload
   const handleLogoUpload = useCallback(async (file: File): Promise<string> => {
     try {
-      // Generate upload URL
-      const uploadResponse = await fetch('/api/advisor/branding/logo/upload-url', {
+      // Same-origin upload — server writes to S3 (no browser CORS to the bucket)
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/advisor/branding/logo/direct', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: file.name,
-          fileType: file.type,
-          fileSize: file.size,
-        }),
+        body: formData,
       });
 
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json();
-        throw new Error(errorData.error || 'Failed to generate upload URL');
+      const payload = await uploadResponse.json();
+
+      if (!uploadResponse.ok || !payload.success) {
+        throw new Error(payload.error || 'Failed to upload logo');
       }
 
-      const { data: uploadData } = await uploadResponse.json();
+      const confirmData = payload.data as { logoUrl: string; s3Key: string };
 
-      // Upload to S3
-      const uploadResult = await fetch(uploadData.signedUrl, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type },
-      });
-
-      if (!uploadResult.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      // Confirm upload
-      const confirmResponse = await fetch('/api/advisor/branding/logo/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          uploadId: uploadData.uploadId,
-          s3Key: uploadData.s3Key,
-          originalFileName: file.name,
-        }),
-      });
-
-      if (!confirmResponse.ok) {
-        const errorData = await confirmResponse.json();
-        throw new Error(errorData.error || 'Failed to confirm upload');
-      }
-
-      const { data: confirmData } = await confirmResponse.json();
-
-      // Update form value
       setValue('logoUrl', confirmData.logoUrl, { shouldDirty: true });
 
       return confirmData.logoUrl;
@@ -490,7 +468,7 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <PreviewContainer branding={watchedValues} />
+                    <PreviewContainer branding={brandingForPreview} />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -569,7 +547,7 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
                   <Label className="text-sm font-medium">Logo</Label>
                   <div className="border rounded-lg p-4 bg-muted/30 flex items-center justify-center min-h-[80px]">
                     <img
-                      src={watchedValues.logoUrl || profile.logoUrl || ''}
+                      src={resolveAdvisorLogoSrcForPreview(watchedValues.logoUrl || profile.logoUrl)}
                       alt="Logo preview"
                       className="max-h-16 max-w-full object-contain"
                       onError={(e) => {

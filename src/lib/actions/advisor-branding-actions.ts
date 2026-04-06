@@ -6,8 +6,8 @@ import { requireAdvisorRole, getAdvisorProfileOrThrow } from '@/lib/advisor/auth
 import { prisma } from '@/lib/db';
 import { brandingUpdateSchema } from '@/lib/validation/branding';
 import { auditBrandingUpdate } from '@/lib/audit/branding-audit';
-import { requireAdvisorBrandingAccess } from '@/lib/subscription/validation';
-import { generateLogoUploadUrl, confirmLogoUpload, deleteLogo } from '@/lib/s3/branding-uploads';
+import { requireAdvisorBrandingAccess, checkRateLimit } from '@/lib/subscription/validation';
+import { generateLogoUploadUrl, confirmLogoUpload, deleteLogo, uploadLogoFromBuffer } from '@/lib/s3/branding-uploads';
 
 export interface ActionResult {
   success: boolean;
@@ -249,6 +249,50 @@ export async function generateLogoUploadUrlAction(
 /**
  * Confirm logo upload
  */
+/**
+ * Server-side logo upload (same-origin); avoids configuring S3 CORS for browser PUT.
+ */
+export async function uploadLogoDirectAction(
+  fileName: string,
+  fileType: string,
+  buffer: Uint8Array
+): Promise<ActionResult> {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const { advisorId } = await requireAdvisorBrandingAccess(userId, 'write');
+
+    if (!fileName || !buffer.byteLength) {
+      return {
+        success: false,
+        error: 'File name and file data are required',
+      };
+    }
+
+    const rateLimit = await checkRateLimit(advisorId, 'logo_upload', 1);
+    if (!rateLimit.allowed) {
+      return {
+        success: false,
+        error: 'Rate limit exceeded. Please try again later.',
+      };
+    }
+
+    const effectiveType = fileType?.trim() ? fileType : 'application/octet-stream';
+    const data = await uploadLogoFromBuffer(advisorId, fileName, effectiveType, buffer);
+
+    revalidatePath('/advisor/settings');
+    revalidatePath('/advisor');
+
+    return {
+      success: true,
+      data,
+    };
+  } catch (error) {
+    console.error('Error uploading logo (direct):', error);
+    const message = error instanceof Error ? error.message : 'Failed to upload logo';
+    return { success: false, error: message };
+  }
+}
+
 export async function confirmLogoUploadAction(
   uploadId: string,
   s3Key: string,

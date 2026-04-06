@@ -7,14 +7,29 @@ const globalForPrisma = globalThis as unknown as {
   pool: Pool | undefined;
 };
 
+/**
+ * pg / pg-connection-string warns when sslmode is prefer, require, or verify-ca
+ * (those are temporarily treated like verify-full; future majors will not).
+ * Setting verify-full explicitly keeps strict verification and silences the warning.
+ */
+function postgresUrlWithExplicitSslMode(url: string): string {
+  return url.replace(
+    /([?&]sslmode=)(prefer|require|verify-ca)(?=&|$)/gi,
+    "$1verify-full"
+  );
+}
+
 function getPrisma(): PrismaClient {
   if (globalForPrisma.prisma) {
     return globalForPrisma.prisma;
   }
 
+  const rawUrl = process.env.DATABASE_URL;
+  const connectionString = rawUrl ? postgresUrlWithExplicitSslMode(rawUrl) : rawUrl;
+
   const pool =
     globalForPrisma.pool ??
-    new Pool({ connectionString: process.env.DATABASE_URL });
+    new Pool({ connectionString });
 
   if (!globalForPrisma.pool) {
     globalForPrisma.pool = pool;
