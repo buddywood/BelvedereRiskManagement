@@ -47,25 +47,47 @@ interface AdvisorBranding {
   logoUrl?: string;
 }
 
+interface PdfDocumentMetadata {
+  title?: string;
+  author?: string;
+  creator?: string;
+  producer?: string;
+  subject?: string;
+  keywords?: string;
+  creationDate?: Date;
+}
+
 interface AssessmentReportProps {
   data: AssessmentReportData;
   householdProfile?: HouseholdProfile;
   advisorBranding?: AdvisorBranding;
+  /** Merged onto <Document /> (e.g. from createBrandedPDFMetadata) */
+  documentMetadata?: PdfDocumentMetadata;
 }
 
 export function AssessmentReport({
   data,
   householdProfile,
   advisorBranding,
+  documentMetadata,
 }: AssessmentReportProps) {
   const companyName = advisorBranding?.firmName || "Belvedere Risk Management";
 
   return (
     <Document
-      title="Family Governance Assessment Report"
-      author={advisorBranding?.firmName || "AKILI Risk Intelligence"}
-      subject="Confidential Governance Assessment"
-      creator="AKILI Assessment Platform"
+      title={documentMetadata?.title ?? "Family Governance Assessment Report"}
+      author={
+        documentMetadata?.author ??
+        advisorBranding?.firmName ??
+        "AKILI Risk Intelligence"
+      }
+      subject={
+        documentMetadata?.subject ?? "Confidential Governance Assessment"
+      }
+      creator={documentMetadata?.creator ?? "AKILI Assessment Platform"}
+      producer={documentMetadata?.producer}
+      keywords={documentMetadata?.keywords}
+      creationDate={documentMetadata?.creationDate}
     >
       {/* Page 1: Cover */}
       <ReportCover

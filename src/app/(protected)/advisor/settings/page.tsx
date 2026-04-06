@@ -1,8 +1,13 @@
-import { getAdvisorDashboardData, updateAdvisorBranding } from "@/lib/actions/advisor-actions";
-import { AdvisorBrandingForm } from "@/components/advisor/settings/AdvisorBrandingForm";
+import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
+import {
+  getSubscriptionFeatures,
+  STARTER_SUBSCRIPTION_FEATURES,
+} from "@/lib/subscription/validation";
+import { EnhancedBrandingForm } from "@/components/advisor/settings/EnhancedBrandingForm";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Settings } from "lucide-react";
 
 export default async function AdvisorSettingsPage() {
   const result = await getAdvisorDashboardData();
@@ -20,6 +25,11 @@ export default async function AdvisorSettingsPage() {
   }
 
   const { profile } = result.data!;
+
+  // Subscription flags gate premium tabs; missing Subscription row should not hide the full branding UI
+  const features =
+    (await getSubscriptionFeatures(profile.userId)) ?? STARTER_SUBSCRIPTION_FEATURES;
+
   const displayName =
     profile.user.firstName && profile.user.lastName
       ? `${profile.user.firstName} ${profile.user.lastName}`
@@ -27,24 +37,57 @@ export default async function AdvisorSettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/advisor" className="inline-flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back to Clients
           </Link>
         </Button>
+
+        <Badge variant={features.tier === 'PROFESSIONAL' ? 'default' : 'secondary'}>
+          {features.tier} Plan
+        </Badge>
       </div>
 
       <div className="space-y-6">
-        <AdvisorBrandingForm
-          profile={profile}
-          updateBrandingAction={updateAdvisorBranding}
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <Settings className="h-6 w-6" />
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground">
+              Manage your profile and branding preferences
+            </p>
+          </div>
+        </div>
+
+        {/* Branding Section */}
+        <EnhancedBrandingForm
+          profile={{
+            firmName: profile.firmName,
+            brandName: profile.brandName,
+            tagline: profile.tagline,
+            primaryColor: profile.primaryColor,
+            secondaryColor: profile.secondaryColor,
+            accentColor: profile.accentColor,
+            websiteUrl: profile.websiteUrl,
+            emailFooterText: profile.emailFooterText,
+            supportEmail: profile.supportEmail,
+            supportPhone: profile.supportPhone,
+            logoUrl: profile.logoUrl,
+            logoS3Key: profile.logoS3Key,
+            logoContentType: profile.logoContentType,
+            logoFileSize: profile.logoFileSize,
+            logoUploadedAt: profile.logoUploadedAt,
+          }}
+          features={features}
         />
 
+        {/* Contact Information (Read-only) */}
         <div className="rounded-xl border bg-card p-6 shadow-sm">
           <div className="space-y-1">
-            <h2 className="text-lg font-semibold tracking-tight">Contact information</h2>
+            <h2 className="text-lg font-semibold tracking-tight">Contact Information</h2>
             <p className="text-sm text-muted-foreground">
               Shown in client invitation emails. Updated by your administrator.
             </p>

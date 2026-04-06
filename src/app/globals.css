@@ -97,6 +97,25 @@
   --surface-foreground: oklch(0.248 0.015 50.2);
   --surface-strong: oklch(0.956 0.008 74.5);
   --surface-muted: oklch(0.939 0.006 73.1);
+
+  /* Advisor Branding Variables (Default values) */
+  --advisor-primary: oklch(0.27 0.019 52.8);
+  --advisor-primary-foreground: oklch(0.985 0.002 90);
+  --advisor-secondary: oklch(0.934 0.01 71.1);
+  --advisor-secondary-foreground: oklch(0.31 0.013 49.2);
+  --advisor-accent: oklch(0.812 0.051 72.4);
+  --advisor-accent-foreground: oklch(0.235 0.014 50.8);
+
+  /* Component-specific advisor overrides */
+  --button-primary: var(--advisor-primary);
+  --button-primary-hover: oklch(0.24 0.019 52.8);
+  --header-background: var(--advisor-secondary);
+  --card-accent: var(--advisor-accent);
+  --border-accent: var(--advisor-primary);
+
+  /* Advisor branding assets */
+  --advisor-logo-url: '';
+  --advisor-brand-name: '';
 }
 
 .dark {
@@ -139,6 +158,21 @@
   --surface-foreground: oklch(0.948 0.007 82.4);
   --surface-strong: oklch(0.292 0.011 42.9);
   --surface-muted: oklch(0.268 0.012 43.1);
+
+  /* Advisor Branding Variables (Dark mode defaults) */
+  --advisor-primary: oklch(0.872 0.024 74.4);
+  --advisor-primary-foreground: oklch(0.188 0.011 41.5);
+  --advisor-secondary: oklch(0.29 0.012 41.3);
+  --advisor-secondary-foreground: oklch(0.948 0.007 82.4);
+  --advisor-accent: oklch(0.78 0.043 74.2);
+  --advisor-accent-foreground: oklch(0.188 0.011 41.5);
+
+  /* Component-specific advisor overrides (Dark mode) */
+  --button-primary: var(--advisor-primary);
+  --button-primary-hover: oklch(0.81 0.024 74.4);
+  --header-background: var(--advisor-secondary);
+  --card-accent: var(--advisor-accent);
+  --border-accent: var(--advisor-primary);
 }
 
 @layer base {
@@ -598,5 +632,162 @@
       linear-gradient(to right, color-mix(in oklab, var(--border) 28%, transparent 72%) 1px, transparent 1px),
       linear-gradient(to bottom, color-mix(in oklab, var(--border) 28%, transparent 72%) 1px, transparent 1px);
     background-size: 44px 44px;
+  }
+
+  /* Advisor Branding Utilities */
+  .advisor-themed {
+    /* Enable advisor theming context */
+    color-scheme: inherit;
+  }
+
+  .advisor-themed .btn-primary {
+    background-color: hsl(var(--advisor-primary));
+    color: hsl(var(--advisor-primary-foreground));
+    border-color: hsl(var(--advisor-primary));
+  }
+
+  .advisor-themed .btn-primary:hover {
+    background-color: hsl(var(--button-primary-hover));
+  }
+
+  .advisor-themed .header-brand {
+    background-color: hsl(var(--header-background));
+    color: hsl(var(--advisor-secondary-foreground));
+  }
+
+  .advisor-themed .card-accent {
+    border-left-color: hsl(var(--card-accent));
+  }
+
+  .advisor-themed .border-accent {
+    border-color: hsl(var(--border-accent));
+  }
+
+  .advisor-themed .text-advisor-primary {
+    color: hsl(var(--advisor-primary));
+  }
+
+  .advisor-themed .text-advisor-secondary {
+    color: hsl(var(--advisor-secondary));
+  }
+
+  .advisor-themed .bg-advisor-primary {
+    background-color: hsl(var(--advisor-primary));
+    color: hsl(var(--advisor-primary-foreground));
+  }
+
+  .advisor-themed .bg-advisor-secondary {
+    background-color: hsl(var(--advisor-secondary));
+    color: hsl(var(--advisor-secondary-foreground));
+  }
+
+  .advisor-themed .bg-advisor-accent {
+    background-color: hsl(var(--advisor-accent));
+    color: hsl(var(--advisor-accent-foreground));
+  }
+
+  /* Advisor Logo Display */
+  .advisor-logo {
+    background-image: var(--advisor-logo-url);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  .advisor-logo:empty::before {
+    content: var(--advisor-brand-name, '');
+    display: inline-block;
+    font-weight: 600;
+    color: hsl(var(--advisor-primary));
+  }
+
+  /* Enhanced advisor header styles */
+  .advisor-header.advisor-themed {
+    background: linear-gradient(135deg,
+      color-mix(in oklab, hsl(var(--advisor-secondary)) 20%, transparent 80%),
+      color-mix(in oklab, hsl(var(--advisor-primary)) 5%, transparent 95%)
+    );
+    border-color: color-mix(in oklab, hsl(var(--advisor-primary)) 30%, transparent 70%);
+  }
+
+  .advisor-header.advisor-themed .professional-icon {
+    color: hsl(var(--advisor-primary));
+    background: color-mix(in oklab, hsl(var(--advisor-primary)) 8%, transparent 92%);
+    border-color: color-mix(in oklab, hsl(var(--advisor-primary)) 20%, transparent 80%);
+  }
+
+  /* Adaptive theming based on contrast */
+  [data-advisor-theme="active"] {
+    /* This class is applied when advisor theming is active */
+  }
+
+  [data-advisor-theme="active"] .adaptive-primary {
+    background-color: hsl(var(--advisor-primary));
+    color: hsl(var(--advisor-primary-foreground));
+  }
+
+  [data-advisor-theme="active"] .adaptive-secondary {
+    background-color: hsl(var(--advisor-secondary));
+    color: hsl(var(--advisor-secondary-foreground));
+  }
+
+  [data-advisor-theme="active"] .adaptive-accent {
+    background-color: hsl(var(--advisor-accent));
+    color: hsl(var(--advisor-accent-foreground));
+  }
+
+  [data-advisor-theme="active"] .adaptive-border {
+    border-color: hsl(var(--advisor-primary));
+  }
+
+  /* Theme preview scoping */
+  .theme-preview {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .theme-preview::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border: 2px solid hsl(var(--advisor-primary));
+    border-radius: inherit;
+    opacity: 0.3;
+    z-index: -1;
+  }
+
+  /* Safe fallbacks for missing branding */
+  .advisor-themed:not([data-advisor-theme="active"]) .btn-primary {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .advisor-themed:not([data-advisor-theme="active"]) .header-brand {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+  }
+
+  /* Accessibility enhancements for advisor theming */
+  @media (prefers-reduced-motion: reduce) {
+    .advisor-themed * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+
+  @media (prefers-contrast: high) {
+    .advisor-themed .btn-primary {
+      border-width: 2px;
+      font-weight: 600;
+    }
+
+    .advisor-themed .border-accent {
+      border-width: 2px;
+    }
+
+    .advisor-logo:empty::before {
+      font-weight: 700;
+      text-decoration: underline;
+    }
   }
 }

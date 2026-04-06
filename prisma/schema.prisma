@@ -77,6 +77,13 @@ model Subscription {
   billingCycle         BillingCycle
   currentPeriodEnd     DateTime
   cancelAtPeriodEnd    Boolean            @default(false)
+
+  // Branding Feature Flags
+  basicBrandingEnabled    Boolean @default(false)
+  advancedBrandingEnabled Boolean @default(false)
+  customSubdomainEnabled  Boolean @default(false)
+  whiteLabel              Boolean @default(false)
+
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
 
@@ -395,6 +402,28 @@ model AdvisorProfile {
   phone            String?
   jobTitle         String?
   logoUrl          String?
+
+  // Enhanced Branding Fields
+  brandName        String?
+  tagline          String?
+  primaryColor     String?
+  secondaryColor   String?
+  accentColor      String?
+  websiteUrl       String?
+  emailFooterText  String?
+  supportEmail     String?
+  supportPhone     String?
+
+  // S3 Asset Management
+  logoS3Key        String?
+  logoContentType  String?
+  logoFileSize     Int?
+  logoUploadedAt   DateTime?
+
+  // Feature Control
+  brandingEnabled     Boolean @default(true)
+  customDomainEnabled Boolean @default(false)
+
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @updatedAt
   clientAssignments ClientAdvisorAssignment[] @relation("AdvisorAssignments")
@@ -403,8 +432,11 @@ model AdvisorProfile {
   invitations      InviteCode[]
   documentRequirements DocumentRequirement[]
   assignedGovernanceLeads GovernanceReviewLead[] @relation("GovernanceLeadAssignment")
+  subdomain        AdvisorSubdomain?
+  auditLogs        AdvisorBrandingAuditLog[]
 
   @@index([userId])
+  @@index([brandingEnabled])
 }
 
 model ClientProfile {
@@ -519,4 +551,51 @@ model NotificationPreference {
   updatedAt DateTime @updatedAt
 
   @@unique([userId])
+}
+
+// Advisor Subdomain Management
+model AdvisorSubdomain {
+  id             String    @id @default(cuid())
+  advisorId      String    @unique
+  subdomain      String    @unique
+  isActive       Boolean   @default(false)
+  dnsVerified    Boolean   @default(false)
+  sslProvisioned Boolean   @default(false)
+  verifiedAt     DateTime?
+  lastCheckedAt  DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  advisor AdvisorProfile @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@index([advisorId])
+  @@index([isActive])
+}
+
+// Reserved subdomains that cannot be claimed
+model ReservedSubdomains {
+  id        String   @id @default(cuid())
+  subdomain String   @unique
+  reason    String
+  createdAt DateTime @default(now())
+}
+
+// Audit log for advisor branding changes
+model AdvisorBrandingAuditLog {
+  id             String   @id @default(cuid())
+  advisorId      String
+  action         String
+  entityType     String
+  entityId       String?
+  previousValues Json?
+  newValues      Json?
+  metadata       Json?
+  timestamp      DateTime @default(now())
+  userId         String
+
+  advisor AdvisorProfile @relation(fields: [advisorId], references: [id], onDelete: Cascade)
+
+  @@index([advisorId])
+  @@index([timestamp])
+  @@index([action])
 }

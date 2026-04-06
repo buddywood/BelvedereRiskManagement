@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { AssessmentReport } from "@/lib/pdf/components/AssessmentReport";
+import { getAdvisorBrandingForPDF, createBrandedPDFMetadata } from "@/lib/pdf/branding-integration";
 
 /**
  * PDF Report Generation API Route
@@ -116,13 +117,14 @@ export async function GET(
       },
     });
 
-    // 5. Look up advisor branding for this client
+    // 5. Look up enhanced advisor branding for this client
     const clientAdvisorAssignment = await prisma.clientAdvisorAssignment.findFirst({
       where: {
         clientId: session.user.id,
         status: 'ACTIVE',
       },
-      include: {
+      select: {
+        advisorId: true,
         advisor: {
           select: {
             firmName: true,
@@ -132,7 +134,13 @@ export async function GET(
       },
     });
 
-    const advisorBranding = clientAdvisorAssignment?.advisor ? {
+    // Get enhanced branding data or fallback to legacy
+    const advisorBranding = clientAdvisorAssignment?.advisorId
+      ? await getAdvisorBrandingForPDF(clientAdvisorAssignment.advisorId)
+      : null;
+
+    // Legacy fallback for backward compatibility
+    const legacyAdvisorBranding = clientAdvisorAssignment?.advisor ? {
       firmName: clientAdvisorAssignment.advisor.firmName || undefined,
       logoUrl: clientAdvisorAssignment.advisor.logoUrl || undefined,
     } : undefined;
@@ -189,15 +197,35 @@ export async function GET(
       missingControlsCount: missingControls.length,
     };
 
-    // 9. Generate PDF buffer
+    // 9. Generate PDF with enhanced branding
+    const pdfMetadata = createBrandedPDFMetadata(advisorBranding ?? undefined);
+
+    const coverBranding =
+      advisorBranding != null
+        ? {
+            firmName:
+              advisorBranding.brandName ||
+              advisorBranding.advisorFirmName ||
+              undefined,
+            logoUrl: advisorBranding.logoUrl ?? undefined,
+          }
+        : legacyAdvisorBranding;
+
     const pdfBuffer = await renderToBuffer(
-      <AssessmentReport data={reportData} householdProfile={householdProfile} advisorBranding={advisorBranding} />
+      <AssessmentReport
+        data={reportData}
+        householdProfile={householdProfile}
+        advisorBranding={coverBranding}
+        documentMetadata={pdfMetadata}
+      />
     );
 
     // 10. Return PDF with appropriate headers
-    const firmSlug = advisorBranding?.firmName
-      ? advisorBranding.firmName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-      : 'belvedere';
+    const brandName = advisorBranding?.brandName || advisorBranding?.advisorFirmName || legacyAdvisorBranding?.firmName || 'belvedere';
+    const firmSlug = brandName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
     const pillarSlug = pillarScore.pillar
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
