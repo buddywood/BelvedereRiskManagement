@@ -55,14 +55,12 @@ export type RiskAreaSelection = {
   selected: boolean;
 };
 
-// Risk areas matching assessment subcategories
+// Risk areas aligned with the six pillars of comprehensive risk assessment (focus-area selector + subcategory IDs)
 export const RISK_AREAS = [
-  { id: 'decision-making-authority', name: 'Decision-Making Authority' },
-  { id: 'access-controls', name: 'Access Controls' },
-  { id: 'trust-estate-governance', name: 'Trust & Estate Governance' },
-  { id: 'marriage-relationship-risk', name: 'Marriage & Relationship Risk' },
-  { id: 'succession-planning', name: 'Succession Planning' },
-  { id: 'behavior-standards', name: 'Behavior Standards' },
-  { id: 'business-involvement', name: 'Business Involvement' },
-  { id: 'documentation-communication', name: 'Documentation & Communication' },
+  { id: 'environmental-geographic-risk', name: 'Environmental / Geographic Risk' },
+  { id: 'physical-security', name: 'Physical Security' },
+  { id: 'cybersecurity', name: 'Cybersecurity' },
+  { id: 'financial-asset-protection', name: 'Financial / Asset Protection' },
+  { id: 'health-medical-preparedness', name: 'Health & Medical Preparedness' },
+  { id: 'lifestyle-behavioral-risk', name: 'Lifestyle & Behavioral Risk' },
 ] as const;

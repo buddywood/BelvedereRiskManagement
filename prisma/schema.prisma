@@ -352,10 +352,14 @@ model GovernanceReviewLead {
   primaryAdvisor        String?
   familyComplexity      FamilyComplexity
   promptedInterest      String?
+  assignedAdvisorId     String?
+  assignedAt            DateTime?
   createdAt             DateTime          @default(now())
+  assignedAdvisor       AdvisorProfile?   @relation("GovernanceLeadAssignment", fields: [assignedAdvisorId], references: [id], onDelete: SetNull)
 
   @@index([email])
   @@index([createdAt])
+  @@index([assignedAdvisorId])
 }
 
 model InviteCode {
@@ -398,6 +402,7 @@ model AdvisorProfile {
   notifications    AdvisorNotification[]
   invitations      InviteCode[]
   documentRequirements DocumentRequirement[]
+  assignedGovernanceLeads GovernanceReviewLead[] @relation("GovernanceLeadAssignment")
 
   @@index([userId])
 }

@@ -14,8 +14,7 @@ import { Loader2, Clock } from "lucide-react";
 import toast from "react-hot-toast";
 import type { Pillar } from "@/lib/assessment/types";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
-import { allQuestions } from "@/lib/assessment/questions";
-import { cyberRiskPillar, allCyberQuestions } from "@/lib/cyber-risk/questions";
+import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
 import { identityRiskPillar, allIdentityQuestions } from "@/lib/identity-risk/questions";
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,77 +35,8 @@ import {
 // Pillar configurations for multi-pillar assessment hub
 const ASSESSMENT_PILLARS = [
   {
-    pillar: {
-      id: "family-governance",
-      name: "Family Governance",
-      slug: "family-governance",
-      description:
-        "Evaluate your family's governance structures, decision-making processes, and succession planning.",
-      estimatedMinutes: 25,
-      subCategories: [
-        {
-          id: "governance-structure",
-          name: "Governance Structure",
-          description: "Family councils and decision-making bodies",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "decision-making",
-          name: "Decision Making",
-          description: "Processes and protocols",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "conflict-resolution",
-          name: "Conflict Resolution",
-          description: "Dispute handling mechanisms",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "succession-planning",
-          name: "Succession Planning",
-          description: "Leadership transition strategies",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "communication",
-          name: "Communication",
-          description: "Family communication frameworks",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "education",
-          name: "Education",
-          description: "Next generation preparation",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "values-mission",
-          name: "Values & Mission",
-          description: "Family purpose and principles",
-          weight: 1,
-          questionIds: [],
-        },
-        {
-          id: "documentation",
-          name: "Documentation",
-          description: "Policies and formal agreements",
-          weight: 1,
-          questionIds: [],
-        },
-      ],
-    },
+    pillar: familyGovernancePillar,
     questions: allQuestions,
-  },
-  {
-    pillar: cyberRiskPillar,
-    questions: allCyberQuestions,
   },
   {
     pillar: identityRiskPillar,
@@ -301,7 +231,7 @@ export default function AssessmentHubPage() {
     // Calculate question counts using branching logic and customization
     const pillarQuestions = questions.filter((q) => q.pillar === pillarSlug);
 
-    // Apply customization filtering only for governance pillar (cyber risk doesn't have customization yet)
+    // Apply customization filtering only for comprehensive (family-governance) pillar
     const baseQuestions = pillarSlug === "family-governance" &&
       customizationConfig?.isCustomized &&
       customizationConfig.visibleSubCategories.length > 0

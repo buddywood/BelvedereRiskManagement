@@ -5,6 +5,7 @@ import {
   Shield,
   Users,
   UserCircle,
+  Inbox,
   FileText,
   ClipboardCheck,
   Settings,
@@ -45,6 +46,16 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
       kicker: "User management",
       title: "Clients",
       subtitle: "Client accounts and advisor assignments",
+    },
+  },
+  {
+    path: "/admin/leads",
+    config: {
+      icon: Inbox,
+      kicker: "Lead routing",
+      title: "Assessment requests",
+      subtitle:
+        "Review submissions from the public request form and assign them to an advisor",
     },
   },
   {

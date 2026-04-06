@@ -136,3 +136,31 @@ export async function getAssessmentsForAdmin() {
   });
   return assessments;
 }
+
+export async function getGovernanceReviewLeadsForAdmin() {
+  await requireAdminRole();
+  return prisma.governanceReviewLead.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      assignedAdvisor: {
+        select: {
+          id: true,
+          firmName: true,
+          user: { select: { email: true, name: true } },
+        },
+      },
+    },
+  });
+}
+
+export async function getAdvisorProfilesForLeadAssignment() {
+  await requireAdminRole();
+  return prisma.advisorProfile.findMany({
+    select: {
+      id: true,
+      firmName: true,
+      user: { select: { email: true, name: true } },
+    },
+    orderBy: { id: "asc" },
+  });
+}

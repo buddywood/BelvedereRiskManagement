@@ -56,11 +56,11 @@ export default function RequestGovernanceReviewPage() {
     return (
       <AuthPanel
         title="Request received"
-        description="Thank you. A Belvedere advisor will be in touch."
+        description="Thank you. Akili Risk Intelligence will be in touch."
       >
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Your governance review request has been submitted. We will contact you at the email you provided.
+            Your assessment request has been submitted. We will contact you at the email you provided.
           </p>
           <Button asChild variant="outline">
             <Link href="/">Return to home</Link>
@@ -73,8 +73,8 @@ export default function RequestGovernanceReviewPage() {
   return (
     <AuthPanel
       eyebrow="Contact"
-      title="Request Governance Review"
-      description="Submit this short form and an advisor will follow up. This is not the full intake."
+      title="Request a risk assessment"
+      description="You are a client requesting full risk coverage—often across more than one pillar. Submit this short form and Akili Risk Intelligence will follow up. This is not the full intake."
       footer={
         <span>
           Already have an account?{" "}
@@ -161,7 +161,7 @@ export default function RequestGovernanceReviewPage() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="promptedInterest">
-            What prompted your interest in governance review? (optional)
+            What prompted your interest in an assessment? (optional)
           </Label>
           <Textarea
             id="promptedInterest"

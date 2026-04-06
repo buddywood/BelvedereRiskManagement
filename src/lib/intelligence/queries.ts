@@ -9,48 +9,61 @@ import type { RiskSeverity, RiskIndicator, FamilyRiskSummary, PortfolioIntellige
  * Static governance recommendations mapped by category slug
  */
 const RISK_RECOMMENDATIONS: Record<string, RiskRecommendation[]> = {
-  'decision-making-authority': [
-    { title: 'Establish formal decision-making framework', description: 'Create clear guidelines for who makes what decisions and under what circumstances', priority: 'high' },
-    { title: 'Document authority levels for financial decisions', description: 'Define spending thresholds and approval requirements for different transaction types', priority: 'medium' },
-    { title: 'Create family council with defined voting procedures', description: 'Establish structured governance body with clear voting rights and procedures', priority: 'medium' },
+  'environmental-geographic-risk': [
+    { title: 'Map hazard exposure for each primary property', description: 'Document flood, wind, wildfire, seismic, and heat risk with insurance broker and civil sources', priority: 'high' },
+    { title: 'Reconcile property coverage with replacement value', description: 'Align dwelling, flood, wind, and umbrella limits with current construction and ordinance costs', priority: 'high' },
+    { title: 'Rehearse evacuation and continuity', description: 'Write down routes, rally points, communications tree, and records to grab under time pressure', priority: 'medium' },
   ],
-  'access-controls': [
-    { title: 'Implement tiered access to financial information', description: 'Establish different levels of access based on family member roles and responsibilities', priority: 'high' },
-    { title: 'Review and update beneficiary access rights annually', description: 'Regularly audit and adjust access permissions to match current family structure', priority: 'medium' },
+  'physical-security': [
+    { title: 'Layer residence controls', description: 'Upgrade lighting, entry hardware, alarms, and monitoring with periodic professional review', priority: 'high' },
+    { title: 'Institute travel security norms', description: 'Use pre-trip briefings, vetted transport, and check-ins for higher-risk destinations', priority: 'medium' },
+    { title: 'Brief dependents away from home', description: 'Give students and travelers clear emergency contacts and duress expectations', priority: 'medium' },
   ],
-  'trust-estate-governance': [
-    { title: 'Schedule annual trust document review', description: 'Ensure trust provisions remain aligned with family goals and legal requirements', priority: 'high' },
-    { title: 'Clarify trustee succession plan', description: 'Document clear procedures for trustee replacement and transition', priority: 'medium' },
-    { title: 'Establish trust protector role', description: 'Appoint independent oversight to monitor trustee performance and resolve disputes', priority: 'low' },
+  'cybersecurity': [
+    { title: 'Tighten identity and account recovery', description: 'Enable MFA, hardware keys where appropriate, and locked-down recovery options on financial and email accounts', priority: 'high' },
+    { title: 'Segment home and device access', description: 'Use guest Wi-Fi, patch routers, and inventory IoT; monitor family members most targeted for fraud', priority: 'high' },
+    { title: 'Schedule periodic access reviews', description: 'Audit who can see sensitive financial and estate information', priority: 'medium' },
   ],
-  'marriage-relationship-risk': [
-    { title: 'Consider prenuptial/postnuptial agreements', description: 'Protect family assets through appropriate marital agreements', priority: 'high' },
-    { title: 'Establish family wealth education program for spouses', description: 'Ensure new family members understand governance principles and expectations', priority: 'medium' },
+  'financial-asset-protection': [
+    { title: 'Close insurance and liability gaps', description: 'Review property, excess, D&O, cyber, and professional coverage against real exposures', priority: 'high' },
+    { title: 'Stress-test concentration', description: 'Model liquidity and loss scenarios for large real estate, operating business, or single-manager positions', priority: 'high' },
+    { title: 'Refresh trusts, titling, and succession documents', description: 'Keep estate plans, marital agreements, and business buy-sell provisions current', priority: 'medium' },
   ],
-  'succession-planning': [
-    { title: 'Create formal succession timeline', description: 'Establish clear timeline and milestones for leadership transition', priority: 'high' },
-    { title: 'Identify and develop next-generation leaders', description: 'Invest in leadership development for family members taking future roles', priority: 'medium' },
-    { title: 'Document transition procedures for key roles', description: 'Create detailed handover processes for critical family governance positions', priority: 'medium' },
+  'health-medical-preparedness': [
+    { title: 'Centralize medical directives and history', description: 'Maintain portable medication lists, allergies, and emergency contacts', priority: 'high' },
+    { title: 'Align travel with medical evacuation coverage', description: 'Confirm international coverage, telehealth, and transport for serious events', priority: 'medium' },
+    { title: 'Plan for regional health disruptions', description: 'Assign caregiving contingencies for elders and dependents when schools or services close', priority: 'medium' },
   ],
-  'behavior-standards': [
-    { title: 'Codify family values and expected behaviors', description: 'Document clear behavioral expectations and family code of conduct', priority: 'high' },
-    { title: 'Establish consequences for policy violations', description: 'Create fair and consistent enforcement mechanisms for governance breaches', priority: 'medium' },
-  ],
-  'business-involvement': [
-    { title: 'Define family employment policies', description: 'Establish clear criteria and processes for family members joining the business', priority: 'high' },
-    { title: 'Create compensation guidelines for family members in business', description: 'Develop fair compensation frameworks that balance family and business interests', priority: 'medium' },
-  ],
-  'documentation-communication': [
-    { title: 'Schedule quarterly family governance meetings', description: 'Establish regular communication rhythm for governance updates and decisions', priority: 'high' },
-    { title: 'Create centralized document repository', description: 'Implement secure, accessible system for storing and sharing governance documents', priority: 'medium' },
+  'lifestyle-behavioral-risk': [
+    { title: 'Govern public and digital visibility', description: 'Set expectations for social media, press, and sharing wealth-related information', priority: 'high' },
+    { title: 'Clarify decision rights and conflict paths', description: 'Document who decides what, and how disputes escalate for family and advisors', priority: 'high' },
+    { title: 'Coordinate advisors on one facts set', description: 'Reduce silos so legal, tax, security, and investment advice stay consistent', priority: 'medium' },
   ],
 };
+
+/** Map legacy governance subcategory slugs to six-pillar keys for recommendations */
+const LEGACY_RISK_CATEGORY_MAP: Record<string, keyof typeof RISK_RECOMMENDATIONS> = {
+  'decision-making-authority': 'lifestyle-behavioral-risk',
+  'access-controls': 'cybersecurity',
+  'trust-estate-governance': 'financial-asset-protection',
+  'marriage-relationship-risk': 'financial-asset-protection',
+  'succession-planning': 'financial-asset-protection',
+  'behavior-standards': 'lifestyle-behavioral-risk',
+  'business-involvement': 'financial-asset-protection',
+  'documentation-communication': 'lifestyle-behavioral-risk',
+};
+
+function resolveRiskRecommendationKey(categorySlug: string): string {
+  if (categorySlug in RISK_RECOMMENDATIONS) return categorySlug;
+  return LEGACY_RISK_CATEGORY_MAP[categorySlug] ?? categorySlug;
+}
 
 /**
  * Get recommendations for a specific category slug with severity-based priority adjustment
  */
 function getRecommendationsForCategory(categorySlug: string, severity: RiskSeverity): RiskRecommendation[] {
-  const baseRecommendations = RISK_RECOMMENDATIONS[categorySlug] || [];
+  const key = resolveRiskRecommendationKey(categorySlug);
+  const baseRecommendations = RISK_RECOMMENDATIONS[key] || [];
 
   // Adjust priority based on severity
   return baseRecommendations.map(rec => ({

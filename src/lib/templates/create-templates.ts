@@ -23,18 +23,195 @@ const createBaseDocx = (): PizZip => {
   return zip;
 };
 
-// Template content for each policy type
+// Template content for each policy type (six comprehensive risk pillars)
 const templateContents = {
-  'decision-making-authority': `
-{familyName} Family Decision-Making Authority Policy
+  'environmental-geographic-risk': `
+{familyName} Environmental & Geographic Risk Policy
 
 Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
+Overall Score: {overallScore}/10 ({riskLevel} risk)
 Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
 
-GOVERNANCE STRUCTURE & DECISION-MAKING
+NATURAL HAZARD EXPOSURE & PROPERTY RESILIENCE
 
-This policy establishes clear decision-making authority and voting procedures for the {familyName} family governance structure.
+This policy documents how the {familyName} household identifies regional hazards, maintains insurance, and plans for evacuation or prolonged disruption.
+
+RESPONSIBLE PARTIES:
+Primary Authority: {householdHead}
+
+IDENTIFIED GAPS TO ADDRESS:
+{#gaps}• {description} - {severity} Priority
+  Recommendation: {recommendation}
+
+{/gaps}
+
+STRENGTHS TO MAINTAIN:
+{#strengths}• {.}
+{/strengths}
+
+RECOMMENDATIONS FOR IMPLEMENTATION:
+{#recommendations}• {.}
+{/recommendations}
+
+ENVIRONMENTAL & GEOGRAPHIC FRAMEWORK:
+1. Hazard mapping and broker review cycle for primary residences
+2. Catastrophe coverage aligned to replacement value and ordinance costs
+3. Evacuation routes, rally points, and household communications
+4. Continuity: records, secondary locations, and advisor contact tree
+`,
+
+  'physical-security': `
+{familyName} Physical Security Policy
+
+Assessment Date: {assessmentDate}
+Overall Score: {overallScore}/10 ({riskLevel} risk)
+Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
+
+RESIDENCE, TRAVEL, AND PERSONAL SAFETY
+
+This policy defines physical security expectations for residences, travel, and dependents for the {familyName} family.
+
+RESPONSIBLE PARTIES:
+Primary Authority: {householdHead}
+
+IDENTIFIED GAPS TO ADDRESS:
+{#gaps}• {description} - {severity} Priority
+  Recommendation: {recommendation}
+
+{/gaps}
+
+STRENGTHS TO MAINTAIN:
+{#strengths}• {.}
+{/strengths}
+
+RECOMMENDATIONS FOR IMPLEMENTATION:
+{#recommendations}• {.}
+{/recommendations}
+
+PHYSICAL SECURITY FRAMEWORK:
+1. Layered controls at primary homes (entries, lighting, monitoring)
+2. Neighborhood risk awareness and routine adjustments
+3. Travel security briefings for elevated-risk destinations
+4. Duress communication and escalation for household members
+`,
+
+  'cybersecurity': `
+{familyName} Cybersecurity & Digital Access Policy
+
+Assessment Date: {assessmentDate}
+Overall Score: {overallScore}/10 ({riskLevel} risk)
+Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
+
+DIGITAL ACCESS, DEVICES, AND SENSITIVE INFORMATION
+
+This policy defines authentication, access tiers, and safe handling of financial and estate information for the {familyName} family.
+
+RESPONSIBLE PARTIES:
+Primary Authority: {householdHead}
+Access Approvers: {decisionMakers}
+
+IDENTIFIED GAPS TO ADDRESS:
+{#gaps}• {description} - {severity} Priority
+  Recommendation: {recommendation}
+
+{/gaps}
+
+STRENGTHS TO MAINTAIN:
+{#strengths}• {.}
+{/strengths}
+
+RECOMMENDATIONS FOR IMPLEMENTATION:
+{#recommendations}• {.}
+{/recommendations}
+
+CYBERSECURITY FRAMEWORK:
+1. MFA and hardened recovery paths for email and financial accounts
+2. Home network segmentation and IoT inventory
+3. Need-to-know access to trust, tax, and investment documents
+4. Periodic access reviews as household roles change
+`,
+
+  'financial-asset-protection': `
+{familyName} Financial & Asset Protection Policy
+
+Assessment Date: {assessmentDate}
+Overall Score: {overallScore}/10 ({riskLevel} risk)
+Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
+
+INSURANCE, STRUCTURES, AND CONCENTRATION
+
+This policy addresses how the {familyName} family protects balance-sheet assets through insurance, legal structures, and concentration awareness.
+
+RESPONSIBLE PARTIES:
+Primary Authority: {householdHead}
+Trustees: {trustees}
+
+IDENTIFIED GAPS TO ADDRESS:
+{#gaps}• {description} - {severity} Priority
+  Recommendation: {recommendation}
+
+{/gaps}
+
+STRENGTHS TO MAINTAIN:
+{#strengths}• {.}
+{/strengths}
+
+RECOMMENDATIONS FOR IMPLEMENTATION:
+{#recommendations}• {.}
+{/recommendations}
+
+FINANCIAL & ASSET PROTECTION FRAMEWORK:
+1. Property, liability, umbrella, and specialty coverage reviews
+2. Trust, titling, marital, and business continuity documents
+3. Liquidity stress tests for large private positions
+4. Fraud controls on banking and investment workflows
+`,
+
+  'health-medical-preparedness': `
+{familyName} Health & Medical Preparedness Policy
+
+Assessment Date: {assessmentDate}
+Overall Score: {overallScore}/10 ({riskLevel} risk)
+Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
+
+EMERGENCY MEDICAL AND TRAVEL HEALTH
+
+This policy documents medical decision-making, continuity of care, and travel health readiness for the {familyName} family.
+
+RESPONSIBLE PARTIES:
+Primary Authority: {householdHead}
+
+IDENTIFIED GAPS TO ADDRESS:
+{#gaps}• {description} - {severity} Priority
+  Recommendation: {recommendation}
+
+{/gaps}
+
+STRENGTHS TO MAINTAIN:
+{#strengths}• {.}
+{/strengths}
+
+RECOMMENDATIONS FOR IMPLEMENTATION:
+{#recommendations}• {.}
+{/recommendations}
+
+HEALTH & MEDICAL FRAMEWORK:
+1. Emergency plans, preferred facilities, and physician rosters
+2. Central medication and allergy lists for caregivers
+3. International coverage, telehealth, and medical evacuation
+4. Contingencies for regional health disruptions affecting dependents
+`,
+
+  'lifestyle-behavioral-risk': `
+{familyName} Lifestyle & Behavioral Risk Policy
+
+Assessment Date: {assessmentDate}
+Overall Score: {overallScore}/10 ({riskLevel} risk)
+Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
+
+GOVERNANCE, VISIBILITY, AND ROUTINES
+
+This policy aligns decision rights, public footprint, and advisor coordination for the {familyName} family.
 
 RESPONSIBLE PARTIES:
 Primary Authority: {householdHead}
@@ -54,236 +231,11 @@ RECOMMENDATIONS FOR IMPLEMENTATION:
 {#recommendations}• {.}
 {/recommendations}
 
-DECISION-MAKING FRAMEWORK:
-1. Family council voting rights and quorum requirements
-   Authorized voting members: {decisionMakers}
-2. Conflict resolution procedures and escalation paths
-3. Authority levels for different decision types
-4. Meeting protocols and documentation standards
-`,
-
-  'access-controls': `
-{familyName} Family Access Controls Policy
-
-Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-INFORMATION SECURITY & ACCESS MANAGEMENT
-
-This policy defines asset access tiers and approval workflows for the {familyName} family.
-
-RESPONSIBLE PARTIES:
-Primary Authority: {householdHead}
-Access Approval Authority: {decisionMakers}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-ACCESS CONTROL FRAMEWORK:
-1. Asset access tier definitions and restrictions
-2. Approval workflow requirements by asset type
-   Approving authorities: {decisionMakers}
-3. Information sharing protocols and confidentiality
-4. Digital access management and security measures
-`,
-
-  'trust-estate-governance': `
-{familyName} Trust & Estate Governance Policy
-
-Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-TRUST & ESTATE STRUCTURE GOVERNANCE
-
-This policy outlines trustee responsibilities and beneficiary rights for the {familyName} family trust structures.
-
-RESPONSIBLE PARTIES:
-Primary Authority: {householdHead}
-Designated Trustees: {trustees}
-Beneficiaries: {beneficiaries}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-TRUST GOVERNANCE FRAMEWORK:
-1. Trustee duties, powers, and accountability measures
-   Trustees: {trustees}
-2. Beneficiary rights and communication requirements
-   Beneficiaries: {beneficiaries}
-3. Distribution decision criteria and procedures
-4. Trust review schedule and performance evaluation
-`,
-
-  'succession-planning': `
-{familyName} Succession Planning Policy
-
-Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-LEADERSHIP SUCCESSION PLANNING
-
-This policy establishes leadership transition planning and capability development for the {familyName} family.
-
-RESPONSIBLE PARTIES:
-Primary Authority: {householdHead}
-Designated Successors: {successors}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-SUCCESSION FRAMEWORK:
-1. Leadership transition planning and timeline
-   Designated successors: {successors}
-2. Mentorship and development requirements
-3. Capability assessment and readiness criteria
-4. Emergency succession procedures
-`,
-
-  'behavior-standards': `
-{familyName} Family Behavior Standards Policy
-
-Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-FAMILY CODE OF CONDUCT
-
-This policy defines behavior expectations and public representation standards for the {familyName} family.
-
-RESPONSIBLE PARTIES:
-Family Governance Lead: {householdHead}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-BEHAVIOR STANDARDS FRAMEWORK:
-1. Family code of conduct and core values
-2. Social media guidelines and digital presence
-3. Public representation and media interaction rules
-4. Consequence framework for policy violations
-`,
-
-  'family-business-governance': `
-{familyName} Family Business Governance Policy
-
-Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-FAMILY BUSINESS GOVERNANCE STRUCTURE
-
-This policy establishes governance framework for family business operations and oversight.
-
-RESPONSIBLE PARTIES:
-Primary Authority: {householdHead}
-Board Members: {decisionMakers}
-Advisory Board: {advisors}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-BUSINESS GOVERNANCE FRAMEWORK:
-1. Board structure and family/independent director balance
-   Family board members: {decisionMakers}
-   Advisory board members: {advisors}
-2. Family employment policies and merit requirements
-3. Compensation transparency and fairness principles
-4. Conflict of interest policies and disclosure requirements
-`,
-
-  'documentation-records': `
-{familyName} Documentation & Records Policy
-
-Assessment Date: {assessmentDate}
-Overall Governance Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-RECORD KEEPING & DOCUMENTATION MANAGEMENT
-
-This policy defines record retention and documentation standards for the {familyName} family governance.
-
-RESPONSIBLE PARTIES:
-Primary Authority: {householdHead}
-Records Custodians: {executors}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-DOCUMENTATION FRAMEWORK:
-1. Record retention schedule by document type
-2. Access protocols and security requirements
-3. Update frequency and version control
-4. Responsible parties and accountability measures
-   Records custodians: {executors}
+LIFESTYLE & BEHAVIORAL FRAMEWORK:
+1. Documented governance roles, voting, and conflict escalation
+2. Expectations for social visibility and sharing wealth-related information
+3. Predictable routines reviewed for undue exposure
+4. Coordinated advisor team with single source of truth on key facts
 `
 };
 

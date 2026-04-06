@@ -87,7 +87,7 @@ export function RiskAreaSelector({ selectedAreas, onChange, disabled = false }: 
                     {area.name}
                   </div>
                   <p className="text-xs text-muted-foreground leading-4">
-                    Assessment subcategory focusing on {area.name.toLowerCase()} within family wealth governance.
+                    Comprehensive risk pillar: {area.name}.
                   </p>
                 </div>
               </div>

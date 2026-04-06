@@ -366,9 +366,25 @@ describe("branching-aware scoring with real questions", () => {
 
   it("includes all sections when all gates are yes", () => {
     const answers = {
+      // Environmental / geographic, physical security, health (always visible)
+      "env-01": 3,
+      "env-02": "written-current",
+      "env-03": "always",
+      "env-04": 3,
+      "env-05": "yes",
+      "phys-01": 3,
+      "phys-02": "systematic",
+      "phys-03": "formal",
+      "phys-04": "yes",
+      "phys-05": "full",
+      "health-01": 3,
+      "health-02": "current",
+      "health-03": "robust",
+      "health-04": "substantive",
+      "health-05": "yes",
       "dma-01": 3, // Good governance
       "dma-02": "criteria-clear", // Good criteria
-      "dma-03": 3, // Good involvement
+      "dma-03": "yes",
       "dma-04": "documented", // Good processes
       "ac-01": "multi-factor", // Strong access control
       "ac-02": "need-to-know", // Good information control

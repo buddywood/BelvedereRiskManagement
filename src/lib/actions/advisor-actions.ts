@@ -358,6 +358,37 @@ export async function getFamilyRiskDetailData(familyId: string) {
   }
 }
 
+function riskLevelFromNumericScore(score: number): RiskLevel {
+  if (score <= 2.5) return 'CRITICAL';
+  if (score < 5.0) return 'HIGH';
+  if (score < 7.5) return 'MEDIUM';
+  return 'LOW';
+}
+
+function extractCybersecurityFromPillarScore(score: {
+  pillar: string;
+  score: number;
+  riskLevel: RiskLevel;
+  breakdown: unknown;
+  calculatedAt: Date;
+}): { cyberScore: number; riskLevel: RiskLevel } | null {
+  if (score.pillar === 'cyber-risk') {
+    return { cyberScore: score.score, riskLevel: score.riskLevel };
+  }
+  if (score.pillar !== 'family-governance' || score.breakdown == null) {
+    return null;
+  }
+  const rows = score.breakdown as Array<{ categoryId?: string; score?: number }>;
+  const row = rows.find((r) => r.categoryId === 'cybersecurity');
+  if (!row || typeof row.score !== 'number') {
+    return null;
+  }
+  return {
+    cyberScore: row.score,
+    riskLevel: riskLevelFromNumericScore(row.score),
+  };
+}
+
 export async function getCyberRiskDashboardData() {
   try {
     const { userId } = await requireAdvisorRole();
@@ -376,16 +407,11 @@ export async function getCyberRiskDashboardData() {
               where: {
                 status: 'COMPLETED',
               },
+              orderBy: {
+                completedAt: 'desc',
+              },
               include: {
-                scores: {
-                  where: {
-                    pillar: 'cyber-risk',
-                  },
-                  orderBy: {
-                    calculatedAt: 'desc',
-                  },
-                  take: 1,
-                },
+                scores: true,
               },
             },
           },
@@ -393,7 +419,7 @@ export async function getCyberRiskDashboardData() {
       },
     });
 
-    // Build cyber risk client data
+    // Build cyber risk client data (cybersecurity slice of comprehensive assessment, or legacy cyber-risk pillar)
     type CyberRiskClient = {
       id: string;
       name: string | null;
@@ -403,20 +429,44 @@ export async function getCyberRiskDashboardData() {
       assessedAt: Date | null;
     };
 
-    const clients: CyberRiskClient[] = assignments.map(assignment => {
-      const cyberAssessments = assignment.client.assessments.filter(a =>
-        a.scores.some(s => s.pillar === 'cyber-risk')
-      );
-      const latestCyberAssessment = cyberAssessments[0] || null;
-      const latestCyberScore = latestCyberAssessment?.scores[0] || null;
+    const clients: CyberRiskClient[] = assignments.map((assignment) => {
+      let cyberScore: number | null = null;
+      let riskLevel: RiskLevel | null = null;
+      let assessedAt: Date | null = null;
+
+      for (const assessment of assignment.client.assessments) {
+        const governanceScores = assessment.scores
+          .filter((s) => s.pillar === 'family-governance')
+          .sort((a, b) => b.calculatedAt.getTime() - a.calculatedAt.getTime());
+        for (const s of governanceScores) {
+          const extracted = extractCybersecurityFromPillarScore(s);
+          if (extracted) {
+            cyberScore = extracted.cyberScore;
+            riskLevel = extracted.riskLevel;
+            assessedAt = s.calculatedAt;
+            break;
+          }
+        }
+        if (cyberScore !== null) break;
+
+        const legacyCyber = assessment.scores
+          .filter((s) => s.pillar === 'cyber-risk')
+          .sort((a, b) => b.calculatedAt.getTime() - a.calculatedAt.getTime())[0];
+        if (legacyCyber) {
+          cyberScore = legacyCyber.score;
+          riskLevel = legacyCyber.riskLevel;
+          assessedAt = legacyCyber.calculatedAt;
+          break;
+        }
+      }
 
       return {
         id: assignment.client.id,
         name: assignment.client.name,
         email: assignment.client.email,
-        cyberScore: latestCyberScore?.score || null,
-        riskLevel: latestCyberScore?.riskLevel || null,
-        assessedAt: latestCyberScore?.calculatedAt || null,
+        cyberScore,
+        riskLevel,
+        assessedAt,
       };
     });
 

@@ -6,6 +6,11 @@ import { ChevronRight } from "lucide-react";
 const SECTIONS = [
   { href: "/admin/advisors", label: "Advisors", description: "View and manage advisor accounts and profiles." },
   { href: "/admin/clients", label: "Clients", description: "View and manage client accounts and assignments." },
+  {
+    href: "/admin/leads",
+    label: "Assessment requests",
+    description: "Public lead form submissions; assign each request to an advisor.",
+  },
   { href: "/admin/intake", label: "Intake Management", description: "Review intake interviews and submission status." },
   { href: "/admin/assessment", label: "Assessment Management", description: "Review assessments and completion status." },
   { href: "/admin/settings", label: "Settings", description: "Admin and system settings." },

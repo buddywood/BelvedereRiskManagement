@@ -34,7 +34,7 @@ export function getCustomizationConfig(focusAreas: string[]): CustomizationConfi
 
 /**
  * Filter focus areas to only valid RISK_AREAS IDs
- * Returns all 8 subcategory IDs if focusAreas is empty (fallback to standard assessment)
+ * Returns all 6 pillar subcategory IDs if focusAreas is empty (fallback to standard assessment)
  */
 export function getVisibleSubCategories(focusAreas: string[]): string[] {
   if (focusAreas.length === 0) {

@@ -6,14 +6,21 @@ import { CATEGORY_LABELS } from "./formatters";
 
 // Pillar weights from the family governance pillar definition
 export const PILLAR_WEIGHTS = {
-  'decision-making-authority': 20,
-  'access-controls': 15,
-  'trust-estate-governance': 15,
-  'marriage-relationship-risk': 10,
-  'succession-planning': 15,
-  'behavior-standards': 10,
-  'business-involvement': 10,
-  'documentation-communication': 5,
+  'environmental-geographic-risk': 12,
+  'physical-security': 13,
+  'cybersecurity': 20,
+  'financial-asset-protection': 34,
+  'health-medical-preparedness': 11,
+  'lifestyle-behavioral-risk': 10,
+  // Legacy weights for historical PillarScore rows
+  'decision-making-authority': 13,
+  'access-controls': 13,
+  'trust-estate-governance': 9,
+  'marriage-relationship-risk': 9,
+  'succession-planning': 9,
+  'behavior-standards': 13,
+  'business-involvement': 9,
+  'documentation-communication': 13,
 } as const;
 
 /**

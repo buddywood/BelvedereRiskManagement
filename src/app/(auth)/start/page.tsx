@@ -77,15 +77,28 @@ export default function StartAssessmentPage() {
       title="Enter invite code"
       description="Your advisor has provided a 6-character invite code (letters and numbers) to start the assessment. Enter it below to create your account and begin."
       footer={
-        <span>
-          Already have an account?{" "}
-          <a
-            href="/signin"
-            className="font-semibold text-foreground hover:underline"
-          >
-            Sign in
-          </a>
-        </span>
+        <div className="flex flex-col">
+          <span>
+            Already have an account?{" "}
+            <a
+              href="/signin"
+              className="font-semibold text-foreground hover:underline"
+            >
+              Sign in
+            </a>
+          </span>
+          <div className="mt-3 border-t section-divider pt-3">
+            <span>
+              Looking for an advisor?{" "}
+              <a
+                href="/request-review"
+                className="font-semibold text-foreground hover:underline"
+              >
+                Request a review here
+              </a>
+            </span>
+          </div>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">

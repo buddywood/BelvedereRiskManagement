@@ -13,8 +13,7 @@ import { SectionProgress } from '@/components/assessment/ProgressBar';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
 import type { CustomizationConfig } from '@/lib/assessment/customization';
-import { allQuestions } from '@/lib/assessment/questions';
-import { allCyberQuestions, cyberRiskPillar } from '@/lib/cyber-risk/questions';
+import { allQuestions, familyGovernancePillar } from '@/lib/assessment/questions';
 import { allIdentityQuestions, identityRiskPillar } from '@/lib/identity-risk/questions';
 import { Question, Pillar } from '@/lib/assessment/types';
 
@@ -30,7 +29,7 @@ import { Question, Pillar } from '@/lib/assessment/types';
  * - Navigation with branching logic
  * - Progress tracking
  * - Validation
- * - Multi-pillar support (governance and cyber-risk)
+ * - Multi-pillar support (comprehensive + identity-risk)
  */
 
 /**
@@ -41,19 +40,7 @@ function getQuestionsForPillar(pillarSlug: string): { questions: Question[]; pil
     case 'family-governance':
       return {
         questions: allQuestions,
-        pillar: {
-          id: "family-governance",
-          name: "Family Governance",
-          slug: "family-governance",
-          description: "Evaluate your family's governance structures, decision-making processes, and succession planning.",
-          estimatedMinutes: 25,
-          subCategories: [],
-        }
-      };
-    case 'cyber-risk':
-      return {
-        questions: allCyberQuestions,
-        pillar: cyberRiskPillar
+        pillar: familyGovernancePillar,
       };
     case 'identity-risk':
       return {
@@ -132,6 +119,13 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
   // Auto-save
   const { saveAnswer, isSaving } = useAutoSave(assessmentId);
+
+  // Cyber module merged into comprehensive assessment — old URLs go to hub
+  useEffect(() => {
+    if (pillarSlug === 'cyber-risk') {
+      router.replace('/assessment');
+    }
+  }, [pillarSlug, router]);
 
   // Redirect if no assessment
   useEffect(() => {

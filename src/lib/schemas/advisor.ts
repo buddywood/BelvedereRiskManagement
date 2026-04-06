@@ -15,7 +15,7 @@ export const approveClientSchema = z.object({
 
 // Schema for selecting risk areas during approval process
 export const selectRiskAreasSchema = z.object({
-  focusAreas: z.array(z.string()).min(1).max(8),
+  focusAreas: z.array(z.string()).min(1).max(6),
 });
 
 // Schema for updating approval status

@@ -1,11 +1,10 @@
 export type TemplateId =
-  | 'decision-making-authority'
-  | 'access-controls'
-  | 'trust-estate-governance'
-  | 'succession-planning'
-  | 'behavior-standards'
-  | 'family-business-governance'
-  | 'documentation-records';
+  | 'environmental-geographic-risk'
+  | 'physical-security'
+  | 'cybersecurity'
+  | 'financial-asset-protection'
+  | 'health-medical-preparedness'
+  | 'lifestyle-behavioral-risk';
 
 export interface TemplateMetadata {
   id: TemplateId;
@@ -36,63 +35,56 @@ export interface TemplateData {
     relationship: string;
     governanceRoles: string[];
   }>;
-  decisionMakers?: string;    // Names of members with DECISION_MAKER role (comma-joined)
-  successors?: string;        // Names of members with SUCCESSOR role (comma-joined)
-  trustees?: string;          // Names of members with TRUSTEE role (comma-joined)
-  advisors?: string;          // Names of members with ADVISOR role (comma-joined)
-  beneficiaries?: string;     // Names of members with BENEFICIARY role (comma-joined)
-  executors?: string;         // Names of members with EXECUTOR role (comma-joined)
-  householdHead?: string;     // Primary decision maker or first member name
+  decisionMakers?: string; // Names of members with DECISION_MAKER role (comma-joined)
+  successors?: string; // Names of members with SUCCESSOR role (comma-joined)
+  trustees?: string; // Names of members with TRUSTEE role (comma-joined)
+  advisors?: string; // Names of members with ADVISOR role (comma-joined)
+  beneficiaries?: string; // Names of members with BENEFICIARY role (comma-joined)
+  executors?: string; // Names of members with EXECUTOR role (comma-joined)
+  householdHead?: string; // Primary decision maker or first member name
 }
 
 export const TEMPLATE_REGISTRY: TemplateMetadata[] = [
   {
-    id: 'decision-making-authority',
-    name: 'Decision-Making Authority Policy',
-    description: 'Family governance structure, voting rights, quorum requirements',
-    category: 'governance-structure',
-    applicableSubCategories: ['governance-structure']
+    id: 'environmental-geographic-risk',
+    name: 'Environmental & Geographic Risk Policy',
+    description: 'Hazards, catastrophe insurance, evacuation, and continuity',
+    category: 'environmental-geographic-risk',
+    applicableSubCategories: ['environmental-geographic-risk'],
   },
   {
-    id: 'access-controls',
-    name: 'Access Controls Policy',
-    description: 'Asset access tiers, approval workflows, information sharing protocols',
-    category: 'information-security',
-    applicableSubCategories: ['information-security']
+    id: 'physical-security',
+    name: 'Physical Security Policy',
+    description: 'Residence security, travel safety, and duress protocols',
+    category: 'physical-security',
+    applicableSubCategories: ['physical-security'],
   },
   {
-    id: 'trust-estate-governance',
-    name: 'Trust & Estate Governance Policy',
-    description: 'Trustee responsibilities, beneficiary rights, distribution procedures',
-    category: 'trust-estate-governance',
-    applicableSubCategories: ['trust-estate-governance']
+    id: 'cybersecurity',
+    name: 'Cybersecurity & Digital Access Policy',
+    description: 'Authentication, device hygiene, and sensitive information access',
+    category: 'cybersecurity',
+    applicableSubCategories: ['cybersecurity'],
   },
   {
-    id: 'succession-planning',
-    name: 'Succession Planning Policy',
-    description: 'Leadership transition plan, mentorship requirements, capability assessment',
-    category: 'succession-planning',
-    applicableSubCategories: ['succession-planning']
+    id: 'financial-asset-protection',
+    name: 'Financial & Asset Protection Policy',
+    description: 'Insurance, concentration, trusts, titling, and succession structures',
+    category: 'financial-asset-protection',
+    applicableSubCategories: ['financial-asset-protection'],
   },
   {
-    id: 'behavior-standards',
-    name: 'Behavior Standards Policy',
-    description: 'Family code of conduct, social media guidelines, public representation rules',
-    category: 'family-dynamics',
-    applicableSubCategories: ['family-dynamics']
+    id: 'health-medical-preparedness',
+    name: 'Health & Medical Preparedness Policy',
+    description: 'Emergency medical planning, travel health, and caregiving contingencies',
+    category: 'health-medical-preparedness',
+    applicableSubCategories: ['health-medical-preparedness'],
   },
   {
-    id: 'family-business-governance',
-    name: 'Family Business Governance Policy',
-    description: 'Board structure, family employment policies, compensation transparency',
-    category: 'business-governance',
-    applicableSubCategories: ['business-governance']
+    id: 'lifestyle-behavioral-risk',
+    name: 'Lifestyle & Behavioral Risk Policy',
+    description: 'Governance, communication, visibility, and advisor coordination',
+    category: 'lifestyle-behavioral-risk',
+    applicableSubCategories: ['lifestyle-behavioral-risk'],
   },
-  {
-    id: 'documentation-records',
-    name: 'Documentation & Records Policy',
-    description: 'Record retention schedule, access protocols, update frequency',
-    category: 'communication-transparency',
-    applicableSubCategories: ['communication-transparency']
-  }
 ];

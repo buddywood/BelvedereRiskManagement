@@ -5,8 +5,6 @@ import { Prisma, RiskLevel as PrismaRiskLevel } from "@prisma/client";
 import { calculatePillarScore, calculateCustomizedPillarScore } from "@/lib/assessment/scoring";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
-import { cyberRiskPillar, cyberRiskQuestions } from "@/lib/cyber-risk/questions";
-import { calculateCyberRiskScore } from "@/lib/cyber-risk/scoring";
 import { identityRiskPillar, identityRiskQuestions } from "@/lib/identity-risk/questions";
 import { calculateIdentityRiskScore } from "@/lib/identity-risk/scoring";
 import { Question, Pillar } from "@/lib/assessment/types";
@@ -27,6 +25,11 @@ import { triggerMilestoneNotification } from "@/lib/notifications/triggers";
 /**
  * Map TypeScript RiskLevel string to Prisma enum
  */
+function normalizeScorePillar(pillar: string): string {
+  if (pillar === 'cyber-risk') return 'family-governance';
+  return pillar;
+}
+
 function mapRiskLevelToPrisma(riskLevel: string): PrismaRiskLevel {
   switch (riskLevel) {
     case "low":
@@ -49,8 +52,6 @@ function getPillarConfig(pillar: string): { pillarData: Pillar; questions: Quest
   switch (pillar) {
     case 'family-governance':
       return { pillarData: familyGovernancePillar, questions: allQuestions };
-    case 'cyber-risk':
-      return { pillarData: cyberRiskPillar, questions: cyberRiskQuestions };
     case 'identity-risk':
       return { pillarData: identityRiskPillar, questions: identityRiskQuestions };
     default:
@@ -78,7 +79,7 @@ export async function GET(
 
     const { id } = await params;
     const { searchParams } = new URL(request.url);
-    const pillar = searchParams.get('pillar') || 'family-governance';
+    const pillar = normalizeScorePillar(searchParams.get('pillar') || 'family-governance');
 
     // Verify ownership
     const assessment = await prisma.assessment.findUnique({
@@ -153,7 +154,7 @@ export async function POST(
 
     const { id } = await params;
     const body = await request.json().catch(() => ({}));
-    const pillar = body.pillar || 'family-governance';
+    const pillar = normalizeScorePillar(body.pillar || 'family-governance');
 
     // Verify ownership
     const assessment = await prisma.assessment.findUnique({
@@ -184,12 +185,13 @@ export async function POST(
       );
     }
 
-    // Load all responses for this pillar
+    // Load responses for this pillar's question IDs (includes rows saved under legacy pillar labels)
+    const questionIds = pillarConfig.questions.map((q) => q.id);
     const responses = await prisma.assessmentResponse.findMany({
       where: {
         assessmentId: id,
-        pillar: pillar,
-        skipped: false, // Exclude skipped questions
+        skipped: false,
+        questionId: { in: questionIds },
       },
     });
 
@@ -232,7 +234,10 @@ export async function POST(
 
     // Check minimum completion threshold (50% of visible questions)
     const totalVisibleQuestions = visibleQuestions.length;
-    const answeredCount = responses.length;
+    const answeredCount = visibleQuestions.filter((q) => {
+      const a = answers[q.id];
+      return a !== undefined && a !== null;
+    }).length;
     const completionPercentage = (answeredCount / totalVisibleQuestions) * 100;
 
     if (completionPercentage < 50) {
@@ -246,10 +251,7 @@ export async function POST(
 
     // Calculate pillar score - customized or standard
     let scoreResult;
-    if (pillar === 'cyber-risk') {
-      // Use cyber risk scoring wrapper
-      scoreResult = calculateCyberRiskScore(answers, visibleIds);
-    } else if (pillar === 'identity-risk') {
+    if (pillar === 'identity-risk') {
       // Use identity risk scoring wrapper
       scoreResult = calculateIdentityRiskScore(answers, visibleIds);
     } else if (customizationConfig) {

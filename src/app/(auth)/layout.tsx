@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthLeftPaneSupplement } from "@/components/auth/AuthLeftPaneSupplement";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, Sparkles, Waypoints } from "lucide-react";
 import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
@@ -24,6 +25,7 @@ export default function AuthLayout({
                   language that feels discreet, editorial, and modern on every screen.
                 </p>
               </div>
+              <AuthLeftPaneSupplement />
             </div>
 
             <div className="hidden gap-4 sm:grid-cols-3 lg:grid">
