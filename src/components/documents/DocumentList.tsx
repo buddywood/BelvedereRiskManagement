@@ -3,6 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { DocumentUpload } from "./DocumentUpload";
+import { DocumentDownloadButton } from "./DocumentDownloadButton";
 import { CalendarDays, FileText, HardDrive } from "lucide-react";
 
 interface DocumentRequirement {
@@ -138,27 +139,30 @@ export function DocumentList({
             {/* Fulfilled State - Show File Info */}
             {requirement.fulfilled && requirement.fileName && (
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-center gap-3 text-sm">
-                  <FileText className="h-5 w-5 text-green-600" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-green-900 truncate">
-                      {requirement.fileName}
-                    </p>
-                    <div className="flex items-center gap-4 mt-1 text-green-700">
-                      {requirement.fileSize && (
-                        <div className="flex items-center gap-1">
-                          <HardDrive className="h-3 w-3" />
-                          <span>{formatFileSize(requirement.fileSize)}</span>
-                        </div>
-                      )}
-                      {requirement.fulfilledAt && (
-                        <div className="flex items-center gap-1">
-                          <CalendarDays className="h-3 w-3" />
-                          <span>Uploaded {formatDate(requirement.fulfilledAt)}</span>
-                        </div>
-                      )}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileText className="h-5 w-5 shrink-0 text-green-600" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-green-900 truncate">
+                        {requirement.fileName}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-4 mt-1 text-green-700">
+                        {requirement.fileSize != null && requirement.fileSize > 0 && (
+                          <div className="flex items-center gap-1">
+                            <HardDrive className="h-3 w-3" />
+                            <span>{formatFileSize(requirement.fileSize)}</span>
+                          </div>
+                        )}
+                        {requirement.fulfilledAt && (
+                          <div className="flex items-center gap-1">
+                            <CalendarDays className="h-3 w-3" />
+                            <span>Uploaded {formatDate(requirement.fulfilledAt)}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <DocumentDownloadButton requirementId={requirement.id} className="shrink-0 border-green-800/20 text-green-900" />
                 </div>
               </div>
             )}

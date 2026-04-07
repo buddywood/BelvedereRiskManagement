@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,6 +17,8 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { addDocumentRequirement, removeDocumentRequirement } from "@/lib/actions/pipeline-actions";
 import type { ClientDetail } from "@/lib/pipeline/types";
+import { DocumentUpload } from "@/components/documents/DocumentUpload";
+import { DocumentDownloadButton } from "@/components/documents/DocumentDownloadButton";
 
 interface DocumentRequirementsProps {
   clientId: string;
@@ -30,6 +33,7 @@ const documentSchema = z.object({
 type DocumentFormData = z.infer<typeof documentSchema>;
 
 export function DocumentRequirements({ clientId, requirements }: DocumentRequirementsProps) {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>("");
@@ -147,48 +151,72 @@ export function DocumentRequirements({ clientId, requirements }: DocumentRequire
             {requirements.map((requirement) => (
               <div
                 key={requirement.id}
-                className="flex items-start justify-between p-3 border rounded-lg"
+                className="p-3 border rounded-lg space-y-3"
               >
-                <div className="flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{requirement.name}</h4>
-                    <Badge variant={requirement.fulfilled ? "default" : "secondary"}>
-                      {requirement.fulfilled ? "Fulfilled" : "Pending"}
-                    </Badge>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-medium">{requirement.name}</h4>
+                      <Badge variant={requirement.fulfilled ? "default" : "secondary"}>
+                        {requirement.fulfilled ? "Fulfilled" : "Pending"}
+                      </Badge>
+                    </div>
+
+                    {requirement.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {requirement.description}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        Added {format(requirement.createdAt, 'MMM d, yyyy')}
+                      </span>
+                      {requirement.fulfilledAt && (
+                        <span>
+                          Fulfilled {format(requirement.fulfilledAt, 'MMM d, yyyy')}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {requirement.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {requirement.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      Added {format(requirement.createdAt, 'MMM d, yyyy')}
-                    </span>
-                    {requirement.fulfilledAt && (
-                      <span>
-                        Fulfilled {format(requirement.fulfilledAt, 'MMM d, yyyy')}
-                      </span>
+                  <div className="flex shrink-0 items-center gap-1">
+                    {requirement.fulfilled && (
+                      <DocumentDownloadButton requirementId={requirement.id} />
                     )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      disabled={deletingId === requirement.id}
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to remove "${requirement.name}"? This action cannot be undone.`)) {
+                          handleDelete(requirement.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                  disabled={deletingId === requirement.id}
-                  onClick={() => {
-                    if (window.confirm(`Are you sure you want to remove "${requirement.name}"? This action cannot be undone.`)) {
-                      handleDelete(requirement.id);
-                    }
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                {!requirement.fulfilled && (
+                  <DocumentUpload
+                    requirementId={requirement.id}
+                    requirementName={requirement.name}
+                    onUploadComplete={() => router.refresh()}
+                  />
+                )}
+
+                {requirement.fulfilled && requirement.fileName && (
+                  <p className="text-sm text-muted-foreground truncate">
+                    File: <span className="font-medium text-foreground">{requirement.fileName}</span>
+                    {requirement.fileSize != null && requirement.fileSize > 0 && (
+                      <span className="ml-2">({Math.round(requirement.fileSize / 1024)} KB)</span>
+                    )}
+                  </p>
+                )}
               </div>
             ))}
           </div>

@@ -65,6 +65,8 @@ export type ClientDetail = {
     fulfilled: boolean;
     fulfilledAt: Date | null;
     createdAt: Date;
+    fileName: string | null;
+    fileSize: number | null;
   }[];
   intakeDetails: {
     status: string;

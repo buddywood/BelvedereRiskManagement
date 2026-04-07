@@ -10,6 +10,9 @@ export async function GET(request: NextRequest) {
 
     const encoder = new TextEncoder();
 
+    // UnderlyingSource.cancel receives (reason), not the controller — interval must live in this closure.
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+
     const stream = new ReadableStream({
       async start(controller) {
         // Send initial connected event
@@ -19,33 +22,42 @@ data: {"timestamp": "${new Date().toISOString()}"}
 `;
         controller.enqueue(encoder.encode(connectedEvent));
 
-        // Set up polling interval (every 30 seconds)
-        const intervalId = setInterval(async () => {
+        intervalId = setInterval(async () => {
           try {
             const clients = await getClientPipeline(profile.id);
             const updateEvent = `event: pipeline_update
 data: ${JSON.stringify({ clients, timestamp: new Date().toISOString() })}
 
 `;
-            controller.enqueue(encoder.encode(updateEvent));
+            try {
+              controller.enqueue(encoder.encode(updateEvent));
+            } catch {
+              if (intervalId !== undefined) {
+                clearInterval(intervalId);
+                intervalId = undefined;
+              }
+            }
           } catch (error) {
             console.error('Error fetching pipeline update:', error);
-            // Send error event but don't close the stream
             const errorEvent = `event: error
 data: {"message": "Failed to fetch pipeline update", "timestamp": "${new Date().toISOString()}"}
 
 `;
-            controller.enqueue(encoder.encode(errorEvent));
+            try {
+              controller.enqueue(encoder.encode(errorEvent));
+            } catch {
+              if (intervalId !== undefined) {
+                clearInterval(intervalId);
+                intervalId = undefined;
+              }
+            }
           }
-        }, 30000); // 30 seconds
-
-        // Store interval ID for cleanup
-        (controller as any).intervalId = intervalId;
+        }, 30000);
       },
-      cancel(controller) {
-        // Clean up interval on stream close
-        if ((controller as any).intervalId) {
-          clearInterval((controller as any).intervalId);
+      cancel() {
+        if (intervalId !== undefined) {
+          clearInterval(intervalId);
+          intervalId = undefined;
         }
       },
     });

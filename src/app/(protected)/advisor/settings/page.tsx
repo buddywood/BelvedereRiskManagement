@@ -7,7 +7,7 @@ import { EnhancedBrandingForm } from "@/components/advisor/settings/EnhancedBran
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 export default async function AdvisorSettingsPage() {
   const result = await getAdvisorDashboardData();
@@ -37,32 +37,19 @@ export default async function AdvisorSettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/advisor" className="inline-flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Clients
-          </Link>
-        </Button>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+     
 
-        <Badge variant={features.tier === 'PROFESSIONAL' ? 'default' : 'secondary'}>
-          {features.tier} Plan
+        <Badge
+          variant={features.tier === 'PROFESSIONAL' ? 'default' : 'secondary'}
+          className="w-fit shrink-0 px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+        >
+          {features.tier} plan
         </Badge>
       </div>
 
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <Settings className="h-6 w-6" />
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-            <p className="text-muted-foreground">
-              Manage your profile and branding preferences
-            </p>
-          </div>
-        </div>
-
-        {/* Branding Section */}
+        {/* Branding Section (page title: sr-only "Settings" in advisor layout) */}
         <EnhancedBrandingForm
           profile={{
             firmName: profile.firmName,

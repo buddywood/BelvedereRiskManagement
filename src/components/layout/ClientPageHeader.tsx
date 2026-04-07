@@ -1,6 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useBrandingOptional } from "@/components/providers/BrandingProvider";
+import { getPreviewBrandHex, type PreviewBrandHex } from "@/lib/branding/preview-hex";
 import {
   LayoutDashboard,
   FileText,
@@ -75,35 +77,75 @@ function getHeaderConfig(pathname: string): ClientPageHeaderConfig | null {
   return match?.config ?? null;
 }
 
-export function ClientPageHeader(props: ClientPageHeaderConfig) {
-  const { icon: Icon, kicker, title, subtitle } = props;
+export function ClientPageHeader(
+  props: ClientPageHeaderConfig & { brandHex?: PreviewBrandHex | null },
+) {
+  const { icon: Icon, kicker, title, subtitle, brandHex } = props;
+  const iconSurfaceStyle = brandHex
+    ? {
+        color: brandHex.primary,
+        background: `color-mix(in srgb, ${brandHex.primary} 10%, transparent)`,
+        border: `1px solid color-mix(in srgb, ${brandHex.primary} 18%, transparent)`,
+      }
+    : undefined;
   return (
-    <header role="banner" className="client-header professional-header space-y-3 sm:space-y-4">
-      <div className="flex items-center gap-3 header-section-spacing">
-        <div className="professional-icon" role="img" aria-label={`${title} section icon`}>
+    <header
+      role="banner"
+      className="client-header professional-header"
+      style={
+        brandHex
+          ? {
+              background: brandHex.secondary,
+              borderColor: `color-mix(in srgb, ${brandHex.primary} 20%, transparent)`,
+            }
+          : undefined
+    }
+    >
+      <div className="flex items-start gap-3 sm:gap-4 header-section-spacing">
+      <div
+          className="professional-icon shrink-0"
+          role="img"
+          aria-label={`${title} section icon`}
+          style={iconSurfaceStyle}
+        >
           <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
-        <p className="professional-kicker" id="client-section-context" role="doc-subtitle">
-          {kicker}
-        </p>
-      </div>
-      <div className="header-section-spacing">
-        <h1
-          className="professional-title text-balance"
-          aria-describedby="client-section-context client-subtitle"
-        >
-          {title}
-        </h1>
-        {subtitle && (
+        <div className="min-w-0 flex-1 space-y-2 sm:space-y-3">
           <p
-            className="professional-subtitle"
-            id="client-subtitle"
+            className="professional-kicker"
+            id="client-section-context"
             role="doc-subtitle"
-            aria-label={`Page description: ${subtitle}`}
+            style={
+              brandHex
+                ? { color: brandHex.primary, opacity: 0.85 }
+                : undefined
+            }
           >
-            {subtitle}
+            {kicker}
           </p>
-        )}
+          <h1
+            className="professional-title text-balance"
+            aria-describedby="client-section-context client-subtitle"
+            style={brandHex ? { color: brandHex.primary } : undefined}
+          >
+            {title}
+          </h1>
+          {subtitle ? (
+            <p
+              className="professional-subtitle"
+              id="client-subtitle"
+              role="doc-subtitle"
+              aria-label={`Page description: ${subtitle}`}
+              style={
+                brandHex
+                  ? { color: brandHex.primary, opacity: 0.78 }
+                  : undefined
+              }
+            >
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
       </div>
     </header>
   );
@@ -116,14 +158,13 @@ export function ClientPageHeader(props: ClientPageHeaderConfig) {
 export function ClientPageHeaderFromPath() {
   const pathname = usePathname();
   const config = getHeaderConfig(pathname);
+  const branding = useBrandingOptional()?.branding ?? null;
+  const brandHex = branding ? getPreviewBrandHex(branding) : null;
   if (!config) return null;
 
   return (
     <>
-      <a href="#main-content" className="skip-to-content">
-        Skip to main content
-      </a>
-      <ClientPageHeader {...config} />
+      <ClientPageHeader {...config} brandHex={brandHex} />
     </>
   );
 }

@@ -508,9 +508,7 @@ export function BillingDashboard({
       ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/advisor">Back to Clients</Link>
-        </Button>
+   
         {data.stripeCustomerId ? (
           <Button type="button" variant="outline" disabled={pending} onClick={onPortal}>
             Manage payment &amp; cancellation

@@ -1,0 +1,12 @@
+{
+  "CORSRules": [
+    {
+      "ID": "presigned-browser-upload",
+      "AllowedOrigins": ["*"],
+      "AllowedMethods": ["GET", "PUT", "HEAD"],
+      "AllowedHeaders": ["*"],
+      "ExposeHeaders": ["ETag", "x-amz-request-id"],
+      "MaxAgeSeconds": 3600
+    }
+  ]
+}

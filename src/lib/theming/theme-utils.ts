@@ -27,6 +27,33 @@ export const THEME_VARIABLES = {
 } as const;
 
 /**
+ * shadcn/Tailwind design tokens (see globals.css :root). The main UI reads these —
+ * not --advisor-* — so we mirror advisor colors here when a branded experience is active.
+ */
+const SHADCN_THEME_BRIDGE_VARS = [
+  '--primary',
+  '--primary-foreground',
+  '--secondary',
+  '--secondary-foreground',
+  '--accent',
+  '--accent-foreground',
+  '--ring',
+  '--sidebar-primary',
+  '--sidebar-primary-foreground',
+  '--brand',
+  '--brand-foreground',
+] as const;
+
+function clearThemeVariablesFromRoot(root: HTMLElement): void {
+  Object.values(THEME_VARIABLES).forEach((variable) => {
+    root.style.removeProperty(variable);
+  });
+  SHADCN_THEME_BRIDGE_VARS.forEach((variable) => {
+    root.style.removeProperty(variable);
+  });
+}
+
+/**
  * Convert hex color to HSL values for CSS variables
  */
 export function hexToHSL(hex: string): string {
@@ -178,10 +205,7 @@ export function applyAdvisorTheme(branding: AdvisorBrandingData): void {
 
   const root = document.documentElement;
 
-  // Clear existing advisor theme variables
-  Object.values(THEME_VARIABLES).forEach(variable => {
-    root.style.removeProperty(variable);
-  });
+  clearThemeVariablesFromRoot(root);
 
   // Apply primary color
   if (branding.primaryColor) {
@@ -197,6 +221,15 @@ export function applyAdvisorTheme(branding: AdvisorBrandingData): void {
 
     // Border accent
     root.style.setProperty(THEME_VARIABLES.BORDER_ACCENT, branding.primaryColor);
+
+    // App-wide tokens (Buttons, links, focus rings, etc.)
+    const primaryCss = `hsl(${primaryHSL})`;
+    const primaryFgCss = `hsl(${hexToHSL(primaryForeground)})`;
+    root.style.setProperty('--primary', primaryCss);
+    root.style.setProperty('--primary-foreground', primaryFgCss);
+    root.style.setProperty('--ring', primaryCss);
+    root.style.setProperty('--sidebar-primary', primaryCss);
+    root.style.setProperty('--sidebar-primary-foreground', primaryFgCss);
   }
 
   // Apply secondary color
@@ -209,6 +242,9 @@ export function applyAdvisorTheme(branding: AdvisorBrandingData): void {
 
     // Header background
     root.style.setProperty(THEME_VARIABLES.HEADER_BACKGROUND, branding.secondaryColor);
+
+    root.style.setProperty('--secondary', `hsl(${secondaryHSL})`);
+    root.style.setProperty('--secondary-foreground', `hsl(${hexToHSL(secondaryForeground)})`);
   }
 
   // Apply accent color
@@ -221,6 +257,11 @@ export function applyAdvisorTheme(branding: AdvisorBrandingData): void {
 
     // Card accent
     root.style.setProperty(THEME_VARIABLES.CARD_ACCENT, branding.accentColor);
+
+    root.style.setProperty('--accent', `hsl(${accentHSL})`);
+    root.style.setProperty('--accent-foreground', `hsl(${hexToHSL(accentForeground)})`);
+    root.style.setProperty('--brand', `hsl(${accentHSL})`);
+    root.style.setProperty('--brand-foreground', `hsl(${hexToHSL(accentForeground)})`);
   }
 
   // Apply logo URL
@@ -245,10 +286,7 @@ export function removeAdvisorTheme(): void {
 
   const root = document.documentElement;
 
-  // Remove all advisor theme variables
-  Object.values(THEME_VARIABLES).forEach(variable => {
-    root.style.removeProperty(variable);
-  });
+  clearThemeVariablesFromRoot(root);
 
   // Remove advisor theme class
   root.removeAttribute('data-advisor-theme');

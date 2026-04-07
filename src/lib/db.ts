@@ -19,9 +19,20 @@ function postgresUrlWithExplicitSslMode(url: string): string {
   );
 }
 
+function isPrismaClientCurrent(client: PrismaClient): boolean {
+  // After `prisma generate`, new models exist on the class; a cached global instance
+  // from before generate does not — causes `prisma.platformSettings` undefined until dev restart.
+  return "platformSettings" in client;
+}
+
 function getPrisma(): PrismaClient {
-  if (globalForPrisma.prisma) {
-    return globalForPrisma.prisma;
+  const cached = globalForPrisma.prisma;
+  if (cached && isPrismaClientCurrent(cached)) {
+    return cached;
+  }
+  if (cached) {
+    void cached.$disconnect().catch(() => {});
+    globalForPrisma.prisma = undefined;
   }
 
   const rawUrl = process.env.DATABASE_URL;

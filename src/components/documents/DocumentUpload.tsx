@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,18 @@ type UploadState =
   | { status: 'success' }
   | { status: 'error'; message: string };
 
+async function parseS3ErrorBody(response: Response): Promise<string> {
+  try {
+    const text = await response.text();
+    const m = text.match(/<Message>([^<]*)<\/Message>/);
+    if (m?.[1]) return m[1].trim();
+    if (text.trim()) return text.trim().slice(0, 280);
+  } catch {
+    /* ignore */
+  }
+  return "";
+}
+
 export function DocumentUpload({
   requirementId,
   requirementName,
@@ -29,10 +41,9 @@ export function DocumentUpload({
 }: DocumentUploadProps) {
   const [uploadState, setUploadState] = useState<UploadState>({ status: 'idle' });
 
-  const onDrop = async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
-
+  const onDropAccepted = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
+    if (!file) return;
 
     try {
       // Step 1: Request upload URL
@@ -54,7 +65,18 @@ export function DocumentUpload({
         throw new Error(errorData || 'Failed to get upload URL');
       }
 
-      const { signedUrl, key } = await urlResponse.json();
+      const payload = await urlResponse.json();
+      const signedUrl = typeof payload.signedUrl === "string" ? payload.signedUrl : "";
+      const key = typeof payload.key === "string" ? payload.key : "";
+      const contentType = payload.contentType;
+      if (!signedUrl || !key) {
+        throw new Error("Invalid response from upload URL service");
+      }
+
+      const putContentType =
+        typeof contentType === "string" && contentType.length > 0
+          ? contentType
+          : file.type || "application/octet-stream";
 
       // Step 2: Upload file to S3
       setUploadState({ status: 'uploading' });
@@ -63,12 +85,16 @@ export function DocumentUpload({
         method: 'PUT',
         body: file,
         headers: {
-          'Content-Type': file.type,
+          "Content-Type": putContentType,
         },
       });
 
       if (!s3Response.ok) {
-        throw new Error('Failed to upload file to storage');
+        const detail = await parseS3ErrorBody(s3Response);
+        const suffix = detail ? `: ${detail}` : "";
+        throw new Error(
+          `Storage upload failed (${s3Response.status || "network"})${suffix}`,
+        );
       }
 
       // Step 3: Confirm upload with server
@@ -80,7 +106,7 @@ export function DocumentUpload({
           key,
           fileName: file.name,
           fileSize: file.size,
-          fileMimeType: file.type,
+          fileMimeType: putContentType,
         },
       });
 
@@ -95,10 +121,10 @@ export function DocumentUpload({
       const message = error instanceof Error ? error.message : 'Upload failed';
       setUploadState({ status: 'error', message });
     }
-  };
+  }, [onUploadComplete, requirementId]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
+    onDropAccepted,
     accept: ALLOWED_FILE_TYPES,
     maxSize: MAX_FILE_SIZE,
     multiple: false,

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPortfolioIntelligenceData } from "@/lib/actions/advisor-actions";
+import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
 import { RiskSummaryCard } from "@/components/intelligence/RiskSummaryCard";
 import { PortfolioRiskList } from "@/components/intelligence/PortfolioRiskList";
 import { RiskDistributionChart } from "@/components/intelligence/RiskDistributionChart";
@@ -76,20 +77,23 @@ async function IntelligenceContent() {
   );
 }
 
-export default function IntelligencePage() {
+export default async function IntelligencePage() {
+  const flags = await getPlatformFeatureFlags();
+  const backHref = flags.governanceDashboardEnabled ? "/advisor/dashboard" : "/advisor";
+  const backLabel = flags.governanceDashboardEnabled ? "Back to Dashboard" : "Back to Clients";
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <div>
         <Link
-          href="/advisor/dashboard"
+          href={backHref}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
+          {backLabel}
         </Link>
       </div>
 
-      {/* Data-dependent content with Suspense streaming */}
       <Suspense fallback={<IntelligenceLoading />}>
         <IntelligenceContent />
       </Suspense>

@@ -57,10 +57,35 @@ export type RiskAreaSelection = {
 
 // Risk areas aligned with the six pillars of comprehensive risk assessment (focus-area selector + subcategory IDs)
 export const RISK_AREAS = [
-  { id: 'environmental-geographic-risk', name: 'Environmental / Geographic Risk' },
-  { id: 'physical-security', name: 'Physical Security' },
-  { id: 'cybersecurity', name: 'Cybersecurity' },
-  { id: 'financial-asset-protection', name: 'Financial / Asset Protection' },
-  { id: 'health-medical-preparedness', name: 'Health & Medical Preparedness' },
-  { id: 'lifestyle-behavioral-risk', name: 'Lifestyle & Behavioral Risk' },
+  {
+    id: 'environmental-geographic-risk',
+    name: 'Environmental / Geographic Risk',
+    summary:
+      'Climate and location factors, regulatory context, and geography-driven exposure.',
+  },
+  {
+    id: 'physical-security',
+    name: 'Physical Security',
+    summary: 'Personal safety, property security, travel, and physical access control.',
+  },
+  {
+    id: 'cybersecurity',
+    name: 'Cybersecurity',
+    summary: 'Digital footprint, data protection, fraud, and online threats.',
+  },
+  {
+    id: 'financial-asset-protection',
+    name: 'Financial / Asset Protection',
+    summary: 'Wealth structures, insurance, liability, and asset preservation.',
+  },
+  {
+    id: 'health-medical-preparedness',
+    name: 'Health & Medical Preparedness',
+    summary: 'Care access, continuity, coverage, and medical-privacy considerations.',
+  },
+  {
+    id: 'lifestyle-behavioral-risk',
+    name: 'Lifestyle & Behavioral Risk',
+    summary: 'Visibility, routines, relationships, and habits that affect overall risk.',
+  },
 ] as const;

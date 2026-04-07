@@ -35,6 +35,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# Local AWS CLI profile name for Akili (copy from akili.awsprofile.example)
+/akili.awsprofile
+
 # vercel
 .vercel
 

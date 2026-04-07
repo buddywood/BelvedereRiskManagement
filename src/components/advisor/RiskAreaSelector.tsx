@@ -60,34 +60,34 @@ export function RiskAreaSelector({ selectedAreas, onChange, disabled = false }: 
         {selectedAreas.length} of {RISK_AREAS.length} areas selected
       </div>
 
-      {/* Grid of checkboxes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+      {/* Grid of checkboxes — min-w-0 so columns can shrink and long titles wrap inside padding */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {RISK_AREAS.map((area) => {
           const isSelected = selectedAreas.includes(area.id);
 
           return (
             <div
               key={area.id}
-              className={`rounded-lg border p-4 transition-colors cursor-pointer ${
+              className={`min-w-0 rounded-lg border box-border cursor-pointer transition-colors p-2.5 sm:p-3 ${
                 isSelected
                   ? 'border-primary bg-primary/5'
                   : 'border-border hover:border-primary/50'
               } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               onClick={() => handleAreaToggle(area.id)}
             >
-              <div className="flex items-start gap-3">
+              <div className="flex min-w-0 items-start gap-3">
                 <Checkbox
                   checked={isSelected}
                   disabled={disabled}
-                  className="mt-0.5"
+                  className="mt-0.5 shrink-0"
                   onCheckedChange={() => handleAreaToggle(area.id)}
                 />
-                <div className="space-y-1 flex-1">
-                  <div className="font-medium text-sm leading-5">
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="break-normal text-sm font-medium leading-snug">
                     {area.name}
                   </div>
-                  <p className="text-xs text-muted-foreground leading-4">
-                    Comprehensive risk pillar: {area.name}.
+                  <p className="break-normal text-xs leading-relaxed text-muted-foreground">
+                    {area.summary}
                   </p>
                 </div>
               </div>

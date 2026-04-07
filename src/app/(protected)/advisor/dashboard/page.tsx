@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Shield } from "lucide-react";
 import { getGovernanceDashboardData } from "@/lib/actions/advisor-actions";
+import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
 import { GovernanceTable } from "@/components/dashboard/GovernanceTable";
 import { MetricsCards } from "@/components/dashboard/MetricsCards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,21 +92,23 @@ async function DashboardContent() {
   );
 }
 
-export default function AdvisorGovernanceDashboardPage() {
+export default async function AdvisorGovernanceDashboardPage() {
+  const flags = await getPlatformFeatureFlags();
+
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Quick navigation */}
-      <div className="flex justify-center">
-        <Link
-          href="/advisor/intelligence"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Shield className="h-4 w-4" />
-          Risk Intelligence
-        </Link>
-      </div>
+      {flags.riskIntelligenceEnabled && (
+        <div className="flex justify-center">
+          <Link
+            href="/advisor/intelligence"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Shield className="h-4 w-4" />
+            Risk Intelligence
+          </Link>
+        </div>
+      )}
 
-      {/* Data-dependent content with Suspense streaming */}
       <Suspense fallback={<DashboardSkeleton />}>
         <DashboardContent />
       </Suspense>

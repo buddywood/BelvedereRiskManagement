@@ -1,0 +1,4 @@
+{
+  "name": "Akili (buddy@ebilly.com AWS profile)",
+  "settings": "{\"terminal.integrated.env.osx\":{\"AWS_PROFILE\":\"buddy@ebilly.com\"},\"terminal.integrated.env.linux\":{\"AWS_PROFILE\":\"buddy@ebilly.com\"},\"terminal.integrated.env.windows\":{\"AWS_PROFILE\":\"buddy@ebilly.com\"}}"
+}

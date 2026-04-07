@@ -6,6 +6,10 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { generateDownloadUrl } from '@/lib/documents/s3';
+import {
+  getDocumentRequirementForSessionUser,
+  keyMatchesDocumentRequirement,
+} from '@/lib/documents/requirement-access';
 
 export async function getClientDocumentRequirements() {
   try {
@@ -64,11 +68,11 @@ export async function getClientDocumentRequirements() {
 }
 
 const confirmUploadSchema = z.object({
-  requirementId: z.string().cuid(),
+  requirementId: z.string().min(1).max(64),
   fileMetadata: z.object({
     key: z.string().min(1),
     fileName: z.string().min(1).max(255),
-    fileSize: z.number().positive(),
+    fileSize: z.coerce.number().positive(),
     fileMimeType: z.string().min(1),
   }),
 });
@@ -91,19 +95,21 @@ export async function confirmDocumentUpload(data: unknown) {
 
     const { requirementId, fileMetadata } = validatedFields.data;
 
-    // Verify the requirement exists and belongs to the authenticated user
-    const requirement = await prisma.documentRequirement.findFirst({
-      where: {
-        id: requirementId,
-        clientId: session.user.id,
-      },
-    });
+    const requirement = await getDocumentRequirementForSessionUser(
+      session.user.id,
+      session.user.role,
+      requirementId,
+    );
 
     if (!requirement) {
       return {
         success: false,
         error: 'Document requirement not found or not assigned to you',
       };
+    }
+
+    if (!keyMatchesDocumentRequirement(fileMetadata.key, requirement.clientId, requirementId)) {
+      return { success: false, error: 'Invalid upload key for this requirement' };
     }
 
     // Update the requirement with file metadata
@@ -119,7 +125,9 @@ export async function confirmDocumentUpload(data: unknown) {
       },
     });
 
-    revalidatePath('/client/documents');
+    revalidatePath('/documents');
+    revalidatePath('/advisor/pipeline');
+    revalidatePath(`/advisor/pipeline/${requirement.clientId}`);
     return {
       success: true,
       data: updatedRequirement,
@@ -138,9 +146,11 @@ export async function getDocumentDownloadUrl(requirementId: string) {
       return { success: false, error: 'Not authenticated' };
     }
 
-    const validatedFields = z.object({
-      requirementId: z.string().cuid(),
-    }).safeParse({ requirementId });
+    const validatedFields = z
+      .object({
+        requirementId: z.string().min(1).max(64),
+      })
+      .safeParse({ requirementId });
 
     if (!validatedFields.success) {
       return {
@@ -149,17 +159,13 @@ export async function getDocumentDownloadUrl(requirementId: string) {
       };
     }
 
-    // Verify the requirement exists and belongs to the authenticated user
-    const requirement = await prisma.documentRequirement.findFirst({
-      where: {
-        id: requirementId,
-        clientId: session.user.id,
-        fulfilled: true,
-        fileKey: { not: null },
-      },
-    });
+    const requirement = await getDocumentRequirementForSessionUser(
+      session.user.id,
+      session.user.role,
+      requirementId,
+    );
 
-    if (!requirement || !requirement.fileKey) {
+    if (!requirement || !requirement.fulfilled || !requirement.fileKey) {
       return {
         success: false,
         error: 'Document not found or no file uploaded',

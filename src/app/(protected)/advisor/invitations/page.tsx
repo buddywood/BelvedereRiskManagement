@@ -24,14 +24,6 @@ export default async function InvitationsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/advisor" className="inline-flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Clients
-          </Link>
-        </Button>
-      </div>
 
       {/* Invite Form */}
       <InviteClientForm />

@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
-import { AdvisorPageHeaderFromPath } from "@/components/advisor/AdvisorPageHeader";
+import { AdvisorSrOnlyHeading } from "@/components/advisor/AdvisorSrOnlyHeading";
 
 export default async function AdvisorLayout({
   children,
@@ -17,7 +17,7 @@ export default async function AdvisorLayout({
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <AdvisorPageHeaderFromPath />
+      <AdvisorSrOnlyHeading />
       {children}
     </div>
   );

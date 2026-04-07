@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import {
+  getDocumentRequirementForSessionUser,
+  keyMatchesDocumentRequirement,
+} from "@/lib/documents/requirement-access";
 import { z } from "zod";
 
 const confirmUploadSchema = z.object({
-  requirementId: z.string().cuid(),
+  requirementId: z.string().min(1).max(64),
   key: z.string().min(1),
   fileName: z.string().min(1).max(255),
-  fileSize: z.number().positive(),
+  fileSize: z.coerce.number().positive(),
   fileMimeType: z.string().min(1),
 });
 
@@ -34,18 +38,23 @@ export async function POST(request: NextRequest) {
 
     const { requirementId, key, fileName, fileSize, fileMimeType } = validatedFields.data;
 
-    // Verify the requirement exists and belongs to the authenticated user
-    const requirement = await prisma.documentRequirement.findFirst({
-      where: {
-        id: requirementId,
-        clientId: session.user.id,
-      },
-    });
+    const requirement = await getDocumentRequirementForSessionUser(
+      session.user.id,
+      session.user.role,
+      requirementId,
+    );
 
     if (!requirement) {
       return NextResponse.json(
         { error: "Document requirement not found or not assigned to you" },
         { status: 404 }
+      );
+    }
+
+    if (!keyMatchesDocumentRequirement(key, requirement.clientId, requirementId)) {
+      return NextResponse.json(
+        { error: "Invalid upload key for this requirement" },
+        { status: 400 }
       );
     }
 

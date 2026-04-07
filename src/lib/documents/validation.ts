@@ -1,17 +1,76 @@
-import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from './types';
+import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from "./types";
 
-export function validateFileUpload(fileType: string, fileSize: number): { valid: true } | { valid: false; error: string } {
-  // Check if file type is allowed
-  if (!Object.keys(ALLOWED_FILE_TYPES).includes(fileType)) {
-    const allowedTypes = Object.keys(ALLOWED_FILE_TYPES).join(', ');
-    return { valid: false, error: `File type ${fileType} not allowed. Allowed types: ${allowedTypes}` };
+/** Safe file name segment inside S3 keys — avoids `/`, `#`, spaces, and Unicode breaking presigned URLs. */
+export function sanitizeDocumentKeyFileName(fileName: string): string {
+  const base = (fileName || "upload").trim() || "upload";
+  return base
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_{2,}/g, "_")
+    .slice(0, 180);
+}
+
+/**
+ * Maps browser/file metadata + extension to an allowed MIME type.
+ * Handles empty types, application/octet-stream, and misreported MIME (common on Windows).
+ */
+export function resolveAllowedMimeType(
+  fileName: string,
+  fileType: string,
+): string | null {
+  const t = (fileType || "").trim().toLowerCase();
+  if (t === "image/jpg") {
+    return "image/jpeg";
+  }
+  if (t && Object.keys(ALLOWED_FILE_TYPES).includes(t)) {
+    return t;
   }
 
-  // Check file size
+  const ext = fileName.includes(".")
+    ? fileName.slice(fileName.lastIndexOf(".") + 1).toLowerCase()
+    : "";
+  const extToMime: Record<string, string> = {
+    pdf: "application/pdf",
+    png: "image/png",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+  };
+  const fromExt = extToMime[ext];
+  if (!fromExt) return null;
+
+  if (
+    !t ||
+    t === "application/octet-stream" ||
+    !Object.keys(ALLOWED_FILE_TYPES).includes(t)
+  ) {
+    return fromExt;
+  }
+
+  return null;
+}
+
+export function validateFileUpload(
+  fileName: string,
+  fileType: string,
+  fileSize: number,
+):
+  | { valid: true; mimeType: string }
+  | { valid: false; error: string } {
+  const mimeType = resolveAllowedMimeType(fileName, fileType);
+  if (!mimeType) {
+    const allowedTypes = Object.keys(ALLOWED_FILE_TYPES).join(", ");
+    return {
+      valid: false,
+      error: `File type not allowed or could not be determined from the file. Allowed types: ${allowedTypes}`,
+    };
+  }
+
   if (fileSize > MAX_FILE_SIZE) {
     const maxSizeMB = Math.round(MAX_FILE_SIZE / (1024 * 1024));
-    return { valid: false, error: `File size ${fileSize} bytes exceeds maximum allowed size of ${maxSizeMB}MB` };
+    return {
+      valid: false,
+      error: `File size ${fileSize} bytes exceeds maximum allowed size of ${maxSizeMB}MB`,
+    };
   }
 
-  return { valid: true };
+  return { valid: true, mimeType };
 }

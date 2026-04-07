@@ -1,6 +1,13 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo,
+  useSyncExternalStore,
+} from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'react-hot-toast';
@@ -10,12 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import ColorPicker from '@/components/ui/color-picker';
 import { FileUpload } from '@/components/ui/file-upload';
 import { PreviewContainer } from '@/components/advisor/settings/BrandingPreview';
+import { SubdomainManager } from '@/components/advisor/settings/SubdomainManager';
 import { brandingUpdateSchema, BrandingFormData, SubscriptionFeatures } from '@/lib/validation/branding';
 import { updateAdvisorBrandingAction } from '@/lib/actions/advisor-branding-actions';
 import { resolveAdvisorLogoSrcForPreview } from '@/lib/branding/advisor-logo-display';
@@ -32,6 +38,20 @@ import {
   Check,
   Info,
 } from 'lucide-react';
+
+function subscribeXl(callback: () => void) {
+  const mq = window.matchMedia('(min-width: 1280px)');
+  mq.addEventListener('change', callback);
+  return () => mq.removeEventListener('change', callback);
+}
+
+function getXlSnapshot() {
+  return window.matchMedia('(min-width: 1280px)').matches;
+}
+
+function useXlSidebarNav() {
+  return useSyncExternalStore(subscribeXl, getXlSnapshot, () => false);
+}
 
 interface EnhancedBrandingFormProps {
   profile: {
@@ -56,15 +76,55 @@ interface EnhancedBrandingFormProps {
 }
 
 const FORM_SECTIONS = [
-  { id: 'identity', title: 'Brand Identity', icon: Building, description: 'Basic brand information' },
-  { id: 'colors', title: 'Colors & Style', icon: Palette, description: 'Brand colors and theming', premium: true },
-  { id: 'assets', title: 'Logo & Assets', icon: ImageIcon, description: 'Upload and manage your logo' },
-  { id: 'contact', title: 'Contact Information', icon: Phone, description: 'Support contact details' },
-  { id: 'domain', title: 'Custom Domain', icon: Globe, description: 'Custom subdomain setup', premium: true },
-  { id: 'preview', title: 'Live Preview', icon: Eye, description: 'See how your branding looks' },
-];
+  {
+    id: 'identity',
+    title: 'Brand Identity',
+    shortTitle: 'Identity',
+    icon: Building,
+    description: 'Basic brand information',
+  },
+  {
+    id: 'colors',
+    title: 'Colors & Style',
+    shortTitle: 'Colors',
+    icon: Palette,
+    description: 'Brand colors and theming',
+    premium: true,
+  },
+  {
+    id: 'assets',
+    title: 'Logo & Assets',
+    shortTitle: 'Logo',
+    icon: ImageIcon,
+    description: 'Upload and manage your logo',
+  },
+  {
+    id: 'contact',
+    title: 'Contact Information',
+    shortTitle: 'Contact',
+    icon: Phone,
+    description: 'Support contact details',
+  },
+  {
+    id: 'domain',
+    title: 'Custom Domain',
+    shortTitle: 'Domain',
+    icon: Globe,
+    description: 'Custom subdomain setup',
+    premium: true,
+  },
+  {
+    id: 'preview',
+    title: 'Live Preview',
+    shortTitle: 'Preview',
+    icon: Eye,
+    description: 'See how your branding looks',
+  },
+] as const;
 
 export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingFormProps) {
+  const xlSidebar = useXlSidebarNav();
+
   const brandNameFromFirm =
     profile.firmName?.trim() || profile.brandName?.trim() || '';
 
@@ -93,7 +153,6 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
     watch,
     setValue,
     reset,
-    trigger,
   } = useForm<BrandingFormData>({
     resolver: zodResolver(brandingUpdateSchema),
     defaultValues: defaultFormValues,
@@ -208,37 +267,75 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Enhanced Branding</h2>
-          <p className="text-muted-foreground">
-            Customize your brand identity and client experience
-          </p>
-        </div>
-        <Badge variant={features.tier === 'PROFESSIONAL' ? 'default' : 'secondary'}>
-          {features.tier}
-        </Badge>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(280px,340px)]">
         {/* Main Form */}
-        <div className="xl:col-span-2 space-y-6">
-          <Tabs value={activeSection} onValueChange={setActiveSection}>
-            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-              {FORM_SECTIONS.map((section) => (
-                <TabsTrigger
-                  key={section.id}
-                  value={section.id}
-                  className="flex items-center gap-1 text-xs"
-                >
-                  <section.icon className="h-3 w-3" />
-                  <span className="hidden sm:inline">{section.title}</span>
-                </TabsTrigger>
-              ))}
+        <div className="min-w-0 space-y-6">
+          <Tabs
+            value={activeSection}
+            onValueChange={setActiveSection}
+            orientation={xlSidebar ? 'vertical' : 'horizontal'}
+            className="gap-6 xl:gap-8"
+          >
+            <TabsList
+              aria-label="Branding settings sections"
+              className={cn(
+                'h-auto w-full gap-1.5 rounded-xl border border-border/60 bg-muted/40 p-2 text-muted-foreground shadow-sm',
+                xlSidebar
+                  ? 'sticky top-20 z-10 !flex w-56 shrink-0 flex-col items-stretch'
+                  : '!grid grid-cols-2 grid-rows-3 sm:grid-cols-3 sm:grid-rows-2'
+              )}
+            >
+              {FORM_SECTIONS.map((section) => {
+                const showUpgradeHint =
+                  (section.id === 'colors' &&
+                    section.premium &&
+                    !features.advancedBrandingEnabled) ||
+                  (section.id === 'domain' &&
+                    section.premium &&
+                    !features.customSubdomainEnabled);
+
+                return (
+                  <TabsTrigger
+                    key={section.id}
+                    value={section.id}
+                    className={cn(
+                      'min-h-11 text-xs font-medium transition-colors duration-200 sm:text-sm',
+                      'data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm',
+                      '[&>span>svg]:opacity-60 data-[state=active]:[&>span>svg]:opacity-100',
+                      'focus-visible:ring-2 focus-visible:ring-ring/40',
+                      xlSidebar
+                        ? 'h-auto w-full flex-col items-stretch gap-1.5 px-3 py-3'
+                        : 'flex flex-col items-center justify-center gap-1 px-2 py-2.5 sm:flex-row sm:gap-2'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'flex w-full items-center gap-2',
+                        xlSidebar ? 'justify-start' : 'justify-center sm:justify-center'
+                      )}
+                    >
+                      <section.icon className="size-4 shrink-0 transition-opacity" aria-hidden />
+                      <span className="leading-tight">
+                        {xlSidebar ? section.title : section.shortTitle}
+                      </span>
+                      {showUpgradeHint ? (
+                        <Crown
+                          className="ml-auto size-3.5 shrink-0 !opacity-100 text-amber-600 dark:text-amber-500"
+                          aria-label="Requires plan upgrade"
+                        />
+                      ) : null}
+                    </span>
+                    {xlSidebar ? (
+                      <span className="text-[11px] font-normal leading-snug text-muted-foreground">
+                        {section.description}
+                      </span>
+                    ) : null}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="min-w-0 w-full flex-1 space-y-6">
               {/* RHF only submits registered fields; ColorPickers use setValue only */}
               <input type="hidden" {...register('brandName')} />
               <input type="hidden" {...register('primaryColor')} />
@@ -246,14 +343,14 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               <input type="hidden" {...register('accentColor')} />
               <input type="hidden" {...register('logoUrl')} />
               {/* Brand Identity */}
-              <TabsContent value="identity" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building className="h-5 w-5" />
+              <TabsContent value="identity" className="space-y-4 outline-none">
+                <Card className="border-border/80 shadow-sm">
+                  <CardHeader className="space-y-1 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight">
+                      <Building className="h-5 w-5 text-muted-foreground" />
                       Brand Identity
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-pretty leading-relaxed">
                       Tagline and website. Your public brand name is your firm name (see Contact
                       Information).
                     </CardDescription>
@@ -290,17 +387,17 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               </TabsContent>
 
               {/* Colors & Style */}
-              <TabsContent value="colors" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Palette className="h-5 w-5" />
+              <TabsContent value="colors" className="space-y-4 outline-none">
+                <Card className="border-border/80 shadow-sm">
+                  <CardHeader className="space-y-1 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight">
+                      <Palette className="h-5 w-5 text-muted-foreground" />
                       Brand Colors
                       {!features.advancedBrandingEnabled && (
                         <Crown className="h-4 w-4 text-amber-500" />
                       )}
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-pretty leading-relaxed">
                       Customize your brand colors with accessibility validation
                     </CardDescription>
                   </CardHeader>
@@ -342,14 +439,14 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               </TabsContent>
 
               {/* Logo & Assets */}
-              <TabsContent value="assets" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <ImageIcon className="h-5 w-5" />
+              <TabsContent value="assets" className="space-y-4 outline-none">
+                <Card className="border-border/80 shadow-sm">
+                  <CardHeader className="space-y-1 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight">
+                      <ImageIcon className="h-5 w-5 text-muted-foreground" />
                       Logo Upload
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-pretty leading-relaxed">
                       Upload your logo (PNG, JPEG, or SVG, max 2MB)
                     </CardDescription>
                   </CardHeader>
@@ -365,14 +462,14 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               </TabsContent>
 
               {/* Contact Information */}
-              <TabsContent value="contact" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Phone className="h-5 w-5" />
+              <TabsContent value="contact" className="space-y-4 outline-none">
+                <Card className="border-border/80 shadow-sm">
+                  <CardHeader className="space-y-1 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight">
+                      <Phone className="h-5 w-5 text-muted-foreground" />
                       Contact Information
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-pretty leading-relaxed">
                       Support contact details for your clients
                     </CardDescription>
                   </CardHeader>
@@ -421,49 +518,22 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               </TabsContent>
 
               {/* Custom Domain */}
-              <TabsContent value="domain" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Globe className="h-5 w-5" />
-                      Custom Subdomain
-                      {!features.customSubdomainEnabled && (
-                        <Crown className="h-4 w-4 text-amber-500" />
-                      )}
-                    </CardTitle>
-                    <CardDescription>
-                      Claim your custom subdomain for branded client access
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {features.customSubdomainEnabled ? (
-                      <Alert>
-                        <Info className="h-4 w-4" />
-                        <AlertDescription>
-                          Custom subdomain management coming soon. You'll be able to claim a custom subdomain like yourname.akiliplatform.com for a fully branded client experience.
-                        </AlertDescription>
-                      </Alert>
-                    ) : (
-                      <Alert>
-                        <Info className="h-4 w-4" />
-                        <AlertDescription>
-                          {getUpgradeMessage('domain')}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </CardContent>
-                </Card>
+              <TabsContent value="domain" className="space-y-4 outline-none">
+                <SubdomainManager
+                  features={features}
+                  currentSubdomain={undefined}
+                />
               </TabsContent>
 
               {/* Live Preview */}
-              <TabsContent value="preview" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Eye className="h-5 w-5" />
+              <TabsContent value="preview" className="space-y-4 outline-none">
+                <Card className="border-border/80 shadow-sm">
+                  <CardHeader className="space-y-1 pb-4">
+                    <CardTitle className="flex items-center gap-2 text-base font-semibold tracking-tight">
+                      <Eye className="h-5 w-5 text-muted-foreground" />
                       Live Preview
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-pretty leading-relaxed">
                       See how your branding will appear across different touchpoints
                     </CardDescription>
                   </CardHeader>
@@ -474,14 +544,14 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               </TabsContent>
 
               {/* Form Actions */}
-              <div className="space-y-3 pt-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
+              <div className="space-y-3 border-t border-border/60 pt-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-3">
                   <Button
                     type="submit"
                     disabled={!isDirty || isSubmitting}
                     aria-busy={isSubmitting}
                     className={cn(
-                      'flex-1 gap-2 transition-[color,box-shadow,background-color,border-color]',
+                      'min-h-11 flex-1 gap-2 transition-[color,box-shadow,background-color,border-color] sm:max-w-xs',
                       showSavedFlash &&
                         !isSubmitting &&
                         'border border-emerald-600/85 bg-emerald-50 text-emerald-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] hover:bg-emerald-50 dark:border-emerald-500/60 dark:bg-emerald-950/45 dark:text-emerald-50 dark:hover:bg-emerald-950/45 dark:shadow-none disabled:opacity-100'
@@ -506,6 +576,7 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
                     variant="outline"
                     onClick={() => reset()}
                     disabled={!isDirty || isSubmitting}
+                    className="min-h-11 shrink-0"
                   >
                     Reset
                   </Button>
@@ -532,62 +603,81 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
         </div>
 
         {/* Preview Sidebar */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Preview</CardTitle>
-              <CardDescription>
-                Your current branding
+        <div className="min-w-0 space-y-4 xl:sticky xl:top-20 xl:self-start">
+          <Card className="border-border/80 shadow-md ring-1 ring-border/40">
+            <CardHeader className="space-y-1 border-b border-border/50 pb-4">
+              <CardTitle className="text-lg font-semibold tracking-tight">Preview</CardTitle>
+              <CardDescription className="leading-relaxed">
+                How clients see your brand at a glance
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6 pt-6">
               {/* Logo Preview */}
               {(watchedValues.logoUrl || profile.logoUrl) && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Logo</Label>
-                  <div className="border rounded-lg p-4 bg-muted/30 flex items-center justify-center min-h-[80px]">
+                  <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Logo
+                  </Label>
+                  <div
+                    className={cn(
+                      'flex min-h-[88px] items-center justify-center rounded-lg border border-border/60 p-4',
+                      'bg-[repeating-conic-gradient(rgb(228_228_231)_0%_25%,rgb(250_250_250)_0%_50%)] [background-size:12px_12px]',
+                      'dark:bg-[repeating-conic-gradient(rgb(63_63_70)_0%_25%,rgb(24_24_27)_0%_50%)]'
+                    )}
+                  >
                     <img
                       src={resolveAdvisorLogoSrcForPreview(watchedValues.logoUrl || profile.logoUrl)}
                       alt="Logo preview"
-                      className="max-h-16 max-w-full object-contain"
+                      className="max-h-16 max-w-full object-contain drop-shadow-sm"
                       onError={(e) => {
                         (e.target as HTMLImageElement).style.display = 'none';
                       }}
                     />
                   </div>
+                  <p className="text-[11px] leading-snug text-muted-foreground">
+                    Checkerboard shows transparent areas; light logos stay visible.
+                  </p>
                 </div>
               )}
 
               {/* Color Preview */}
               {features.advancedBrandingEnabled && (
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Colors</Label>
-                  <div className="grid grid-cols-3 gap-2">
+                <div className="space-y-3">
+                  <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Colors
+                  </Label>
+                  <div className="grid grid-cols-3 gap-3">
                     {watchedValues.primaryColor && (
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div
-                          className="h-8 rounded border"
+                          className="h-10 rounded-md border border-border/60 shadow-inner"
                           style={{ backgroundColor: watchedValues.primaryColor }}
                         />
-                        <p className="text-xs text-center">Primary</p>
+                        <p className="text-center text-[11px] font-medium text-muted-foreground">
+                          Primary
+                        </p>
                       </div>
                     )}
                     {watchedValues.secondaryColor && (
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div
-                          className="h-8 rounded border"
+                          className="h-10 rounded-md border border-border/60 shadow-inner"
                           style={{ backgroundColor: watchedValues.secondaryColor }}
                         />
-                        <p className="text-xs text-center">Secondary</p>
+                        <p className="text-center text-[11px] font-medium text-muted-foreground">
+                          Secondary
+                        </p>
                       </div>
                     )}
                     {watchedValues.accentColor && (
-                      <div className="space-y-1">
+                      <div className="space-y-1.5">
                         <div
-                          className="h-8 rounded border"
+                          className="h-10 rounded-md border border-border/60 shadow-inner"
                           style={{ backgroundColor: watchedValues.accentColor }}
                         />
-                        <p className="text-xs text-center">Accent</p>
+                        <p className="text-center text-[11px] font-medium text-muted-foreground">
+                          Accent
+                        </p>
                       </div>
                     )}
                   </div>
@@ -595,17 +685,26 @@ export function EnhancedBrandingForm({ profile, features }: EnhancedBrandingForm
               )}
 
               {/* Brand Info */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Brand Info</Label>
-                <div className="space-y-1 text-sm">
+              <div className="space-y-3">
+                <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Brand info
+                </Label>
+                <div className="space-y-2 rounded-lg border border-border/50 bg-muted/20 p-4 text-sm">
                   {watchedValues.brandName && (
-                    <p><strong>{watchedValues.brandName}</strong></p>
+                    <p className="text-base font-semibold leading-snug">{watchedValues.brandName}</p>
                   )}
                   {watchedValues.tagline && (
-                    <p className="text-muted-foreground italic">{watchedValues.tagline}</p>
+                    <p className="text-muted-foreground leading-relaxed italic">{watchedValues.tagline}</p>
                   )}
                   {watchedValues.websiteUrl && (
-                    <p className="text-blue-600 underline">{watchedValues.websiteUrl}</p>
+                    <a
+                      href={watchedValues.websiteUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block break-all text-primary underline decoration-primary/40 underline-offset-4 transition-colors hover:decoration-primary"
+                    >
+                      {watchedValues.websiteUrl}
+                    </a>
                   )}
                 </div>
               </div>

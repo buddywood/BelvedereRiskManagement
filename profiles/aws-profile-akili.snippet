@@ -1,0 +1,38 @@
+# ------------------------------------------------------------------------------
+# Akili AWS CLI — IAM Identity Center (SSO)
+# ------------------------------------------------------------------------------
+#
+# Your machine may already list a profile named: buddy@ebilly.com
+# If `aws sso login --profile buddy@ebilly.com` says sso_start_url is missing,
+# that profile is incomplete. Fix it ONE of these ways:
+#
+# --- A) Interactive (recommended) ---
+#   aws configure sso
+#   • SSO session name: whatever you like (e.g. ebilly)
+#   • SSO start URL: ASK YOUR ADMIN — typically:
+#       https://d-xxxxxxxxxx.awsapps.com/start
+#     or https://<your-org>.awsapps.com/start
+#     (from AWS IAM Identity Center → Settings → Identity source / portal URL)
+#   • SSO region: region where IAM Identity Center is set up (often us-east-1)
+#   • Then pick the Akili account and role when prompted.
+#   The wizard writes a proper [profile ...] block into ~/.aws/config.
+#
+# --- B) Hand-edit ~/.aws/config ---
+#   Use a block like below; replace ALL placeholders. Profile name can stay
+#   buddy@ebilly.com if that matches what you use.
+#
+# [profile buddy@ebilly.com]
+# sso_start_url = https://d-xxxxxxxxxx.awsapps.com/start
+# sso_region = us-east-1
+# sso_account_id = 123456789012
+# sso_role_name = AdministratorAccess
+# region = us-east-1
+#
+# Then:
+#   aws sso login --profile buddy@ebilly.com
+#
+# --- CORS script ---
+# Repo root file akili.awsprofile (gitignored) should contain ONE line: the profile name
+# (copy akili.awsprofile.example → akili.awsprofile and adjust if needed).
+#
+# Do NOT paste lines starting with # into the shell as commands — comments are not run.

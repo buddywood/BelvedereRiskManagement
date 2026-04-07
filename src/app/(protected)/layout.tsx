@@ -4,9 +4,21 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ProtectedNav } from "@/components/layout/ProtectedNav";
 import { ClientPageHeaderFromPath } from "@/components/layout/ClientPageHeader";
+import { ClientPortalBrandedHeaderMark } from "@/components/layout/ClientPortalBrandedHeaderMark";
 import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncompleteIntake";
+import { BrandingProvider } from "@/components/providers/BrandingProvider";
 import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
 import { prisma } from "@/lib/db";
+import {
+  clientPortalLogoImgSrc,
+  getAssignedAdvisorBrandingForClient,
+} from "@/lib/client/assigned-advisor-branding";
+import { getPreviewBrandHex } from "@/lib/branding/preview-hex";
+import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
+import { cn } from "@/lib/utils";
+
+/** Shown above the workspace title when the client portal is advisor-branded (not the advisor tagline field). */
+const BRANDED_CLIENT_HEADER_KICKER = "Brought to you by AKILI Risk Intelligence";
 
 export default async function ProtectedLayout({
   children,
@@ -27,11 +39,20 @@ export default async function ProtectedLayout({
   // For clients: restrict nav to Intake until they have submitted intake; Assessment stays disabled until advisor approves
   let restrictNavToIntake = false;
   let intakeApprovedForClient = false;
+  let clientAdvisorBranding: Awaited<
+    ReturnType<typeof getAssignedAdvisorBrandingForClient>
+  > = null;
+
   if (role === "USER" && session.user.id) {
-    const submittedInterview = await prisma.intakeInterview.findFirst({
-      where: { userId: session.user.id, status: "SUBMITTED" },
-      select: { id: true },
-    });
+    const [submittedInterview, branding] = await Promise.all([
+      prisma.intakeInterview.findFirst({
+        where: { userId: session.user.id, status: "SUBMITTED" },
+        select: { id: true },
+      }),
+      getAssignedAdvisorBrandingForClient(session.user.id),
+    ]);
+    clientAdvisorBranding = branding;
+
     restrictNavToIntake = !submittedInterview;
     if (submittedInterview) {
       const approval = await prisma.intakeApproval.findUnique({
@@ -42,35 +63,99 @@ export default async function ProtectedLayout({
     }
   }
 
-  return (
+  const brandTitle =
+    clientAdvisorBranding?.brandName?.trim() ||
+    clientAdvisorBranding?.advisorFirmName?.trim() ||
+    "Partner portal";
+  const previewHex = clientAdvisorBranding
+    ? getPreviewBrandHex(clientAdvisorBranding)
+    : null;
+
+  /** Advisor hub (not client portal): slimmer global title so route content is not stacked under an oversized hero. */
+  const compactWorkspaceHeader = showAdvisor && !clientAdvisorBranding;
+
+  const advisorFeatureFlags = showAdvisor ? await getPlatformFeatureFlags() : null;
+
+  const shell = (
     <div className="min-h-screen py-3 sm:py-6">
       {restrictNavToIntake && (
         <RedirectIncompleteIntake restrictNavToIntake={restrictNavToIntake} />
       )}
       <div className="page-shell">
-        <div className="hero-surface overflow-x-hidden rounded-[2rem]">
-          <header className="border-b section-divider bg-background/55 overflow-visible">
+        <div
+          className="hero-surface overflow-x-hidden rounded-[2rem]"
+          style={
+            previewHex
+              ? {
+                  // Overrides `.hero-surface` gradient so the shell matches preview `bg-gray-50`
+                  background: "#f9fafb",
+                }
+              : undefined
+          }
+        >
+          <header
+            className={cn(
+              "border-b section-divider overflow-visible",
+              !previewHex && "bg-background/55",
+            )}
+            style={
+              previewHex
+                ? {
+                    backgroundColor: previewHex.secondary,
+                    borderBottomColor: `${previewHex.primary}33`,
+                    color: previewHex.primary,
+                  }
+                : undefined
+            }
+          >
             <div className="pl-0 pr-4 py-3 sm:pl-4 sm:pr-8 sm:py-4 lg:pl-6 lg:pr-10">
               {" "}
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
                   {" "}
                   <div className="min-w-0">
-                    <Link
-                      href="/"
-                      className="block text-foreground"
-                      aria-label="AKILI home"
-                    >
-                      <AkiliLogoLockup className="h-auto w-full max-w-[190px] lg:max-w-[220px]" />
-                    </Link>
+                    {clientAdvisorBranding ? (
+                      <ClientPortalBrandedHeaderMark
+                        brandTitle={brandTitle}
+                        logoSrc={clientPortalLogoImgSrc(clientAdvisorBranding)}
+                        primaryHex={previewHex?.primary}
+                      />
+                    ) : (
+                      <Link
+                        href="/"
+                        className="block text-foreground"
+                        aria-label="AKILI home"
+                      >
+                        <AkiliLogoLockup className="h-auto w-full max-w-[190px] lg:max-w-[220px]" />
+                      </Link>
+                    )}
 
                     <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-                      <p className="text-sm text-muted-foreground">
-                        Signed in as{" "}
-                        <span className="font-semibold text-foreground break-all">
-                          {session.user.email}
-                        </span>
-                      </p>
+                      {previewHex ? (
+                        <p className="text-sm">
+                          <span
+                            style={{
+                              color: previewHex.primary,
+                              opacity: 0.72,
+                            }}
+                          >
+                            Signed in as{" "}
+                          </span>
+                          <span
+                            className="font-semibold break-all"
+                            style={{ color: previewHex.primary }}
+                          >
+                            {session.user.email}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          Signed in as{" "}
+                          <span className="font-semibold text-foreground break-all">
+                            {session.user.email}
+                          </span>
+                        </p>
+                      )}
                       <form
                         action={async () => {
                           "use server";
@@ -82,6 +167,14 @@ export default async function ProtectedLayout({
                           variant="outline"
                           size="sm"
                           className="min-w-[110px] px-4"
+                          style={
+                            previewHex
+                              ? {
+                                  borderColor: `${previewHex.primary}55`,
+                                  color: previewHex.primary,
+                                }
+                              : undefined
+                          }
                         >
                           Sign Out
                         </Button>
@@ -89,21 +182,51 @@ export default async function ProtectedLayout({
                     </div>
                   </div>
                   <div className="min-w-0 xl:max-w-[560px] xl:text-right">
-                    <p className="editorial-kicker mb-1">
-                      AKILI Risk Intelligence
+                    <p
+                      className={cn(
+                        "mb-1",
+                        compactWorkspaceHeader
+                          ? "text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                          : "editorial-kicker",
+                      )}
+                      style={
+                        previewHex ? { color: previewHex.primary } : undefined
+                      }
+                    >
+                      {clientAdvisorBranding
+                        ? BRANDED_CLIENT_HEADER_KICKER
+                        : "AKILI Risk Intelligence"}
                     </p>
-                    <h1 className="text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]">
+                    <h1
+                      className={cn(
+                        compactWorkspaceHeader
+                          ? "text-xl font-semibold tracking-tight sm:text-2xl"
+                          : "text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]",
+                      )}
+                      style={
+                        previewHex ? { color: previewHex.primary } : undefined
+                      }
+                    >
                       Governance Assessment Workspace
                     </h1>
                   </div>
                 </div>
 
-                <div className="border-t border-border/60 pt-4 mt-3">
+                <div
+                  className="border-t border-border/60 pt-4 mt-3"
+                  style={
+                    previewHex
+                      ? { borderTopColor: `${previewHex.primary}30` }
+                      : undefined
+                  }
+                >
                   <ProtectedNav
                     showAdvisor={showAdvisor}
                     showAdmin={showAdmin}
                     restrictNavToIntake={restrictNavToIntake}
                     intakeApprovedForClient={intakeApprovedForClient}
+                    clientBrandHex={previewHex}
+                    advisorFeatureFlags={advisorFeatureFlags}
                   />
                 </div>
               </div>
@@ -120,4 +243,14 @@ export default async function ProtectedLayout({
       </div>
     </div>
   );
+
+  if (clientAdvisorBranding) {
+    return (
+      <BrandingProvider branding={clientAdvisorBranding} subdomain={null}>
+        {shell}
+      </BrandingProvider>
+    );
+  }
+
+  return shell;
 }

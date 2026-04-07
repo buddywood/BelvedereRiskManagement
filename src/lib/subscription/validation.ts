@@ -168,15 +168,11 @@ export async function requireSubdomainAccess(userId: string): Promise<{
 }> {
   const advisor = await prisma.advisorProfile.findUnique({
     where: { userId },
-    select: { id: true, customDomainEnabled: true },
+    select: { id: true },
   });
 
   if (!advisor) {
     throw new Error('Advisor profile not found');
-  }
-
-  if (!advisor.customDomainEnabled) {
-    throw new Error('Custom domain features are disabled for this advisor');
   }
 
   const features = await requireSubscriptionFeature(

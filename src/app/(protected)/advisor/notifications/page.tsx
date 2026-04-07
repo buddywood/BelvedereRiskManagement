@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { NotificationList } from "@/components/advisor/NotificationList";
 import { getAdvisorNotificationsAction, markAllNotificationsReadAction } from "@/lib/actions/advisor-actions";
 import { redirect } from "next/navigation";
@@ -38,14 +39,21 @@ export default async function NotificationsPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/advisor" className="inline-flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Clients
-            </Link>
-          </Button>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up."}
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+            {unreadCount > 0 ? (
+              <>
+                <Badge
+                  variant="default"
+                  className="tabular-nums"
+                  aria-label={`${unreadCount} unread notifications`}
+                >
+                  {unreadCount}
+                </Badge>
+                <span>unread</span>
+              </>
+            ) : (
+              "You're all caught up."
+            )}
           </p>
         </div>
         <div className="flex gap-2">

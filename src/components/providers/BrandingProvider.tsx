@@ -30,21 +30,14 @@ export function BrandingProvider({
   // Apply theme on mount if autoApply is enabled and branding is available
   useEffect(() => {
     if (autoApply && branding) {
-      // Validate theme accessibility before applying
       const validation = validateThemeAccessibility(branding);
-
-      if (validation.isValid) {
-        applyAdvisorTheme(branding);
-        console.debug('Advisor theme applied:', {
-          brandName: branding.brandName,
-          hasColors: !!(branding.primaryColor || branding.secondaryColor),
-          subdomain,
-        });
-      } else {
-        console.warn('Advisor theme failed validation:', validation.errors);
-        if (validation.warnings.length > 0) {
-          console.warn('Theme warnings:', validation.warnings);
-        }
+      // Always apply so shadcn tokens (--primary, etc.) pick up advisor colors; validation is advisory only
+      applyAdvisorTheme(branding);
+      if (!validation.isValid) {
+        console.warn('Advisor theme accessibility:', validation.errors);
+      }
+      if (validation.warnings.length > 0) {
+        console.warn('Advisor theme warnings:', validation.warnings);
       }
     }
 

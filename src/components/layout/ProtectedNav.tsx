@@ -4,6 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  type PreviewBrandHex,
+  isPreviewHexDark,
+} from "@/lib/branding/preview-hex";
+import type { AdvisorPlatformFeatureFlags } from "@/lib/platform/feature-flags";
 
 const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
@@ -16,7 +21,6 @@ const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
 
 const ADVISOR_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/advisor", label: "Clients" },
-  { href: "/advisor/pipeline", label: "Pipeline" },
   { href: "/advisor/invitations", label: "Invitations" },
   { href: "/advisor/dashboard", label: "Dashboard" },
   { href: "/advisor/intelligence", label: "Risk Intelligence" },
@@ -41,6 +45,10 @@ interface ProtectedNavProps {
   restrictNavToIntake?: boolean;
   /** When false for clients, Assessment link is disabled until advisor approves intake */
   intakeApprovedForClient?: boolean;
+  /** Client portal + assigned advisor: match `BrandingPreview` nav (primary text, light active pill) */
+  clientBrandHex?: PreviewBrandHex | null;
+  /** When omitted for advisors, both features are shown (backward compatible). */
+  advisorFeatureFlags?: AdvisorPlatformFeatureFlags | null;
 }
 
 export function ProtectedNav({
@@ -48,13 +56,29 @@ export function ProtectedNav({
   showAdmin = false,
   restrictNavToIntake = false,
   intakeApprovedForClient = false,
+  clientBrandHex = null,
+  advisorFeatureFlags = null,
 }: ProtectedNavProps) {
   const pathname = usePathname();
 
+  const advisorNavItems: typeof ADVISOR_NAV_ITEMS | undefined = showAdvisor
+    ? advisorFeatureFlags
+      ? ADVISOR_NAV_ITEMS.filter((item) => {
+          if (item.href === "/advisor/dashboard") {
+            return advisorFeatureFlags.governanceDashboardEnabled;
+          }
+          if (item.href === "/advisor/intelligence") {
+            return advisorFeatureFlags.riskIntelligenceEnabled;
+          }
+          return true;
+        })
+      : ADVISOR_NAV_ITEMS
+    : undefined;
+
   const items = showAdmin
     ? ADMIN_NAV_ITEMS
-    : showAdvisor
-      ? ADVISOR_NAV_ITEMS
+    : advisorNavItems !== undefined
+      ? advisorNavItems
       : CLIENT_NAV_ITEMS;
 
   // When restrictNavToIntake (client, intake not submitted), only Intake is enabled
@@ -74,6 +98,9 @@ export function ProtectedNav({
     .find(
       ({ href }) => pathname === href || pathname.startsWith(href + "/"),
     )?.href;
+
+  const clientPreviewNav =
+    !!clientBrandHex && !showAdvisor && !showAdmin;
 
   return (
     <nav
@@ -96,11 +123,44 @@ export function ProtectedNav({
             title={disabledTitle}
             className={cn(
               "inline-flex h-9 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium",
-              "text-muted-foreground/60 opacity-70",
+              !clientPreviewNav && "text-muted-foreground/60 opacity-70",
             )}
+            style={
+              clientPreviewNav
+                ? {
+                    color: isPreviewHexDark(clientBrandHex!.secondary)
+                      ? "rgba(255, 255, 255, 0.72)"
+                      : clientBrandHex!.primary,
+                    opacity: isPreviewHexDark(clientBrandHex!.secondary)
+                      ? 1
+                      : 0.5,
+                  }
+                : undefined
+            }
           >
             {label}
           </span>
+        ) : clientPreviewNav ? (
+          <Link
+            key={href}
+            href={href}
+            aria-current={isActive ? "page" : undefined}
+            className={cn(
+              "inline-flex h-9 shrink-0 items-center rounded-md px-3 text-sm font-medium transition-colors",
+              "hover:bg-white/50",
+            )}
+            style={{
+              color: clientBrandHex!.primary,
+              ...(isActive
+                ? {
+                    backgroundColor: "rgba(255, 255, 255, 0.55)",
+                    fontWeight: 600,
+                  }
+                : {}),
+            }}
+          >
+            {label}
+          </Link>
         ) : (
           <Button
             asChild

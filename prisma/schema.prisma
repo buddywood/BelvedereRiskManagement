@@ -108,6 +108,16 @@ model SubscriptionAuditLog {
   @@index([subscriptionId])
 }
 
+/** Singleton row (`id = "default"`): global toggles managed in Admin → Settings. */
+model PlatformSettings {
+  id     String @id @default("default")
+  /** Advisor nav + /advisor/governance dashboard (Family Portfolio, metrics). */
+  advisorGovernanceDashboardEnabled Boolean @default(true)
+  /** Advisor nav + /advisor/intelligence (portfolio risk views). */
+  advisorRiskIntelligenceEnabled    Boolean @default(true)
+  updatedAt DateTime @updatedAt
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String

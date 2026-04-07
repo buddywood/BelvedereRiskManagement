@@ -145,7 +145,7 @@ export function AdvisorBrandingForm({ profile, updateBrandingAction }: AdvisorBr
           {showPreview && (
             <div className="space-y-2">
               <p className="text-sm font-medium">Preview</p>
-              <div className="rounded-lg border bg-muted/30 p-4 inline-block">
+              <div className="rounded-lg border bg-transparent p-4 inline-block">
                 <img
                   src={logoUrl}
                   alt="Logo preview"

@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { requireAdminRole } from "@/lib/admin/auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getPlatformAdvisorFeatureFlagsForAdmin } from "@/lib/admin/platform-settings-actions";
+import { AdminAdvisorFeatureFlagsForm } from "@/components/admin/AdminAdvisorFeatureFlagsForm";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default async function AdminSettingsPage() {
   await requireAdminRole();
+
+  const flagsRes = await getPlatformAdvisorFeatureFlagsForAdmin();
 
   return (
     <div className="space-y-6">
@@ -24,12 +28,22 @@ export default async function AdminSettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">System</CardTitle>
+          <CardTitle className="text-base">Advisor feature flags</CardTitle>
+          <CardDescription>
+            Control visibility of governance dashboard and risk intelligence for all advisors. Disabled routes redirect
+            to <span className="font-medium text-foreground">Clients</span> (<code className="text-xs">/advisor</code>
+            ).
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Placeholder for system-wide admin settings (e.g. feature flags, defaults, maintenance).
-          </p>
+          {!flagsRes.success ? (
+            <p className="text-sm text-destructive">{flagsRes.error}</p>
+          ) : (
+            <AdminAdvisorFeatureFlagsForm
+              initialGovernanceDashboard={flagsRes.data.advisorGovernanceDashboardEnabled}
+              initialRiskIntelligence={flagsRes.data.advisorRiskIntelligenceEnabled}
+            />
+          )}
         </CardContent>
       </Card>
     </div>

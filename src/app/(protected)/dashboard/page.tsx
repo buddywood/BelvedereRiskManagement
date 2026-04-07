@@ -60,32 +60,31 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6 sm:space-y-8">
       <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-          <div className="space-y-2 sm:space-y-3">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
+          <div className="flex flex-col justify-center space-y-2 sm:space-y-3">
             <p className="text-sm text-muted-foreground">
               Welcome back,{" "}
               {session.user.firstName ?? session.user.name ?? "Guest"}
             </p>
-
           </div>
 
           <Card className="bg-background/60">
-            <CardContent className="grid gap-3 pt-5 sm:grid-cols-3 sm:pt-6">
-              <div>
+            <CardContent className="grid gap-6 pt-5 sm:grid-cols-3 sm:gap-6 sm:px-6 sm:pt-6 lg:gap-8">
+              <div className="min-w-0">
                 <p className="editorial-kicker">Assessments</p>
-                <p className="mt-2 text-3xl font-semibold">
+                <p className="mt-2 text-3xl font-semibold tabular-nums">
                   {assessments.length}
                 </p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="editorial-kicker">MFA</p>
                 <p className="mt-2 text-3xl font-semibold">
                   {session?.user?.mfaEnabled ? "On" : "Off"}
                 </p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="editorial-kicker">Latest Status</p>
-                <p className="mt-2 text-xl font-semibold">
+                <p className="mt-2 text-xl font-semibold leading-snug">
                   {assessments[0]?.status === "COMPLETED"
                     ? "Results Ready"
                     : assessments.length

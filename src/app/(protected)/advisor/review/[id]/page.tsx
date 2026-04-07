@@ -61,12 +61,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/advisor">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Clients
-                </Button>
-              </Link>
+            
               <div className="h-6 w-px bg-border" />
               <h1 className="text-xl font-semibold">View intake</h1>
             </div>

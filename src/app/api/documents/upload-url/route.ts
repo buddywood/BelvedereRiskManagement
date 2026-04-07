@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getDocumentRequirementForSessionUser } from "@/lib/documents/requirement-access";
 import { validateFileUpload } from "@/lib/documents/validation";
 import { generateUploadUrl } from "@/lib/documents/s3";
 import { z } from "zod";
 
 const uploadUrlSchema = z.object({
-  requirementId: z.string().cuid(),
+  requirementId: z.string().min(1).max(64),
   fileName: z.string().min(1).max(255),
-  fileType: z.string().min(1),
-  fileSize: z.number().positive(),
+  fileType: z.string().optional().default(""),
+  fileSize: z.coerce.number().positive(),
 });
 
 export async function POST(request: NextRequest) {
@@ -35,8 +35,7 @@ export async function POST(request: NextRequest) {
 
     const { requirementId, fileName, fileType, fileSize } = validatedFields.data;
 
-    // Validate file type and size
-    const validation = validateFileUpload(fileType, fileSize);
+    const validation = validateFileUpload(fileName, fileType, fileSize);
     if (!validation.valid) {
       return NextResponse.json(
         { error: validation.error },
@@ -44,13 +43,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify the requirement exists and belongs to the authenticated user
-    const requirement = await prisma.documentRequirement.findFirst({
-      where: {
-        id: requirementId,
-        clientId: session.user.id,
-      },
-    });
+    const { mimeType } = validation;
+
+    const requirement = await getDocumentRequirementForSessionUser(
+      session.user.id,
+      session.user.role,
+      requirementId,
+    );
 
     if (!requirement) {
       return NextResponse.json(
@@ -69,13 +68,13 @@ export async function POST(request: NextRequest) {
 
     // Generate presigned URL
     const { signedUrl, key } = await generateUploadUrl(
-      session.user.id,
+      requirement.clientId,
       requirementId,
       fileName,
-      fileType
+      mimeType,
     );
 
-    return NextResponse.json({ signedUrl, key });
+    return NextResponse.json({ signedUrl, key, contentType: mimeType });
   } catch (error) {
     console.error("Error generating upload URL:", error);
     return NextResponse.json(
