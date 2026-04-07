@@ -212,6 +212,32 @@ model PillarScore {
   @@index([assessmentId])
 }
 
+/// Family-governance structured assessment: question copy and visibility per risk area (six intake/scoring pillars).
+model AssessmentBankQuestion {
+  id                  String   @id @default(cuid())
+  questionId          String   @unique
+  riskAreaId          String
+  sortOrderGlobal     Int
+  isVisible           Boolean  @default(true)
+  text                String   @db.Text
+  helpText            String?  @db.Text
+  learnMore           String?  @db.Text
+  type                String
+  options             Json?
+  required            Boolean
+  weight              Int
+  scoreMap            Json
+  branchingDependsOn  String?
+  branchingPredicate  Json?
+  profileConditionKey String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([riskAreaId])
+  @@index([riskAreaId, sortOrderGlobal])
+  @@index([isVisible, sortOrderGlobal])
+}
+
 enum AssessmentStatus {
   IN_PROGRESS
   COMPLETED

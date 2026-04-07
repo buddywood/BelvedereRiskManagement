@@ -2,16 +2,14 @@ import Link from "next/link";
 import { UserPlus, Send, Settings, GitBranch, ArrowRight } from "lucide-react";
 import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
 import { getClientPipelineData } from "@/lib/actions/pipeline-actions";
-import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
 import { ADVISOR_PILLAR_SHORTCUTS } from "@/lib/advisor/pillar-shortcuts";
 import { NotificationBell } from "@/components/advisor/NotificationBell";
 import { Button } from "@/components/ui/button";
 
 export default async function AdvisorHomePage() {
-  const [dash, pipelineRes, flags] = await Promise.all([
+  const [dash, pipelineRes] = await Promise.all([
     getAdvisorDashboardData(),
     getClientPipelineData(),
-    getPlatformFeatureFlags(),
   ]);
 
   if (!dash.success) {
@@ -121,7 +119,7 @@ export default async function AdvisorHomePage() {
         <div className="space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Shortcuts</h2>
           <p className="text-sm text-muted-foreground">
-            Jump to portfolio intelligence by pillar, or open everyday workspace tools.
+            Open the structured question bank by risk area, or use workspace tools below.
           </p>
         </div>
 
@@ -142,9 +140,7 @@ export default async function AdvisorHomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {ADVISOR_PILLAR_SHORTCUTS.map(({ id, name, summary, icon: PillarIcon }) => {
-              const href = flags.riskIntelligenceEnabled
-                ? `/advisor/intelligence?category=${encodeURIComponent(id)}`
-                : "/advisor/pipeline";
+              const href = `/advisor/question-bank/${encodeURIComponent(id)}`;
               return (
                 <Link key={id} href={href} className="group">
                   <div className="h-full rounded-lg border border-border/70 bg-card p-5 transition-colors hover:border-primary/25 hover:bg-muted/40">

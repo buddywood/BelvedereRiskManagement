@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { getOrphanedAnswerIds } from './branching';
 import { allQuestions } from './questions';
 import type { HouseholdProfile } from './personalization';
+import type { Question } from './types';
+import { allIdentityQuestions } from '../identity-risk/questions';
 
 /**
  * Assessment Store
@@ -37,6 +39,8 @@ interface AssessmentState {
   isHydrated: boolean;
   orphanedAnswerIds: string[];
   householdProfile: HouseholdProfile | null;
+  /** Merged DB-backed family-governance questions (visible only). Falls back to static bank when unset. */
+  familyGovernanceQuestionBank: Question[] | null;
 
   // Actions
   setAssessmentId: (id: string) => void;
@@ -50,6 +54,7 @@ interface AssessmentState {
   setLoading: (loading: boolean) => void;
   cleanOrphanedAnswers: () => void;
   setHouseholdProfile: (profile: HouseholdProfile | null) => void;
+  setFamilyGovernanceQuestionBank: (questions: Question[] | null) => void;
 }
 
 const initialState = {
@@ -64,7 +69,15 @@ const initialState = {
   isHydrated: false,
   orphanedAnswerIds: [],
   householdProfile: null,
+  familyGovernanceQuestionBank: null,
 };
+
+function questionUniverseForOrphans(state: AssessmentState): Question[] {
+  const gov = state.familyGovernanceQuestionBank?.length
+    ? state.familyGovernanceQuestionBank
+    : allQuestions;
+  return [...gov, ...allIdentityQuestions];
+}
 
 export const useAssessmentStore = create<AssessmentState>()(
   persist(
@@ -77,7 +90,11 @@ export const useAssessmentStore = create<AssessmentState>()(
       setAnswer: (questionId: string, answer: unknown) =>
         set((state) => {
           const newAnswers = { ...state.answers, [questionId]: answer };
-          const newOrphanedIds = getOrphanedAnswerIds(newAnswers, allQuestions, state.householdProfile);
+          const newOrphanedIds = getOrphanedAnswerIds(
+            newAnswers,
+            questionUniverseForOrphans(state),
+            state.householdProfile
+          );
 
           return {
             answers: newAnswers,
@@ -139,11 +156,18 @@ export const useAssessmentStore = create<AssessmentState>()(
 
       cleanOrphanedAnswers: () =>
         set((state) => ({
-          orphanedAnswerIds: getOrphanedAnswerIds(state.answers, allQuestions, state.householdProfile),
+          orphanedAnswerIds: getOrphanedAnswerIds(
+            state.answers,
+            questionUniverseForOrphans(state),
+            state.householdProfile
+          ),
         })),
 
       setHouseholdProfile: (profile: HouseholdProfile | null) =>
         set({ householdProfile: profile }),
+
+      setFamilyGovernanceQuestionBank: (questions: Question[] | null) =>
+        set({ familyGovernanceQuestionBank: questions }),
     }),
     {
       name: 'belvedere-assessment',

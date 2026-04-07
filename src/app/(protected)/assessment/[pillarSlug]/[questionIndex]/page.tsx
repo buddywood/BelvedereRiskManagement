@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAssessmentStore } from '@/lib/assessment/store';
 import { useAssessmentNavigation } from '@/lib/hooks/useAssessmentNavigation';
@@ -16,6 +16,9 @@ import type { CustomizationConfig } from '@/lib/assessment/customization';
 import { allQuestions, familyGovernancePillar } from '@/lib/assessment/questions';
 import { allIdentityQuestions, identityRiskPillar } from '@/lib/identity-risk/questions';
 import { Question, Pillar } from '@/lib/assessment/types';
+import type { GovernanceQuestionWire } from '@/lib/assessment/bank/behaviors';
+import { wireQuestionsToQuestions } from '@/lib/assessment/bank/behaviors';
+import { GOVERNANCE_ASSESSMENT_QUESTIONS_QUERY_KEY } from '@/lib/assessment/bank/query-keys';
 
 /**
  * Dynamic Question Route Page
@@ -66,13 +69,44 @@ export default function QuestionPage({ params }: QuestionPageProps) {
   const questionIndex = parseInt(resolvedParams.questionIndex, 10);
 
   // Assessment state
-  const { assessmentId, answers, setHouseholdProfile } = useAssessmentStore();
+  const { assessmentId, answers, setHouseholdProfile, setFamilyGovernanceQuestionBank } =
+    useAssessmentStore();
 
   // Household profile for personalization
   const { profile } = useHouseholdProfile();
 
-  // Get questions and pillar info for current pillar
-  const { questions: pillarQuestions, pillar: currentPillar } = getQuestionsForPillar(pillarSlug);
+  const { data: governanceWireResponse, isLoading: governanceBankLoading } = useQuery<{
+    questions: GovernanceQuestionWire[];
+  }>({
+    queryKey: GOVERNANCE_ASSESSMENT_QUESTIONS_QUERY_KEY,
+    queryFn: async () => {
+      const response = await fetch('/api/assessment/governance-questions');
+      if (!response.ok) {
+        throw new Error('Failed to fetch governance questions');
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: pillarSlug === 'family-governance',
+  });
+
+  const effectiveGovernanceQuestions = useMemo(() => {
+    if (governanceWireResponse?.questions?.length) {
+      return wireQuestionsToQuestions(governanceWireResponse.questions);
+    }
+    return allQuestions;
+  }, [governanceWireResponse]);
+
+  useEffect(() => {
+    if (pillarSlug === 'family-governance') {
+      setFamilyGovernanceQuestionBank(effectiveGovernanceQuestions);
+    }
+  }, [pillarSlug, effectiveGovernanceQuestions, setFamilyGovernanceQuestionBank]);
+
+  const pillarPack = getQuestionsForPillar(pillarSlug);
+  const pillarQuestions =
+    pillarSlug === 'family-governance' ? effectiveGovernanceQuestions : pillarPack.questions;
+  const currentPillar = pillarPack.pillar;
 
   // Fetch customization configuration (only applicable to family-governance pillar)
   const { data: customizationConfig, isLoading: customizationLoading } = useQuery<CustomizationConfig>({
@@ -146,8 +180,20 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     }
   }, [questionIndex, visibleQuestions.length, pillarSlug, router]);
 
-  // Show loading while customization config is being fetched (governance only)
-  if (pillarSlug === 'family-governance' && customizationLoading) {
+  // Auto-navigation on branching changes (must stay before any conditional returns)
+  useEffect(() => {
+    if (branchingChange && branchingChange.newlyVisible.length > 0) {
+      const firstNewlyVisibleId = branchingChange.newlyVisible[0];
+      const newlyVisibleIndex = visibleQuestions.findIndex((q) => q.id === firstNewlyVisibleId);
+
+      if (newlyVisibleIndex !== -1) {
+        router.push(`/assessment/${pillarSlug}/${newlyVisibleIndex}`);
+      }
+    }
+  }, [branchingChange, visibleQuestions, pillarSlug, router]);
+
+  // Show loading while customization config and governance bank are loading (governance only)
+  if (pillarSlug === 'family-governance' && (customizationLoading || governanceBankLoading)) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -185,20 +231,6 @@ export default function QuestionPage({ params }: QuestionPageProps) {
       currentQuestionIndex: questionIndex,
     });
   };
-
-  // Auto-navigation on branching changes
-  useEffect(() => {
-    if (branchingChange && branchingChange.newlyVisible.length > 0) {
-      // Find the first newly-visible question in the current pillar's visible questions
-      const firstNewlyVisibleId = branchingChange.newlyVisible[0];
-      const newlyVisibleIndex = visibleQuestions.findIndex(q => q.id === firstNewlyVisibleId);
-
-      if (newlyVisibleIndex !== -1) {
-        // Navigate to the first newly-visible question
-        router.push(`/assessment/${pillarSlug}/${newlyVisibleIndex}`);
-      }
-    }
-  }, [branchingChange, visibleQuestions, pillarSlug, router]);
 
   // Handle skip
   const handleSkip = () => {

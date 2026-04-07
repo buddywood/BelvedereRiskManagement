@@ -13,6 +13,11 @@ const SECTIONS = [
   },
   { href: "/admin/intake", label: "Intake Management", description: "Review intake interviews and submission status." },
   { href: "/admin/assessment", label: "Assessment Management", description: "Review assessments and completion status." },
+  {
+    href: "/admin/question-bank",
+    label: "Question bank",
+    description: "Six risk areas: edit copy and show/hide assessment questions.",
+  },
   { href: "/admin/settings", label: "Settings", description: "Admin and system settings." },
 ] as const;
 

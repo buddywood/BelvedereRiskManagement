@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAssessmentStore } from "@/lib/assessment/store";
@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Clock } from "lucide-react";
 import toast from "react-hot-toast";
-import type { Pillar } from "@/lib/assessment/types";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
 import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
 import { identityRiskPillar, allIdentityQuestions } from "@/lib/identity-risk/questions";
@@ -23,6 +22,9 @@ import {
   getVisibleQuestionIds,
   estimateCompletionMinutes,
 } from "@/lib/assessment/customization";
+import type { GovernanceQuestionWire } from "@/lib/assessment/bank/behaviors";
+import { wireQuestionsToQuestions } from "@/lib/assessment/bank/behaviors";
+import { GOVERNANCE_ASSESSMENT_QUESTIONS_QUERY_KEY } from "@/lib/assessment/bank/query-keys";
 
 /**
  * Assessment Hub Page
@@ -32,24 +34,12 @@ import {
  * Enhanced with smart resume to navigate to exact next required question.
  */
 
-// Pillar configurations for multi-pillar assessment hub
-const ASSESSMENT_PILLARS = [
-  {
-    pillar: familyGovernancePillar,
-    questions: allQuestions,
-  },
-  {
-    pillar: identityRiskPillar,
-    questions: allIdentityQuestions,
-  },
-];
-
-// Legacy constant for backwards compatibility
-const FAMILY_GOVERNANCE_PILLAR: Pillar = ASSESSMENT_PILLARS[0].pillar;
-
 export default function AssessmentHubPage() {
   const router = useRouter();
   const store = useAssessmentStore();
+  const setFamilyGovernanceQuestionBank = useAssessmentStore(
+    (s) => s.setFamilyGovernanceQuestionBank,
+  );
   const [isInitializing, setIsInitializing] = useState(true);
 
   // Household profile for personalization
@@ -103,6 +93,38 @@ export default function AssessmentHubPage() {
       },
       staleTime: 5 * 60 * 1000, // 5 minutes
     });
+
+  const { data: governanceWireResponse } = useQuery<{ questions: GovernanceQuestionWire[] }>({
+    queryKey: GOVERNANCE_ASSESSMENT_QUESTIONS_QUERY_KEY,
+    queryFn: async () => {
+      const response = await fetch("/api/assessment/governance-questions");
+      if (!response.ok) {
+        throw new Error("Failed to fetch governance questions");
+      }
+      return response.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const effectiveGovernanceQuestions = useMemo(() => {
+    if (governanceWireResponse?.questions?.length) {
+      return wireQuestionsToQuestions(governanceWireResponse.questions);
+    }
+    return allQuestions;
+  }, [governanceWireResponse]);
+
+  const assessmentPillars = useMemo(
+    () =>
+      [
+        { pillar: familyGovernancePillar, questions: effectiveGovernanceQuestions },
+        { pillar: identityRiskPillar, questions: allIdentityQuestions },
+      ] as const,
+    [effectiveGovernanceQuestions],
+  );
+
+  useEffect(() => {
+    setFamilyGovernanceQuestionBank(effectiveGovernanceQuestions);
+  }, [effectiveGovernanceQuestions, setFamilyGovernanceQuestionBank]);
 
   // Rehydrate store from server data
   useEffect(() => {
@@ -175,7 +197,7 @@ export default function AssessmentHubPage() {
     store.cleanOrphanedAnswers();
 
     // Find the pillar config
-    const pillarConfig = ASSESSMENT_PILLARS.find(p => p.pillar.slug === pillarSlug);
+    const pillarConfig = assessmentPillars.find((p) => p.pillar.slug === pillarSlug);
     if (!pillarConfig) {
       toast.error("Pillar configuration not found");
       return;
@@ -210,7 +232,7 @@ export default function AssessmentHubPage() {
   };
 
   // Calculate pillar statistics for each pillar
-  const pillarStats = ASSESSMENT_PILLARS.map(({ pillar, questions }) => {
+  const pillarStats = assessmentPillars.map(({ pillar, questions }) => {
     const pillarSlug = pillar.slug;
 
     // Determine pillar status
@@ -257,7 +279,7 @@ export default function AssessmentHubPage() {
       customizationConfig.visibleSubCategories.length > 0
         ? estimateCompletionMinutes(
             customizationConfig.visibleSubCategories,
-            allQuestions,
+            effectiveGovernanceQuestions,
           )
         : pillar.estimatedMinutes;
 

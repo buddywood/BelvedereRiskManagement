@@ -47,10 +47,16 @@ export function useAssessmentNavigation(
   options?: UseAssessmentNavigationOptions
 ): UseAssessmentNavigationReturn {
   const router = useRouter();
-  const { answers, setCurrentPosition, householdProfile } = useAssessmentStore();
+  const { answers, setCurrentPosition, householdProfile, familyGovernanceQuestionBank } =
+    useAssessmentStore();
 
-  // Use provided questions or default to allQuestions, then filter for current pillar
-  const questionSet = options?.questions || allQuestions;
+  const governanceFallback =
+    familyGovernanceQuestionBank?.length ? familyGovernanceQuestionBank : allQuestions;
+
+  // Use provided questions, or DB-backed governance bank, or static banks
+  const questionSet =
+    options?.questions ||
+    (pillarSlug === 'family-governance' ? governanceFallback : allQuestions);
   const pillarQuestions = questionSet.filter((q) => q.pillar === pillarSlug);
 
   // Apply subcategory filtering first (for customization)

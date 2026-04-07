@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:assessment-bank": "npx tsx scripts/seed-assessment-bank.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

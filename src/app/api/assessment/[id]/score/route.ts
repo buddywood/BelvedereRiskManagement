@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { Prisma, RiskLevel as PrismaRiskLevel } from "@prisma/client";
 import { calculatePillarScore, calculateCustomizedPillarScore } from "@/lib/assessment/scoring";
 import { getVisibleQuestions } from "@/lib/assessment/branching";
-import { familyGovernancePillar, allQuestions } from "@/lib/assessment/questions";
+import { familyGovernancePillar } from "@/lib/assessment/questions";
+import { loadGovernanceQuestionsMerged } from "@/lib/assessment/bank/load-bank";
 import { identityRiskPillar, identityRiskQuestions } from "@/lib/identity-risk/questions";
 import { calculateIdentityRiskScore } from "@/lib/identity-risk/scoring";
 import { Question, Pillar } from "@/lib/assessment/types";
@@ -48,11 +49,15 @@ function mapRiskLevelToPrisma(riskLevel: string): PrismaRiskLevel {
 /**
  * Helper function to get pillar configuration and questions
  */
-function getPillarConfig(pillar: string): { pillarData: Pillar; questions: Question[] } | null {
+async function getPillarConfig(
+  pillar: string
+): Promise<{ pillarData: Pillar; questions: Question[] } | null> {
   switch (pillar) {
-    case 'family-governance':
-      return { pillarData: familyGovernancePillar, questions: allQuestions };
-    case 'identity-risk':
+    case "family-governance": {
+      const questions = await loadGovernanceQuestionsMerged({ onlyVisible: true });
+      return { pillarData: familyGovernancePillar, questions };
+    }
+    case "identity-risk":
       return { pillarData: identityRiskPillar, questions: identityRiskQuestions };
     default:
       return null;
@@ -177,7 +182,7 @@ export async function POST(
     }
 
     // Get pillar configuration
-    const pillarConfig = getPillarConfig(pillar);
+    const pillarConfig = await getPillarConfig(pillar);
     if (!pillarConfig) {
       return NextResponse.json(
         { error: `Unsupported pillar: ${pillar}` },

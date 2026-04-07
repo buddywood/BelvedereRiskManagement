@@ -8,6 +8,7 @@ import {
   Inbox,
   FileText,
   ClipboardCheck,
+  ListChecks,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -77,6 +78,15 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
     },
   },
   {
+    path: "/admin/question-bank",
+    config: {
+      icon: ListChecks,
+      kicker: "Content management",
+      title: "Assessment question bank",
+      subtitle: "Six risk areas — copy, visibility, and client-facing question set",
+    },
+  },
+  {
     path: "/admin/settings",
     config: {
       icon: Settings,
@@ -89,16 +99,13 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
 ];
 
 function getHeaderConfig(pathname: string): AdminPageHeaderConfig | null {
-  // Try exact match first
-  let match = ADMIN_HEADER_CONFIG.find(({ path }) => pathname === path);
-
-  // Fall back to parent path if no exact match
-  if (!match) {
-    const parentPath = pathname.split('/').slice(0, -1).join('/');
-    match = ADMIN_HEADER_CONFIG.find(({ path }) => path === parentPath);
+  const sorted = [...ADMIN_HEADER_CONFIG].sort((a, b) => b.path.length - a.path.length);
+  for (const { path, config } of sorted) {
+    if (pathname === path || pathname.startsWith(`${path}/`)) {
+      return config;
+    }
   }
-
-  return match?.config ?? null;
+  return null;
 }
 
 export function AdminPageHeader(props: AdminPageHeaderConfig) {

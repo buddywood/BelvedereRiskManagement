@@ -22,7 +22,7 @@ function postgresUrlWithExplicitSslMode(url: string): string {
 function isPrismaClientCurrent(client: PrismaClient): boolean {
   // After `prisma generate`, new models exist on the class; a cached global instance
   // from before generate does not — causes `prisma.platformSettings` undefined until dev restart.
-  return "platformSettings" in client;
+  return "assessmentBankQuestion" in client;
 }
 
 function getPrisma(): PrismaClient {

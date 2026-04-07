@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { formatDistanceToNow, format } from "date-fns";
-import { allQuestions } from "@/lib/assessment/questions";
+import { countVisibleGovernanceQuestions } from "@/lib/assessment/bank/load-bank";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -55,7 +55,7 @@ export default async function DashboardPage() {
     orderBy: { updatedAt: "desc" },
   });
 
-  const totalQuestions = allQuestions.length;
+  const totalQuestions = await countVisibleGovernanceQuestions();
 
   return (
     <div className="space-y-6 sm:space-y-8">

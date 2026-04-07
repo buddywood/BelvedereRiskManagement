@@ -1,0 +1,131 @@
+import type { HouseholdProfile } from "@/lib/assessment/personalization";
+import { getMembersByRole, hasMultipleGenerations, hasSuccessors } from "@/lib/assessment/personalization";
+import type { BranchingRule, Question } from "@/lib/assessment/types";
+
+export type BranchingPredicateWire = {
+  op: "equals" | "notEquals";
+  value: unknown;
+};
+
+export type GovernanceQuestionWire = {
+  questionId: string;
+  riskAreaId: string;
+  sortOrderGlobal: number;
+  text: string;
+  helpText: string | null;
+  learnMore: string | null;
+  type: string;
+  options: unknown;
+  required: boolean;
+  weight: number;
+  scoreMap: Record<string, unknown>;
+  branchingDependsOn: string | null;
+  branchingPredicate: BranchingPredicateWire | null;
+  profileConditionKey: string | null;
+};
+
+export function branchingPredicateToRule(
+  dependsOn: string,
+  predicate: BranchingPredicateWire | null | undefined
+): BranchingRule | undefined {
+  if (!predicate || !dependsOn) return undefined;
+  const { op, value } = predicate;
+  if (op === "equals") {
+    return {
+      dependsOn,
+      showIf: (answer: unknown) => answer === value,
+    };
+  }
+  return {
+    dependsOn,
+    showIf: (answer: unknown) => answer !== value,
+  };
+}
+
+const PROFILE_CONDITIONS: Record<
+  string,
+  (profile: HouseholdProfile) => boolean
+> = {
+  "young-dependent": (profile) =>
+    profile.members.some((m) => m.age !== null && m.age < 26),
+  "trustee-in-family": (profile) =>
+    profile.members.some((m) => m.governanceRoles.includes("TRUSTEE")),
+  "generations-or-successors": (profile) =>
+    hasMultipleGenerations(profile) || hasSuccessors(profile),
+};
+
+export function profileConditionForKey(
+  key: string | null | undefined
+): ((profile: HouseholdProfile) => boolean) | undefined {
+  if (!key) return undefined;
+  return PROFILE_CONDITIONS[key];
+}
+
+const TEXT_TEMPLATE_BY_QUESTION_ID: Record<
+  string,
+  (profile: HouseholdProfile | null) => string
+> = {
+  "dma-05": (p) => {
+    if (!p) {
+      return "How does the primary decision maker communicate major financial decisions to the family?";
+    }
+    const dm = getMembersByRole(p, "DECISION_MAKER")[0];
+    return dm
+      ? `How does ${dm.fullName} communicate major financial decisions to the family?`
+      : "How does the primary decision maker communicate major financial decisions to the family?";
+  },
+  "sp-02": (p) => {
+    if (!p) {
+      return "How prepared is your primary successor for leadership responsibility?";
+    }
+    const successor = getMembersByRole(p, "SUCCESSOR")[0];
+    return successor
+      ? `How prepared is ${successor.fullName} for leadership responsibility?`
+      : "How prepared is your primary successor for leadership responsibility?";
+  },
+};
+
+export function textTemplateForQuestionId(
+  questionId: string
+): ((profile: HouseholdProfile | null) => string) | undefined {
+  return TEXT_TEMPLATE_BY_QUESTION_ID[questionId];
+}
+
+export function wireQuestionsToQuestions(wires: GovernanceQuestionWire[]): Question[] {
+  return wires.map((w) => wireQuestionToQuestion(w));
+}
+
+export function wireQuestionToQuestion(wire: GovernanceQuestionWire): Question {
+  const branchingRule = branchingPredicateToRule(
+    wire.branchingDependsOn ?? "",
+    wire.branchingPredicate ?? undefined
+  );
+  const profileCondition = profileConditionForKey(wire.profileConditionKey);
+  const textTemplate = textTemplateForQuestionId(wire.questionId);
+
+  return {
+    id: wire.questionId,
+    text: wire.text,
+    helpText: wire.helpText ?? undefined,
+    learnMore: wire.learnMore ?? undefined,
+    type: wire.type as Question["type"],
+    options: (wire.options as Question["options"]) ?? undefined,
+    required: wire.required,
+    pillar: "family-governance",
+    subCategory: wire.riskAreaId,
+    weight: wire.weight,
+    scoreMap: normalizeScoreMap(wire.scoreMap),
+    ...(branchingRule ? { branchingRule } : {}),
+    ...(profileCondition ? { profileCondition } : {}),
+    ...(textTemplate ? { textTemplate } : {}),
+  };
+}
+
+function normalizeScoreMap(raw: Record<string, unknown>): Record<string | number, number> {
+  const out: Record<string | number, number> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const key = /^\d+$/.test(k) ? Number(k) : k;
+    out[key] = typeof v === "number" ? v : Number(v);
+  }
+  return out;
+}
