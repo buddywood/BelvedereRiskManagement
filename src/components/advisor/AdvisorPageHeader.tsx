@@ -26,7 +26,7 @@ export interface AdvisorPageHeaderConfig {
 }
 
 const ADVISOR_HEADER_CONFIG: { path: string; config: AdvisorPageHeaderConfig }[] = [
-  { path: "/advisor", config: { icon: Users, kicker: "Client Portfolio", title: "Clients", subtitle: "Client portfolio management and engagement tracking" } },
+  { path: "/advisor", config: { icon: Users, kicker: "Advisor hub", title: "Overview", subtitle: "Pipeline health, priorities, and quick links" } },
   { path: "/advisor/pipeline", config: { icon: GitBranch, kicker: "Workflow Management", title: "Client Pipeline", subtitle: "Client workflow progression and document requirements oversight" } },
   { path: "/advisor/invitations", config: { icon: Send, kicker: "Client Engagement", title: "Client Invitations", subtitle: "Assessment invitation management and client onboarding" } },
   { path: "/advisor/dashboard", config: { icon: LayoutDashboard, kicker: "Portfolio Intelligence", title: "Governance Dashboard", subtitle: "Comprehensive governance analytics and client family risk assessment overview" } },

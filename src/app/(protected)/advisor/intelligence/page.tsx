@@ -3,14 +3,32 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPortfolioIntelligenceData } from "@/lib/actions/advisor-actions";
 import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
+import { RISK_AREAS } from "@/lib/advisor/types";
 import { RiskSummaryCard } from "@/components/intelligence/RiskSummaryCard";
 import { PortfolioRiskList } from "@/components/intelligence/PortfolioRiskList";
 import { RiskDistributionChart } from "@/components/intelligence/RiskDistributionChart";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import IntelligenceLoading from "./loading";
 
+const RISK_AREA_IDS = new Set(RISK_AREAS.map((a) => a.id));
+
+function resolveCategoryFilter(raw: string | undefined) {
+  if (!raw) return { categoryFilter: undefined as string | undefined, categoryLabel: undefined as string | undefined };
+  if (!RISK_AREA_IDS.has(raw)) {
+    return { categoryFilter: undefined, categoryLabel: undefined };
+  }
+  const label = RISK_AREAS.find((a) => a.id === raw)?.name;
+  return { categoryFilter: raw, categoryLabel: label };
+}
+
 // Async component for data-dependent content
-async function IntelligenceContent() {
+async function IntelligenceContent({
+  categoryFilter,
+  categoryLabel,
+}: {
+  categoryFilter?: string;
+  categoryLabel?: string;
+}) {
   const result = await getPortfolioIntelligenceData();
 
   if (!result.success) {
@@ -59,7 +77,11 @@ async function IntelligenceContent() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <PortfolioRiskList risks={data.portfolioRisks} />
+            <PortfolioRiskList
+              risks={data.portfolioRisks}
+              categoryFilter={categoryFilter}
+              categoryLabel={categoryLabel}
+            />
           </CardContent>
         </Card>
 
@@ -77,10 +99,17 @@ async function IntelligenceContent() {
   );
 }
 
-export default async function IntelligencePage() {
+export default async function IntelligencePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
   const flags = await getPlatformFeatureFlags();
+  const sp = await searchParams;
+  const { categoryFilter, categoryLabel } = resolveCategoryFilter(sp.category);
+
   const backHref = flags.governanceDashboardEnabled ? "/advisor/dashboard" : "/advisor";
-  const backLabel = flags.governanceDashboardEnabled ? "Back to Dashboard" : "Back to Clients";
+  const backLabel = flags.governanceDashboardEnabled ? "Back to Dashboard" : "Back to Overview";
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -95,7 +124,7 @@ export default async function IntelligencePage() {
       </div>
 
       <Suspense fallback={<IntelligenceLoading />}>
-        <IntelligenceContent />
+        <IntelligenceContent categoryFilter={categoryFilter} categoryLabel={categoryLabel} />
       </Suspense>
     </div>
   );

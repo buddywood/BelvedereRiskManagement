@@ -1,15 +1,17 @@
 import Link from "next/link";
-import { UserPlus, Send, Settings, GitBranch, Shield, UserSearch, ArrowRight } from "lucide-react";
+import { UserPlus, Send, Settings, GitBranch, ArrowRight } from "lucide-react";
 import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
 import { getClientPipelineData } from "@/lib/actions/pipeline-actions";
+import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
+import { ADVISOR_PILLAR_SHORTCUTS } from "@/lib/advisor/pillar-shortcuts";
 import { NotificationBell } from "@/components/advisor/NotificationBell";
-import { AdvisorNeedsAttention } from "@/components/advisor/AdvisorNeedsAttention";
 import { Button } from "@/components/ui/button";
 
 export default async function AdvisorHomePage() {
-  const [dash, pipelineRes] = await Promise.all([
+  const [dash, pipelineRes, flags] = await Promise.all([
     getAdvisorDashboardData(),
     getClientPipelineData(),
+    getPlatformFeatureFlags(),
   ]);
 
   if (!dash.success) {
@@ -27,7 +29,6 @@ export default async function AdvisorHomePage() {
   const { profile, unreadNotificationCount, pendingInvitationsCount } = dash.data!;
 
   const pipelineOk = pipelineRes.success;
-  const pipelineClients = pipelineOk ? pipelineRes.data!.clients : [];
   const metrics = pipelineOk ? pipelineRes.data!.metrics : null;
 
   const byStage = metrics?.byStage;
@@ -38,13 +39,14 @@ export default async function AdvisorHomePage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">Overview</h2>
           <p className="text-sm text-muted-foreground">
-            Welcome back{profile.user.firstName ? `, ${profile.user.firstName}` : ""}
-            {profile.firmName ? ` · ${profile.firmName}` : ""}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Use <span className="font-medium text-foreground">Pipeline</span> for the full client list, stages, and filters.
+            Welcome back
+            {profile.user.firstName ? `, ${profile.user.firstName}` : ""}
+            {profile.firmName ? ` · ${profile.firmName}` : ""}. Use{" "}
+            <span className="font-medium text-foreground">Pipeline</span> for the full client list,
+            stages, and filters.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -115,123 +117,117 @@ export default async function AdvisorHomePage() {
         </div>
       )}
 
-      {pipelineOk && (
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold">Needs attention</h2>
-            <Link
-              href="/advisor/pipeline"
-              className="text-sm font-medium text-primary hover:underline"
+      <div className="space-y-10">
+        <div className="space-y-1">
+          <h2 className="text-lg font-semibold tracking-tight">Shortcuts</h2>
+          <p className="text-sm text-muted-foreground">
+            Jump to portfolio intelligence by pillar, or open everyday workspace tools.
+          </p>
+        </div>
+
+        <section
+          aria-labelledby="advisor-shortcuts-pillars-heading"
+          className="rounded-xl border border-border/80 bg-gradient-to-b from-primary/[0.04] to-transparent p-5 shadow-sm sm:p-6"
+        >
+          <div className="mb-4 space-y-1">
+            <h3
+              id="advisor-shortcuts-pillars-heading"
+              className="text-base font-semibold text-foreground"
             >
-              All clients
+              Assessment pillars
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              The six focus areas used across intake and governance scoring.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {ADVISOR_PILLAR_SHORTCUTS.map(({ id, name, summary, icon: PillarIcon }) => {
+              const href = flags.riskIntelligenceEnabled
+                ? `/advisor/intelligence?category=${encodeURIComponent(id)}`
+                : "/advisor/pipeline";
+              return (
+                <Link key={id} href={href} className="group">
+                  <div className="h-full rounded-lg border border-border/70 bg-card p-5 transition-colors hover:border-primary/25 hover:bg-muted/40">
+                    <div className="flex items-start gap-4">
+                      <div className="rounded-md bg-primary/10 p-2 ring-1 ring-primary/10">
+                        <PillarIcon className="h-5 w-5 text-primary" aria-hidden />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <h4 className="font-semibold leading-snug group-hover:text-primary">{name}</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+
+        <section
+          aria-labelledby="advisor-shortcuts-workspace-heading"
+          className="rounded-xl border bg-card p-5 shadow-sm sm:p-6"
+        >
+          <div className="mb-4 space-y-1">
+            <h3 id="advisor-shortcuts-workspace-heading" className="text-base font-semibold">
+              Workspace
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Pipeline, invitations, and how your practice appears in the product.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Link href="/advisor/pipeline" className="group">
+              <div className="h-full rounded-lg border bg-background p-5 transition-colors hover:bg-muted/50">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-md bg-muted p-2">
+                    <GitBranch className="h-5 w-5 text-foreground" aria-hidden />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold group-hover:text-primary">Pipeline</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Stages, filters, and client drill-down with live updates
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/advisor/invitations" className="group">
+              <div className="h-full rounded-lg border bg-background p-5 transition-colors hover:bg-muted/50">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-md bg-muted p-2">
+                    <Send className="h-5 w-5 text-foreground" aria-hidden />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold group-hover:text-primary">Invitations</h4>
+                    <p className="text-sm text-muted-foreground">Send and manage invitations</p>
+                    {pendingInvitationsCount > 0 && (
+                      <p className="text-xs text-amber-600 dark:text-amber-500">
+                        {pendingInvitationsCount} pending invitation
+                        {pendingInvitationsCount === 1 ? "" : "s"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            <Link href="/advisor/settings" className="group">
+              <div className="h-full rounded-lg border bg-background p-5 transition-colors hover:bg-muted/50">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-md bg-muted p-2">
+                    <Settings className="h-5 w-5 text-foreground" aria-hidden />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-semibold group-hover:text-primary">Settings</h4>
+                    <p className="text-sm text-muted-foreground">Branding and preferences</p>
+                  </div>
+                </div>
+              </div>
             </Link>
           </div>
-          {totalAssigned === 0 && pendingInvitationsCount === 0 ? (
-            <div className="hero-surface rounded-lg p-8 text-center">
-              <div className="space-y-3">
-                <p className="text-muted-foreground">No clients assigned yet.</p>
-                <p className="text-sm text-muted-foreground">
-                  <Link
-                    href="/advisor/invitations"
-                    className="font-medium text-primary underline underline-offset-2"
-                  >
-                    Invite a client
-                  </Link>{" "}
-                  or contact your administrator to get started.
-                </p>
-              </div>
-            </div>
-          ) : (
-            <AdvisorNeedsAttention clients={pipelineClients} />
-          )}
-        </div>
-      )}
-
-      <div>
-        <h2 className="mb-4 text-lg font-semibold">Shortcuts</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Link href="/advisor/pipeline" className="group">
-            <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
-              <div className="flex items-start gap-4">
-                <div className="rounded-md bg-primary/10 p-2">
-                  <GitBranch className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold group-hover:text-primary">Pipeline</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Stages, filters, and client drill-down with live updates
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/advisor/cyber-risk" className="group">
-            <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
-              <div className="flex items-start gap-4">
-                <div className="rounded-md bg-primary/10 p-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold group-hover:text-primary">Cyber Risk</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Client cyber risk scores and assessment status
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/advisor/identity-risk" className="group">
-            <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
-              <div className="flex items-start gap-4">
-                <div className="rounded-md bg-primary/10 p-2">
-                  <UserSearch className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold group-hover:text-primary">Identity Risk</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Identity exposure and privacy risk scores
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/advisor/invitations" className="group">
-            <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
-              <div className="flex items-start gap-4">
-                <div className="rounded-md bg-primary/10 p-2">
-                  <Send className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold group-hover:text-primary">Invitations</h3>
-                  <p className="text-sm text-muted-foreground">Send and manage invitations</p>
-                  {pendingInvitationsCount > 0 && (
-                    <p className="text-xs text-amber-600">
-                      {pendingInvitationsCount} pending invitation
-                      {pendingInvitationsCount === 1 ? "" : "s"}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/advisor/settings" className="group">
-            <div className="rounded-lg border bg-card p-6 transition-colors hover:bg-muted/50">
-              <div className="flex items-start gap-4">
-                <div className="rounded-md bg-primary/10 p-2">
-                  <Settings className="h-5 w-5 text-primary" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold group-hover:text-primary">Settings</h3>
-                  <p className="text-sm text-muted-foreground">Branding and preferences</p>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
+        </section>
       </div>
     </div>
   );

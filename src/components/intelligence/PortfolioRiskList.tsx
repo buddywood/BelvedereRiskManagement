@@ -2,13 +2,26 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { RiskIndicator } from "@/lib/intelligence/types";
 
 interface PortfolioRiskListProps {
   risks: RiskIndicator[];
+  /** When set, only risks for this governance subcategory / pillar slug are shown. */
+  categoryFilter?: string | null;
+  categoryLabel?: string | null;
 }
 
-export function PortfolioRiskList({ risks }: PortfolioRiskListProps) {
+export function PortfolioRiskList({
+  risks,
+  categoryFilter,
+  categoryLabel,
+}: PortfolioRiskListProps) {
+  const filtered =
+    categoryFilter != null && categoryFilter !== ""
+      ? risks.filter((r) => r.categorySlug === categoryFilter)
+      : risks;
+
   if (risks.length === 0) {
     return (
       <div className="text-center py-12">
@@ -19,15 +32,50 @@ export function PortfolioRiskList({ risks }: PortfolioRiskListProps) {
     );
   }
 
+  if (filtered.length === 0) {
+    return (
+      <div className="space-y-4">
+        {categoryLabel ? (
+          <Alert>
+            <AlertDescription className="text-sm leading-relaxed">
+              No portfolio risks are tagged with <strong>{categoryLabel}</strong> yet. Older assessments
+              may roll scores up under a single comprehensive pillar instead of these six areas — try{" "}
+              <Link href="/advisor/intelligence" className="font-medium text-primary underline underline-offset-2">
+                clearing the filter
+              </Link>{" "}
+              to see all indicators.
+            </AlertDescription>
+          </Alert>
+        ) : null}
+        <div className="text-center py-8">
+          <p className="text-sm text-muted-foreground">Nothing to show for this filter.</p>
+        </div>
+      </div>
+    );
+  }
+
   // Show top 20 risks, but track if there are more
-  const displayedRisks = risks.slice(0, 20);
-  const hasMoreRisks = risks.length > 20;
+  const displayedRisks = filtered.slice(0, 20);
+  const hasMoreRisks = filtered.length > 20;
 
   return (
     <div className="space-y-4">
+      {categoryLabel && categoryFilter ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm">
+          <span className="text-muted-foreground">
+            Filtered by <span className="font-medium text-foreground">{categoryLabel}</span>
+          </span>
+          <Link
+            href="/advisor/intelligence"
+            className="shrink-0 font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Show all
+          </Link>
+        </div>
+      ) : null}
       {/* Risk list */}
       <div className="space-y-3">
-        {displayedRisks.map((risk, index) => (
+        {displayedRisks.map((risk) => (
           <div
             key={`${risk.familyId}-${risk.categorySlug}`}
             className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
@@ -77,7 +125,8 @@ export function PortfolioRiskList({ risks }: PortfolioRiskListProps) {
       {hasMoreRisks && (
         <div className="text-center py-4 border-t">
           <p className="text-sm text-muted-foreground">
-            Showing top 20 of {risks.length} total risk indicators
+            Showing top 20 of {filtered.length} risk indicator{filtered.length === 1 ? "" : "s"}
+            {categoryFilter ? " for this pillar" : ""}
           </p>
         </div>
       )}
