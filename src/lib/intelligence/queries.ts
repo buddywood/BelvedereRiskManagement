@@ -9,6 +9,23 @@ import type { RiskSeverity, RiskIndicator, FamilyRiskSummary, PortfolioIntellige
  * Static governance recommendations mapped by category slug
  */
 const RISK_RECOMMENDATIONS: Record<string, RiskRecommendation[]> = {
+  governance: [
+    {
+      title: 'Clarify decision rights and conflict paths',
+      description: 'Document who decides what, voting thresholds, and how disputes escalate for family and advisors',
+      priority: 'high',
+    },
+    {
+      title: 'Institute formal governance meetings',
+      description: 'Use scheduled meetings with agendas, minutes, and a secure document repository for policies and records',
+      priority: 'high',
+    },
+    {
+      title: 'Coordinate advisors on one facts set',
+      description: 'Reduce silos so legal, tax, security, and investment advice stay consistent',
+      priority: 'medium',
+    },
+  ],
   'environmental-geographic-risk': [
     { title: 'Map hazard exposure for each primary property', description: 'Document flood, wind, wildfire, seismic, and heat risk with insurance broker and civil sources', priority: 'high' },
     { title: 'Reconcile property coverage with replacement value', description: 'Align dwelling, flood, wind, and umbrella limits with current construction and ordinance costs', priority: 'high' },
@@ -28,32 +45,31 @@ const RISK_RECOMMENDATIONS: Record<string, RiskRecommendation[]> = {
     { title: 'Close insurance and liability gaps', description: 'Review property, excess, D&O, cyber, and professional coverage against real exposures', priority: 'high' },
     { title: 'Stress-test concentration', description: 'Model liquidity and loss scenarios for large real estate, operating business, or single-manager positions', priority: 'high' },
     { title: 'Refresh trusts, titling, and succession documents', description: 'Keep estate plans, marital agreements, and business buy-sell provisions current', priority: 'medium' },
-  ],
-  'health-medical-preparedness': [
     { title: 'Centralize medical directives and history', description: 'Maintain portable medication lists, allergies, and emergency contacts', priority: 'high' },
     { title: 'Align travel with medical evacuation coverage', description: 'Confirm international coverage, telehealth, and transport for serious events', priority: 'medium' },
     { title: 'Plan for regional health disruptions', description: 'Assign caregiving contingencies for elders and dependents when schools or services close', priority: 'medium' },
   ],
   'lifestyle-behavioral-risk': [
     { title: 'Govern public and digital visibility', description: 'Set expectations for social media, press, and sharing wealth-related information', priority: 'high' },
-    { title: 'Clarify decision rights and conflict paths', description: 'Document who decides what, and how disputes escalate for family and advisors', priority: 'high' },
-    { title: 'Coordinate advisors on one facts set', description: 'Reduce silos so legal, tax, security, and investment advice stay consistent', priority: 'medium' },
+    { title: 'Codify conduct and family standards', description: 'Document behavioral expectations, enforcement, and support for sensitive issues such as substance use', priority: 'high' },
+    { title: 'Reduce undue exposure from routines', description: 'Review predictable patterns that increase targeting or reputational risk', priority: 'medium' },
   ],
 };
 
 /** Map legacy governance subcategory slugs to six-pillar keys for recommendations */
 const LEGACY_RISK_CATEGORY_MAP: Record<string, keyof typeof RISK_RECOMMENDATIONS> = {
-  'decision-making-authority': 'lifestyle-behavioral-risk',
+  'decision-making-authority': 'governance',
   'access-controls': 'cybersecurity',
   'trust-estate-governance': 'financial-asset-protection',
   'marriage-relationship-risk': 'financial-asset-protection',
   'succession-planning': 'financial-asset-protection',
   'behavior-standards': 'lifestyle-behavioral-risk',
   'business-involvement': 'financial-asset-protection',
-  'documentation-communication': 'lifestyle-behavioral-risk',
+  'documentation-communication': 'governance',
 };
 
 function resolveRiskRecommendationKey(categorySlug: string): string {
+  if (categorySlug === 'health-medical-preparedness') return 'financial-asset-protection';
   if (categorySlug in RISK_RECOMMENDATIONS) return categorySlug;
   return LEGACY_RISK_CATEGORY_MAP[categorySlug] ?? categorySlug;
 }

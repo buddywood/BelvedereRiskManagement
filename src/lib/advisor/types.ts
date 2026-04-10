@@ -55,37 +55,40 @@ export type RiskAreaSelection = {
   selected: boolean;
 };
 
-// Risk areas aligned with the six pillars of comprehensive risk assessment (focus-area selector + subcategory IDs)
+// Risk areas: six pillars for comprehensive assessment (IDs stable for bank / scoring JSON)
 export const RISK_AREAS = [
   {
-    id: 'environmental-geographic-risk',
-    name: 'Environmental / Geographic Risk',
+    id: 'governance',
+    name: 'Governance',
     summary:
-      'Climate and location factors, regulatory context, and geography-driven exposure.',
-  },
-  {
-    id: 'physical-security',
-    name: 'Physical Security',
-    summary: 'Personal safety, property security, travel, and physical access control.',
+      'Decision rights, family authority, advisor coordination, documentation, and dispute resolution.',
   },
   {
     id: 'cybersecurity',
-    name: 'Cybersecurity',
+    name: 'Cyber security',
     summary: 'Digital footprint, data protection, fraud, and online threats.',
   },
   {
-    id: 'financial-asset-protection',
-    name: 'Financial / Asset Protection',
-    summary: 'Wealth structures, insurance, liability, and asset preservation.',
+    id: 'physical-security',
+    name: 'Physical security',
+    summary: 'Personal safety, property security, travel, and physical access control.',
   },
   {
-    id: 'health-medical-preparedness',
-    name: 'Health & Medical Preparedness',
-    summary: 'Care access, continuity, coverage, and medical-privacy considerations.',
+    id: 'financial-asset-protection',
+    name: 'Insurance',
+    summary:
+      'Property, liability, and health continuity coverage; trusts, titling, succession, and concentration risk.',
+  },
+  {
+    id: 'environmental-geographic-risk',
+    name: 'Geographic',
+    summary:
+      'Climate and location factors, regional hazards, regulatory context, and geography-driven exposure.',
   },
   {
     id: 'lifestyle-behavioral-risk',
-    name: 'Lifestyle & Behavioral Risk',
-    summary: 'Visibility, routines, relationships, and habits that affect overall risk.',
+    name: 'Reputational & social risk',
+    summary:
+      'Public footprint, conduct and social media norms, family standards, and reputation-sensitive behavior.',
   },
 ] as const;

@@ -1,33 +1,177 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { requireAdminRole } from "@/lib/admin/auth";
+import { PROFILE_CONDITION_KEYS } from "@/lib/assessment/bank/behaviors";
+import { isRiskAreaId, RISK_AREA_IDS } from "@/lib/assessment/bank/risk-areas";
+import type { QuestionType } from "@/lib/assessment/types";
 import { prisma } from "@/lib/db";
 
-function revalidateQuestionBankPaths() {
+const QUESTION_TYPES = [
+  "single-choice",
+  "yes-no",
+  "maturity-scale",
+  "numeric",
+  "short-text",
+] as const satisfies readonly QuestionType[];
+
+const optionSchema = z.object({
+  value: z.union([z.string(), z.number(), z.boolean()]),
+  label: z.string(),
+  description: z.string().optional(),
+});
+
+const branchingPredicateSchema = z.object({
+  op: z.enum(["equals", "notEquals"]),
+  value: z.unknown(),
+});
+
+function revalidateQuestionBankPaths(riskAreaId?: string) {
   revalidatePath("/admin/question-bank");
   revalidatePath("/admin/question-bank", "layout");
+  if (riskAreaId) {
+    revalidatePath(`/admin/question-bank/${riskAreaId}`);
+  }
   revalidatePath("/advisor/question-bank");
   revalidatePath("/advisor/question-bank", "layout");
 }
 
-export async function updateAssessmentBankQuestionVisibility(formData: FormData) {
-  await requireAdminRole();
-  const questionId = z.string().min(1).parse(formData.get("questionId"));
-  const isVisible = formData.get("isVisible") === "true";
-
-  await prisma.assessmentBankQuestion.update({
-    where: { questionId },
-    data: { isVisible },
-  });
-
-  revalidateQuestionBankPaths();
+function parseScoreMapJson(raw: string): Prisma.InputJsonValue {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error("Score map must be valid JSON.");
+  }
+  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Score map must be a JSON object.");
+  }
+  const out: Record<string, number> = {};
+  for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+    const n = typeof v === "number" ? v : Number(v);
+    if (Number.isNaN(n)) {
+      throw new Error(`Score map value for "${k}" must be a number.`);
+    }
+    out[String(k)] = n;
+  }
+  return out as Prisma.InputJsonValue;
 }
 
-export async function updateAssessmentBankQuestionContent(formData: FormData) {
-  await requireAdminRole();
-  const questionId = z.string().min(1).parse(formData.get("questionId"));
+function parseOptionsJson(
+  raw: string | null | undefined,
+  type: QuestionType
+): Prisma.InputJsonValue | undefined {
+  if (type === "numeric" || type === "short-text") {
+    if (raw === null || raw === undefined || String(raw).trim() === "") {
+      return undefined;
+    }
+  }
+  if (raw === null || raw === undefined || String(raw).trim() === "") {
+    if (type === "single-choice" || type === "maturity-scale") {
+      throw new Error("Options JSON is required for this question type.");
+    }
+    if (type === "yes-no") {
+      return [
+        { value: "yes", label: "Yes" },
+        { value: "no", label: "No" },
+      ] as Prisma.InputJsonValue;
+    }
+    return undefined;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(String(raw));
+  } catch {
+    throw new Error("Options must be valid JSON.");
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error("Options must be a JSON array.");
+  }
+  return z.array(optionSchema).parse(parsed) as Prisma.InputJsonValue;
+}
+
+function parseBranchingPredicate(
+  raw: string | null | undefined
+): Prisma.InputJsonValue | null {
+  if (raw === null || raw === undefined || String(raw).trim() === "") {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(String(raw));
+    return branchingPredicateSchema.parse(parsed) as Prisma.InputJsonValue;
+  } catch {
+    throw new Error("Branching predicate must be valid JSON like {\"op\":\"equals\",\"value\":\"yes\"}.");
+  }
+}
+
+function defaultScoreMapForType(type: QuestionType): Prisma.InputJsonValue {
+  switch (type) {
+    case "yes-no":
+      return { yes: 3, no: 0 };
+    case "maturity-scale":
+      return { 0: 0, 1: 1, 2: 2, 3: 3 };
+    default:
+      return {};
+  }
+}
+
+function assertScoreMapUsable(type: QuestionType, scoreMap: Prisma.InputJsonValue) {
+  const keys = Object.keys(scoreMap as object);
+  if (
+    (type === "single-choice" || type === "numeric" || type === "short-text") &&
+    keys.length === 0
+  ) {
+    throw new Error("Provide a score map JSON object for this question type (keys must match answer values).");
+  }
+}
+
+function formatActionError(e: unknown): string {
+  if (e instanceof z.ZodError) {
+    return e.issues.map((i) => `${i.path.join(".") || "field"}: ${i.message}`).join("; ");
+  }
+  if (e instanceof Error) {
+    return e.message;
+  }
+  return "Something went wrong.";
+}
+
+function redirectCreateError(formData: FormData, message: string): never {
+  const riskAreaId = formData.get("riskAreaId");
+  const base =
+    typeof riskAreaId === "string" && isRiskAreaId(riskAreaId)
+      ? `/admin/question-bank/${riskAreaId}/new`
+      : "/admin/question-bank";
+  redirect(`${base}?err=${encodeURIComponent(message)}`);
+}
+
+function redirectUpdateError(formData: FormData, message: string): never {
+  const riskAreaId = formData.get("riskAreaId");
+  const questionId = formData.get("questionId");
+  if (
+    typeof riskAreaId === "string" &&
+    isRiskAreaId(riskAreaId) &&
+    typeof questionId === "string" &&
+    questionId.length > 0
+  ) {
+    redirect(
+      `/admin/question-bank/${riskAreaId}/${encodeURIComponent(questionId)}?err=${encodeURIComponent(message)}`,
+    );
+  }
+  redirect(`/admin/question-bank?err=${encodeURIComponent(message)}`);
+}
+
+const profileConditionKeySchema = z.enum(PROFILE_CONDITION_KEYS);
+
+type RiskAreaId = (typeof RISK_AREA_IDS)[number];
+
+function buildAssessmentBankCreateData(
+  formData: FormData,
+  riskAreaId: RiskAreaId,
+): Omit<Prisma.AssessmentBankQuestionCreateInput, "sortOrderGlobal"> {
   const text = z.string().min(1).parse(formData.get("text"));
   const helpTextRaw = formData.get("helpText");
   const learnMoreRaw = formData.get("learnMore");
@@ -35,13 +179,247 @@ export async function updateAssessmentBankQuestionContent(formData: FormData) {
     helpTextRaw === null || helpTextRaw === "" ? null : String(helpTextRaw);
   const learnMore =
     learnMoreRaw === null || learnMoreRaw === "" ? null : String(learnMoreRaw);
+  const riskRelevanceRaw = formData.get("riskRelevance");
+  const riskRelevance =
+    riskRelevanceRaw === null || riskRelevanceRaw === "" ? null : String(riskRelevanceRaw);
   const weight = z.coerce.number().int().min(0).max(100).parse(formData.get("weight"));
   const required = formData.has("required");
+  const type = z.enum(QUESTION_TYPES).parse(formData.get("type"));
+  const isVisible = formData.has("isVisible");
 
-  await prisma.assessmentBankQuestion.update({
+  const scoreMapRaw = formData.get("scoreMapJson");
+  const scoreMap =
+    scoreMapRaw !== null && String(scoreMapRaw).trim() !== ""
+      ? parseScoreMapJson(String(scoreMapRaw))
+      : (defaultScoreMapForType(type) as Prisma.InputJsonValue);
+
+  assertScoreMapUsable(type, scoreMap);
+
+  const parsedOptions = parseOptionsJson(
+    formData.get("optionsJson") === null || formData.get("optionsJson") === ""
+      ? null
+      : String(formData.get("optionsJson")),
+    type
+  );
+
+  const branchingDependsOnRaw = formData.get("branchingDependsOn");
+  const branchingDependsOn =
+    branchingDependsOnRaw === null || String(branchingDependsOnRaw).trim() === ""
+      ? null
+      : String(branchingDependsOnRaw).trim();
+
+  const branchingPredicate = parseBranchingPredicate(
+    formData.get("branchingPredicateJson") === null
+      ? undefined
+      : String(formData.get("branchingPredicateJson"))
+  );
+
+  const profileKeyRaw = formData.get("profileConditionKey");
+  const profileConditionKey =
+    profileKeyRaw === null || String(profileKeyRaw).trim() === ""
+      ? null
+      : profileConditionKeySchema.parse(String(profileKeyRaw));
+
+  const omitMaturityScoreWhenYes = formData.has("omitMaturityScoreWhenYes");
+
+  const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
+  const questionId = `custom-${riskAreaId.slice(0, 8)}-${suffix}`;
+
+  return {
+    questionId,
+    riskAreaId,
+    isVisible,
+    text,
+    helpText,
+    learnMore,
+    riskRelevance,
+    type,
+    options:
+      parsedOptions === undefined ? Prisma.DbNull : (parsedOptions as Prisma.InputJsonValue),
+    required,
+    weight,
+    scoreMap,
+    branchingDependsOn,
+    branchingPredicate:
+      branchingPredicate === null ? Prisma.DbNull : (branchingPredicate as Prisma.InputJsonValue),
+    profileConditionKey,
+    omitMaturityScoreWhenYes,
+  };
+}
+
+export async function updateAssessmentBankQuestionVisibility(formData: FormData) {
+  await requireAdminRole();
+  const questionId = z.string().min(1).parse(formData.get("questionId"));
+  const isVisible = formData.get("isVisible") === "true";
+
+  const row = await prisma.assessmentBankQuestion.update({
     where: { questionId },
-    data: { text, helpText, learnMore, weight, required },
+    data: { isVisible },
   });
 
-  revalidateQuestionBankPaths();
+  revalidateQuestionBankPaths(row.riskAreaId);
+}
+
+export async function updateAssessmentBankQuestionContent(formData: FormData) {
+  await requireAdminRole();
+  try {
+    const questionId = z.string().min(1).parse(formData.get("questionId"));
+    const text = z.string().min(1).parse(formData.get("text"));
+    const helpTextRaw = formData.get("helpText");
+    const learnMoreRaw = formData.get("learnMore");
+    const helpText =
+      helpTextRaw === null || helpTextRaw === "" ? null : String(helpTextRaw);
+    const learnMore =
+      learnMoreRaw === null || learnMoreRaw === "" ? null : String(learnMoreRaw);
+    const riskRelevanceRaw = formData.get("riskRelevance");
+    const riskRelevance =
+      riskRelevanceRaw === null || riskRelevanceRaw === "" ? null : String(riskRelevanceRaw);
+    const weight = z.coerce.number().int().min(0).max(100).parse(formData.get("weight"));
+    const required = formData.has("required");
+    const type = z.enum(QUESTION_TYPES).parse(formData.get("type"));
+
+    const scoreMapRaw = formData.get("scoreMapJson");
+    const scoreMap =
+      scoreMapRaw !== null && String(scoreMapRaw).trim() !== ""
+        ? parseScoreMapJson(String(scoreMapRaw))
+        : (defaultScoreMapForType(type) as Prisma.InputJsonValue);
+
+    assertScoreMapUsable(type, scoreMap);
+
+    const parsedOptions = parseOptionsJson(
+      formData.get("optionsJson") === null || formData.get("optionsJson") === ""
+        ? null
+        : String(formData.get("optionsJson")),
+      type
+    );
+
+    const branchingDependsOnRaw = formData.get("branchingDependsOn");
+    const branchingDependsOn =
+      branchingDependsOnRaw === null || String(branchingDependsOnRaw).trim() === ""
+        ? null
+        : String(branchingDependsOnRaw).trim();
+
+    const branchingPredicate = parseBranchingPredicate(
+      formData.get("branchingPredicateJson") === null
+        ? undefined
+        : String(formData.get("branchingPredicateJson"))
+    );
+
+    const profileKeyRaw = formData.get("profileConditionKey");
+    const profileConditionKey =
+      profileKeyRaw === null || String(profileKeyRaw).trim() === ""
+        ? null
+        : profileConditionKeySchema.parse(String(profileKeyRaw));
+
+    const omitMaturityScoreWhenYes = formData.has("omitMaturityScoreWhenYes");
+
+    const row = await prisma.assessmentBankQuestion.update({
+      where: { questionId },
+      data: {
+        text,
+        helpText,
+        learnMore,
+        riskRelevance,
+        weight,
+        required,
+        type,
+        scoreMap,
+        options:
+          parsedOptions === undefined
+            ? Prisma.DbNull
+            : (parsedOptions as Prisma.InputJsonValue),
+        branchingDependsOn,
+        branchingPredicate:
+          branchingPredicate === null
+            ? Prisma.DbNull
+            : (branchingPredicate as Prisma.InputJsonValue),
+        profileConditionKey,
+        omitMaturityScoreWhenYes,
+      },
+    });
+    revalidateQuestionBankPaths(row.riskAreaId);
+  } catch (e: unknown) {
+    redirectUpdateError(formData, formatActionError(e));
+  }
+}
+
+export async function createAssessmentBankQuestion(formData: FormData) {
+  await requireAdminRole();
+  const riskAreaIdRaw = formData.get("riskAreaId");
+  if (typeof riskAreaIdRaw !== "string" || !isRiskAreaId(riskAreaIdRaw)) {
+    redirect("/admin/question-bank");
+  }
+  const riskAreaId = riskAreaIdRaw;
+
+  let createData: Omit<Prisma.AssessmentBankQuestionCreateInput, "sortOrderGlobal">;
+  try {
+    createData = buildAssessmentBankCreateData(formData, riskAreaId);
+  } catch (e: unknown) {
+    redirectCreateError(formData, formatActionError(e));
+  }
+
+  const maxOrder = await prisma.assessmentBankQuestion.aggregate({
+    where: { riskAreaId },
+    _max: { sortOrderGlobal: true },
+  });
+  const sortOrderGlobal = (maxOrder._max.sortOrderGlobal ?? -1) + 1;
+
+  await prisma.assessmentBankQuestion.create({
+    data: { ...createData, sortOrderGlobal },
+  });
+
+  revalidateQuestionBankPaths(riskAreaId);
+  redirect(`/admin/question-bank/${riskAreaId}`);
+}
+
+export async function deleteAssessmentBankQuestion(formData: FormData) {
+  await requireAdminRole();
+  const questionId = z.string().min(1).parse(formData.get("questionId"));
+
+  const row = await prisma.assessmentBankQuestion.delete({
+    where: { questionId },
+  });
+
+  revalidateQuestionBankPaths(row.riskAreaId);
+  redirect(`/admin/question-bank/${row.riskAreaId}`);
+}
+
+export async function moveAssessmentBankQuestionOrder(formData: FormData) {
+  await requireAdminRole();
+  const questionId = z.string().min(1).parse(formData.get("questionId"));
+  const direction = z.enum(["up", "down"]).parse(formData.get("direction"));
+
+  const row = await prisma.assessmentBankQuestion.findUnique({
+    where: { questionId },
+  });
+  if (!row) {
+    return;
+  }
+
+  const list = await prisma.assessmentBankQuestion.findMany({
+    where: { riskAreaId: row.riskAreaId },
+    orderBy: { sortOrderGlobal: "asc" },
+    select: { id: true, questionId: true, sortOrderGlobal: true },
+  });
+
+  const idx = list.findIndex((q) => q.questionId === questionId);
+  if (idx < 0) return;
+  const swapWith = direction === "up" ? idx - 1 : idx + 1;
+  if (swapWith < 0 || swapWith >= list.length) return;
+
+  const a = list[idx]!;
+  const b = list[swapWith]!;
+
+  await prisma.$transaction([
+    prisma.assessmentBankQuestion.update({
+      where: { id: a.id },
+      data: { sortOrderGlobal: b.sortOrderGlobal },
+    }),
+    prisma.assessmentBankQuestion.update({
+      where: { id: b.id },
+      data: { sortOrderGlobal: a.sortOrderGlobal },
+    }),
+  ]);
+
+  revalidateQuestionBankPaths(row.riskAreaId);
 }

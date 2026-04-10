@@ -21,6 +21,8 @@ import { Loader2, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent } from "@/components/ui/card";
+import { MATURITY_SCALE_MAX } from "@/lib/assessment/maturity-scale";
+import type { RiskLevel } from "@/lib/assessment/types";
 
 interface ScoreData {
   score: number;
@@ -38,6 +40,9 @@ interface ScoreData {
     description: string;
     severity: "high" | "medium" | "low";
     recommendation: string;
+    maturityScore?: number;
+    remediationPriority?: number;
+    riskRelevance?: string;
   }>;
   completedAt: string;
   customization?: {
@@ -181,7 +186,11 @@ export default function AssessmentResultsPage() {
   const pillarDescription =
     targetPillar === "identity-risk"
       ? "personal information exposure and identity theft vulnerability"
-      : "six pillars: environmental, physical, cyber, financial, health, and lifestyle risk";
+      : "six pillars: governance, cyber security, physical security, insurance, geographic, and reputational & social risk";
+
+  const isCyberOnlyScore =
+    scoreData.breakdown.length === 1 && scoreData.breakdown[0]?.categoryId === "cybersecurity";
+  const scoreRubric = isCyberOnlyScore ? "cyber" : "governance";
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
@@ -209,7 +218,9 @@ export default function AssessmentResultsPage() {
             <CardContent className="grid gap-4 pt-6 sm:grid-cols-2">
               <div>
                 <p className="editorial-kicker">Overall Score</p>
-                <p className="mt-2 text-3xl font-semibold">{scoreData.score.toFixed(1)} / 10</p>
+                <p className="mt-2 text-3xl font-semibold">
+                  {scoreData.score.toFixed(1)} / {MATURITY_SCALE_MAX}
+                </p>
               </div>
               <div>
                 <p className="editorial-kicker">Completion</p>
@@ -227,6 +238,7 @@ export default function AssessmentResultsPage() {
             riskLevel={scoreData.riskLevel}
             breakdown={scoreData.breakdown}
             answeredPercentage={answeredPercentage}
+            scoreRubric={scoreRubric}
           />
         </CardContent>
       </Card>
@@ -246,6 +258,8 @@ export default function AssessmentResultsPage() {
             <ActionPlan
               missingControls={scoreData.missingControls}
               pillarName={pillarDisplayName}
+              riskLevel={scoreData.riskLevel.toLowerCase() as RiskLevel}
+              scoreRubric={scoreRubric}
             />
           </CardContent>
         </Card>

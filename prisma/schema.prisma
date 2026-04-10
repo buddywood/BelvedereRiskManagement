@@ -222,6 +222,7 @@ model AssessmentBankQuestion {
   text                String   @db.Text
   helpText            String?  @db.Text
   learnMore           String?  @db.Text
+  riskRelevance       String?  @db.Text
   type                String
   options             Json?
   required            Boolean
@@ -230,6 +231,8 @@ model AssessmentBankQuestion {
   branchingDependsOn  String?
   branchingPredicate  Json?
   profileConditionKey String?
+  /// Yes/no only: when true, "yes" is excluded from maturity aggregation (follow-ups define 0–3).
+  omitMaturityScoreWhenYes Boolean @default(false)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 

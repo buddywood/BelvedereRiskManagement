@@ -6,10 +6,63 @@ import PizZip from 'pizzip';
  * Enhanced template contents that include advisor branding variables
  */
 const enhancedTemplateContents = {
+  governance: `
+{advisorBrandName}
+
+{familyName} Governance Policy
+
+{advisorTagline}
+
+Assessment Date: {assessmentDate}
+Overall Score: {overallScore}/10 ({riskLevel} risk)
+Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
+
+DECISION RIGHTS, MEETINGS, AND ADVISOR COORDINATION
+
+This policy documents how the {familyName} family defines authority, runs governance meetings, maintains records, and coordinates professional advisors.
+
+RESPONSIBLE PARTIES:
+Primary Authority: {householdHead}
+Decision Makers: {decisionMakers}
+
+IDENTIFIED GAPS TO ADDRESS:
+{#gaps}• {description} - {severity} Priority
+  Recommendation: {recommendation}
+
+{/gaps}
+
+STRENGTHS TO MAINTAIN:
+{#strengths}• {.}
+{/strengths}
+
+RECOMMENDATIONS FOR IMPLEMENTATION:
+{#recommendations}• {.}
+{/recommendations}
+
+GOVERNANCE FRAMEWORK:
+1. Documented roles, voting thresholds, and conflict escalation
+2. Cadence for family meetings with agendas and minutes
+3. Secure repository for wills, trusts, and governance policies
+4. Single coordinated advisor team with shared factual baseline
+
+ADVISOR CONTACT INFORMATION:
+{advisorBrandName}
+{advisorWebsite}
+{advisorSupportEmail}
+{advisorSupportPhone}
+
+{advisorFooterText}
+
+{confidentialityStatement}
+
+Generated on: {generatedDate}
+Document Type: {documentType}
+`,
+
   'environmental-geographic-risk': `
 {advisorBrandName}
 
-{familyName} Environmental & Geographic Risk Policy
+{familyName} Geographic risk policy
 
 {advisorTagline}
 
@@ -38,7 +91,7 @@ RECOMMENDATIONS FOR IMPLEMENTATION:
 {#recommendations}• {.}
 {/recommendations}
 
-ENVIRONMENTAL & GEOGRAPHIC FRAMEWORK:
+GEOGRAPHIC FRAMEWORK:
 1. Hazard mapping and broker review cycle for primary residences
 2. Catastrophe coverage aligned to replacement value and ordinance costs
 3. Evacuation routes, rally points, and household communications
@@ -61,7 +114,7 @@ Document Type: {documentType}
   'physical-security': `
 {advisorBrandName}
 
-{familyName} Physical Security Policy
+{familyName} Physical security policy
 
 {advisorTagline}
 
@@ -113,7 +166,7 @@ Document Type: {documentType}
   'cybersecurity': `
 {advisorBrandName}
 
-{familyName} Cybersecurity & Digital Access Policy
+{familyName} Cyber security & digital access policy
 
 {advisorTagline}
 
@@ -143,7 +196,7 @@ RECOMMENDATIONS FOR IMPLEMENTATION:
 {#recommendations}• {.}
 {/recommendations}
 
-CYBERSECURITY FRAMEWORK:
+CYBER SECURITY FRAMEWORK:
 1. MFA and hardened recovery paths for email and financial accounts
 2. Home network segmentation and IoT inventory
 3. Need-to-know access to trust, tax, and investment documents
@@ -166,7 +219,7 @@ Document Type: {documentType}
   'financial-asset-protection': `
 {advisorBrandName}
 
-{familyName} Financial & Asset Protection Policy
+{familyName} Insurance & asset protection policy
 
 {advisorTagline}
 
@@ -174,9 +227,9 @@ Assessment Date: {assessmentDate}
 Overall Score: {overallScore}/10 ({riskLevel} risk)
 Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
 
-INSURANCE, STRUCTURES, AND CONCENTRATION
+INSURANCE, STRUCTURES, MEDICAL CONTINUITY, AND CONCENTRATION
 
-This policy addresses how the {familyName} family protects balance-sheet assets through insurance, legal structures, and concentration awareness.
+This policy addresses how the {familyName} family protects balance-sheet assets through insurance, legal structures, medical preparedness, and concentration awareness.
 
 RESPONSIBLE PARTIES:
 Primary Authority: {householdHead}
@@ -196,63 +249,14 @@ RECOMMENDATIONS FOR IMPLEMENTATION:
 {#recommendations}• {.}
 {/recommendations}
 
-FINANCIAL & ASSET PROTECTION FRAMEWORK:
+INSURANCE & PROTECTION FRAMEWORK:
 1. Property, liability, umbrella, and specialty coverage reviews
 2. Trust, titling, marital, and business continuity documents
 3. Liquidity stress tests for large private positions
 4. Fraud controls on banking and investment workflows
-
-ADVISOR CONTACT INFORMATION:
-{advisorBrandName}
-{advisorWebsite}
-{advisorSupportEmail}
-{advisorSupportPhone}
-
-{advisorFooterText}
-
-{confidentialityStatement}
-
-Generated on: {generatedDate}
-Document Type: {documentType}
-`,
-
-  'health-medical-preparedness': `
-{advisorBrandName}
-
-{familyName} Health & Medical Preparedness Policy
-
-{advisorTagline}
-
-Assessment Date: {assessmentDate}
-Overall Score: {overallScore}/10 ({riskLevel} risk)
-Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
-
-EMERGENCY MEDICAL AND TRAVEL HEALTH
-
-This policy documents medical decision-making, continuity of care, and travel health readiness for the {familyName} family.
-
-RESPONSIBLE PARTIES:
-Primary Authority: {householdHead}
-
-IDENTIFIED GAPS TO ADDRESS:
-{#gaps}• {description} - {severity} Priority
-  Recommendation: {recommendation}
-
-{/gaps}
-
-STRENGTHS TO MAINTAIN:
-{#strengths}• {.}
-{/strengths}
-
-RECOMMENDATIONS FOR IMPLEMENTATION:
-{#recommendations}• {.}
-{/recommendations}
-
-HEALTH & MEDICAL FRAMEWORK:
-1. Emergency plans, preferred facilities, and physician rosters
-2. Central medication and allergy lists for caregivers
-3. International coverage, telehealth, and medical evacuation
-4. Contingencies for regional health disruptions affecting dependents
+5. Emergency medical plans, medication lists, and physician rosters
+6. Travel health, evacuation coverage, and telehealth where appropriate
+7. Contingencies for regional health disruptions affecting dependents
 
 ADVISOR CONTACT INFORMATION:
 {advisorBrandName}
@@ -271,7 +275,7 @@ Document Type: {documentType}
   'lifestyle-behavioral-risk': `
 {advisorBrandName}
 
-{familyName} Lifestyle & Behavioral Risk Policy
+{familyName} Reputational & social risk policy
 
 {advisorTagline}
 
@@ -279,13 +283,12 @@ Assessment Date: {assessmentDate}
 Overall Score: {overallScore}/10 ({riskLevel} risk)
 Category Score: {categoryScore}/10 ({categoryRiskLevel} risk)
 
-GOVERNANCE, VISIBILITY, AND ROUTINES
+CONDUCT, VISIBILITY, AND PUBLIC FOOTPRINT
 
-This policy aligns decision rights, public footprint, and advisor coordination for the {familyName} family.
+This policy sets expectations for behavior, social media, and reputation-sensitive activities for the {familyName} family.
 
 RESPONSIBLE PARTIES:
 Primary Authority: {householdHead}
-Decision Makers: {decisionMakers}
 
 IDENTIFIED GAPS TO ADDRESS:
 {#gaps}• {description} - {severity} Priority
@@ -301,11 +304,11 @@ RECOMMENDATIONS FOR IMPLEMENTATION:
 {#recommendations}• {.}
 {/recommendations}
 
-LIFESTYLE & BEHAVIORAL FRAMEWORK:
-1. Documented governance roles, voting, and conflict escalation
-2. Expectations for social visibility and sharing wealth-related information
-3. Predictable routines reviewed for undue exposure
-4. Coordinated advisor team with single source of truth on key facts
+REPUTATIONAL & SOCIAL FRAMEWORK:
+1. Written family standards and graduated enforcement
+2. Social media, press, and confidentiality norms for wealth-related topics
+3. Substance and behavioral health policies with support pathways
+4. Periodic review of routines and exposure that affect reputation or safety
 
 ADVISOR CONTACT INFORMATION:
 {advisorBrandName}

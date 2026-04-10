@@ -1,20 +1,13 @@
 import type { LucideIcon } from "lucide-react";
-import {
-  Globe,
-  Shield,
-  Lock,
-  Landmark,
-  HeartPulse,
-  Users,
-} from "lucide-react";
+import { Globe, Shield, Lock, Umbrella, Scale, Users } from "lucide-react";
 import { RISK_AREAS } from "@/lib/advisor/types";
 
 const PILLAR_ICONS: Record<(typeof RISK_AREAS)[number]["id"], LucideIcon> = {
-  "environmental-geographic-risk": Globe,
-  "physical-security": Shield,
+  governance: Scale,
   cybersecurity: Lock,
-  "financial-asset-protection": Landmark,
-  "health-medical-preparedness": HeartPulse,
+  "physical-security": Shield,
+  "financial-asset-protection": Umbrella,
+  "environmental-geographic-risk": Globe,
   "lifestyle-behavioral-risk": Users,
 };
 

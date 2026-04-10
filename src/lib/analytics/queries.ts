@@ -6,12 +6,14 @@ import { CATEGORY_LABELS } from "./formatters";
 
 // Pillar weights from the family governance pillar definition
 export const PILLAR_WEIGHTS = {
-  'environmental-geographic-risk': 12,
+  governance: 11,
+  cybersecurity: 20,
   'physical-security': 13,
-  'cybersecurity': 20,
   'financial-asset-protection': 34,
-  'health-medical-preparedness': 11,
+  'environmental-geographic-risk': 12,
   'lifestyle-behavioral-risk': 10,
+  /** Historical category rows */
+  'health-medical-preparedness': 11,
   // Legacy weights for historical PillarScore rows
   'decision-making-authority': 13,
   'access-controls': 13,

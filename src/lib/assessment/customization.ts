@@ -8,6 +8,15 @@
 import { RISK_AREAS } from '@/lib/advisor/types';
 import { Question } from '@/lib/assessment/types';
 
+/** Prior intake IDs mapped to current `RISK_AREAS` ids */
+const FOCUS_AREA_LEGACY_ALIASES: Record<string, string> = {
+  'health-medical-preparedness': 'financial-asset-protection',
+};
+
+function normalizeRiskAreaId(id: string): string {
+  return FOCUS_AREA_LEGACY_ALIASES[id] ?? id;
+}
+
 export interface CustomizationConfig {
   isCustomized: boolean;
   visibleSubCategories: string[];
@@ -43,7 +52,16 @@ export function getVisibleSubCategories(focusAreas: string[]): string[] {
   }
 
   const validRiskAreaIds = new Set<string>(RISK_AREAS.map(area => area.id));
-  return focusAreas.filter((area: string) => validRiskAreaIds.has(area));
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of focusAreas) {
+    const id = normalizeRiskAreaId(raw);
+    if (validRiskAreaIds.has(id) && !seen.has(id)) {
+      seen.add(id);
+      out.push(id);
+    }
+  }
+  return out;
 }
 
 /**

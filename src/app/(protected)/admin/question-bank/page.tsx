@@ -26,9 +26,10 @@ export default async function AdminQuestionBankIndexPage() {
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground max-w-2xl">
-        Edit question copy and visibility for the six risk areas. Clients only see questions marked
-        visible. Run <code className="text-xs">npx tsx scripts/seed-assessment-bank.ts</code> to
-        sync from code defaults.
+        Create, reorder, edit, and hide questions for each assessment pillar (risk area). Clients
+        only see questions marked visible. Run{" "}
+        <code className="text-xs">npm run seed:assessment-bank</code> to sync from code defaults
+        without removing custom rows.
       </p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {RISK_AREAS.map((area) => {

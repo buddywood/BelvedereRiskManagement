@@ -1,9 +1,9 @@
 export type TemplateId =
-  | 'environmental-geographic-risk'
-  | 'physical-security'
+  | 'governance'
   | 'cybersecurity'
+  | 'physical-security'
   | 'financial-asset-protection'
-  | 'health-medical-preparedness'
+  | 'environmental-geographic-risk'
   | 'lifestyle-behavioral-risk';
 
 export interface TemplateMetadata {
@@ -46,44 +46,44 @@ export interface TemplateData {
 
 export const TEMPLATE_REGISTRY: TemplateMetadata[] = [
   {
-    id: 'environmental-geographic-risk',
-    name: 'Environmental & Geographic Risk Policy',
-    description: 'Hazards, catastrophe insurance, evacuation, and continuity',
-    category: 'environmental-geographic-risk',
-    applicableSubCategories: ['environmental-geographic-risk'],
-  },
-  {
-    id: 'physical-security',
-    name: 'Physical Security Policy',
-    description: 'Residence security, travel safety, and duress protocols',
-    category: 'physical-security',
-    applicableSubCategories: ['physical-security'],
+    id: 'governance',
+    name: 'Governance Policy',
+    description: 'Decision rights, meetings, documentation, and advisor coordination',
+    category: 'governance',
+    applicableSubCategories: ['governance'],
   },
   {
     id: 'cybersecurity',
-    name: 'Cybersecurity & Digital Access Policy',
+    name: 'Cyber security & digital access policy',
     description: 'Authentication, device hygiene, and sensitive information access',
     category: 'cybersecurity',
     applicableSubCategories: ['cybersecurity'],
   },
   {
+    id: 'physical-security',
+    name: 'Physical security policy',
+    description: 'Residence security, travel safety, and duress protocols',
+    category: 'physical-security',
+    applicableSubCategories: ['physical-security'],
+  },
+  {
     id: 'financial-asset-protection',
-    name: 'Financial & Asset Protection Policy',
-    description: 'Insurance, concentration, trusts, titling, and succession structures',
+    name: 'Insurance & asset protection policy',
+    description: 'Coverage, trusts, titling, succession, medical continuity, and concentration',
     category: 'financial-asset-protection',
     applicableSubCategories: ['financial-asset-protection'],
   },
   {
-    id: 'health-medical-preparedness',
-    name: 'Health & Medical Preparedness Policy',
-    description: 'Emergency medical planning, travel health, and caregiving contingencies',
-    category: 'health-medical-preparedness',
-    applicableSubCategories: ['health-medical-preparedness'],
+    id: 'environmental-geographic-risk',
+    name: 'Geographic risk policy',
+    description: 'Hazards, catastrophe insurance, evacuation, and continuity',
+    category: 'environmental-geographic-risk',
+    applicableSubCategories: ['environmental-geographic-risk'],
   },
   {
     id: 'lifestyle-behavioral-risk',
-    name: 'Lifestyle & Behavioral Risk Policy',
-    description: 'Governance, communication, visibility, and advisor coordination',
+    name: 'Reputational & social risk policy',
+    description: 'Conduct standards, visibility, social media, and reputation-sensitive behavior',
     category: 'lifestyle-behavioral-risk',
     applicableSubCategories: ['lifestyle-behavioral-risk'],
   },

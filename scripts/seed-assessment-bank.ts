@@ -49,6 +49,7 @@ async function main() {
         text: q.text,
         helpText: q.helpText ?? null,
         learnMore: q.learnMore ?? null,
+        riskRelevance: q.riskRelevance ?? null,
         type: q.type,
         options: q.options ? (q.options as object) : undefined,
         required: q.required,
@@ -57,6 +58,7 @@ async function main() {
         branchingDependsOn,
         branchingPredicate: branchingPredicateAsJson(branchingPredicate),
         profileConditionKey,
+        omitMaturityScoreWhenYes: q.omitMaturityScoreWhenYes === true,
       },
       update: {
         riskAreaId: q.subCategory,
@@ -64,6 +66,7 @@ async function main() {
         text: q.text,
         helpText: q.helpText ?? null,
         learnMore: q.learnMore ?? null,
+        riskRelevance: q.riskRelevance ?? null,
         type: q.type,
         options: q.options ? (q.options as object) : undefined,
         required: q.required,
@@ -72,6 +75,7 @@ async function main() {
         branchingDependsOn,
         branchingPredicate: branchingPredicateAsJson(branchingPredicate),
         profileConditionKey,
+        omitMaturityScoreWhenYes: q.omitMaturityScoreWhenYes === true,
       },
     });
   }

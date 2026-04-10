@@ -7,12 +7,18 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { MissingControl } from "@/lib/assessment/types";
+import type { MissingControl, RiskLevel } from "@/lib/assessment/types";
+import { MATURITY_SCALE_MAX } from "@/lib/assessment/maturity-scale";
+import { governanceTierCopyForRiskLevel } from "@/lib/assessment/governance-rubric";
+import { cyberTierCopyForRiskLevel } from "@/lib/cyber-risk/cyber-rubric";
 import { Target, Clock, Users } from "lucide-react";
 
 interface ActionPlanProps {
   missingControls: MissingControl[];
   pillarName: string;
+  /** Overall tier drives required action row (Belvedere action mapping). */
+  riskLevel: RiskLevel;
+  scoreRubric?: "governance" | "cyber";
 }
 
 /**
@@ -49,10 +55,18 @@ function getOwnership(category: string): string {
   if (category.includes("business")) {
     return "Board of Directors";
   }
+  if (category === "cybersecurity" || category.includes("cyber")) {
+    return "IT / security lead";
+  }
   return "Family Office";
 }
 
-export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
+export function ActionPlan({
+  missingControls,
+  pillarName,
+  riskLevel,
+  scoreRubric = "governance",
+}: ActionPlanProps) {
   if (missingControls.length === 0) {
     return (
       <div className="space-y-4">
@@ -62,16 +76,25 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
         <Card className="border-emerald-500/20 bg-emerald-500/10">
           <CardContent className="pt-6">
             <p className="font-medium text-emerald-900 dark:text-emerald-100">
-              Your governance framework is well-established.
+              {scoreRubric === "cyber"
+                ? "Your cyber security posture looks strong for the areas assessed."
+                : "Your governance framework is well-established."}
             </p>
             <p className="mt-2 text-sm text-emerald-800 dark:text-emerald-200">
-              Continue regular reviews and updates to maintain strong governance practices.
+              {scoreRubric === "cyber"
+                ? "Keep testing backups, phishing awareness, and access reviews on a regular cadence."
+                : "Continue regular reviews and updates to maintain strong governance practices."}
             </p>
           </CardContent>
         </Card>
       </div>
     );
   }
+
+  const totalRemediationPriority = missingControls.reduce(
+    (sum, c) => sum + (c.remediationPriority ?? 0),
+    0
+  );
 
   const priorityConfig = {
     high: {
@@ -94,8 +117,26 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
         Recommended Actions
       </h3>
       <p className="text-sm leading-6 text-muted-foreground">
-        Prioritized recommendations based on your {pillarName} assessment responses.
+        {scoreRubric === "cyber" ? (
+          <>
+            Remediation steps for answers in the critical exposure or partial / inconsistent bands (0–1 on
+            the {MATURITY_SCALE_MAX}-point scale). Priority total sums weighted gaps across these items.
+          </>
+        ) : (
+          <>
+            Definitive remediation steps for responses in the low-maturity band (0–1 on the{" "}
+            {MATURITY_SCALE_MAX}-point scale). Priority total sums weighted gaps across these items.
+          </>
+        )}
       </p>
+
+      <div className="rounded-[1.25rem] border section-divider bg-background/55 px-4 py-3 text-sm">
+        <span className="font-medium text-foreground">Remediation plan priority total: </span>
+        <span className="tabular-nums font-semibold text-foreground">
+          {totalRemediationPriority.toFixed(1)}
+        </span>
+        <span className="text-muted-foreground"> (higher = more weighted attention needed)</span>
+      </div>
 
       <div className="space-y-4">
         {missingControls.map((control, index) => {
@@ -117,9 +158,19 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground pl-6">
-                    Addresses: {control.category.split("-").map(word =>
+                    Addresses:{" "}
+                    {control.category.split("-").map((word) =>
                       word.charAt(0).toUpperCase() + word.slice(1)
                     ).join(" ")}
+                    {control.maturityScore !== undefined && (
+                      <>
+                        {" "}
+                        · Maturity score: {control.maturityScore.toFixed(2)} / {MATURITY_SCALE_MAX}
+                        {control.remediationPriority !== undefined && (
+                          <> · Priority contribution: {control.remediationPriority.toFixed(1)}</>
+                        )}
+                      </>
+                    )}
                   </p>
                 </div>
 
@@ -146,9 +197,18 @@ export function ActionPlan({ missingControls, pillarName }: ActionPlanProps) {
         })}
       </div>
 
-      <div className="mt-6 rounded-[1.25rem] border section-divider bg-background/55 p-4">
-        <p className="text-xs text-muted-foreground">
-          These recommendations are based on your assessment responses. Consult with your advisors for implementation guidance.
+      <div className="mt-6 space-y-3 rounded-[1.25rem] border section-divider bg-background/55 p-4">
+        <div>
+          <p className="text-xs font-medium text-foreground">Tier required action</p>
+          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+            {(scoreRubric === "cyber" ? cyberTierCopyForRiskLevel : governanceTierCopyForRiskLevel)(
+              riskLevel
+            ).requiredAction}
+          </p>
+        </div>
+        <p className="text-xs text-muted-foreground border-t border-border/60 pt-3">
+          These recommendations are based on your assessment responses. Consult with your advisors
+          for implementation guidance.
         </p>
       </div>
     </div>

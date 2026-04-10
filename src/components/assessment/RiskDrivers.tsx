@@ -87,6 +87,12 @@ export function RiskDrivers({ missingControls, riskLevel }: RiskDriversProps) {
                   <p className="text-sm text-muted-foreground leading-6">
                     {control.description}
                   </p>
+                  {control.riskRelevance ? (
+                    <p className="text-sm text-foreground/90 leading-6 border-l-2 border-brand/40 pl-3">
+                      <span className="font-medium text-foreground">Why this matters: </span>
+                      {control.riskRelevance}
+                    </p>
+                  ) : null}
                 </div>
               </div>
             </div>

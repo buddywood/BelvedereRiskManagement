@@ -1,9 +1,9 @@
 /**
  * Cyber Risk Question Bank
  *
- * Complete question definitions for cyber risk assessment pillar.
- * 4 sub-categories covering digital hygiene, identity protection,
- * banking security, and payment risk.
+ * Questions roll up under comprehensive assessment `cybersecurity` (and access-control blocks).
+ * Client worksheet sections A–F are defined in `cyber-rubric.ts` (Household governance through
+ * Incident response & recovery) for roadmap alignment; this bank uses four thematic groups below.
  */
 
 import { Question, Pillar } from '../assessment/types';

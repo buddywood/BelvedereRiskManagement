@@ -1,9 +1,8 @@
 /**
- * Comprehensive risk question bank (Family Governance pillar)
+ * Comprehensive risk question bank (`family-governance` pillar)
  *
- * Six pillar-aligned subcategories: environmental/geographic, physical security,
- * cybersecurity, financial/asset protection, health/medical preparedness, and
- * lifestyle/behavioral risk — plus legacy governance themes mapped into those areas.
+ * Six pillars: Governance, Cyber security, Physical security, Insurance (incl. medical
+ * continuity questions), Geographic, and Reputational & social risk.
  */
 
 import { Question, Pillar } from './types';
@@ -201,7 +200,7 @@ const healthMedicalQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'health-medical-preparedness',
+    subCategory: 'financial-asset-protection',
     weight: 4,
     scoreMap: { 0: 0, 1: 3, 2: 7, 3: 10 },
   },
@@ -217,7 +216,7 @@ const healthMedicalQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'health-medical-preparedness',
+    subCategory: 'financial-asset-protection',
     weight: 4,
     scoreMap: { none: 0, scattered: 4, central: 7, current: 10 },
   },
@@ -233,7 +232,7 @@ const healthMedicalQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'health-medical-preparedness',
+    subCategory: 'financial-asset-protection',
     weight: 4,
     scoreMap: { none: 0, 'ad-hoc': 4, solid: 7, robust: 10 },
   },
@@ -249,7 +248,7 @@ const healthMedicalQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'health-medical-preparedness',
+    subCategory: 'financial-asset-protection',
     weight: 3,
     scoreMap: { never: 0, once: 3, light: 7, substantive: 10 },
   },
@@ -263,14 +262,14 @@ const healthMedicalQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'health-medical-preparedness',
+    subCategory: 'financial-asset-protection',
     weight: 3,
     scoreMap: { yes: 10, no: 0 },
   },
 ];
 
 // ============================================================================
-// LIFESTYLE / BEHAVIORAL (legacy: decision-making, behavior, documentation)
+// GOVERNANCE (decision-making authority)
 // ============================================================================
 
 // ============================================================================
@@ -292,7 +291,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 5,
     scoreMap: { 0: 0, 1: 3, 2: 6, 3: 10 },
   },
@@ -310,7 +309,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 3,
     scoreMap: { 'none': 0, 'informal': 2, 'criteria-unclear': 5, 'criteria-clear': 8, 'election': 10 },
     branchingRule: {
@@ -329,7 +328,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 4,
     scoreMap: { 'yes': 10, 'no': 0 },
   },
@@ -347,7 +346,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 5,
     scoreMap: { 'none': 0, 'informal': 3, 'documented': 7, 'external': 10 },
   },
@@ -364,7 +363,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 4,
     scoreMap: { 0: 0, 1: 4, 2: 7, 3: 10 },
     textTemplate: (p) => {
@@ -386,7 +385,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: false,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 2,
     scoreMap: { 'yes': 10, 'no': 5 },
   },
@@ -402,7 +401,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 3,
     scoreMap: { 'undefined': 0, 'informal': 5, 'documented': 10 },
   },
@@ -419,7 +418,7 @@ const decisionMakingQuestions: Question[] = [
     ],
     required: false,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 3,
     scoreMap: { 'none': 4, 'informal': 6, 'formal-advisor': 8, 'formal-voting': 10 },
   },
@@ -584,6 +583,7 @@ const trustEstateQuestions: Question[] = [
     subCategory: 'financial-asset-protection',
     weight: 1,
     scoreMap: { 'yes': 5, 'no': 10 },
+    omitMaturityScoreWhenYes: true,
   },
   {
     id: 'teg-02',
@@ -927,6 +927,7 @@ const successionPlanningQuestions: Question[] = [
     subCategory: 'financial-asset-protection',
     weight: 1,
     scoreMap: { 'yes': 5, 'no': 10 },
+    omitMaturityScoreWhenYes: true,
   },
   {
     id: 'sp-02',
@@ -1111,7 +1112,7 @@ const successionPlanningQuestions: Question[] = [
 ];
 
 // ============================================================================
-// SUB-CATEGORY 6: BEHAVIOR STANDARDS (8 questions)
+// REPUTATIONAL & SOCIAL RISK — BEHAVIOR STANDARDS (8 questions)
 // ============================================================================
 
 const behaviorStandardsQuestions: Question[] = [
@@ -1271,6 +1272,7 @@ const businessInvolvementQuestions: Question[] = [
     subCategory: 'financial-asset-protection',
     weight: 1,
     scoreMap: { 'yes': 5, 'no': 10 },
+    omitMaturityScoreWhenYes: true,
   },
   {
     id: 'bi-02',
@@ -1437,7 +1439,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 4,
     scoreMap: { 'never': 0, 'ad-hoc': 4, 'annual': 7, 'quarterly': 10 },
   },
@@ -1452,7 +1454,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 2,
     scoreMap: { 'yes': 10, 'no': 4 },
   },
@@ -1469,7 +1471,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 3,
     scoreMap: { 0: 0, 1: 4, 2: 7, 3: 10 },
   },
@@ -1486,7 +1488,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 4,
     scoreMap: { 'scattered': 0, 'attorney': 5, 'centralized': 7, 'digital': 10 },
   },
@@ -1502,7 +1504,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 3,
     scoreMap: { 'unclear': 2, 'informal': 6, 'defined': 10 },
   },
@@ -1519,7 +1521,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 4,
     scoreMap: { 'siloed': 2, 'informal': 6, 'formal': 10 },
   },
@@ -1535,7 +1537,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 4,
     scoreMap: { 'none': 0, 'informal': 5, 'documented': 10 },
   },
@@ -1551,7 +1553,7 @@ const documentationCommunicationQuestions: Question[] = [
     ],
     required: true,
     pillar: 'family-governance',
-    subCategory: 'lifestyle-behavioral-risk',
+    subCategory: 'governance',
     weight: 3,
     scoreMap: { 'none': 2, 'informal': 6, 'documented': 10 },
   },
@@ -1566,28 +1568,23 @@ export const familyGovernancePillar: Pillar = {
   name: 'Comprehensive Risk Assessment',
   slug: 'family-governance',
   description:
-    'Six pillars: environmental and geographic exposure, physical security, cybersecurity, financial and asset protection, health and medical preparedness, and lifestyle and behavioral risk — including family governance and wealth structures.',
+    'Governance, cyber security, physical security, insurance (structures and medical continuity), geographic exposure, and reputational & social risk.',
   estimatedMinutes: 32,
   subCategories: [
     {
-      id: 'environmental-geographic-risk',
-      name: 'Environmental / Geographic Risk',
+      id: 'governance',
+      name: 'Governance',
       description:
-        'Natural hazards, property and catastrophe coverage, evacuation planning, and proximity to emergency infrastructure.',
-      weight: 12,
-      questionIds: environmentalGeographicQuestions.map((q) => q.id),
-    },
-    {
-      id: 'physical-security',
-      name: 'Physical Security',
-      description:
-        'Residence hardening, neighborhood exposure, travel and dependent safety, and duress protocols.',
-      weight: 13,
-      questionIds: physicalSecurityQuestions.map((q) => q.id),
+        'Decision rights, family councils, documentation, meetings, advisor coordination, and dispute resolution.',
+      weight: 11,
+      questionIds: [
+        ...decisionMakingQuestions.map((q) => q.id),
+        ...documentationCommunicationQuestions.map((q) => q.id),
+      ],
     },
     {
       id: 'cybersecurity',
-      name: 'Cybersecurity',
+      name: 'Cyber security',
       description:
         'Home and device security, digital hygiene, identity protection, banking and payment safety, plus access controls for sensitive information.',
       weight: 20,
@@ -1597,37 +1594,42 @@ export const familyGovernancePillar: Pillar = {
       ],
     },
     {
-      id: 'financial-asset-protection',
-      name: 'Financial / Asset Protection',
+      id: 'physical-security',
+      name: 'Physical security',
       description:
-        'Trusts and estates, marriage and titling risk, succession, business involvement, insurance and concentration context.',
+        'Residence hardening, neighborhood exposure, travel and dependent safety, and duress protocols.',
+      weight: 13,
+      questionIds: physicalSecurityQuestions.map((q) => q.id),
+    },
+    {
+      id: 'financial-asset-protection',
+      name: 'Insurance',
+      description:
+        'Coverage and liability, trusts and estates, marriage and titling, succession, business involvement, medical continuity, and concentration context.',
       weight: 34,
       questionIds: [
         ...trustEstateQuestions.map((q) => q.id),
         ...marriageRiskQuestions.map((q) => q.id),
         ...successionPlanningQuestions.map((q) => q.id),
         ...businessInvolvementQuestions.map((q) => q.id),
+        ...healthMedicalQuestions.map((q) => q.id),
       ],
     },
     {
-      id: 'health-medical-preparedness',
-      name: 'Health & Medical Preparedness',
+      id: 'environmental-geographic-risk',
+      name: 'Geographic',
       description:
-        'Emergency medical planning, medications and conditions, travel health, trauma center awareness, and regional health threats.',
-      weight: 11,
-      questionIds: healthMedicalQuestions.map((q) => q.id),
+        'Natural hazards, property and catastrophe coverage, evacuation planning, and proximity to emergency infrastructure.',
+      weight: 12,
+      questionIds: environmentalGeographicQuestions.map((q) => q.id),
     },
     {
       id: 'lifestyle-behavioral-risk',
-      name: 'Lifestyle & Behavioral Risk',
+      name: 'Reputational & social risk',
       description:
-        'Governance and decision making, conduct standards, communication, visibility, and coordination across advisors.',
+        'Family standards, conduct, substance policies, public and social media norms, and reputation-sensitive behavior.',
       weight: 10,
-      questionIds: [
-        ...decisionMakingQuestions.map((q) => q.id),
-        ...behaviorStandardsQuestions.map((q) => q.id),
-        ...documentationCommunicationQuestions.map((q) => q.id),
-      ],
+      questionIds: behaviorStandardsQuestions.map((q) => q.id),
     },
   ],
 };

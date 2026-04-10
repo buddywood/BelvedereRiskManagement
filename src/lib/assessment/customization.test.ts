@@ -109,6 +109,18 @@ describe('getVisibleSubCategories', () => {
 
     expect(visible).toEqual([]);
   });
+
+  test('maps legacy health-medical focus area to insurance (financial-asset-protection)', () => {
+    expect(getVisibleSubCategories(['health-medical-preparedness'])).toEqual([
+      'financial-asset-protection',
+    ]);
+  });
+
+  test('dedupes when legacy health and insurance both appear', () => {
+    expect(
+      getVisibleSubCategories(['health-medical-preparedness', 'financial-asset-protection'])
+    ).toEqual(['financial-asset-protection']);
+  });
 });
 
 describe('getEmphasisMultipliers', () => {

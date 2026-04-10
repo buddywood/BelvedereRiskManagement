@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { MATURITY_SCALE_MAX } from "@/lib/assessment/maturity-scale";
+import { maturityHeatLevel, maturityScoreToPercent } from "@/lib/assessment/governance-rubric";
 
 interface EmphasisIndicatorProps {
   pillarName: string;
@@ -17,28 +19,26 @@ export function EmphasisIndicator({
   isEmphasized,
   className,
 }: EmphasisIndicatorProps) {
-  const progressValue = (score / 10) * 100;
+  const progressValue = maturityScoreToPercent(score);
 
-  // Determine color based on score and emphasis
-  let progressColor = "";
-  if (isEmphasized) {
-    progressColor = "bg-amber-500";
-  } else if (score >= 7.5) {
-    progressColor = "bg-green-500";
-  } else if (score >= 5.0) {
-    progressColor = "bg-amber-500";
-  } else if (score >= 2.5) {
-    progressColor = "bg-orange-500";
-  } else {
-    progressColor = "bg-red-500";
-  }
+  const heatColor = (() => {
+    const heat = maturityHeatLevel(score);
+    if (heat === "strong") return "bg-green-600";
+    if (heat === "fair") return "bg-amber-500";
+    if (heat === "weak") return "bg-orange-600";
+    return "bg-red-600";
+  })();
+
+  const progressColor = isEmphasized ? "bg-amber-500" : heatColor;
 
   return (
     <div className={cn("space-y-3", className)}>
       <div className="flex items-center justify-between">
         <div>
           <h4 className="font-medium">{pillarName}</h4>
-          <p className="text-sm text-muted-foreground">{score.toFixed(1)}/10</p>
+          <p className="text-sm text-muted-foreground">
+            {progressValue} / 100 resilience ({score.toFixed(1)} / {MATURITY_SCALE_MAX} maturity)
+          </p>
         </div>
         {isEmphasized && (
           <Badge variant="secondary" className="flex items-center gap-1">
@@ -50,6 +50,7 @@ export function EmphasisIndicator({
 
       <Progress
         value={progressValue}
+        indicatorClassName={progressColor}
         className={cn(
           "h-2",
           isEmphasized && "border-amber-200 border-2"

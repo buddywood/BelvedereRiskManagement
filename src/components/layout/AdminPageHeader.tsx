@@ -83,7 +83,8 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
       icon: ListChecks,
       kicker: "Content management",
       title: "Assessment question bank",
-      subtitle: "Six risk areas — copy, visibility, and client-facing question set",
+      subtitle:
+        "Six assessment pillars — create and manage questions, copy, visibility, and ordering",
     },
   },
   {

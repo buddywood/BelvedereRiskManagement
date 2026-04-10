@@ -42,7 +42,7 @@ const minimalQuestions: Question[] = [
     pillar: "test",
     subCategory: "cat1",
     weight: 1,
-    scoreMap: { "0": 0, "1": 2, "2": 5, "3": 8, "4": 10 },
+    scoreMap: { 0: 0, 1: 1, 2: 2, 3: 3 },
   },
   {
     id: "q2",
@@ -52,7 +52,7 @@ const minimalQuestions: Question[] = [
     pillar: "test",
     subCategory: "cat1",
     weight: 1,
-    scoreMap: { "0": 0, "1": 3, "2": 6, "3": 10 },
+    scoreMap: { 0: 0, 1: 1, 2: 2, 3: 3 },
   },
   {
     id: "q3",
@@ -62,7 +62,7 @@ const minimalQuestions: Question[] = [
     pillar: "test",
     subCategory: "cat2",
     weight: 1,
-    scoreMap: { "0": 0, "1": 1, "2": 4, "3": 10 },
+    scoreMap: { 0: 0, 1: 1, 2: 2, 3: 3 },
     branchingRule: {
       dependsOn: "q1",
       showIf: (answer) => answer !== 0,
@@ -71,24 +71,25 @@ const minimalQuestions: Question[] = [
 ];
 
 describe("getRiskLevel", () => {
-  it("returns low for score >= 7.5", () => {
-    expect(getRiskLevel(7.5)).toBe("low");
-    expect(getRiskLevel(10)).toBe("low");
+  /** Belvedere bands on 0–100 resilience (from maturity 0–3 via rounded percent). */
+  it("returns low when resilience percent is 80–100", () => {
+    expect(getRiskLevel(2.4)).toBe("low");
+    expect(getRiskLevel(3)).toBe("low");
   });
 
-  it("returns medium for 5.0 <= score < 7.5", () => {
-    expect(getRiskLevel(5.0)).toBe("medium");
-    expect(getRiskLevel(6)).toBe("medium");
+  it("returns medium when resilience percent is 60–79", () => {
+    expect(getRiskLevel(1.8)).toBe("medium");
+    expect(getRiskLevel(2)).toBe("medium");
   });
 
-  it("returns high for 2.5 <= score < 5.0", () => {
-    expect(getRiskLevel(2.5)).toBe("high");
-    expect(getRiskLevel(4)).toBe("high");
+  it("returns high when resilience percent is 40–59", () => {
+    expect(getRiskLevel(1.2)).toBe("high");
+    expect(getRiskLevel(1.5)).toBe("high");
   });
 
-  it("returns critical for score < 2.5", () => {
+  it("returns critical when resilience percent is under 40", () => {
     expect(getRiskLevel(0)).toBe("critical");
-    expect(getRiskLevel(2.4)).toBe("critical");
+    expect(getRiskLevel(1.1)).toBe("critical");
   });
 });
 
@@ -102,38 +103,27 @@ describe("calculatePillarScore", () => {
   });
 
   it("calculates score from answers", () => {
-    // q1: "4" -> 10, q2: "3" -> 10; q3 is visible and "3" -> 10; weighted avg
     const result = calculatePillarScore(
-      { q1: 4, q2: 3, q3: 3 },
+      { q1: 3, q2: 3, q3: 3 },
       minimalPillar,
       minimalQuestions
     );
-    expect(result.score).toBe(10);
+    expect(result.score).toBe(3);
     expect(result.riskLevel).toBe("low");
   });
 
   it("excludes unanswered questions from calculation", () => {
-    // Only q1 answered as 4 -> 10; q2 and q3 skipped
-    // q1 = 4 -> score 10, weight 1 in cat1 (weight 1)
-    // q3 would be visible (q1 != 0) but unanswered
-    // cat1: (10 * 1) / 1 = 10, weight 1
-    // cat2: no answered questions, weight 2
-    // Total: (10 * 1 + 0 * 2) / (1 + 0) = 10 / 1 = 10
     const result = calculatePillarScore(
-      { q1: 4 },
+      { q1: 3 },
       minimalPillar,
       minimalQuestions
     );
-    // Actually, the calculation is more complex with weighted categories
-    // Let me check what the actual calculation should be
     expect(result.score).toBeGreaterThan(0);
-    expect(result.score).toBeLessThanOrEqual(10);
+    expect(result.score).toBeLessThanOrEqual(3);
   });
 
   it("excludes hidden question answers when visibleQuestionIds provided", () => {
-    // Simpler test: q1 good, q2 bad, q3 bad (different categories)
-    // When q3 is excluded, only cat1 should count
-    const answers = { q1: 4, q2: 0, q3: 0 }; // q1 good, q2 and q3 bad
+    const answers = { q1: 3, q2: 0, q3: 0 };
 
     // With all questions: both categories have poor averages
     const resultWithAll = calculatePillarScore(answers, minimalPillar, minimalQuestions);
@@ -151,9 +141,8 @@ describe("calculatePillarScore", () => {
   });
 
   it("calculates correctly with all questions visible (backward compatible)", () => {
-    const answers = { q1: 4, q2: 3, q3: 3 };
+    const answers = { q1: 3, q2: 3, q3: 3 };
 
-    // These should be the same
     const resultWithoutParam = calculatePillarScore(answers, minimalPillar, minimalQuestions);
     const resultWithAllIds = calculatePillarScore(answers, minimalPillar, minimalQuestions, ['q1', 'q2', 'q3']);
 
@@ -162,7 +151,7 @@ describe("calculatePillarScore", () => {
   });
 
   it("handles case where all questions are hidden", () => {
-    const answers = { q1: 4, q2: 3, q3: 3 };
+    const answers = { q1: 3, q2: 3, q3: 3 };
     const visibleIds: string[] = []; // No questions visible
 
     const result = calculatePillarScore(answers, minimalPillar, minimalQuestions, visibleIds);
@@ -170,18 +159,58 @@ describe("calculatePillarScore", () => {
     expect(result.score).toBe(0);
     expect(result.riskLevel).toBe("critical");
   });
+
+  it("omits yes/no gate from maturity rollup when Yes (follow-ups carry 0–3)", () => {
+    const pillar: Pillar = {
+      id: "p",
+      name: "P",
+      slug: "p",
+      description: "",
+      estimatedMinutes: 1,
+      subCategories: [
+        { id: "c1", name: "C1", description: "", weight: 1, questionIds: ["gate", "child"] },
+      ],
+    };
+    const qs: Question[] = [
+      {
+        id: "gate",
+        text: "Gate?",
+        type: "yes-no",
+        required: true,
+        pillar: "p",
+        subCategory: "c1",
+        weight: 1,
+        scoreMap: { yes: 3, no: 0 },
+        omitMaturityScoreWhenYes: true,
+      },
+      {
+        id: "child",
+        text: "Child?",
+        type: "maturity-scale",
+        required: true,
+        pillar: "p",
+        subCategory: "c1",
+        weight: 1,
+        scoreMap: { 0: 0, 1: 1, 2: 2, 3: 3 },
+      },
+    ];
+    expect(
+      calculatePillarScore({ gate: "yes", child: 2 }, pillar, qs).score
+    ).toBe(2);
+    expect(calculatePillarScore({ gate: "no" }, pillar, qs).score).toBe(0);
+  });
 });
 
 describe("identifyMissingControls", () => {
   it("returns empty when no low scores", () => {
     const result = identifyMissingControls(
-      { q1: 4, q2: 3 },
+      { q1: 3, q2: 3 },
       minimalQuestions
     );
     expect(result).toEqual([]);
   });
 
-  it("returns missing controls for answers with score <= 2", () => {
+  it("returns missing controls for low normalized maturity (0–1)", () => {
     const result = identifyMissingControls(
       { q1: 0, q2: 1 },
       minimalQuestions
@@ -197,7 +226,7 @@ describe("identifyMissingControls", () => {
   });
 
   it("excludes hidden questions from missing controls when visibleQuestionIds provided", () => {
-    const answers = { q1: 0, q2: 4, q3: 0 }; // q1 and q3 have low scores
+    const answers = { q1: 0, q2: 3, q3: 0 };
 
     // Without filtering
     const resultWithAll = identifyMissingControls(answers, minimalQuestions);
@@ -214,7 +243,7 @@ describe("identifyMissingControls", () => {
 
 describe("calculateCustomizedPillarScore", () => {
   it("produces identical results to calculatePillarScore when all multipliers = 1.0", () => {
-    const answers = { q1: 4, q2: 3, q3: 3 };
+    const answers = { q1: 3, q2: 3, q3: 3 };
     const visibleIds = ['q1', 'q2', 'q3'];
     const noEmphasisMultipliers = { cat1: 1.0, cat2: 1.0 };
 
@@ -234,7 +263,7 @@ describe("calculateCustomizedPillarScore", () => {
 
   it("applies 1.5x multiplier to emphasized subcategory weight", () => {
     // Set up answers where cat1 has good score, cat2 has poor score
-    const answers = { q1: 4, q2: 4, q3: 0 }; // cat1 good (weight 1), cat2 poor (weight 2)
+    const answers = { q1: 3, q2: 3, q3: 0 };
     const visibleIds = ['q1', 'q2', 'q3'];
 
     // No emphasis
@@ -262,7 +291,7 @@ describe("calculateCustomizedPillarScore", () => {
   });
 
   it("does not change individual category scores, only their weighted contribution", () => {
-    const answers = { q1: 4, q2: 3, q3: 2 };
+    const answers = { q1: 3, q2: 3, q3: 2 };
     const visibleIds = ['q1', 'q2', 'q3'];
     const emphasisMultipliers = { cat1: 1.5, cat2: 1.0 };
 
@@ -293,7 +322,7 @@ describe("calculateCustomizedPillarScore", () => {
   });
 
   it("handles empty emphasisMultipliers by using 1.0 default", () => {
-    const answers = { q1: 4, q2: 3, q3: 3 };
+    const answers = { q1: 3, q2: 3, q3: 3 };
     const visibleIds = ['q1', 'q2', 'q3'];
     const emptyMultipliers = {};
 
@@ -311,7 +340,7 @@ describe("calculateCustomizedPillarScore", () => {
   });
 
   it("handles subcategory with no visible questions by skipping it", () => {
-    const answers = { q1: 4, q2: 3, q3: 3 };
+    const answers = { q1: 3, q2: 3, q3: 3 };
     const visibleIds = ['q1', 'q2']; // Exclude q3 (cat2)
     const emphasisMultipliers = { cat1: 1.5, cat2: 2.0 }; // cat2 multiplier shouldn't matter
 
@@ -411,7 +440,7 @@ describe("branching-aware scoring with real questions", () => {
     const result = calculatePillarScore(answers, familyGovernancePillar, allQuestions, visibleIds);
 
     // Should have decent score with many good answers
-    expect(result.score).toBeGreaterThan(5);
+    expect(result.score).toBeGreaterThan(2);
     expect(result.riskLevel).toMatch(/^(low|medium)$/);
   });
 

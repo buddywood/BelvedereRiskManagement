@@ -15,6 +15,45 @@ import {
   MissingControl,
   RiskLevel,
 } from './types';
+import {
+  MATURITY_SCALE_MAX,
+  REMEDIATION_MATURITY_THRESHOLD,
+} from './maturity-scale';
+import { riskLevelFromMaturityScore } from './governance-rubric';
+
+/**
+ * Map a raw score from a question's scoreMap onto the 0–3 maturity scale using that
+ * question's own max map value (so legacy 0–10 maps and native 0–3 maps both work).
+ */
+/** Yes/no gate: "yes" defers maturity to follow-up questions (not aggregated here). */
+export function omitYesNoMaturityScore(
+  question: Question,
+  rawAnswer: unknown
+): boolean {
+  return (
+    question.type === "yes-no" &&
+    question.omitMaturityScoreWhenYes === true &&
+    rawAnswer === "yes"
+  );
+}
+
+export function normalizeAnswerToMaturity(
+  question: Question,
+  rawAnswer: unknown
+): number | undefined {
+  const answerKey = String(rawAnswer);
+  const raw = question.scoreMap[answerKey];
+  if (raw === undefined) {
+    return undefined;
+  }
+  const numericRaw = Number(raw);
+  const values = Object.values(question.scoreMap).map((v) => Number(v));
+  const maxV = Math.max(0, ...values);
+  if (maxV <= 0) {
+    return undefined;
+  }
+  return (numericRaw / maxV) * MATURITY_SCALE_MAX;
+}
 
 /**
  * Calculate pillar score from user answers
@@ -30,7 +69,7 @@ import {
  * @param pillar - Pillar definition with sub-categories
  * @param allQuestions - All question definitions
  * @param visibleQuestionIds - Optional array of question IDs that should be included in scoring
- * @returns ScoreResult with score (0-10), risk level, breakdown, and missing controls
+ * @returns ScoreResult with score (0–3 maturity), risk level, breakdown, and missing controls
  */
 export function calculatePillarScore(
   answers: Record<string, unknown>,
@@ -70,12 +109,14 @@ export function calculatePillarScore(
         continue;
       }
 
-      // Get score from scoreMap
-      const answerKey = String(answer);
-      const questionScore = question.scoreMap[answerKey];
+      if (omitYesNoMaturityScore(question, answer)) {
+        continue;
+      }
 
-      if (questionScore !== undefined) {
-        categoryWeightedScore += questionScore * question.weight;
+      const maturityScore = normalizeAnswerToMaturity(question, answer);
+
+      if (maturityScore !== undefined) {
+        categoryWeightedScore += maturityScore * question.weight;
         categoryWeight += question.weight;
       }
     }
@@ -90,7 +131,7 @@ export function calculatePillarScore(
       categoryName: subCategory.name,
       score: Math.round(categoryScore * 100) / 100, // Round to 2 decimals
       weight: subCategory.weight,
-      maxScore: 10,
+      maxScore: MATURITY_SCALE_MAX,
     });
 
     // Accumulate for pillar score (only include subcategories with visible questions)
@@ -118,45 +159,23 @@ export function calculatePillarScore(
 }
 
 /**
- * Map numeric score to risk level
- *
- * Score is 0-10 where 10 = excellent governance, 0 = no governance.
- * This inverts the "risk" mental model: LOW risk = HIGH governance score.
- *
- * @param score - Numeric score (0-10 scale)
- * @returns RiskLevel classification
+ * Map aggregate maturity (0–3) to risk level using Belvedere 0–100 resilience bands:
+ * 80–100 low, 60–79 moderate, 40–59 elevated, &lt;40 high/critical.
  */
 export function getRiskLevel(score: number): RiskLevel {
-  if (score >= 7.5) {
-    return 'low';
-  }
-  if (score >= 5.0) {
-    return 'medium';
-  }
-  if (score >= 2.5) {
-    return 'high';
-  }
-  return 'critical';
+  return riskLevelFromMaturityScore(score);
 }
 
 /**
- * Identify missing controls from answered questions
- *
- * Finds questions where answer indicates absence of control (score <= 2 on 0-10 scale).
- * Returns top 5 sorted by severity (weight * deficit).
- * Only considers visible questions to avoid identifying missing controls from hidden branching paths.
- *
- * @param answers - User answers keyed by questionId
- * @param questions - Question definitions to check
- * @param visibleQuestionIds - Optional array of question IDs that should be considered (excludes hidden questions)
- * @returns Array of missing controls sorted by severity
+ * Identify remediation items from answered questions in the low-maturity band (normalized ≤ threshold).
+ * Returns top items sorted by remediation priority (weight × maturity gap).
  */
 export function identifyMissingControls(
   answers: Record<string, unknown>,
   questions: Question[],
   visibleQuestionIds?: string[]
 ): MissingControl[] {
-  const controls: Array<MissingControl & { severityScore: number }> = [];
+  const controls: Array<MissingControl & { sortKey: number }> = [];
 
   // Filter questions to only those that should be included
   const questionsToCheck = visibleQuestionIds
@@ -171,41 +190,50 @@ export function identifyMissingControls(
       continue;
     }
 
-    // Get score from scoreMap
-    const answerKey = String(answer);
-    const questionScore = question.scoreMap[answerKey];
+    if (omitYesNoMaturityScore(question, answer)) {
+      continue;
+    }
 
-    // Identify low scores as missing controls (score <= 2 out of 10)
-    if (questionScore !== undefined && questionScore <= 2) {
-      const deficit = 10 - questionScore;
-      const severityScore = question.weight * deficit;
+    const maturityScore = normalizeAnswerToMaturity(question, answer);
+    if (maturityScore === undefined) {
+      continue;
+    }
 
-      // Determine severity level
+    // Critical gap + partial / informal (0–1 on 0–3 scale) drive definitive remediation
+    if (maturityScore <= REMEDIATION_MATURITY_THRESHOLD) {
+      const maturityGap = MATURITY_SCALE_MAX - maturityScore;
+      const remediationPriority = question.weight * maturityGap;
+      const sortKey = remediationPriority;
+
+      // Severity from weighted gap on 0–3 scale
       let severity: 'high' | 'medium' | 'low';
-      if (severityScore >= 30) {
+      if (remediationPriority >= 9) {
         severity = 'high';
-      } else if (severityScore >= 15) {
+      } else if (remediationPriority >= 4.5) {
         severity = 'medium';
       } else {
         severity = 'low';
       }
+
+      const recommendation = definitiveRemediationAction(question);
 
       controls.push({
         questionId: question.id,
         category: question.subCategory,
         description: question.text,
         severity,
-        recommendation: generateRecommendation(question),
-        severityScore,
+        recommendation,
+        maturityScore: Math.round(maturityScore * 100) / 100,
+        remediationPriority: Math.round(remediationPriority * 100) / 100,
+        ...(question.riskRelevance ? { riskRelevance: question.riskRelevance } : {}),
+        sortKey,
       });
     }
   }
 
-  // Sort by severity score (descending) and take top 5
-  controls.sort((a, b) => b.severityScore - a.severityScore);
+  controls.sort((a, b) => b.sortKey - a.sortKey);
 
-  // Remove severityScore from output (internal calculation only)
-  return controls.slice(0, 5).map(({ severityScore: _s, ...control }) => control);
+  return controls.slice(0, 5).map(({ sortKey: _s, ...control }) => control);
 }
 
 /**
@@ -220,7 +248,7 @@ export function identifyMissingControls(
  * @param allQuestions - All question definitions
  * @param visibleQuestionIds - Array of question IDs that should be included in scoring
  * @param emphasisMultipliers - Record mapping subcategoryId to multiplier (e.g., 1.5)
- * @returns ScoreResult with score (0-10), risk level, breakdown, and missing controls
+ * @returns ScoreResult with score (0-3), risk level, breakdown, and missing controls
  */
 export function calculateCustomizedPillarScore(
   answers: Record<string, unknown>,
@@ -259,12 +287,14 @@ export function calculateCustomizedPillarScore(
         continue;
       }
 
-      // Get score from scoreMap
-      const answerKey = String(answer);
-      const questionScore = question.scoreMap[answerKey];
+      if (omitYesNoMaturityScore(question, answer)) {
+        continue;
+      }
 
-      if (questionScore !== undefined) {
-        categoryWeightedScore += questionScore * question.weight;
+      const maturityScore = normalizeAnswerToMaturity(question, answer);
+
+      if (maturityScore !== undefined) {
+        categoryWeightedScore += maturityScore * question.weight;
         categoryWeight += question.weight;
       }
     }
@@ -279,7 +309,7 @@ export function calculateCustomizedPillarScore(
       categoryName: subCategory.name,
       score: Math.round(categoryScore * 100) / 100, // Round to 2 decimals
       weight: subCategory.weight,
-      maxScore: 10,
+      maxScore: MATURITY_SCALE_MAX,
     });
 
     // Apply emphasis multiplier when accumulating for pillar score
@@ -308,22 +338,17 @@ export function calculateCustomizedPillarScore(
 }
 
 /**
- * Generate recommendation based on question context
- *
- * Uses question's learnMore if available, otherwise constructs
- * recommendation from help text.
- *
- * @param question - Question definition
- * @returns Recommendation text
+ * Definitive remediation line for the action plan (prefer explicit remediation copy).
  */
-function generateRecommendation(question: Question): string {
+function definitiveRemediationAction(question: Question): string {
+  if (question.remediationAction) {
+    return question.remediationAction;
+  }
   if (question.learnMore) {
     return question.learnMore;
   }
-
   if (question.helpText) {
-    return `Consider implementing: ${question.helpText}`;
+    return `Formalize and document: ${question.helpText}`;
   }
-
-  return 'Review and strengthen this control to reduce risk exposure.';
+  return 'Establish a documented, communicated practice and review it on a defined cadence.';
 }

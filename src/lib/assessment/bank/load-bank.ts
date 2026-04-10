@@ -38,6 +38,7 @@ export function prismaRowToWire(row: AssessmentBankQuestion): GovernanceQuestion
     text: row.text,
     helpText: row.helpText,
     learnMore: row.learnMore,
+    riskRelevance: row.riskRelevance,
     type: row.type,
     options: row.options ?? null,
     required: row.required,
@@ -46,6 +47,7 @@ export function prismaRowToWire(row: AssessmentBankQuestion): GovernanceQuestion
     branchingDependsOn: row.branchingDependsOn,
     branchingPredicate,
     profileConditionKey: row.profileConditionKey,
+    omitMaturityScoreWhenYes: row.omitMaturityScoreWhenYes,
   };
 }
 

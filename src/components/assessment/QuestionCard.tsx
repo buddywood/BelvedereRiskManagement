@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { QuestionTtsPlayButton } from "@/components/common/QuestionTtsPlayButton";
+import { MATURITY_SCALE_MAX } from "@/lib/assessment/maturity-scale";
+import { MATURITY_LEVEL_LABELS } from "@/lib/assessment/governance-rubric";
+import { CYBER_MATURITY_LEVEL_LABELS } from "@/lib/cyber-risk/cyber-rubric";
 
 /**
  * QuestionCard Component
@@ -214,6 +217,17 @@ export function QuestionCard({
       <div className="mt-6 sm:mt-8">
         {renderAnswerComponent()}
       </div>
+
+      {question.type === "maturity-scale" ? (
+        <p className="mt-3 border-t border-border/60 pt-3 text-xs leading-relaxed text-muted-foreground">
+          Maturity scale (0–{MATURITY_SCALE_MAX}):{" "}
+          {(question.subCategory === "cybersecurity"
+            ? CYBER_MATURITY_LEVEL_LABELS
+            : MATURITY_LEVEL_LABELS
+          ).map((label, i) => `${i} — ${label}`).join(" · ")}
+          .
+        </p>
+      ) : null}
 
       {errors.answer && (
         <Alert variant="destructive">

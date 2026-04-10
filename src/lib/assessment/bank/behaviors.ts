@@ -14,6 +14,7 @@ export type GovernanceQuestionWire = {
   text: string;
   helpText: string | null;
   learnMore: string | null;
+  riskRelevance: string | null;
   type: string;
   options: unknown;
   required: boolean;
@@ -22,6 +23,7 @@ export type GovernanceQuestionWire = {
   branchingDependsOn: string | null;
   branchingPredicate: BranchingPredicateWire | null;
   profileConditionKey: string | null;
+  omitMaturityScoreWhenYes: boolean;
 };
 
 export function branchingPredicateToRule(
@@ -42,8 +44,15 @@ export function branchingPredicateToRule(
   };
 }
 
+/** Keys stored on bank rows for household-profile gating (admin picklist). */
+export const PROFILE_CONDITION_KEYS = [
+  "young-dependent",
+  "trustee-in-family",
+  "generations-or-successors",
+] as const;
+
 const PROFILE_CONDITIONS: Record<
-  string,
+  (typeof PROFILE_CONDITION_KEYS)[number],
   (profile: HouseholdProfile) => boolean
 > = {
   "young-dependent": (profile) =>
@@ -58,7 +67,7 @@ export function profileConditionForKey(
   key: string | null | undefined
 ): ((profile: HouseholdProfile) => boolean) | undefined {
   if (!key) return undefined;
-  return PROFILE_CONDITIONS[key];
+  return PROFILE_CONDITIONS[key as (typeof PROFILE_CONDITION_KEYS)[number]];
 }
 
 const TEXT_TEMPLATE_BY_QUESTION_ID: Record<
@@ -108,6 +117,7 @@ export function wireQuestionToQuestion(wire: GovernanceQuestionWire): Question {
     text: wire.text,
     helpText: wire.helpText ?? undefined,
     learnMore: wire.learnMore ?? undefined,
+    ...(wire.riskRelevance ? { riskRelevance: wire.riskRelevance } : {}),
     type: wire.type as Question["type"],
     options: (wire.options as Question["options"]) ?? undefined,
     required: wire.required,
@@ -115,6 +125,7 @@ export function wireQuestionToQuestion(wire: GovernanceQuestionWire): Question {
     subCategory: wire.riskAreaId,
     weight: wire.weight,
     scoreMap: normalizeScoreMap(wire.scoreMap),
+    ...(wire.omitMaturityScoreWhenYes ? { omitMaturityScoreWhenYes: true } : {}),
     ...(branchingRule ? { branchingRule } : {}),
     ...(profileCondition ? { profileCondition } : {}),
     ...(textTemplate ? { textTemplate } : {}),

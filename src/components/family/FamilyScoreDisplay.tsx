@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { EmphasisIndicator } from "./EmphasisIndicator";
 import type { FamilyPillarScore } from "@/lib/family/types";
+import { getRiskLevel } from "@/lib/assessment/scoring";
+import { MATURITY_SCALE_MAX } from "@/lib/assessment/maturity-scale";
+import {
+  governanceTierCopyForRiskLevel,
+  maturityScoreToPercent,
+} from "@/lib/assessment/governance-rubric";
 
 interface FamilyScoreDisplayProps {
   currentScore: number;
@@ -13,26 +19,39 @@ export function FamilyScoreDisplay({
   pillarScores,
   advisorEmphasis,
 }: FamilyScoreDisplayProps) {
-  // Determine risk level and badge variant
-  const getRiskLevel = (score: number) => {
-    if (score >= 7.5) return { label: "Low Risk", variant: "success" as const };
-    if (score >= 5.0) return { label: "Moderate Risk", variant: "warning" as const };
-    return { label: "High Risk", variant: "warning" as const };
-  };
-
-  const riskLevel = getRiskLevel(currentScore);
+  const rl = getRiskLevel(currentScore);
+  const tier = governanceTierCopyForRiskLevel(rl);
+  const resiliencePercent = maturityScoreToPercent(currentScore);
+  const riskLevel =
+    rl === "low"
+      ? { variant: "success" as const }
+      : rl === "medium"
+        ? { variant: "warning" as const }
+        : rl === "high"
+          ? { variant: "warning" as const }
+          : { variant: "outline" as const };
 
   return (
     <div className="space-y-6">
       {/* Overall Score */}
       <div className="text-center space-y-3">
         <div>
-          <p className="text-5xl font-semibold">{currentScore.toFixed(1)} / 10</p>
-          <p className="text-sm text-muted-foreground mt-1">Overall Governance Score</p>
+          <p className="text-5xl font-semibold">
+            {resiliencePercent}
+            <span className="text-2xl text-muted-foreground font-normal"> / 100</span>
+          </p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Governance resilience · maturity {currentScore.toFixed(1)} / {MATURITY_SCALE_MAX}
+          </p>
         </div>
-        <Badge variant={riskLevel.variant} className="text-sm px-3 py-1">
-          {riskLevel.label}
-        </Badge>
+        <div className="space-y-1">
+          <Badge variant={riskLevel.variant} className="text-sm px-3 py-1">
+            {tier.title}
+          </Badge>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+            {tier.description}
+          </p>
+        </div>
       </div>
 
       {/* Governance Categories */}

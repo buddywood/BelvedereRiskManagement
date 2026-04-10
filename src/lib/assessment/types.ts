@@ -36,6 +36,10 @@ export interface Question {
   text: string;
   helpText?: string;
   learnMore?: string;
+  /** Definitive remediation step when this question scores in the remediation band (shown in action plan). */
+  remediationAction?: string;
+  /** “Why this matters” / risk relevance (rubric column). */
+  riskRelevance?: string;
   type: QuestionType;
   options?: QuestionOption[];
   required: boolean;
@@ -43,6 +47,11 @@ export interface Question {
   subCategory: string;
   weight: number;
   scoreMap: Record<string | number, number>;
+  /**
+   * Yes/no gates only: when true, answering "yes" does not enter the maturity rollup—follow-up
+   * questions carry the 1–3 maturity. "no" is still scored via scoreMap (usually 0).
+   */
+  omitMaturityScoreWhenYes?: boolean;
   branchingRule?: BranchingRule;
   textTemplate?: (profile: HouseholdProfile | null) => string;
   profileCondition?: (profile: HouseholdProfile) => boolean;
@@ -73,7 +82,16 @@ export interface MissingControl {
   category: string;
   description: string;
   severity: 'high' | 'medium' | 'low';
+  /** Definitive remediation step (same as recommendation; kept for clarity in UI copy). */
   recommendation: string;
+  /** Rubric: why this gap matters. */
+  riskRelevance?: string;
+  /** Normalized maturity contribution for this answer (0–3 scale). */
+  maturityScore?: number;
+  /**
+   * Weighted gap used to prioritize and sum remediation work: weight × (maturity max − maturityScore).
+   */
+  remediationPriority?: number;
 }
 
 // Category Score Breakdown
@@ -82,6 +100,7 @@ export interface CategoryScore {
   categoryName: string;
   score: number;
   weight: number;
+  /** Upper bound for category score display (maturity scale = 3). */
   maxScore: number;
 }
 
