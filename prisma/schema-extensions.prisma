@@ -1,0 +1,2 @@
+// Enhanced assessment models live in schema.prisma (section "Enhanced assessment engine").
+// This file is kept as a pointer so older docs that mention schema-extensions.prisma still make sense.

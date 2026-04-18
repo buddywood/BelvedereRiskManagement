@@ -55,3 +55,5 @@ function getPrisma(): PrismaClient {
 }
 
 export const prisma = getPrisma();
+/** Alias for callers that import `db` (same Prisma client instance). */
+export const db = prisma;

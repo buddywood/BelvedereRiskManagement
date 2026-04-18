@@ -44,6 +44,15 @@ npx prisma migrate reset
 # View database in Prisma Studio
 npx prisma studio
 
+# Assessment bank (spreadsheet is source of truth)
+# Place Belvedere_Household_Risk_Profile.xlsx at repo root, or set BELVEDERE_WORKBOOK_PATH in .env.local.
+# Tab names must match scripts/lib/belvedere-workbook.ts (Governance, Cyber, Physical, …).
+npm run seed:assessment-bank
+# Without a workbook, seed fails unless you opt into the TS catalog (dev/tests only):
+# QUESTION_BANK_FALLBACK_TYPESCRIPT=1 npm run seed:assessment-bank
+# Full deploy (migrations + workbook import + rules): npx tsx scripts/deploy-complete-assessment-system.ts
+# Deploy also requires the workbook or QUESTION_BANK_FALLBACK_TYPESCRIPT=1.
+
 # Seed test data (run in order)
 node scripts/seed-advisor-test-data.js
 node scripts/seed-invite-code.js

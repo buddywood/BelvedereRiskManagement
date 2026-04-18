@@ -1,0 +1,353 @@
+{
+  "scoringRules": [
+    {
+      "id": "governance_family_business_multiplier",
+      "questionId": "governance_decision_making",
+      "ruleName": "Family Business Governance Weight Increase",
+      "description": "Increase governance scoring weight for families with business interests",
+      "priority": 100,
+      "conditions": [
+        {
+          "type": "answer_equals",
+          "questionId": "governance_family_business",
+          "operator": "equals",
+          "value": "yes"
+        }
+      ],
+      "scoreModifiers": [
+        {
+          "type": "apply_weight",
+          "value": 1.5,
+          "target": "category_weight"
+        }
+      ]
+    },
+    {
+      "id": "cyber_mfa_bonus",
+      "questionId": "cyber_authentication",
+      "ruleName": "Multi-Factor Authentication Bonus",
+      "description": "Bonus points for implementing multiple authentication factors",
+      "priority": 95,
+      "conditions": [
+        {
+          "type": "answer_equals",
+          "questionId": "cyber_mfa_enabled",
+          "operator": "equals",
+          "value": "yes"
+        },
+        {
+          "type": "answer_greater_than",
+          "questionId": "cyber_mfa_methods_count",
+          "operator": "greater_than",
+          "value": 1
+        }
+      ],
+      "scoreModifiers": [
+        {
+          "type": "add",
+          "value": 0.5,
+          "target": "question_score"
+        }
+      ]
+    }
+  ],
+  "recommendationRules": [
+    {
+      "id": "estate_planning_trigger",
+      "serviceRecommendationId": "estate_planning_comprehensive",
+      "ruleName": "Comprehensive Estate Planning Recommendation",
+      "description": "Triggered for high net worth families with governance gaps",
+      "triggerConditions": [
+        {
+          "type": "score_threshold",
+          "pillarId": "governance",
+          "operator": "less_than",
+          "value": 1.5,
+          "weight": 3
+        },
+        {
+          "type": "answer_match",
+          "questionId": "governance_will_exists",
+          "operator": "equals",
+          "value": "no",
+          "weight": 2
+        },
+        {
+          "type": "profile_condition",
+          "operator": "greater_than",
+          "value": 5000000,
+          "weight": 2
+        }
+      ],
+      "priority": 95
+    },
+    {
+      "id": "cyber_security_audit_trigger",
+      "serviceRecommendationId": "cyber_security_professional_audit",
+      "ruleName": "Professional Cyber Security Audit",
+      "description": "Triggered for high cyber risk families",
+      "triggerConditions": [
+        {
+          "type": "risk_level",
+          "pillarId": "cybersecurity",
+          "operator": "in",
+          "value": ["high", "critical"],
+          "weight": 4
+        },
+        {
+          "type": "missing_control",
+          "questionId": "cyber_password_manager",
+          "operator": "equals",
+          "value": "password_management",
+          "weight": 2
+        }
+      ],
+      "priority": 90
+    },
+    {
+      "id": "family_governance_workshop",
+      "serviceRecommendationId": "family_governance_facilitation",
+      "ruleName": "Family Governance Workshop",
+      "description": "Workshop for large families with governance challenges",
+      "triggerConditions": [
+        {
+          "type": "profile_condition",
+          "operator": "greater_than",
+          "value": 5,
+          "weight": 2
+        },
+        {
+          "type": "score_threshold",
+          "pillarId": "governance",
+          "operator": "less_than",
+          "value": 2.0,
+          "weight": 3
+        },
+        {
+          "type": "answer_match",
+          "questionId": "governance_family_charter",
+          "operator": "equals",
+          "value": "no",
+          "weight": 1
+        }
+      ],
+      "priority": 85
+    }
+  ],
+  "serviceRecommendations": [
+    {
+      "id": "estate_planning_comprehensive",
+      "name": "Comprehensive Estate Planning",
+      "description": "Full estate planning review including wills, trusts, tax planning, and succession strategies",
+      "category": "legal",
+      "priority": 1,
+      "estimatedCost": "$15,000 - $50,000",
+      "timeframe": "3-6 months",
+      "provider": "Estate Planning Attorney Network",
+      "metadata": {
+        "services": [
+          "Will and testament drafting",
+          "Trust establishment",
+          "Tax minimization strategies",
+          "Succession planning",
+          "Asset protection"
+        ],
+        "deliverables": [
+          "Estate planning report",
+          "Legal document package",
+          "Implementation timeline",
+          "Annual review schedule"
+        ]
+      }
+    },
+    {
+      "id": "cyber_security_professional_audit",
+      "name": "Professional Cyber Security Audit",
+      "description": "Comprehensive assessment of digital security posture with remediation roadmap",
+      "category": "technology",
+      "priority": 2,
+      "estimatedCost": "$8,000 - $20,000",
+      "timeframe": "4-8 weeks",
+      "provider": "Cyber Security Partners",
+      "metadata": {
+        "services": [
+          "Network security assessment",
+          "Device security review",
+          "Password policy audit",
+          "Social engineering simulation",
+          "Security awareness training"
+        ],
+        "deliverables": [
+          "Security assessment report",
+          "Risk prioritization matrix",
+          "Implementation roadmap",
+          "Staff training materials"
+        ]
+      }
+    },
+    {
+      "id": "family_governance_facilitation",
+      "name": "Family Governance Workshop",
+      "description": "Facilitated workshop to establish family governance structures and decision-making processes",
+      "category": "advisory",
+      "priority": 3,
+      "estimatedCost": "$5,000 - $15,000",
+      "timeframe": "2-4 weeks",
+      "provider": "Family Governance Specialists",
+      "metadata": {
+        "services": [
+          "Family charter development",
+          "Decision-making framework",
+          "Communication protocols",
+          "Conflict resolution processes",
+          "Next generation engagement"
+        ],
+        "deliverables": [
+          "Family charter document",
+          "Governance framework",
+          "Communication guidelines",
+          "Implementation plan"
+        ]
+      }
+    },
+    {
+      "id": "insurance_coverage_review",
+      "name": "Comprehensive Insurance Review",
+      "description": "Full review of all insurance policies with gap analysis and optimization recommendations",
+      "category": "insurance",
+      "priority": 2,
+      "estimatedCost": "$2,000 - $8,000",
+      "timeframe": "2-3 weeks",
+      "provider": "Risk Management Advisors",
+      "metadata": {
+        "services": [
+          "Policy inventory and analysis",
+          "Coverage gap identification",
+          "Cost optimization review",
+          "Claims history analysis",
+          "Carrier evaluation"
+        ],
+        "deliverables": [
+          "Insurance portfolio summary",
+          "Gap analysis report",
+          "Cost-benefit analysis",
+          "Carrier recommendations"
+        ]
+      }
+    }
+  ],
+  "pillarConfigurations": [
+    {
+      "pillarId": "governance",
+      "name": "Governance",
+      "description": "Family decision-making structures, authority, and coordination",
+      "baseWeight": 1.0,
+      "thresholds": {
+        "low": { "min": 2.5, "max": 3.0 },
+        "medium": { "min": 1.5, "max": 2.4 },
+        "high": { "min": 0.5, "max": 1.4 },
+        "critical": { "min": 0.0, "max": 0.4 }
+      }
+    },
+    {
+      "pillarId": "cybersecurity",
+      "name": "Cyber Security",
+      "description": "Digital security, data protection, and online risk management",
+      "baseWeight": 1.0,
+      "thresholds": {
+        "low": { "min": 2.5, "max": 3.0 },
+        "medium": { "min": 1.5, "max": 2.4 },
+        "high": { "min": 0.5, "max": 1.4 },
+        "critical": { "min": 0.0, "max": 0.4 }
+      }
+    },
+    {
+      "pillarId": "physical-security",
+      "name": "Physical Security",
+      "description": "Personal safety, property protection, and physical access control",
+      "baseWeight": 1.0,
+      "thresholds": {
+        "low": { "min": 2.5, "max": 3.0 },
+        "medium": { "min": 1.5, "max": 2.4 },
+        "high": { "min": 0.5, "max": 1.4 },
+        "critical": { "min": 0.0, "max": 0.4 }
+      }
+    },
+    {
+      "pillarId": "financial-asset-protection",
+      "name": "Insurance & Asset Protection",
+      "description": "Insurance coverage, financial protection, and asset security",
+      "baseWeight": 1.0,
+      "thresholds": {
+        "low": { "min": 2.5, "max": 3.0 },
+        "medium": { "min": 1.5, "max": 2.4 },
+        "high": { "min": 0.5, "max": 1.4 },
+        "critical": { "min": 0.0, "max": 0.4 }
+      }
+    },
+    {
+      "pillarId": "environmental-geographic-risk",
+      "name": "Geographic & Environmental Risk",
+      "description": "Location-based risks, climate factors, and regional considerations",
+      "baseWeight": 1.0,
+      "thresholds": {
+        "low": { "min": 2.5, "max": 3.0 },
+        "medium": { "min": 1.5, "max": 2.4 },
+        "high": { "min": 0.5, "max": 1.4 },
+        "critical": { "min": 0.0, "max": 0.4 }
+      }
+    },
+    {
+      "pillarId": "lifestyle-behavioral-risk",
+      "name": "Reputational & Social Risk",
+      "description": "Social media, public behavior, and reputational risk factors",
+      "baseWeight": 1.0,
+      "thresholds": {
+        "low": { "min": 2.5, "max": 3.0 },
+        "medium": { "min": 1.5, "max": 2.4 },
+        "high": { "min": 0.5, "max": 1.4 },
+        "critical": { "min": 0.0, "max": 0.4 }
+      }
+    }
+  ],
+  "exampleQuestionDefinition": {
+    "questionId": "governance_decision_authority",
+    "riskAreaId": "governance",
+    "text": "Who has ultimate decision-making authority for family financial and strategic matters?",
+    "helpText": "Clear decision-making authority reduces conflicts and ensures timely decisions during crises.",
+    "learnMore": "Establish a clear governance hierarchy with documented decision rights for different types of decisions and circumstances.",
+    "riskRelevance": "Unclear authority creates decision paralysis during emergencies and can lead to family conflicts over important matters.",
+    "type": "single-choice",
+    "options": [
+      {
+        "value": "patriarch_matriarch",
+        "label": "Patriarch/Matriarch has sole authority",
+        "description": "One family leader makes all major decisions"
+      },
+      {
+        "value": "family_council",
+        "label": "Family council or board",
+        "description": "Formal group with defined membership and voting procedures"
+      },
+      {
+        "value": "consensus_required",
+        "label": "All family members must agree",
+        "description": "Unanimous consensus required for major decisions"
+      },
+      {
+        "value": "unclear_undefined",
+        "label": "It's not clearly defined",
+        "description": "No formal structure or unclear who has authority"
+      }
+    ],
+    "required": true,
+    "weight": 3,
+    "scoreMap": {
+      "patriarch_matriarch": 2,
+      "family_council": 3,
+      "consensus_required": 1,
+      "unclear_undefined": 0
+    },
+    "remediationAction": "Establish a clear family governance charter that defines decision-making authority, voting procedures, and escalation processes for different types of family decisions."
+  }
+}

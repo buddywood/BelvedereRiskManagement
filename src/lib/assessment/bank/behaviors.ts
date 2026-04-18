@@ -121,7 +121,7 @@ export function wireQuestionToQuestion(wire: GovernanceQuestionWire): Question {
     type: wire.type as Question["type"],
     options: (wire.options as Question["options"]) ?? undefined,
     required: wire.required,
-    pillar: "family-governance",
+    pillar: wire.riskAreaId,
     subCategory: wire.riskAreaId,
     weight: wire.weight,
     scoreMap: normalizeScoreMap(wire.scoreMap),

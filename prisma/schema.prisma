@@ -174,6 +174,8 @@ model Assessment {
   user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   responses     AssessmentResponse[]
   scores        PillarScore[]
+  recommendations AssessmentRecommendation[]
+  ruleExecutions    RuleExecution[]
 
   @@index([userId])
   @@index([status])
@@ -637,4 +639,137 @@ model AdvisorBrandingAuditLog {
   @@index([advisorId])
   @@index([timestamp])
   @@index([action])
+}
+
+// --- Enhanced assessment engine (recommendations, rules, pillar config) ---
+
+model ServiceRecommendation {
+  id            String   @id @default(cuid())
+  name          String
+  description   String
+  category      String
+  priority      Int      @default(1)
+  estimatedCost String?
+  timeframe     String?
+  provider      String?
+  metadata      Json?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  recommendationRules         RecommendationRule[]
+  assessmentRecommendations AssessmentRecommendation[]
+
+  @@index([category, priority])
+  @@index([isActive])
+}
+
+model ScoringRule {
+  id             String   @id @default(cuid())
+  questionId     String
+  ruleName       String
+  description    String?
+  priority       Int      @default(1)
+  conditions     Json
+  scoreModifiers Json
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([questionId])
+  @@index([isActive, priority])
+}
+
+model RecommendationRule {
+  id                      String   @id @default(cuid())
+  serviceRecommendationId String
+  ruleName                String
+  description             String?
+  triggerConditions       Json
+  pillarThresholds        Json?
+  questionConditions      Json?
+  priority                Int      @default(1)
+  isActive                Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  serviceRecommendation ServiceRecommendation @relation(fields: [serviceRecommendationId], references: [id], onDelete: Cascade)
+
+  @@index([serviceRecommendationId])
+  @@index([isActive, priority])
+}
+
+enum RecommendationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  DECLINED
+  COMPLETED
+}
+
+model AssessmentRecommendation {
+  id                      String                 @id @default(cuid())
+  assessmentId            String
+  serviceRecommendationId String
+  triggerReason           Json
+  customization           Json?
+  priority                Int
+  status                  RecommendationStatus   @default(PENDING)
+  advisorNotes            String?
+  createdAt               DateTime               @default(now())
+  updatedAt               DateTime               @updatedAt
+
+  assessment            Assessment            @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  serviceRecommendation ServiceRecommendation @relation(fields: [serviceRecommendationId], references: [id])
+
+  @@unique([assessmentId, serviceRecommendationId])
+  @@index([assessmentId])
+  @@index([status])
+}
+
+model PillarConfiguration {
+  id          String   @id @default(cuid())
+  pillarId    String   @unique
+  name        String
+  description String
+  baseWeight  Float    @default(1.0)
+  thresholds  Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([pillarId])
+  @@index([isActive])
+}
+
+model SubCategoryConfiguration {
+  id            String   @id @default(cuid())
+  subcategoryId String   @unique
+  pillarId      String
+  name          String
+  description   String
+  baseWeight    Float    @default(1.0)
+  sortOrder     Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([pillarId, sortOrder])
+  @@index([isActive])
+}
+
+model RuleExecution {
+  id           String   @id @default(cuid())
+  assessmentId String
+  ruleType     String
+  ruleId       String
+  ruleName     String
+  conditions   Json
+  result       Json
+  executedAt   DateTime @default(now())
+
+  assessment Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+  @@index([ruleType, executedAt])
 }
