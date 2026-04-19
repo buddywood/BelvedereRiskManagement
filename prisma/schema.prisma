@@ -243,6 +243,78 @@ model AssessmentBankQuestion {
   @@index([isVisible, sortOrderGlobal])
 }
 
+/// Belvedere `categories` row: scored workbook pillars vs. audio/script intake (see `kind`).
+enum PillarCategoryKind {
+  INTAKE
+  ASSESSMENT
+
+  @@map("pillar_category_kind")
+}
+
+/// Belvedere workbook taxonomy (DDL source of truth). Maps to SQL table `categories`.
+model PillarCategory {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code         String             @unique @db.VarChar(50)
+  name         String             @db.VarChar(200)
+  sheetName    String?            @map("sheet_name") @db.VarChar(200)
+  displayOrder Int                @default(0) @map("display_order")
+  /// `INTAKE` = audio interview script; `ASSESSMENT` = scored pillar workbook tabs.
+  kind         PillarCategoryKind @default(ASSESSMENT) @map("category_kind")
+  sections     PillarSection[]
+
+  @@index([displayOrder])
+  @@map("categories")
+}
+
+/// Section within a pillar category (e.g. rubric block A–F or numbered block).
+/// Maps to SQL table `sections`.
+model PillarSection {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoryId String         @map("category_id") @db.Uuid
+  code         String         @db.VarChar(20)
+  name         String         @db.VarChar(300)
+  objective    String?        @db.Text
+  weightPct    Int?           @map("weight_pct")
+  displayOrder Int            @default(0) @map("display_order")
+
+  category  PillarCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  questions PillarQuestion[]
+
+  @@unique([categoryId, code])
+  @@index([categoryId])
+  @@index([displayOrder])
+  @@map("sections")
+}
+
+/// Question row aligned to Belvedere DDL (answer labels, types, cross-references).
+/// Maps to SQL table `questions`.
+model PillarQuestion {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sectionId            String   @map("section_id") @db.Uuid
+  questionNumber       String?  @map("question_number") @db.VarChar(20)
+  questionText         String   @map("question_text") @db.Text
+  answerType           String   @default("scored_0_3") @map("answer_type") @db.VarChar(50)
+  answer0              String?  @map("answer_0") @db.Text
+  answer1              String?  @map("answer_1") @db.Text
+  answer2              String?  @map("answer_2") @db.Text
+  answer3              String?  @map("answer_3") @db.Text
+  whyThisMatters       String?  @map("why_this_matters") @db.Text
+  recommendedActions   String?  @map("recommended_actions") @db.Text
+  isSubQuestion         Boolean  @default(false) @map("is_sub_question")
+  crossReference       String?  @map("cross_reference") @db.Text
+  displayOrder         Int      @default(0) @map("display_order")
+  isVisible            Boolean  @default(true) @map("is_visible")
+
+  section PillarSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@unique([sectionId, questionNumber])
+  @@unique([sectionId, displayOrder])
+  @@index([sectionId])
+  @@index([answerType])
+  @@index([isVisible])
+  @@map("questions")
+}
+
 enum AssessmentStatus {
   IN_PROGRESS
   COMPLETED

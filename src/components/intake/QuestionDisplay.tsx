@@ -2,6 +2,7 @@
 
 import { Lightbulb } from "lucide-react";
 import { QuestionTtsPlayButton } from "@/components/common/QuestionTtsPlayButton";
+import type { IntakeQuestion } from "@/lib/intake/types";
 
 /**
  * Question Display Component
@@ -9,14 +10,6 @@ import { QuestionTtsPlayButton } from "@/components/common/QuestionTtsPlayButton
  * Displays intake interview questions with prominent text hierarchy.
  * Follows Belvedere editorial design patterns for clean, focused UX.
  */
-
-export interface IntakeQuestion {
-  id: string;
-  questionText: string;
-  context: string;
-  recordingTips: string[];
-  questionNumber: number;
-}
 
 interface QuestionDisplayProps {
   question: IntakeQuestion;

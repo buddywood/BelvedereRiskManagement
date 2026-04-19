@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isRiskAreaId } from "@/lib/assessment/bank/risk-areas";
+import { prisma } from "@/lib/db";
 
 export default async function AdminQuestionBankNewPage({
   params,
@@ -26,6 +27,11 @@ export default async function AdminQuestionBankNewPage({
 
   const area = RISK_AREAS.find((a) => a.id === riskAreaId)!;
 
+  const pillarBankDisabled = process.env.USE_PILLAR_QUESTION_BANK?.trim() === "0";
+  const pillarQuestionCount = await prisma.pillarQuestion.count();
+  const pillarOverridesAssessmentBank =
+    !pillarBankDisabled && pillarQuestionCount > 0;
+
   return (
     <div className="max-w-3xl space-y-6">
       <div className="flex flex-wrap gap-2">
@@ -38,6 +44,21 @@ export default async function AdminQuestionBankNewPage({
         <Alert variant="destructive">
           <AlertTitle>Could not create question</AlertTitle>
           <AlertDescription>{err}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {pillarOverridesAssessmentBank ? (
+        <Alert>
+          <AlertTitle>Pillar DDL is the live question bank</AlertTitle>
+          <AlertDescription>
+            The <code className="text-xs">questions</code> table has {pillarQuestionCount} row
+            {pillarQuestionCount === 1 ? "" : "s"} and <code className="text-xs">USE_PILLAR_QUESTION_BANK</code>{" "}
+            is not <code className="text-xs">0</code>, so client assessments load from pillar DDL first.
+            New rows here only update <code className="text-xs">AssessmentBankQuestion</code>—they will
+            not appear in the live assessment for this pillar unless you disable the pillar bank or add
+            matching pillar rows. Prefer editing existing pillar questions from the area list, or use{" "}
+            <code className="text-xs">npm run seed:pillar-ddl</code> for bulk changes.
+          </AlertDescription>
         </Alert>
       ) : null}
 

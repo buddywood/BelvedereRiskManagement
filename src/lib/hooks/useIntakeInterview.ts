@@ -1,15 +1,12 @@
-import { useMemo } from 'react';
-import { useIntakeStore, type InterviewResponse } from '@/lib/intake/store';
-import { INTAKE_QUESTIONS, type IntakeQuestion } from '@/lib/intake/questions';
+import { useCallback, useEffect, useMemo } from "react";
+import { useIntakeStore, type InterviewResponse } from "@/lib/intake/store";
+import type { IntakeQuestion } from "@/lib/intake/types";
 
 /**
  * Intake Interview Navigation Hook
  *
- * Orchestration hook that combines store state with navigation logic.
- * Follows the pattern established by useAssessmentNavigation.
+ * `scriptQuestions` is the ordered pillar intake script (or legacy fallback) from the server.
  */
-
-// IntakeQuestion interface is now imported from intake/questions.ts
 
 export interface UseIntakeInterviewReturn {
   currentQuestion: IntakeQuestion | null;
@@ -25,76 +22,74 @@ export interface UseIntakeInterviewReturn {
   getResponseForQuestion: (questionId: string) => InterviewResponse | undefined;
 }
 
-export function useIntakeInterview(interviewId: string): UseIntakeInterviewReturn {
-  const {
-    currentQuestionIndex,
-    responses,
-    setCurrentQuestion,
-    setInterviewId,
-    setStatus,
-  } = useIntakeStore();
+export function useIntakeInterview(
+  interviewId: string,
+  scriptQuestions: IntakeQuestion[]
+): UseIntakeInterviewReturn {
+  const currentQuestionIndex = useIntakeStore((s) => s.currentQuestionIndex);
+  const responses = useIntakeStore((s) => s.responses);
+  const setCurrentQuestion = useIntakeStore((s) => s.setCurrentQuestion);
+  const setInterviewId = useIntakeStore((s) => s.setInterviewId);
+  const setStatus = useIntakeStore((s) => s.setStatus);
 
-  // Initialize interview ID if provided and different from current
-  const currentInterviewId = useIntakeStore(state => state.interviewId);
-  if (interviewId && interviewId !== currentInterviewId) {
-    setInterviewId(interviewId);
-    setStatus('in_progress');
-  }
+  useEffect(() => {
+    if (!interviewId) return;
+    const { interviewId: stored } = useIntakeStore.getState();
+    if (interviewId !== stored) {
+      setInterviewId(interviewId);
+      setStatus("in_progress");
+    }
+  }, [interviewId, setInterviewId, setStatus]);
 
-  // Get current question
-  const currentQuestion = INTAKE_QUESTIONS[currentQuestionIndex] || null;
+  const n = scriptQuestions.length;
 
-  // Calculate progress
-  const progress = Math.round((currentQuestionIndex / INTAKE_QUESTIONS.length) * 100);
+  const currentQuestion = useMemo(
+    () => (n > 0 ? (scriptQuestions[currentQuestionIndex] ?? null) : null),
+    [n, scriptQuestions, currentQuestionIndex]
+  );
 
-  // Navigation state
+  const currentQuestionResponse = currentQuestion ? responses[currentQuestion.id] : undefined;
+  const hasCurrentResponse = Boolean(
+    currentQuestionResponse?.audioUrl && currentQuestionResponse?.status === "completed"
+  );
+
   const isFirstQuestion = currentQuestionIndex === 0;
-  const isLastQuestion = currentQuestionIndex >= INTAKE_QUESTIONS.length - 1;
-
-  // Check if current question has a response
-  const currentQuestionResponse = currentQuestion
-    ? responses[currentQuestion.id]
-    : undefined;
-
-  const hasCurrentResponse = Boolean(currentQuestionResponse?.audioUrl &&
-    currentQuestionResponse?.status === 'completed');
-
-  // Navigation conditions
-  const canGoNext = currentQuestionIndex < INTAKE_QUESTIONS.length - 1 ||
-    (isLastQuestion && hasCurrentResponse);
-
+  const isLastQuestion = n > 0 && currentQuestionIndex >= n - 1;
   const canGoPrev = currentQuestionIndex > 0;
+  const canGoNext =
+    n > 0 && (currentQuestionIndex < n - 1 || (isLastQuestion && hasCurrentResponse));
 
-  // Navigation functions
-  const goToNext = () => {
-    if (isLastQuestion && hasCurrentResponse) {
-      // On last question with response - signals ready to submit
-      // UI component in Plan 05 will handle actual submission
-      return;
+  const denom = Math.max(n, 1);
+  const progress = Math.round((currentQuestionIndex / denom) * 100);
+
+  const goToNext = useCallback(() => {
+    if (n === 0) return;
+    const q = scriptQuestions[currentQuestionIndex];
+    if (!q) return;
+    const resp = responses[q.id];
+    const has = Boolean(resp?.audioUrl && resp?.status === "completed");
+    const last = currentQuestionIndex >= n - 1;
+    if (last && has) return;
+    if (currentQuestionIndex < n - 1) {
+      setCurrentQuestion(currentQuestionIndex + 1);
     }
+  }, [n, currentQuestionIndex, responses, scriptQuestions, setCurrentQuestion]);
 
-    if (currentQuestionIndex < INTAKE_QUESTIONS.length - 1) {
-      const nextIndex = currentQuestionIndex + 1;
-      setCurrentQuestion(nextIndex);
+  const goToPrev = useCallback(() => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestion(Math.max(0, currentQuestionIndex - 1));
     }
-  };
+  }, [currentQuestionIndex, setCurrentQuestion]);
 
-  const goToPrev = () => {
-    if (canGoPrev) {
-      const prevIndex = Math.max(0, currentQuestionIndex - 1);
-      setCurrentQuestion(prevIndex);
-    }
-  };
-
-  // Response lookup function
-  const getResponseForQuestion = (questionId: string): InterviewResponse | undefined => {
-    return responses[questionId];
-  };
+  const getResponseForQuestion = useCallback(
+    (questionId: string) => responses[questionId],
+    [responses]
+  );
 
   return {
     currentQuestion,
     currentIndex: currentQuestionIndex,
-    totalQuestions: INTAKE_QUESTIONS.length,
+    totalQuestions: n,
     progress,
     canGoNext,
     canGoPrev,

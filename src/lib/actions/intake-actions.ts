@@ -12,7 +12,8 @@ import {
 } from '@/lib/data/intake';
 import { saveResponseSchema, submitInterviewSchema } from '@/lib/schemas/intake';
 import { revalidatePath } from 'next/cache';
-import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
+import type { IntakeQuestion } from '@/lib/intake/types';
+import { loadIntakeScriptQuestions } from '@/lib/intake/load-intake-script';
 
 // Helper function to get authenticated user ID
 async function getAuthUserId() {
@@ -96,7 +97,8 @@ export async function updateProgress(interviewId: string, questionIndex: number)
     if (status === 'NOT_STARTED') {
       status = 'IN_PROGRESS';
     }
-    if (questionIndex >= INTAKE_QUESTIONS.length - 1) {
+    const script = await loadIntakeScriptQuestions();
+    if (script.length > 0 && questionIndex >= script.length - 1) {
       status = 'COMPLETED';
     }
 
@@ -129,14 +131,19 @@ export async function submitIntakeInterviewAction(interviewId: string) {
       return { success: false, error: 'Interview not found' };
     }
 
-    // Check that all questions have responses
+    const script = await loadIntakeScriptQuestions();
+    const expectedIds = script.map((q) => q.id);
     const responses = await getIntakeResponsesByInterview(interviewId);
-    const expectedQuestionCount = INTAKE_QUESTIONS.length;
+    const byQuestionId = new Map(responses.map((r) => [r.questionId, r]));
+    const missing = expectedIds.filter((id) => {
+      const r = byQuestionId.get(id);
+      return !r?.audioUrl;
+    });
 
-    if (responses.length < expectedQuestionCount) {
+    if (missing.length > 0) {
       return {
         success: false,
-        error: `Interview incomplete: ${responses.length}/${expectedQuestionCount} questions answered`,
+        error: `Interview incomplete: ${expectedIds.length - missing.length}/${expectedIds.length} questions have saved audio`,
       };
     }
 
@@ -194,5 +201,17 @@ export async function getActiveIntakeInterviewAction() {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get active interview';
     return { success: false, error: message, interview: null };
+  }
+}
+
+/** Ordered script for the audio intake interview (pillar `INTAKE` category or legacy fallback). */
+export async function getIntakeScriptQuestionsAction() {
+  try {
+    await getAuthUserId();
+    const questions = await loadIntakeScriptQuestions();
+    return { success: true as const, questions };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to load intake questions';
+    return { success: false as const, error: message, questions: [] as IntakeQuestion[] };
   }
 }

@@ -5,6 +5,8 @@
  */
 
 import "./load-repo-env";
+import { PillarCategoryKind } from "@prisma/client";
+import { deploymentVisibleQuestionCount } from "../src/lib/assessment/bank/deployment-question-count";
 import { prisma, disconnectPrismaScript } from './lib/prisma-for-scripts';
 import {
   workbookExists,
@@ -270,8 +272,22 @@ async function validateDeployment() {
       where: { isActive: true }
     });
 
-    const questions = await prisma.assessmentBankQuestion.findMany({
-      where: { isVisible: true }
+    const pillarBankDisabled = process.env.USE_PILLAR_QUESTION_BANK?.trim() === "0";
+    const pillarTotalCount = await prisma.pillarQuestion.count();
+    const pillarVisibleCount = await prisma.pillarQuestion.count({
+      where: {
+        isVisible: true,
+        section: { category: { kind: { not: PillarCategoryKind.INTAKE } } },
+      },
+    });
+    const bankVisibleCount = await prisma.assessmentBankQuestion.count({
+      where: { isVisible: true },
+    });
+    const mergedVisibleCount = deploymentVisibleQuestionCount({
+      pillarBankDisabled,
+      pillarTotalCount,
+      pillarVisibleCount,
+      bankVisibleCount,
     });
 
     const services = await prisma.serviceRecommendation.findMany({
@@ -297,8 +313,10 @@ async function validateDeployment() {
       issues.push(`Only ${pillars.length} pillars configured (expected 6)`);
     }
 
-    if (questions.length < 50) {
-      issues.push(`Only ${questions.length} questions (expected 100+)`);
+    if (mergedVisibleCount < 50) {
+      issues.push(
+        `Only ${mergedVisibleCount} visible questions in merged bank (expected 50+). Pillar DDL total=${pillarTotalCount}, pillar visible=${pillarVisibleCount}, AssessmentBankQuestion visible=${bankVisibleCount}.`
+      );
     }
 
     if (services.length < 15) {
@@ -321,7 +339,7 @@ async function validateDeployment() {
     return {
       isValid: issues.length === 0,
       issues,
-      questionCount: questions.length,
+      questionCount: mergedVisibleCount,
       pillarCount: pillars.length,
       serviceCount: services.length,
       recommendationRuleCount: recommendationRules.length,

@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { requireAdminRole } from "@/lib/admin/auth";
 import { PROFILE_CONDITION_KEYS } from "@/lib/assessment/bank/behaviors";
+import { riskAreaIdForPillarCategory } from "@/lib/assessment/bank/pillar-category-risk-area";
 import { isRiskAreaId, RISK_AREA_IDS } from "@/lib/assessment/bank/risk-areas";
 import type { QuestionType } from "@/lib/assessment/types";
 import { prisma } from "@/lib/db";
@@ -258,6 +259,132 @@ export async function updateAssessmentBankQuestionVisibility(formData: FormData)
   });
 
   revalidateQuestionBankPaths(row.riskAreaId);
+}
+
+export async function updatePillarQuestionVisibility(formData: FormData) {
+  await requireAdminRole();
+  const questionId = z.string().uuid().parse(formData.get("questionId"));
+  const isVisible = formData.get("isVisible") === "true";
+  const riskAreaIdRaw = formData.get("riskAreaId");
+  if (typeof riskAreaIdRaw !== "string" || !isRiskAreaId(riskAreaIdRaw)) {
+    return;
+  }
+  const riskAreaId = riskAreaIdRaw;
+
+  const row = await prisma.pillarQuestion.findUnique({
+    where: { id: questionId },
+    include: { section: { include: { category: true } } },
+  });
+  if (!row) return;
+  if (riskAreaIdForPillarCategory(row.section.category) !== riskAreaId) {
+    return;
+  }
+
+  await prisma.pillarQuestion.update({
+    where: { id: questionId },
+    data: { isVisible },
+  });
+
+  revalidateQuestionBankPaths(riskAreaId);
+}
+
+export async function deletePillarQuestion(formData: FormData) {
+  await requireAdminRole();
+  const questionId = z.string().uuid().parse(formData.get("questionId"));
+  const riskAreaIdRaw = formData.get("riskAreaId");
+  if (typeof riskAreaIdRaw !== "string" || !isRiskAreaId(riskAreaIdRaw)) {
+    redirect("/admin/question-bank");
+  }
+  const riskAreaId = riskAreaIdRaw;
+
+  const row = await prisma.pillarQuestion.findUnique({
+    where: { id: questionId },
+    include: { section: { include: { category: true } } },
+  });
+  if (!row) {
+    redirect(`/admin/question-bank/${riskAreaId}`);
+  }
+  if (riskAreaIdForPillarCategory(row.section.category) !== riskAreaId) {
+    redirect(`/admin/question-bank/${riskAreaId}`);
+  }
+
+  await prisma.pillarQuestion.delete({ where: { id: questionId } });
+  revalidateQuestionBankPaths(riskAreaId);
+  redirect(`/admin/question-bank/${riskAreaId}`);
+}
+
+function optionalFormString(raw: FormDataEntryValue | null): string | null {
+  if (raw === null || raw === undefined) return null;
+  const s = String(raw).trim();
+  return s === "" ? null : s;
+}
+
+export async function updatePillarQuestionContent(formData: FormData) {
+  await requireAdminRole();
+  try {
+    const questionId = z.string().uuid().parse(formData.get("questionId"));
+    const riskAreaIdRaw = formData.get("riskAreaId");
+    if (typeof riskAreaIdRaw !== "string" || !isRiskAreaId(riskAreaIdRaw)) {
+      throw new Error("Invalid risk area.");
+    }
+    const riskAreaId = riskAreaIdRaw;
+
+    const text = z.string().min(1).parse(formData.get("text"));
+    const helpText = optionalFormString(formData.get("helpText"));
+    const riskRelevance = optionalFormString(formData.get("riskRelevance"));
+    const whyThisMatters =
+      [helpText, riskRelevance].filter((s): s is string => Boolean(s)).join("\n\n") || null;
+
+    const learnMore = optionalFormString(formData.get("learnMore"));
+
+    const answer0 = optionalFormString(formData.get("answer0"));
+    const answer1 = optionalFormString(formData.get("answer1"));
+    const answer2 = optionalFormString(formData.get("answer2"));
+    const answer3 = optionalFormString(formData.get("answer3"));
+    const crossReference = optionalFormString(formData.get("crossReference"));
+    const questionNumberRaw = optionalFormString(formData.get("questionNumber"));
+    const questionNumber =
+      questionNumberRaw === null
+        ? null
+        : z.string().max(20).parse(questionNumberRaw);
+
+    const displayOrder = z.coerce.number().int().min(0).parse(formData.get("displayOrder"));
+    const isSubQuestion = formData.has("isSubQuestion");
+
+    const existing = await prisma.pillarQuestion.findUnique({
+      where: { id: questionId },
+      include: { section: { include: { category: true } } },
+    });
+    if (!existing) {
+      throw new Error("Pillar question not found.");
+    }
+    if (
+      riskAreaIdForPillarCategory(existing.section.category) !== riskAreaId
+    ) {
+      throw new Error("Question does not belong to this risk area.");
+    }
+
+    await prisma.pillarQuestion.update({
+      where: { id: questionId },
+      data: {
+        questionText: text,
+        whyThisMatters,
+        recommendedActions: learnMore,
+        answer0,
+        answer1,
+        answer2,
+        answer3,
+        crossReference,
+        questionNumber,
+        displayOrder,
+        isSubQuestion,
+      },
+    });
+
+    revalidateQuestionBankPaths(riskAreaId);
+  } catch (e: unknown) {
+    redirectUpdateError(formData, formatActionError(e));
+  }
 }
 
 export async function updateAssessmentBankQuestionContent(formData: FormData) {

@@ -1,20 +1,38 @@
--- Migration: Add cybersecurity questions from spreadsheet to assessment bank
+-- Seed cybersecurity assessment bank questions (idempotent).
+-- Fixes: required "id"/timestamps on AssessmentBankQuestion; removes SubCategoryConfiguration inserts
+-- (that table is created in 20260410180000 — seeded in 20260417150000_seed_cybersecurity_subcategories).
 
--- Insert cybersecurity questions based on actual spreadsheet data
-
--- Category A: Household Governance
 INSERT INTO "AssessmentBankQuestion" (
-    "questionId", "riskAreaId", "sortOrderGlobal", "isVisible",
-    "text", "helpText", "riskRelevance", "type", "options",
-    "required", "weight", "scoreMap", "omitMaturityScoreWhenYes"
+    "id",
+    "questionId",
+    "riskAreaId",
+    "sortOrderGlobal",
+    "isVisible",
+    "text",
+    "helpText",
+    "learnMore",
+    "riskRelevance",
+    "type",
+    "options",
+    "required",
+    "weight",
+    "scoreMap",
+    "branchingDependsOn",
+    "branchingPredicate",
+    "profileConditionKey",
+    "omitMaturityScoreWhenYes",
+    "createdAt",
+    "updatedAt"
 ) VALUES
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_password_device_management',
     'cybersecurity',
     1,
     true,
     'Who manages passwords, devices, and updates?',
     'This reveals whether cybersecurity responsibility is clearly owned or informally assumed.',
+    NULL,
     'When no one is accountable, updates get skipped, passwords get reused, and small gaps compound into major exposure.',
     'single-choice',
     '[
@@ -26,15 +44,22 @@ INSERT INTO "AssessmentBankQuestion" (
     true,
     3,
     '{"no_ownership": 0, "informal": 1, "assigned": 2, "centralized_audited": 3}'::json,
-    false
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_family_online_rules',
     'cybersecurity',
     2,
     true,
     'Does your family have agreed on basic do''s and don''ts for online activity?',
     'Shared norms reduce accidental risk (e.g., clicking unknown links, oversharing on social media).',
+    NULL,
     'Without alignment, the least cautious household member becomes the entry point for attackers.',
     'single-choice',
     '[
@@ -46,15 +71,22 @@ INSERT INTO "AssessmentBankQuestion" (
     true,
     2,
     '{"none": 0, "verbal": 1, "documented": 2, "documented_reinforced": 3}'::json,
-    false
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_family_education',
     'cybersecurity',
     3,
     true,
     'Have family members received any guidance or education on how to stay safe online?',
     'Education is one of the strongest risk reducers. Most cyber incidents exploit human behavior, not technology.',
+    NULL,
     'Training dramatically lowers susceptibility to phishing and scams.',
     'single-choice',
     '[
@@ -66,15 +98,22 @@ INSERT INTO "AssessmentBankQuestion" (
     true,
     3,
     '{"none": 0, "one_time": 1, "periodic": 2, "ongoing_role_based": 3}'::json,
-    false
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_risk_awareness',
     'cybersecurity',
     4,
     true,
     'How familiar are family members with basic cyber risks (phishing, scams)?',
     'This gauges vulnerability to social engineering.',
+    NULL,
     'Low awareness increases the likelihood of financial loss, identity theft, or account takeover.',
     'single-choice',
     '[
@@ -86,15 +125,22 @@ INSERT INTO "AssessmentBankQuestion" (
     true,
     2,
     '{"low": 0, "basic": 1, "moderate": 2, "high_tested": 3}'::json,
-    false
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_insurance',
     'cybersecurity',
     5,
     true,
     'Do you have personal or family cybersecurity insurance?',
     'Insurance can offset financial losses, cover forensic services, and provide crisis response.',
+    NULL,
     'Its absence means incidents may result in unplanned emergency spending and reputational damage.',
     'single-choice',
     '[
@@ -106,15 +152,22 @@ INSERT INTO "AssessmentBankQuestion" (
     true,
     2,
     '{"none": 0, "exploring": 1, "active_policy": 2, "active_aligned": 3}'::json,
-    false
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_travel_practices',
     'cybersecurity',
     6,
     true,
     'What additional cybersecurity practices do family members utilize while traveling domestically or internationally?',
     'Travel increases exposure to insecure Wi-Fi, border searches, and device theft.',
+    NULL,
     'This question identifies gaps during the household''s highest-risk periods.',
     'single-choice',
     '[
@@ -126,22 +179,22 @@ INSERT INTO "AssessmentBankQuestion" (
     true,
     2,
     '{"none": 0, "minimal": 1, "defined": 2, "strict_protocols": 3}'::json,
-    false
-);
-
--- Category B: Devices & Network
-INSERT INTO "AssessmentBankQuestion" (
-    "questionId", "riskAreaId", "sortOrderGlobal", "isVisible",
-    "text", "helpText", "riskRelevance", "type", "options",
-    "required", "weight", "scoreMap"
-) VALUES
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_device_inventory',
     'cybersecurity',
     10,
     true,
     'Can you provide an inventory of all devices: computers, phones, tablets, smart TVs, IoT devices, routers?',
     'You can''t protect what you don''t know exists.',
+    NULL,
     'Unknown or forgotten devices are common attack vectors.',
     'single-choice',
     '[
@@ -152,15 +205,23 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     3,
-    '{"none": 0, "partial": 1, "complete": 2, "dynamic_maintained": 3}'::json
+    '{"none": 0, "partial": 1, "complete": 2, "dynamic_maintained": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_software_updates',
     'cybersecurity',
     11,
     true,
     'Are all devices running current software updates?',
     'Updates patch known vulnerabilities.',
+    NULL,
     'Unpatched devices are one of the easiest targets for attackers.',
     'single-choice',
     '[
@@ -171,15 +232,23 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     3,
-    '{"outdated": 0, "manual": 1, "current": 2, "automated_enforced": 3}'::json
+    '{"outdated": 0, "manual": 1, "current": 2, "automated_enforced": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_auto_updates',
     'cybersecurity',
     12,
     true,
     'Are all devices set to auto update?',
     'Manual updating fails over time.',
+    NULL,
     'Auto-updates reduce reliance on memory and discipline.',
     'single-choice',
     '[
@@ -190,15 +259,23 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     2,
-    '{"none": 0, "some_devices": 1, "most_devices": 2, "all_devices": 3}'::json
+    '{"none": 0, "some_devices": 1, "most_devices": 2, "all_devices": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_network_segmentation',
     'cybersecurity',
     13,
     true,
     'Are separate networks used for guests, home automation, IoT, and critical devices?',
     'Network segmentation limits damage if one device or guest network is compromised.',
+    NULL,
     'Configure separate networks for work, family, and guests.',
     'single-choice',
     '[
@@ -209,15 +286,23 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     3,
-    '{"none": 0, "limited": 1, "segmented": 2, "fully_segmented": 3}'::json
+    '{"none": 0, "limited": 1, "segmented": 2, "fully_segmented": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_wifi_security',
     'cybersecurity',
     14,
     true,
     'Are Wi-Fi networks secured with strong encryption and password?',
     'Weak Wi-Fi security allows attackers to intercept data or access connected devices directly.',
+    NULL,
     'Home Wi-Fi admin access restricted and credentials unique.',
     'single-choice',
     '[
@@ -228,22 +313,23 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     2,
-    '{"weak_default": 0, "moderate": 1, "strong_encryption": 2, "enterprise_grade": 3}'::json
-);
-
--- Category C: Accounts & Access
-INSERT INTO "AssessmentBankQuestion" (
-    "questionId", "riskAreaId", "sortOrderGlobal", "isVisible",
-    "text", "helpText", "riskRelevance", "type", "options",
-    "required", "weight", "scoreMap"
-) VALUES
+    '{"weak_default": 0, "moderate": 1, "strong_encryption": 2, "enterprise_grade": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_password_manager',
     'cybersecurity',
     20,
     true,
     'Are password managers used, and are they secure?',
     'Password managers reduce reuse and weak passwords—two of the biggest causes of account compromise.',
+    NULL,
     'Password manager is deployed and used by all family members.',
     'single-choice',
     '[
@@ -254,15 +340,23 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     3,
-    '{"reused_simple": 0, "some_complexity": 1, "password_manager": 2, "enterprise_grade": 3}'::json
+    '{"reused_simple": 0, "some_complexity": 1, "password_manager": 2, "enterprise_grade": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 ),
 (
+    replace(gen_random_uuid()::text, '-', ''),
     'cyber_mfa_enabled',
     'cybersecurity',
     21,
     true,
     'Is MFA enabled on sensitive accounts?',
     'Multi-factor authentication dramatically lowers the chance of unauthorized access, even if passwords are stolen.',
+    NULL,
     'Multi-factor authentication enabled for banking, investments, email.',
     'single-choice',
     '[
@@ -273,19 +367,29 @@ INSERT INTO "AssessmentBankQuestion" (
     ]'::json,
     true,
     3,
-    '{"none": 0, "limited": 1, "critical_enabled": 2, "universal_phishing_resistant": 3}'::json
-);
-
--- Continue with remaining categories...
--- (This would be a very long migration file with all questions)
-
--- Insert subcategory configurations
-INSERT INTO "SubCategoryConfiguration" (
-    "subcategoryId", "pillarId", "name", "description", "baseWeight", "sortOrder", "isActive"
-) VALUES
-('household_governance', 'cybersecurity', 'Household Governance', 'Family cyber governance and responsibility', 1.0, 1, true),
-('devices_network', 'cybersecurity', 'Devices & Network', 'Device management and network security', 1.0, 2, true),
-('accounts_access', 'cybersecurity', 'Accounts & Access', 'Account security and access control', 1.0, 3, true),
-('data_privacy', 'cybersecurity', 'Data & Privacy', 'Data protection and privacy controls', 1.0, 4, true),
-('financial_identity', 'cybersecurity', 'Financial & Identity Risk', 'Financial and identity protection', 1.0, 5, true),
-('incident_response', 'cybersecurity', 'Incident Response & Recovery', 'Incident preparedness and recovery', 1.0, 6, true);
+    '{"none": 0, "limited": 1, "critical_enabled": 2, "universal_phishing_resistant": 3}'::json,
+    NULL,
+    NULL,
+    NULL,
+    false,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+)
+ON CONFLICT ("questionId") DO UPDATE SET
+    "riskAreaId" = EXCLUDED."riskAreaId",
+    "sortOrderGlobal" = EXCLUDED."sortOrderGlobal",
+    "isVisible" = EXCLUDED."isVisible",
+    "text" = EXCLUDED."text",
+    "helpText" = EXCLUDED."helpText",
+    "learnMore" = EXCLUDED."learnMore",
+    "riskRelevance" = EXCLUDED."riskRelevance",
+    "type" = EXCLUDED."type",
+    "options" = EXCLUDED."options",
+    "required" = EXCLUDED."required",
+    "weight" = EXCLUDED."weight",
+    "scoreMap" = EXCLUDED."scoreMap",
+    "branchingDependsOn" = EXCLUDED."branchingDependsOn",
+    "branchingPredicate" = EXCLUDED."branchingPredicate",
+    "profileConditionKey" = EXCLUDED."profileConditionKey",
+    "omitMaturityScoreWhenYes" = EXCLUDED."omitMaturityScoreWhenYes",
+    "updatedAt" = EXCLUDED."updatedAt";

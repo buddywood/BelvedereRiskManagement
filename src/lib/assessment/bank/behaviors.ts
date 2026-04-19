@@ -9,7 +9,8 @@ export type BranchingPredicateWire = {
 
 export type GovernanceQuestionWire = {
   questionId: string;
-  riskAreaId: string;
+  /** `null` for intake script pillar rows — not a scoring risk area. */
+  riskAreaId: string | null;
   sortOrderGlobal: number;
   text: string;
   helpText: string | null;
@@ -105,6 +106,11 @@ export function wireQuestionsToQuestions(wires: GovernanceQuestionWire[]): Quest
 }
 
 export function wireQuestionToQuestion(wire: GovernanceQuestionWire): Question {
+  if (wire.riskAreaId === null) {
+    throw new Error(
+      "wireQuestionToQuestion: intake script wires are not scoring questions; do not map them to Question"
+    );
+  }
   const branchingRule = branchingPredicateToRule(
     wire.branchingDependsOn ?? "",
     wire.branchingPredicate ?? undefined

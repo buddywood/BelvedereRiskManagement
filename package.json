@@ -10,7 +10,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:assessment-bank": "npx tsx scripts/seed-assessment-bank.ts"
+    "seed:assessment-bank": "npx tsx scripts/seed-assessment-bank.ts",
+    "seed:pillar-ddl": "npx tsx scripts/seed-pillar-ddl-sql.ts",
+    "import:reputational-social": "npx tsx scripts/import-reputational-social-spreadsheet.ts",
+    "db:fix-cyber-migration": "bash scripts/fix-cybersecurity-migration-failure.sh",
+    "db:fix-enhanced-migration": "bash scripts/fix-failed-enhanced-migration.sh"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

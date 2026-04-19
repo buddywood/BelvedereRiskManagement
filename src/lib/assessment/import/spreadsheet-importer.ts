@@ -54,16 +54,48 @@ export class SpreadsheetImporter {
    * Import assessment questions from Excel/CSV file
    */
   async importFromFile(filePath: string, options: ImportOptions = {}): Promise<ImportResult> {
+    this.validationErrors = [];
+    this.transformationLog = [];
+
     try {
       // Read and parse spreadsheet
       const workbook = XLSX.readFile(filePath);
       const sheetName = options.sheetName || workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) {
+        return {
+          success: false,
+          errors: [{ row: -1, errors: [`Sheet not found: "${sheetName}". Available: ${workbook.SheetNames.join(', ')}`] }],
+          importedCount: 0,
+          transformationLog: this.transformationLog,
+        };
+      }
       const rawData = XLSX.utils.sheet_to_json(worksheet);
 
       // Normalize column names and transform data
       const normalizedData = this.normalizeColumnNames(rawData);
-      const transformedRows = this.transformRows(normalizedData);
+      let transformedRows = this.transformRows(normalizedData);
+
+      if (options.pillarRiskAreaId) {
+        const target = options.pillarRiskAreaId;
+        const before = transformedRows.length;
+        transformedRows = transformedRows.filter((r) => r.pillarId === target);
+        if (transformedRows.length === 0 && before > 0) {
+          return {
+            success: false,
+            errors: [
+              {
+                row: -1,
+                errors: [
+                  `No rows matched pillarRiskAreaId "${target}" after normalizing the Pillar column (${before} row(s) in sheet).`,
+                ],
+              },
+            ],
+            importedCount: 0,
+            transformationLog: this.transformationLog,
+          };
+        }
+      }
 
       // Validate all rows
       const validatedRows = this.validateRows(transformedRows);
@@ -194,23 +226,32 @@ export class SpreadsheetImporter {
   }
 
   private normalizePillarId(value: string): string {
+    if (value === undefined || value === null) return '';
+    const v = typeof value === 'string' ? value.trim() : String(value).trim();
+    if (!v || v === 'undefined') return '';
     const pillarMappings: Record<string, string> = {
-      'Governance': 'governance',
-      'Cyber': 'cybersecurity',
-      'Cybersecurity': 'cybersecurity',
+      Governance: 'governance',
+      Cyber: 'cybersecurity',
+      Cybersecurity: 'cybersecurity',
       'Cyber Security': 'cybersecurity',
-      'Physical': 'physical-security',
+      Physical: 'physical-security',
       'Physical Security': 'physical-security',
-      'Insurance': 'financial-asset-protection',
-      'Financial': 'financial-asset-protection',
-      'Geographic': 'environmental-geographic-risk',
-      'Environmental': 'environmental-geographic-risk',
-      'Social': 'lifestyle-behavioral-risk',
-      'Reputational': 'lifestyle-behavioral-risk',
-      'Lifestyle': 'lifestyle-behavioral-risk',
+      Insurance: 'financial-asset-protection',
+      Financial: 'financial-asset-protection',
+      Geographic: 'environmental-geographic-risk',
+      Environmental: 'environmental-geographic-risk',
+      Social: 'lifestyle-behavioral-risk',
+      Reputational: 'lifestyle-behavioral-risk',
+      Lifestyle: 'lifestyle-behavioral-risk',
+      'Reputational & Social Risk': 'lifestyle-behavioral-risk',
+      'Reputational & social risk': 'lifestyle-behavioral-risk',
+      'Reputational and Social Risk': 'lifestyle-behavioral-risk',
+      'Lifestyle & Behavioral Risk': 'lifestyle-behavioral-risk',
+      'Lifestyle and Behavioral Risk': 'lifestyle-behavioral-risk',
+      'lifestyle-behavioral-risk': 'lifestyle-behavioral-risk',
     };
 
-    return pillarMappings[value] || value.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    return pillarMappings[v] || v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
   private normalizeSubCategoryId(value: string): string {
@@ -323,10 +364,11 @@ export class SpreadsheetImporter {
     let importCount = 0;
 
     for (const row of rows) {
+      const sortBase = options.sortOrderBase ?? 0;
       const questionData = {
         questionId: row.questionId,
         riskAreaId: row.pillarId,
-        sortOrderGlobal: importCount + 1,
+        sortOrderGlobal: sortBase + importCount + 1,
         isVisible: true,
         text: row.questionText,
         helpText: row.helpText,
@@ -343,7 +385,8 @@ export class SpreadsheetImporter {
         omitMaturityScoreWhenYes: false, // Default value
       };
 
-      if (options.updateExisting) {
+      const upsert = options.updateExisting !== false;
+      if (upsert) {
         await tx.assessmentBankQuestion.upsert({
           where: { questionId: row.questionId },
           create: questionData,
@@ -403,7 +446,12 @@ export class SpreadsheetImporter {
 
 export interface ImportOptions {
   sheetName?: string;
+  /** When true (default), upsert by questionId. When false, create-only (fails on duplicate id). */
   updateExisting?: boolean;
+  /** Only import rows whose normalized pillar id equals this (e.g. `lifestyle-behavioral-risk`). */
+  pillarRiskAreaId?: string;
+  /** Added to each row’s `sortOrderGlobal` (use max existing order for this pillar to append). */
+  sortOrderBase?: number;
   dryRun?: boolean;
   skipValidation?: boolean;
 }

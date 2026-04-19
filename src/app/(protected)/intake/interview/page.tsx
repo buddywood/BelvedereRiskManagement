@@ -12,9 +12,10 @@ import { AudioRecorder } from "@/components/intake/AudioRecorder";
 import { StepIndicator } from "@/components/intake/StepIndicator";
 import { useIntakeInterview } from "@/lib/hooks/useIntakeInterview";
 import { useIntakeStore } from "@/lib/intake/store";
-import { INTAKE_QUESTIONS } from "@/lib/intake/questions";
+import type { IntakeQuestion } from "@/lib/intake/types";
 import {
   getIntakeInterviewAction,
+  getIntakeScriptQuestionsAction,
   updateProgress,
   submitIntakeInterviewAction,
   getActiveIntakeInterviewAction,
@@ -31,6 +32,7 @@ import {
 export default function InterviewPage() {
   const router = useRouter();
   const [interviewId, setInterviewId] = useState<string | null>(null);
+  const [scriptQuestions, setScriptQuestions] = useState<IntakeQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +47,7 @@ export default function InterviewPage() {
     goToPrev,
     isLastQuestion,
     getResponseForQuestion
-  } = useIntakeInterview(interviewId || "");
+  } = useIntakeInterview(interviewId || "", scriptQuestions);
 
   const { responses, setResponse, setCurrentQuestion } = useIntakeStore();
 
@@ -60,14 +62,26 @@ export default function InterviewPage() {
           const interview = activeInterviewResult.interview;
           setInterviewId(interview.id);
 
-          // Load interview details to get current progress
-          const detailResult = await getIntakeInterviewAction(interview.id);
-          if (detailResult.success && detailResult.interview) {
-            // Update store with loaded responses and progress
-            const loadedInterview = detailResult.interview;
-            setCurrentQuestion(loadedInterview.currentQuestionIndex || 0);
+          const [detailResult, scriptResult] = await Promise.all([
+            getIntakeInterviewAction(interview.id),
+            getIntakeScriptQuestionsAction(),
+          ]);
 
-            // Load existing responses into store
+          if (!scriptResult.success) {
+            toast.error(scriptResult.error || "Could not load intake questions");
+            router.push("/intake");
+            return;
+          }
+
+          const script = [...scriptResult.questions];
+          setScriptQuestions(script);
+
+          if (detailResult.success && detailResult.interview) {
+            const loadedInterview = detailResult.interview;
+            const maxIdx = Math.max(0, script.length - 1);
+            const idx = Math.min(loadedInterview.currentQuestionIndex ?? 0, maxIdx);
+            setCurrentQuestion(idx);
+
             if (loadedInterview.responses) {
               for (const response of loadedInterview.responses) {
                 setResponse(response.questionId, {
@@ -79,6 +93,8 @@ export default function InterviewPage() {
                 });
               }
             }
+          } else {
+            setCurrentQuestion(0);
           }
         } else {
           // No active interview - redirect to start page
@@ -294,7 +310,7 @@ export default function InterviewPage() {
           Object.entries(responses)
             .filter(([, response]) => response?.status === 'completed')
             .map(([questionId]) => {
-              const questionIndex = INTAKE_QUESTIONS.findIndex(q => q.id === questionId);
+              const questionIndex = scriptQuestions.findIndex((q) => q.id === questionId);
               return questionIndex >= 0 ? questionIndex : -1;
             })
             .filter(index => index >= 0)

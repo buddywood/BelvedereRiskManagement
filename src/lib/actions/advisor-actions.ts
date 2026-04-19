@@ -19,7 +19,7 @@ import { getAdvisorDashboardClients, getDashboardMetrics } from '@/lib/dashboard
 import { getFamilyGovernanceTrends } from '@/lib/analytics/queries';
 import { getPortfolioIntelligence, getTopRisksForFamily, getRiskDetailForFamily } from '@/lib/intelligence/queries';
 import { approveClientSchema } from '@/lib/schemas/advisor';
-import { INTAKE_QUESTIONS } from '@/lib/intake/questions';
+import { loadIntakeScriptQuestions } from '@/lib/intake/load-intake-script';
 import type { AdvisorDashboardClient, IntakeReviewData } from '@/lib/advisor/types';
 import { getAdvisorInvitations } from '@/lib/invitations/service';
 import { InvitationStatus } from '@prisma/client';
@@ -97,10 +97,11 @@ export async function getIntakeReviewData(interviewId: string) {
       };
     }
 
+    const script = await loadIntakeScriptQuestions();
     const intakeReviewData: IntakeReviewData = {
       interview: reviewData.interview,
       approval: reviewData.approval,
-      questions: INTAKE_QUESTIONS.map(q => ({
+      questions: script.map((q) => ({
         id: q.id,
         text: q.questionText,
         helpText: q.context,

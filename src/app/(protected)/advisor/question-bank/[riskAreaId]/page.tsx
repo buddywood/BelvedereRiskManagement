@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { RISK_AREAS } from "@/lib/advisor/types";
 import { isRiskAreaId } from "@/lib/assessment/bank/risk-areas";
+import { loadQuestionBankDashboardRows } from "@/lib/assessment/bank/question-bank-dashboard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,10 +20,7 @@ export default async function AdvisorQuestionBankAreaPage({
 
   const area = RISK_AREAS.find((a) => a.id === riskAreaId)!;
 
-  const questions = await prisma.assessmentBankQuestion.findMany({
-    where: { riskAreaId },
-    orderBy: { sortOrderGlobal: "asc" },
-  });
+  const questions = await loadQuestionBankDashboardRows(riskAreaId);
 
   return (
     <div className="space-y-6">
@@ -45,7 +42,11 @@ export default async function AdvisorQuestionBankAreaPage({
             {questions.length} question{questions.length === 1 ? "" : "s"}
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Includes hidden items (not shown to clients). Only admins can change the bank.
+            Includes items hidden from clients when a matching{" "}
+            <code className="text-xs">AssessmentBankQuestion</code> row exists. Pillar DDL (
+            <code className="text-xs">questions</code>) is the live bank when present; advisors view
+            only—admins edit pillar text under{" "}
+            <code className="text-xs">/admin/question-bank/…</code>.
           </p>
         </CardHeader>
         <CardContent className="space-y-6 p-6 pt-0">
@@ -54,7 +55,7 @@ export default async function AdvisorQuestionBankAreaPage({
           ) : (
             <ol className="list-decimal space-y-6 pl-5 marker:text-muted-foreground">
               {questions.map((q) => (
-                <li key={q.id} className="space-y-2 pl-1">
+                <li key={q.questionId} className="space-y-2 pl-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <code className="text-xs text-muted-foreground">{q.questionId}</code>
                     <Badge variant={q.isVisible ? "success" : "secondary"}>

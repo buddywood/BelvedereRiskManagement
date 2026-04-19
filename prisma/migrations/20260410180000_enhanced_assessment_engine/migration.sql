@@ -1,8 +1,15 @@
--- CreateEnum
-CREATE TYPE "RecommendationStatus" AS ENUM ('PENDING', 'REVIEWED', 'ACCEPTED', 'DECLINED', 'COMPLETED');
+-- Enhanced assessment engine tables (idempotent for Neon / partial replays).
+-- Safe when enum or tables already exist from a previously interrupted migration.
+
+-- CreateEnum (skip if already created)
+DO $$ BEGIN
+  CREATE TYPE "RecommendationStatus" AS ENUM ('PENDING', 'REVIEWED', 'ACCEPTED', 'DECLINED', 'COMPLETED');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateTable
-CREATE TABLE "ServiceRecommendation" (
+CREATE TABLE IF NOT EXISTS "ServiceRecommendation" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -20,7 +27,7 @@ CREATE TABLE "ServiceRecommendation" (
 );
 
 -- CreateTable
-CREATE TABLE "ScoringRule" (
+CREATE TABLE IF NOT EXISTS "ScoringRule" (
     "id" TEXT NOT NULL,
     "questionId" TEXT NOT NULL,
     "ruleName" TEXT NOT NULL,
@@ -36,7 +43,7 @@ CREATE TABLE "ScoringRule" (
 );
 
 -- CreateTable
-CREATE TABLE "RecommendationRule" (
+CREATE TABLE IF NOT EXISTS "RecommendationRule" (
     "id" TEXT NOT NULL,
     "serviceRecommendationId" TEXT NOT NULL,
     "ruleName" TEXT NOT NULL,
@@ -53,7 +60,7 @@ CREATE TABLE "RecommendationRule" (
 );
 
 -- CreateTable
-CREATE TABLE "AssessmentRecommendation" (
+CREATE TABLE IF NOT EXISTS "AssessmentRecommendation" (
     "id" TEXT NOT NULL,
     "assessmentId" TEXT NOT NULL,
     "serviceRecommendationId" TEXT NOT NULL,
@@ -69,7 +76,7 @@ CREATE TABLE "AssessmentRecommendation" (
 );
 
 -- CreateTable
-CREATE TABLE "PillarConfiguration" (
+CREATE TABLE IF NOT EXISTS "PillarConfiguration" (
     "id" TEXT NOT NULL,
     "pillarId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -84,7 +91,7 @@ CREATE TABLE "PillarConfiguration" (
 );
 
 -- CreateTable
-CREATE TABLE "SubCategoryConfiguration" (
+CREATE TABLE IF NOT EXISTS "SubCategoryConfiguration" (
     "id" TEXT NOT NULL,
     "subcategoryId" TEXT NOT NULL,
     "pillarId" TEXT NOT NULL,
@@ -100,7 +107,7 @@ CREATE TABLE "SubCategoryConfiguration" (
 );
 
 -- CreateTable
-CREATE TABLE "RuleExecution" (
+CREATE TABLE IF NOT EXISTS "RuleExecution" (
     "id" TEXT NOT NULL,
     "assessmentId" TEXT NOT NULL,
     "ruleType" TEXT NOT NULL,
@@ -114,64 +121,80 @@ CREATE TABLE "RuleExecution" (
 );
 
 -- CreateIndex
-CREATE INDEX "ServiceRecommendation_category_priority_idx" ON "ServiceRecommendation"("category", "priority");
+CREATE INDEX IF NOT EXISTS "ServiceRecommendation_category_priority_idx" ON "ServiceRecommendation"("category", "priority");
 
 -- CreateIndex
-CREATE INDEX "ServiceRecommendation_isActive_idx" ON "ServiceRecommendation"("isActive");
+CREATE INDEX IF NOT EXISTS "ServiceRecommendation_isActive_idx" ON "ServiceRecommendation"("isActive");
 
 -- CreateIndex
-CREATE INDEX "ScoringRule_questionId_idx" ON "ScoringRule"("questionId");
+CREATE INDEX IF NOT EXISTS "ScoringRule_questionId_idx" ON "ScoringRule"("questionId");
 
 -- CreateIndex
-CREATE INDEX "ScoringRule_isActive_priority_idx" ON "ScoringRule"("isActive", "priority");
+CREATE INDEX IF NOT EXISTS "ScoringRule_isActive_priority_idx" ON "ScoringRule"("isActive", "priority");
 
 -- CreateIndex
-CREATE INDEX "RecommendationRule_serviceRecommendationId_idx" ON "RecommendationRule"("serviceRecommendationId");
+CREATE INDEX IF NOT EXISTS "RecommendationRule_serviceRecommendationId_idx" ON "RecommendationRule"("serviceRecommendationId");
 
 -- CreateIndex
-CREATE INDEX "RecommendationRule_isActive_priority_idx" ON "RecommendationRule"("isActive", "priority");
+CREATE INDEX IF NOT EXISTS "RecommendationRule_isActive_priority_idx" ON "RecommendationRule"("isActive", "priority");
 
 -- CreateIndex
-CREATE INDEX "AssessmentRecommendation_assessmentId_idx" ON "AssessmentRecommendation"("assessmentId");
+CREATE INDEX IF NOT EXISTS "AssessmentRecommendation_assessmentId_idx" ON "AssessmentRecommendation"("assessmentId");
 
 -- CreateIndex
-CREATE INDEX "AssessmentRecommendation_status_idx" ON "AssessmentRecommendation"("status");
+CREATE INDEX IF NOT EXISTS "AssessmentRecommendation_status_idx" ON "AssessmentRecommendation"("status");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "AssessmentRecommendation_assessmentId_serviceRecommendation_key" ON "AssessmentRecommendation"("assessmentId", "serviceRecommendationId");
+CREATE UNIQUE INDEX IF NOT EXISTS "AssessmentRecommendation_assessmentId_serviceRecommendation_key" ON "AssessmentRecommendation"("assessmentId", "serviceRecommendationId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "PillarConfiguration_pillarId_key" ON "PillarConfiguration"("pillarId");
+CREATE UNIQUE INDEX IF NOT EXISTS "PillarConfiguration_pillarId_key" ON "PillarConfiguration"("pillarId");
 
 -- CreateIndex
-CREATE INDEX "PillarConfiguration_pillarId_idx" ON "PillarConfiguration"("pillarId");
+CREATE INDEX IF NOT EXISTS "PillarConfiguration_pillarId_idx" ON "PillarConfiguration"("pillarId");
 
 -- CreateIndex
-CREATE INDEX "PillarConfiguration_isActive_idx" ON "PillarConfiguration"("isActive");
+CREATE INDEX IF NOT EXISTS "PillarConfiguration_isActive_idx" ON "PillarConfiguration"("isActive");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "SubCategoryConfiguration_subcategoryId_key" ON "SubCategoryConfiguration"("subcategoryId");
+CREATE UNIQUE INDEX IF NOT EXISTS "SubCategoryConfiguration_subcategoryId_key" ON "SubCategoryConfiguration"("subcategoryId");
 
 -- CreateIndex
-CREATE INDEX "SubCategoryConfiguration_pillarId_sortOrder_idx" ON "SubCategoryConfiguration"("pillarId", "sortOrder");
+CREATE INDEX IF NOT EXISTS "SubCategoryConfiguration_pillarId_sortOrder_idx" ON "SubCategoryConfiguration"("pillarId", "sortOrder");
 
 -- CreateIndex
-CREATE INDEX "SubCategoryConfiguration_isActive_idx" ON "SubCategoryConfiguration"("isActive");
+CREATE INDEX IF NOT EXISTS "SubCategoryConfiguration_isActive_idx" ON "SubCategoryConfiguration"("isActive");
 
 -- CreateIndex
-CREATE INDEX "RuleExecution_assessmentId_idx" ON "RuleExecution"("assessmentId");
+CREATE INDEX IF NOT EXISTS "RuleExecution_assessmentId_idx" ON "RuleExecution"("assessmentId");
 
 -- CreateIndex
-CREATE INDEX "RuleExecution_ruleType_executedAt_idx" ON "RuleExecution"("ruleType", "executedAt");
+CREATE INDEX IF NOT EXISTS "RuleExecution_ruleType_executedAt_idx" ON "RuleExecution"("ruleType", "executedAt");
 
 -- AddForeignKey
-ALTER TABLE "RecommendationRule" ADD CONSTRAINT "RecommendationRule_serviceRecommendationId_fkey" FOREIGN KEY ("serviceRecommendationId") REFERENCES "ServiceRecommendation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "RecommendationRule" ADD CONSTRAINT "RecommendationRule_serviceRecommendationId_fkey" FOREIGN KEY ("serviceRecommendationId") REFERENCES "ServiceRecommendation"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "AssessmentRecommendation" ADD CONSTRAINT "AssessmentRecommendation_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES "Assessment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "AssessmentRecommendation" ADD CONSTRAINT "AssessmentRecommendation_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES "Assessment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "AssessmentRecommendation" ADD CONSTRAINT "AssessmentRecommendation_serviceRecommendationId_fkey" FOREIGN KEY ("serviceRecommendationId") REFERENCES "ServiceRecommendation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "AssessmentRecommendation" ADD CONSTRAINT "AssessmentRecommendation_serviceRecommendationId_fkey" FOREIGN KEY ("serviceRecommendationId") REFERENCES "ServiceRecommendation"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "RuleExecution" ADD CONSTRAINT "RuleExecution_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES "Assessment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "RuleExecution" ADD CONSTRAINT "RuleExecution_assessmentId_fkey" FOREIGN KEY ("assessmentId") REFERENCES "Assessment"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
