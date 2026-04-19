@@ -44,15 +44,19 @@ export async function loadIntakeScriptQuestions(): Promise<IntakeQuestion[]> {
     }
 
     const sorted = sortPillarQuestionRows(rows);
-    return sorted.map((row, i) => ({
-      id: row.id,
-      questionNumber: i + 1,
-      questionText: row.questionText,
-      context:
-        row.whyThisMatters?.trim() ||
-        "Take your time; speak naturally as if in conversation with your advisor.",
-      recordingTips: recordingTipsFromRow(row),
-    }));
+    return sorted.map((row, i) => {
+      const why = row.whyThisMatters?.trim();
+      return {
+        id: row.id,
+        questionNumber: i + 1,
+        questionText: row.questionText,
+        whyThisMatters: why || undefined,
+        context:
+          why ||
+          "Take your time; speak naturally as if in conversation with your advisor.",
+        recordingTips: recordingTipsFromRow(row),
+      };
+    });
   } catch (e) {
     console.warn("[loadIntakeScriptQuestions] falling back to static list:", e);
     return INTAKE_QUESTIONS;

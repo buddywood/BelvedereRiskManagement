@@ -1,4 +1,11 @@
+import { CircleHelp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
 import type { IntakeReviewData } from "@/lib/advisor/types";
 
@@ -20,6 +27,8 @@ export function TranscriptViewer({ responses, questions }: TranscriptViewerProps
         const question = questionMap[response.questionId];
         if (!question) return null;
 
+        const tooltipText = question.whyThisMatters?.trim();
+
         return (
           <section key={response.id} className="space-y-4">
             {/* Question header */}
@@ -27,14 +36,33 @@ export function TranscriptViewer({ responses, questions }: TranscriptViewerProps
               <div className="flex items-center gap-3">
                 <span className="editorial-kicker">Question {question.id.replace('intake-q', '')}</span>
               </div>
-              <h3 className="text-lg font-medium leading-7 text-foreground">
-                {question.text}
-              </h3>
-              {question.helpText && (
-                <p className="text-sm text-muted-foreground leading-6">
-                  {question.helpText}
-                </p>
-              )}
+              <div className="flex items-start gap-2">
+                <h3 className="text-lg font-medium leading-7 text-foreground">
+                  {question.text}
+                </h3>
+                {tooltipText ? (
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          className="mt-0.5 shrink-0 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          aria-label="Why we ask this"
+                        >
+                          <CircleHelp className="size-5" aria-hidden />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="bottom"
+                        align="start"
+                        className="max-h-48 max-w-xs overflow-y-auto text-left text-xs font-normal sm:max-w-md"
+                      >
+                        {tooltipText}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : null}
+              </div>
             </div>
 
             {/* Audio player */}

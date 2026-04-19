@@ -1,9 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Lightbulb, Loader2, Square, Volume2 } from "lucide-react";
+import { CircleHelp, Lightbulb, Loader2, Square, Volume2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AudioPlayer } from "./AudioPlayer";
 import type { IntakeReviewData } from "@/lib/advisor/types";
 
@@ -71,7 +77,8 @@ function QuestionBlock({
   const [audioReady, setAudioReady] = useState(false);
 
   const text = question.questionText ?? question.text;
-  const context = question.context ?? question.helpText;
+  const ttsContext = question.context ?? question.helpText ?? "";
+  const tooltipText = question.whyThisMatters?.trim();
   const recordingTips = question.recordingTips ?? [];
 
   useEffect(() => {
@@ -124,7 +131,7 @@ function QuestionBlock({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           questionText: text,
-          context: context ?? "",
+          context: ttsContext,
           recordingTips: recordingTips,
           questionNumber,
           totalQuestions,
@@ -159,9 +166,33 @@ function QuestionBlock({
         Question {questionNumber} of {totalQuestions}
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <h3 className="text-lg font-medium leading-7 text-foreground sm:text-xl">
-          {text}
-        </h3>
+        <div className="flex min-w-0 flex-1 items-start gap-2">
+          <h3 className="text-lg font-medium leading-7 text-foreground sm:text-xl">
+            {text}
+          </h3>
+          {tooltipText ? (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="mt-0.5 shrink-0 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label="Why we ask this"
+                  >
+                    <CircleHelp className="size-5" aria-hidden />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  align="start"
+                  className="max-h-48 max-w-xs overflow-y-auto text-left text-xs font-normal sm:max-w-md"
+                >
+                  {tooltipText}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
+        </div>
         {isSpeaking ? (
           <Button type="button" variant="outline" size="sm" onClick={handleStop} className="shrink-0">
             <Square className="size-4" />
@@ -185,9 +216,6 @@ function QuestionBlock({
           </Button>
         )}
       </div>
-      {context && (
-        <p className="text-sm text-muted-foreground leading-6">{context}</p>
-      )}
       {recordingTips.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

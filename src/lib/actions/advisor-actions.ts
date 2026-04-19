@@ -109,6 +109,7 @@ export async function getIntakeReviewData(interviewId: string) {
         questionNumber: q.questionNumber,
         questionText: q.questionText,
         context: q.context,
+        whyThisMatters: q.whyThisMatters,
         recordingTips: q.recordingTips,
       })),
     };

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useIntakeStore, type InterviewResponse } from "@/lib/intake/store";
+import { isInterviewResponseComplete } from "@/lib/intake/is-response-complete";
 import type { IntakeQuestion } from "@/lib/intake/types";
 
 /**
@@ -49,9 +50,7 @@ export function useIntakeInterview(
   );
 
   const currentQuestionResponse = currentQuestion ? responses[currentQuestion.id] : undefined;
-  const hasCurrentResponse = Boolean(
-    currentQuestionResponse?.audioUrl && currentQuestionResponse?.status === "completed"
-  );
+  const hasCurrentResponse = isInterviewResponseComplete(currentQuestionResponse);
 
   const isFirstQuestion = currentQuestionIndex === 0;
   const isLastQuestion = n > 0 && currentQuestionIndex >= n - 1;
@@ -67,7 +66,7 @@ export function useIntakeInterview(
     const q = scriptQuestions[currentQuestionIndex];
     if (!q) return;
     const resp = responses[q.id];
-    const has = Boolean(resp?.audioUrl && resp?.status === "completed");
+    const has = isInterviewResponseComplete(resp);
     const last = currentQuestionIndex >= n - 1;
     if (last && has) return;
     if (currentQuestionIndex < n - 1) {

@@ -3,7 +3,8 @@ import { IntakeQuestion } from './types';
 // Re-export for convenience
 export type { IntakeQuestion };
 
-export const INTAKE_QUESTIONS: IntakeQuestion[] = [
+export const INTAKE_QUESTIONS: IntakeQuestion[] = (
+  [
   {
     id: 'intake-q1',
     questionNumber: 1,
@@ -113,7 +114,9 @@ export const INTAKE_QUESTIONS: IntakeQuestion[] = [
       'Include both structures and relationship quality',
       'Think about measurable outcomes you\'d want to see'
     ]
-  }
-];
+  },
+] as const satisfies ReadonlyArray<
+  Omit<IntakeQuestion, "whyThisMatters">
+>).map((q) => ({ ...q, whyThisMatters: q.context }));
 
 export const TOTAL_QUESTIONS = INTAKE_QUESTIONS.length;

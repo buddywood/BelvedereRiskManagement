@@ -45,6 +45,8 @@ export type IntakeQuestion = {
   questionNumber?: number;
   questionText?: string;
   context?: string;
+  /** Pillar rubric “why this matters”; for tooltip only, not inline copy. */
+  whyThisMatters?: string;
   recordingTips?: string[];
 };
 

@@ -15,7 +15,10 @@ export const questionTtsBodySchema = z.object({
 
 export type QuestionTtsBody = z.infer<typeof questionTtsBodySchema>;
 
-export function buildQuestionNarrationText(input: QuestionTtsBody): string {
+export function buildQuestionNarrationText(
+  input: QuestionTtsBody,
+  variant: "intake" | "assessment"
+): string {
   const parts: string[] = [];
   const mod = input.moduleName?.trim();
   if (mod) {
@@ -23,6 +26,11 @@ export function buildQuestionNarrationText(input: QuestionTtsBody): string {
   }
   parts.push(`Question ${input.questionNumber} of ${input.totalQuestions}.`);
   parts.push(input.questionText);
+
+  if (variant === "intake") {
+    return parts.join(" ");
+  }
+
   const ctx = input.context?.trim();
   if (ctx) {
     parts.push(ctx);
@@ -93,7 +101,7 @@ export async function handleQuestionTtsRequest(
       );
     }
 
-    const narrationText = buildQuestionNarrationText(parsed.data);
+    const narrationText = buildQuestionNarrationText(parsed.data, variant);
     const audioBuffer = await synthesizeQuestionSpeech(narrationText, variant);
 
     return new NextResponse(new Uint8Array(audioBuffer), {

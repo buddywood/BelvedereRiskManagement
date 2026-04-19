@@ -78,9 +78,11 @@ export const useIntakeStore = create<IntakeState>()(
       // Computed getters
       getTotalAnswered: () => {
         const state = get();
-        return Object.values(state.responses).filter(response =>
-          response.audioUrl && response.status === 'completed'
-        ).length;
+        return Object.values(state.responses).filter((response) => {
+          if (response.status !== 'completed') return false;
+          if (response.audioUrl) return true;
+          return Boolean(response.transcription?.trim());
+        }).length;
       },
 
       getIsComplete: () => {

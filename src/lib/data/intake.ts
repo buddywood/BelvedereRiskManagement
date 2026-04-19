@@ -1,6 +1,11 @@
 import "server-only";
 
-import { type IntakeInterview, type IntakeResponse, type IntakeStatus } from "@prisma/client";
+import {
+  type IntakeInterview,
+  type IntakeResponse,
+  type IntakeStatus,
+  type Prisma,
+} from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 type IntakeResponseInput = {
@@ -44,6 +49,22 @@ export async function getActiveIntakeInterview(userId: string): Promise<IntakeIn
 }
 
 export async function saveIntakeResponse(interviewId: string, questionId: string, data: IntakeResponseInput): Promise<IntakeResponse> {
+  const hasAudio = Boolean(data.audioUrl);
+  const trimmedTranscription =
+    data.transcription === undefined ? '' : data.transcription.trim();
+  const isTextOnlyAnswer = !hasAudio && trimmedTranscription.length > 0;
+
+  const resolvedCreateStatus =
+    data.transcriptionStatus ??
+    (isTextOnlyAnswer ? 'COMPLETED' : 'PENDING');
+
+  const transcriptionForCreate =
+    data.transcription === undefined
+      ? null
+      : trimmedTranscription.length > 0
+        ? trimmedTranscription
+        : null;
+
   return prisma.intakeResponse.upsert({
     where: {
       interviewId_questionId: {
@@ -56,14 +77,23 @@ export async function saveIntakeResponse(interviewId: string, questionId: string
       questionId,
       audioUrl: data.audioUrl ?? null,
       audioDuration: data.audioDuration ?? null,
-      transcription: data.transcription ?? null,
-      transcriptionStatus: data.transcriptionStatus ?? 'PENDING',
+      transcription: transcriptionForCreate,
+      transcriptionStatus: resolvedCreateStatus,
+      answeredAt: isTextOnlyAnswer ? new Date() : null,
     },
     update: {
       audioUrl: data.audioUrl ?? undefined,
       audioDuration: data.audioDuration ?? undefined,
-      transcription: data.transcription ?? undefined,
-      transcriptionStatus: data.transcriptionStatus ?? undefined,
+      transcription:
+        data.transcription === undefined
+          ? undefined
+          : trimmedTranscription.length > 0
+            ? trimmedTranscription
+            : null,
+      transcriptionStatus: isTextOnlyAnswer
+        ? 'COMPLETED'
+        : (data.transcriptionStatus ?? undefined),
+      ...(isTextOnlyAnswer ? { answeredAt: new Date() } : {}),
     },
   });
 }
@@ -73,14 +103,11 @@ export async function updateInterviewProgress(
   currentQuestionIndex: number,
   status?: IntakeStatus
 ): Promise<IntakeInterview | null> {
-  const updateData: any = {
+  const updateData: Prisma.IntakeInterviewUpdateInput = {
     currentQuestionIndex,
     updatedAt: new Date(),
+    ...(status ? { status } : {}),
   };
-
-  if (status) {
-    updateData.status = status;
-  }
 
   return prisma.intakeInterview.update({
     where: { id: interviewId },

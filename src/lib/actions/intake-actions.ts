@@ -137,13 +137,13 @@ export async function submitIntakeInterviewAction(interviewId: string) {
     const byQuestionId = new Map(responses.map((r) => [r.questionId, r]));
     const missing = expectedIds.filter((id) => {
       const r = byQuestionId.get(id);
-      return !r?.audioUrl;
+      return !(r?.audioUrl || r?.transcription?.trim());
     });
 
     if (missing.length > 0) {
       return {
         success: false,
-        error: `Interview incomplete: ${expectedIds.length - missing.length}/${expectedIds.length} questions have saved audio`,
+        error: `Interview incomplete: ${expectedIds.length - missing.length}/${expectedIds.length} questions have a recorded or typed answer`,
       };
     }
 

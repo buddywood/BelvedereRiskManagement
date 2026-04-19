@@ -6,19 +6,28 @@ export const startInterviewSchema = z.object({
 });
 
 // Schema for saving an interview response
-export const saveResponseSchema = z.object({
-  interviewId: z.string().cuid('Invalid interview ID format'),
-  questionId: z.string().min(1, 'Question ID is required'),
-  audioUrl: z
-    .string()
-    .refine(
-      (value) => value.startsWith('/') || /^https?:\/\//.test(value),
-      'Invalid audio URL format'
-    )
-    .optional(),
-  audioDuration: z.number().min(0, 'Audio duration must be positive').optional(),
-  transcription: z.string().optional()
-});
+export const saveResponseSchema = z
+  .object({
+    interviewId: z.string().cuid('Invalid interview ID format'),
+    questionId: z.string().min(1, 'Question ID is required'),
+    audioUrl: z
+      .string()
+      .refine(
+        (value) => value.startsWith('/') || /^https?:\/\//.test(value),
+        'Invalid audio URL format'
+      )
+      .optional(),
+    audioDuration: z.number().min(0, 'Audio duration must be positive').optional(),
+    transcription: z.string().optional(),
+  })
+  .refine(
+    (d) =>
+      Boolean(d.audioUrl?.trim()) || Boolean(d.transcription?.trim()),
+    {
+      message: 'Provide a recording (audio URL) or a typed response',
+      path: ['transcription'],
+    }
+  );
 
 // Schema for submitting a completed interview
 export const submitInterviewSchema = z.object({

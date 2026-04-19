@@ -1,7 +1,13 @@
 "use client";
 
-import { Lightbulb } from "lucide-react";
+import { CircleHelp, Lightbulb } from "lucide-react";
 import { QuestionTtsPlayButton } from "@/components/common/QuestionTtsPlayButton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { IntakeQuestion } from "@/lib/intake/types";
 
 /**
@@ -17,6 +23,8 @@ interface QuestionDisplayProps {
 }
 
 export function QuestionDisplay({ question, totalQuestions }: QuestionDisplayProps) {
+  const tooltipText = question.whyThisMatters?.trim();
+
   return (
     <div className="py-8 sm:py-12 max-w-2xl mx-auto">
       {/* Question number - editorial kicker style */}
@@ -26,9 +34,33 @@ export function QuestionDisplay({ question, totalQuestions }: QuestionDisplayPro
 
       {/* Question text - prominent heading */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-          {question.questionText}
-        </h1>
+        <div className="flex min-w-0 flex-1 items-start gap-2">
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+            {question.questionText}
+          </h1>
+          {tooltipText ? (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="mt-1.5 shrink-0 rounded-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-label="Why we ask this"
+                  >
+                    <CircleHelp className="size-5" aria-hidden />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  align="start"
+                  className="max-h-48 max-w-xs overflow-y-auto text-left text-xs font-normal sm:max-w-md"
+                >
+                  {tooltipText}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : null}
+        </div>
         <QuestionTtsPlayButton
           contentKey={question.id}
           endpoint="/api/intake/tts"
@@ -41,14 +73,9 @@ export function QuestionDisplay({ question, totalQuestions }: QuestionDisplayPro
         />
       </div>
 
-      {/* Context - secondary guidance */}
-      <p className="text-base text-muted-foreground mb-8 leading-relaxed">
-        {question.context}
-      </p>
-
       {/* Recording tips with subtle styling */}
       {question.recordingTips && question.recordingTips.length > 0 && (
-        <div className="space-y-3">
+        <div className="mb-8 space-y-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Lightbulb className="size-4" />
             <span className="font-medium">Recording Tips</span>

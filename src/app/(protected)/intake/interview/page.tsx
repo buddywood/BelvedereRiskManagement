@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, ArrowRight, Loader2, Mic, Keyboard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -12,6 +14,7 @@ import { AudioRecorder } from "@/components/intake/AudioRecorder";
 import { StepIndicator } from "@/components/intake/StepIndicator";
 import { useIntakeInterview } from "@/lib/hooks/useIntakeInterview";
 import { useIntakeStore } from "@/lib/intake/store";
+import { isInterviewResponseComplete } from "@/lib/intake/is-response-complete";
 import type { IntakeQuestion } from "@/lib/intake/types";
 import {
   getIntakeInterviewAction,
@@ -35,7 +38,10 @@ export default function InterviewPage() {
   const [scriptQuestions, setScriptQuestions] = useState<IntakeQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [typedSaving, setTypedSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [responseTab, setResponseTab] = useState<"record" | "type">("record");
+  const [typedDraft, setTypedDraft] = useState("");
 
   const {
     currentQuestion,
@@ -89,7 +95,11 @@ export default function InterviewPage() {
                   audioDuration: response.audioDuration || 0,
                   transcription: response.transcription || undefined,
                   transcriptionEditedAt: undefined,
-                  status: response.transcriptionStatus === 'COMPLETED' ? 'completed' : 'pending'
+                  status:
+                    response.transcriptionStatus === 'COMPLETED' ||
+                    (!response.audioUrl && Boolean(response.transcription?.trim()))
+                      ? 'completed'
+                      : 'pending',
                 });
               }
             }
@@ -113,9 +123,44 @@ export default function InterviewPage() {
     loadInterview();
   }, [router, setCurrentQuestion, setResponse]);
 
+  const currentResponse = currentQuestion
+    ? getResponseForQuestion(currentQuestion.id)
+    : undefined;
+
+  useEffect(() => {
+    if (!currentQuestion) return;
+    const r = getResponseForQuestion(currentQuestion.id);
+    setResponseTab(r?.audioUrl ? "record" : r?.transcription?.trim() ? "type" : "record");
+    setTypedDraft(r?.transcription ?? "");
+  }, [
+    currentQuestion,
+    getResponseForQuestion,
+    currentResponse?.audioUrl,
+    currentResponse?.transcription,
+  ]);
+
+  const submitInterviewIfLast = useCallback(async () => {
+    if (!interviewId) return;
+    setSubmitting(true);
+    try {
+      const submitResult = await submitIntakeInterviewAction(interviewId);
+      if (submitResult.success) {
+        toast.success("Interview completed successfully!");
+        router.push("/intake/complete");
+      } else {
+        toast.error(submitResult.error || "Failed to submit interview");
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("Failed to submit interview. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [interviewId, router]);
+
   // Handle audio recording completion with auto-save
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
-    if (!interviewId || !currentQuestion || uploading || submitting) return;
+    if (!interviewId || !currentQuestion || uploading || submitting || typedSaving) return;
 
     setUploading(true);
 
@@ -192,23 +237,7 @@ export default function InterviewPage() {
 
       // Step 4: If this is the last question, auto-submit
       if (isLastQuestion) {
-        setSubmitting(true);
-
-        try {
-          const submitResult = await submitIntakeInterviewAction(interviewId);
-
-          if (submitResult.success) {
-            toast.success("Interview completed successfully!");
-            router.push("/intake/complete");
-          } else {
-            toast.error(submitResult.error || "Failed to submit interview");
-          }
-        } catch (error) {
-          console.error("Submit error:", error);
-          toast.error("Failed to submit interview. Please try again.");
-        } finally {
-          setSubmitting(false);
-        }
+        await submitInterviewIfLast();
       } else {
         toast.success("Response saved!");
       }
@@ -274,6 +303,61 @@ export default function InterviewPage() {
     toast.success("Transcript updated");
   };
 
+  const handleTypedSave = async () => {
+    if (!interviewId || !currentQuestion || typedSaving || submitting || uploading) return;
+
+    const trimmed = typedDraft.trim();
+    if (!trimmed) {
+      toast.error("Enter your answer before saving.");
+      return;
+    }
+
+    setTypedSaving(true);
+    try {
+      const result = await saveResponse(interviewId, {
+        interviewId,
+        questionId: currentQuestion.id,
+        transcription: trimmed,
+        ...(currentResponse?.audioUrl
+          ? {
+              audioUrl: currentResponse.audioUrl,
+              audioDuration: currentResponse.audioDuration,
+            }
+          : {}),
+      });
+
+      if (!result.success) {
+        const errorMessage =
+          ("error" in result && result.error) ||
+          ("errors" in result && result.errors
+            ? Object.values(result.errors).flat().find(Boolean)
+            : undefined) ||
+          "Failed to save response";
+        toast.error(errorMessage);
+        return;
+      }
+
+      setResponse(currentQuestion.id, {
+        transcription: trimmed,
+        status: "completed",
+        ...(currentResponse?.audioUrl
+          ? { transcriptionEditedAt: new Date().toISOString() }
+          : {}),
+      });
+
+      if (isLastQuestion) {
+        await submitInterviewIfLast();
+      } else {
+        toast.success(currentResponse?.audioUrl ? "Transcript updated" : "Response saved!");
+      }
+    } catch (error) {
+      console.error("Typed save error:", error);
+      toast.error("Failed to save response. Please try again.");
+    } finally {
+      setTypedSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -296,9 +380,8 @@ export default function InterviewPage() {
     );
   }
 
-  // Get current question response for the recorder
-  const currentResponse = getResponseForQuestion(currentQuestion.id);
-  const hasResponse = Boolean(currentResponse?.audioUrl);
+  const hasResponse = isInterviewResponseComplete(currentResponse);
+  const responseBusy = uploading || typedSaving || submitting;
 
   return (
     <div className="max-w-3xl mx-auto py-6 space-y-8">
@@ -308,7 +391,7 @@ export default function InterviewPage() {
         totalSteps={totalQuestions}
         completedSteps={new Set(
           Object.entries(responses)
-            .filter(([, response]) => response?.status === 'completed')
+            .filter(([, response]) => isInterviewResponseComplete(response))
             .map(([questionId]) => {
               const questionIndex = scriptQuestions.findIndex((q) => q.id === questionId);
               return questionIndex >= 0 ? questionIndex : -1;
@@ -323,35 +406,79 @@ export default function InterviewPage() {
         totalQuestions={totalQuestions}
       />
 
-      {/* Audio Recorder */}
-      <Card className="p-6">
-        <div className="space-y-4">
-          <h3 className="font-medium">Record Your Response</h3>
+      <Card className="rounded-3xl p-6 shadow-sm">
+        <Tabs
+          value={responseTab}
+          onValueChange={(v) => setResponseTab(v as "record" | "type")}
+          className="gap-4"
+        >
+          <TabsList className="w-full max-w-md" variant="line">
+            <TabsTrigger value="record" className="gap-1.5">
+              <Mic className="size-4" />
+              Voice
+            </TabsTrigger>
+            <TabsTrigger value="type" className="gap-1.5">
+              <Keyboard className="size-4" />
+              Type
+            </TabsTrigger>
+          </TabsList>
 
-          <AudioRecorder
-            onRecordingComplete={handleRecordingComplete}
-            existingAudioUrl={currentResponse?.audioUrl}
-            transcription={currentResponse?.transcription}
-            transcriptionEditedAt={currentResponse?.transcriptionEditedAt}
-            transcriptionStatus={currentResponse?.status}
-            onTranscriptionSave={handleTranscriptionSave}
-            disabled={uploading || submitting}
-          />
+          <TabsContent value="record" className="mt-4 space-y-4">
+            <h3 className="font-medium">Record your response</h3>
+            <AudioRecorder
+              onRecordingComplete={handleRecordingComplete}
+              existingAudioUrl={currentResponse?.audioUrl}
+              transcription={currentResponse?.transcription}
+              transcriptionEditedAt={currentResponse?.transcriptionEditedAt}
+              transcriptionStatus={currentResponse?.status}
+              onTranscriptionSave={handleTranscriptionSave}
+              disabled={responseBusy}
+            />
+          </TabsContent>
 
-          {uploading && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Saving your response...</span>
-            </div>
-          )}
+          <TabsContent value="type" className="mt-4 space-y-4">
+            <h3 className="font-medium">Type your response</h3>
+            <p className="text-sm text-muted-foreground">
+              Your answer is saved when you click the button below. You can edit it anytime before moving on.
+            </p>
+            <Textarea
+              value={typedDraft}
+              onChange={(e) => setTypedDraft(e.target.value)}
+              placeholder="Write your answer here…"
+              rows={8}
+              disabled={responseBusy}
+              className="min-h-[180px] resize-y text-base"
+            />
+            <Button
+              type="button"
+              onClick={() => void handleTypedSave()}
+              disabled={responseBusy || !typedDraft.trim()}
+            >
+              {typedSaving ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save typed response"
+              )}
+            </Button>
+          </TabsContent>
+        </Tabs>
 
-          {submitting && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Submitting interview...</span>
-            </div>
-          )}
-        </div>
+        {uploading && (
+          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            <span>Saving your recording…</span>
+          </div>
+        )}
+
+        {submitting && (
+          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin" />
+            <span>Submitting interview…</span>
+          </div>
+        )}
       </Card>
 
       {/* Navigation */}
@@ -359,7 +486,7 @@ export default function InterviewPage() {
         <Button
           variant="outline"
           onClick={handlePrevious}
-          disabled={!canGoPrev || uploading || submitting}
+          disabled={!canGoPrev || responseBusy}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -373,7 +500,7 @@ export default function InterviewPage() {
         {!isLastQuestion ? (
           <Button
             onClick={handleNext}
-            disabled={!hasResponse || !canGoNext || uploading || submitting}
+            disabled={!hasResponse || !canGoNext || responseBusy}
             className="flex items-center gap-2"
           >
             Next
@@ -381,9 +508,11 @@ export default function InterviewPage() {
           </Button>
         ) : (
           <div className="text-sm text-muted-foreground">
-            {hasResponse ? (
-              submitting ? "Submitting..." : "Recording will complete the interview"
-            ) : "Record your response to continue"}
+            {submitting
+              ? "Submitting…"
+              : hasResponse
+                ? "Interview ready to submit."
+                : "Save a voice or typed response to finish."}
           </div>
         )}
       </div>

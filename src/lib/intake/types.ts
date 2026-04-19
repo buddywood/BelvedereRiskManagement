@@ -9,6 +9,9 @@ export interface IntakeQuestion {
   id: string;
   questionNumber: number;
   questionText: string;
+  /** Pillar “why this matters” / risk relevance — optional; never show as body copy, tooltip only. */
+  whyThisMatters?: string;
+  /** Guidance for TTS (includes tone fallback when pillar has no rubric text). */
   context: string;
   recordingTips: string[];
 }
