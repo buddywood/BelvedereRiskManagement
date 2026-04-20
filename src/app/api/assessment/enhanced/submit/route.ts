@@ -4,6 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma, RiskLevel } from '@prisma/client';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { EnhancedScoringEngine } from '@/lib/assessment/engines/enhanced-scoring-engine';
@@ -12,9 +13,17 @@ import { RuleEngine } from '@/lib/assessment/engines/rule-engine';
 import { loadGovernanceQuestionsMerged } from '@/lib/assessment/bank/load-bank';
 import { z } from 'zod';
 
+function parseRiskLevel(value: string): RiskLevel {
+  const v = value.toUpperCase();
+  if (v === 'LOW' || v === 'MEDIUM' || v === 'HIGH' || v === 'CRITICAL') {
+    return v;
+  }
+  return RiskLevel.MEDIUM;
+}
+
 const SubmitAssessmentSchema = z.object({
   assessmentId: z.string(),
-  answers: z.record(z.unknown()),
+  answers: z.record(z.string(), z.unknown()),
   pillarId: z.string().optional(),
   visibleQuestionIds: z.array(z.string()).optional(),
   complete: z.boolean().default(false),
@@ -50,7 +59,7 @@ export async function POST(request: NextRequest) {
         questionId,
         pillar: validatedData.pillarId || 'unknown',
         subCategory: 'default', // This would need to be determined from question
-        answer,
+        answer: answer as Prisma.InputJsonValue,
         skipped: false,
       }));
 
@@ -64,7 +73,7 @@ export async function POST(request: NextRequest) {
           },
           create: answerData,
           update: {
-            answer: answerData.answer,
+            answer: answerData.answer as Prisma.InputJsonValue,
             skipped: answerData.skipped,
             updatedAt: new Date(),
           },
@@ -103,15 +112,15 @@ export async function POST(request: NextRequest) {
             assessmentId: validatedData.assessmentId,
             pillar: validatedData.pillarId,
             score: scoreResult.score,
-            riskLevel: scoreResult.riskLevel.toUpperCase(),
-            breakdown: scoreResult.breakdown,
-            missingControls: scoreResult.missingControls,
+            riskLevel: parseRiskLevel(scoreResult.riskLevel),
+            breakdown: scoreResult.breakdown as unknown as Prisma.InputJsonValue,
+            missingControls: scoreResult.missingControls as unknown as Prisma.InputJsonValue,
           },
           update: {
             score: scoreResult.score,
-            riskLevel: scoreResult.riskLevel.toUpperCase(),
-            breakdown: scoreResult.breakdown,
-            missingControls: scoreResult.missingControls,
+            riskLevel: parseRiskLevel(scoreResult.riskLevel),
+            breakdown: scoreResult.breakdown as unknown as Prisma.InputJsonValue,
+            missingControls: scoreResult.missingControls as unknown as Prisma.InputJsonValue,
             calculatedAt: new Date(),
           },
         });
@@ -157,7 +166,7 @@ export async function POST(request: NextRequest) {
     console.error('Error submitting assessment:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }

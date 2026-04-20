@@ -80,6 +80,7 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
               select: {
                 status: true,
                 updatedAt: true,
+                submittedAt: true,
               },
               orderBy: {
                 updatedAt: 'desc',

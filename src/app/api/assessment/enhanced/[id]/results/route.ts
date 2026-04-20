@@ -51,7 +51,7 @@ interface AssessmentResult {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth();
@@ -59,7 +59,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const assessmentId = params.id;
+    const { id: assessmentId } = await context.params;
 
     // Fetch assessment with all related data
     const assessment = await db.assessment.findFirst({
@@ -115,14 +115,14 @@ export async function GET(
         missingControls: Array.isArray(score.missingControls) ? score.missingControls : [],
       })),
       overallScore,
-      recommendations: assessment.recommendations.map(rec => ({
+      recommendations: assessment.recommendations.map((rec) => ({
         id: rec.serviceRecommendation.id,
         name: rec.serviceRecommendation.name,
         description: rec.serviceRecommendation.description,
         category: rec.serviceRecommendation.category,
         priority: rec.priority,
-        estimatedCost: rec.serviceRecommendation.estimatedCost,
-        timeframe: rec.serviceRecommendation.timeframe,
+        estimatedCost: rec.serviceRecommendation.estimatedCost ?? undefined,
+        timeframe: rec.serviceRecommendation.timeframe ?? undefined,
         status: rec.status,
         triggerReason: rec.triggerReason,
       })),

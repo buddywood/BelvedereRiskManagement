@@ -349,7 +349,7 @@ export class SpreadsheetImporter {
       } else {
         this.validationErrors.push({
           row: index + 2, // +2 for 1-based indexing and header row
-          errors: result.error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
+          errors: result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`)
         });
       }
     });

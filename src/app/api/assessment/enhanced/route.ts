@@ -16,7 +16,7 @@ import { z } from 'zod';
 // Validation schemas
 const SubmitAssessmentSchema = z.object({
   assessmentId: z.string(),
-  answers: z.record(z.unknown()),
+  answers: z.record(z.string(), z.unknown()),
   pillarId: z.string().optional(),
   visibleQuestionIds: z.array(z.string()).optional(),
 });

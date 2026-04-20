@@ -241,9 +241,9 @@ export class RecommendationEngine {
     return rules.map(rule => ({
       id: rule.id,
       serviceId: rule.serviceRecommendationId,
-      conditions: rule.triggerConditions as RecommendationCondition[],
+      conditions: rule.triggerConditions as unknown as RecommendationCondition[],
       priority: rule.priority,
-      customization: rule.questionConditions as Record<string, any>
+      customization: rule.questionConditions as unknown as Record<string, any>
     }));
   }
 
@@ -260,9 +260,9 @@ export class RecommendationEngine {
       description: service.description,
       category: service.category,
       priority: service.priority,
-      estimatedCost: service.estimatedCost,
-      timeframe: service.timeframe,
-      provider: service.provider,
+      estimatedCost: service.estimatedCost ?? undefined,
+      timeframe: service.timeframe ?? undefined,
+      provider: service.provider ?? undefined,
       triggerReason: []
     };
   }

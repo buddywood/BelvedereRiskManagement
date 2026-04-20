@@ -507,6 +507,12 @@ async function importAllPillars() {
       // Import questions
       for (let i = 0; i < pillar.questions.length; i++) {
         const question = pillar.questions[i];
+        const helpText =
+          "helpText" in question && question.helpText ? question.helpText : null;
+        const learnMore =
+          "remediationAction" in question && question.remediationAction
+            ? question.remediationAction
+            : null;
 
         await tx.assessmentBankQuestion.upsert({
           where: { questionId: question.questionId },
@@ -516,8 +522,8 @@ async function importAllPillars() {
             sortOrderGlobal: (totalQuestions + i + 1),
             isVisible: true,
             text: question.text,
-            helpText: question.helpText || null,
-            learnMore: question.remediationAction || null,
+            helpText,
+            learnMore,
             riskRelevance: question.riskRelevance || null,
             type: 'single-choice',
             options: question.options,
@@ -531,8 +537,8 @@ async function importAllPillars() {
           },
           update: {
             text: question.text,
-            helpText: question.helpText || null,
-            learnMore: question.remediationAction || null,
+            helpText,
+            learnMore,
             riskRelevance: question.riskRelevance || null,
             options: question.options,
             weight: question.weight,

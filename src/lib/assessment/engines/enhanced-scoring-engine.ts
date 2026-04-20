@@ -8,6 +8,7 @@
  * - Complex aggregation strategies
  */
 
+import { Prisma } from '@prisma/client';
 import { Question, ScoreResult, Pillar } from '../types';
 import { calculatePillarScore } from '../scoring';
 import { db } from '@/lib/db';
@@ -193,8 +194,8 @@ export class EnhancedScoringEngine {
       id: rule.id,
       questionId: rule.questionId,
       ruleName: rule.ruleName,
-      conditions: rule.conditions as ScoringCondition[],
-      scoreModifiers: rule.scoreModifiers as ScoreModifier[],
+      conditions: rule.conditions as unknown as ScoringCondition[],
+      scoreModifiers: rule.scoreModifiers as unknown as ScoreModifier[],
       priority: rule.priority
     }));
   }
@@ -220,7 +221,11 @@ export class EnhancedScoringEngine {
 
     if (executions.length > 0) {
       await db.ruleExecution.createMany({
-        data: executions
+        data: executions.map((e) => ({
+          ...e,
+          conditions: e.conditions as unknown as Prisma.InputJsonValue,
+          result: e.result as unknown as Prisma.InputJsonValue,
+        })),
       });
     }
   }
