@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
+import { clientPortalBrandingDisplayTitle } from '@/lib/client/client-portal-branding';
 import { AdvisorBrandingData } from '@/lib/validation/branding';
 import { applyAdvisorTheme, removeAdvisorTheme, validateThemeAccessibility } from '@/lib/theming/theme-utils';
 
@@ -221,7 +222,7 @@ export function AdvisorLogo({
     return <>{fallback}</>;
   }
 
-  const brandName = branding.branding.brandName || branding.branding.advisorFirmName;
+  const brandName = clientPortalBrandingDisplayTitle(branding.branding);
 
   if (branding.branding.logoUrl) {
     return (

@@ -20,7 +20,8 @@ import { getFamilyGovernanceTrends } from '@/lib/analytics/queries';
 import { getPortfolioIntelligence, getTopRisksForFamily, getRiskDetailForFamily } from '@/lib/intelligence/queries';
 import { approveClientSchema } from '@/lib/schemas/advisor';
 import { loadIntakeScriptQuestions } from '@/lib/intake/load-intake-script';
-import type { AdvisorDashboardClient, IntakeReviewData } from '@/lib/advisor/types';
+import { toAdvisorHouseholdMemberViews } from '@/lib/profiles/advisor-household-view';
+import type { IntakeReviewData } from '@/lib/advisor/types';
 import { getAdvisorInvitations } from '@/lib/invitations/service';
 import { InvitationStatus } from '@prisma/client';
 
@@ -98,6 +99,13 @@ export async function getIntakeReviewData(interviewId: string) {
     }
 
     const script = await loadIntakeScriptQuestions();
+
+    const rawHouseholdMembers = await prisma.householdMember.findMany({
+      where: { userId: reviewData.interview.userId },
+      orderBy: { createdAt: 'asc' },
+    });
+    const householdMembers = toAdvisorHouseholdMemberViews(rawHouseholdMembers);
+
     const intakeReviewData: IntakeReviewData = {
       interview: reviewData.interview,
       approval: reviewData.approval,
@@ -112,6 +120,7 @@ export async function getIntakeReviewData(interviewId: string) {
         whyThisMatters: q.whyThisMatters,
         recordingTips: q.recordingTips,
       })),
+      householdMembers,
     };
 
     return {

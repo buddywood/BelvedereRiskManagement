@@ -48,6 +48,14 @@ export async function getActiveIntakeInterview(userId: string): Promise<IntakeIn
   });
 }
 
+/** Most recently touched interview (any status), e.g. to detect SUBMITTED after active filter excludes it. */
+export async function getLatestIntakeInterview(userId: string): Promise<IntakeInterview | null> {
+  return prisma.intakeInterview.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: 'desc' },
+  });
+}
+
 export async function saveIntakeResponse(interviewId: string, questionId: string, data: IntakeResponseInput): Promise<IntakeResponse> {
   const hasAudio = Boolean(data.audioUrl);
   const trimmedTranscription =

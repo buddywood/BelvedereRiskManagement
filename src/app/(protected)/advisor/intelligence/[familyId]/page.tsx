@@ -6,7 +6,7 @@ import { getFamilyRiskDetailData } from '@/lib/actions/advisor-actions';
 import { RiskDetailPanel } from '@/components/intelligence/RiskDetailPanel';
 
 interface RiskDetailPageProps {
-  params: { familyId: string };
+  params: Promise<{ familyId: string }>;
 }
 
 async function RiskDetailContent({ familyId }: { familyId: string }) {
@@ -28,7 +28,7 @@ async function RiskDetailContent({ familyId }: { familyId: string }) {
       <div className="text-center py-12">
         <h2 className="text-lg font-semibold mb-2">No Risk Data Available</h2>
         <p className="text-muted-foreground">
-          This family hasn't completed any governance assessments yet, or you don't have access to this family's data.
+          This family hasn&apos;t completed any governance assessments yet, or you don&apos;t have access to this family&apos;s data.
         </p>
       </div>
     );
@@ -37,8 +37,8 @@ async function RiskDetailContent({ familyId }: { familyId: string }) {
   return <RiskDetailPanel riskDetail={data} />;
 }
 
-export default function RiskDetailPage({ params }: RiskDetailPageProps) {
-  const { familyId } = params;
+export default async function RiskDetailPage({ params }: RiskDetailPageProps) {
+  const { familyId } = await params;
 
   return (
     <div className="container mx-auto px-4 py-8">

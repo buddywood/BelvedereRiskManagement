@@ -4,8 +4,9 @@ import { persist } from 'zustand/middleware';
 /**
  * Intake Interview Store
  *
- * State management for audio interview progress with localStorage persistence.
- * Follows the same pattern as assessment store for consistency.
+ * Responses and currentQuestionIndex are intentionally not persisted: they must match
+ * the server and the current pillar script (question UUIDs / order can change). Persisting
+ * them caused rehydrated stale maps to show the wrong recording for a question.
  */
 
 export interface InterviewResponse {
@@ -28,6 +29,8 @@ interface IntakeState {
   setInterviewId: (id: string) => void;
   setCurrentQuestion: (index: number) => void;
   setResponse: (questionId: string, data: Partial<InterviewResponse>) => void;
+  /** Replace the whole responses map (e.g. after server load). Avoids orphan keys from merge-only updates. */
+  replaceResponses: (responses: Record<string, InterviewResponse>) => void;
   setStatus: (status: IntakeState['status']) => void;
   reset: () => void;
 
@@ -69,6 +72,9 @@ export const useIntakeStore = create<IntakeState>()(
           },
         })),
 
+      replaceResponses: (responses: Record<string, InterviewResponse>) =>
+        set({ responses }),
+
       setStatus: (status: IntakeState['status']) =>
         set({ status }),
 
@@ -94,11 +100,9 @@ export const useIntakeStore = create<IntakeState>()(
       },
     }),
     {
-      name: 'intake-interview',
+      name: 'intake-interview-v2',
       partialize: (state) => ({
         interviewId: state.interviewId,
-        currentQuestionIndex: state.currentQuestionIndex,
-        responses: state.responses,
         status: state.status,
         startedAt: state.startedAt,
       }),

@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useBrandingOptional } from "@/components/providers/BrandingProvider";
+import {
+  clientPortalBrandingDisplayTitle,
+  clientPortalLogoImgSrc,
+} from "@/lib/client/client-portal-branding";
 import { DocumentList } from "./DocumentList";
-import Image from "next/image";
 
 interface DocumentRequirement {
   id: string;
@@ -16,8 +20,10 @@ interface DocumentRequirement {
 }
 
 interface AdvisorInfo {
+  /** Fallback when the client shell has no `BrandingProvider` (branding off). From document requirement advisor row. */
   firmName: string;
-  logoUrl?: string | null;
+  /** Fallback logo when branding context is absent (HTTPS or same-origin path). */
+  logoSrc?: string | null;
 }
 
 interface ClientDocumentPortalProps {
@@ -39,28 +45,38 @@ export function ClientDocumentPortal({
     window.location.reload();
   };
 
-  const hasValidLogo = advisorInfo.logoUrl && advisorInfo.logoUrl.startsWith('https://');
+  const brandingCtx = useBrandingOptional();
+  const assignedBranding = brandingCtx?.branding ?? null;
+
+  const portalTitle = assignedBranding
+    ? clientPortalBrandingDisplayTitle(assignedBranding)
+    : advisorInfo.firmName;
+
+  const logoSrc =
+    (assignedBranding
+      ? clientPortalLogoImgSrc(assignedBranding)
+      : advisorInfo.logoSrc?.trim()) || null;
 
   return (
     <div className="space-y-8">
       {/* Advisor Branding Header */}
       <div className="bg-card border rounded-lg p-6">
         <div className="flex items-center gap-4">
-          {hasValidLogo && (
+          {logoSrc ? (
             <div className="flex-shrink-0">
-              <Image
-                src={advisorInfo.logoUrl!}
-                alt={`${advisorInfo.firmName} logo`}
-                width={120}
-                height={48}
-                className="max-h-12 w-auto object-contain"
-                unoptimized
+              <img
+                src={logoSrc}
+                alt=""
+                className="h-12 w-auto max-w-[200px] object-contain object-left"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
               />
             </div>
-          )}
+          ) : null}
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold text-foreground mb-1">
-              {advisorInfo.firmName}
+              {portalTitle}
             </h1>
             <p className="text-lg text-muted-foreground">
               Document Collection Portal
@@ -72,7 +88,7 @@ export function ClientDocumentPortal({
       {/* Document List */}
       <DocumentList
         requirements={currentRequirements}
-        advisorFirmName={advisorInfo.firmName}
+        advisorFirmName={portalTitle}
         onUploadComplete={handleUploadComplete}
       />
     </div>

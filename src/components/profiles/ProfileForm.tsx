@@ -4,7 +4,15 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { RoleSelector } from './RoleSelector';
 import { householdMemberSchema, HouseholdMemberFormData, RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
@@ -38,6 +46,7 @@ export function ProfileForm({ defaultValues, onSubmit, onCancel, isSubmitting }:
       governanceRoles: defaultValues?.governanceRoles || [],
       isResident: defaultValues?.isResident ?? true,
       notes: defaultValues?.notes || '',
+      shareNameAndContactWithAdvisor: defaultValues?.shareNameAndContactWithAdvisor ?? true,
     },
   });
 
@@ -120,18 +129,24 @@ export function ProfileForm({ defaultValues, onSubmit, onCancel, isSubmitting }:
             <p className={fieldHintClassName}>
               Select how this person is connected to the household decision-makers.
             </p>
-            <select
-              id="relationship"
-              {...register('relationship')}
-              className="h-11 w-full min-w-0 rounded-xl border border-input bg-card/80 px-4 py-2 text-base shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] transition-[color,box-shadow,border-color,background-color] outline-none focus-visible:border-ring focus-visible:bg-background focus-visible:ring-ring/35 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive md:text-sm"
-              aria-invalid={!!errors.relationship}
-            >
-              {relationships.map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <Controller
+              name="relationship"
+              control={control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="relationship" aria-invalid={!!errors.relationship}>
+                    <SelectValue placeholder="Choose relationship" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {relationships.map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.relationship && (
               <p className={errorClassName}>{errors.relationship.message}</p>
             )}
@@ -176,6 +191,33 @@ export function ProfileForm({ defaultValues, onSubmit, onCancel, isSubmitting }:
             {errors.email && <p className={errorClassName}>{errors.email.message}</p>}
           </div>
         </div>
+
+        <Controller
+          name="shareNameAndContactWithAdvisor"
+          control={control}
+          render={({ field }) => (
+            <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/70 bg-background/80 p-4">
+              <Checkbox
+                checked={field.value}
+                onCheckedChange={(state) => field.onChange(state === true)}
+                className="mt-1"
+                aria-describedby="share-advisor-hint"
+              />
+              <span className="min-w-0 space-y-1">
+                <span className="block text-sm font-semibold text-foreground">
+                  Share name and contact with my advisor
+                </span>
+                <span id="share-advisor-hint" className="block text-xs leading-5 text-muted-foreground">
+                  When off, your advisor still sees relationship, residency, governance roles, and age so
+                  assessments stay accurate. Name, phone, email, occupation, and notes stay private to you.
+                </span>
+              </span>
+            </label>
+          )}
+        />
+        {errors.shareNameAndContactWithAdvisor && (
+          <p className={errorClassName}>{errors.shareNameAndContactWithAdvisor.message}</p>
+        )}
       </section>
 
       <section className="space-y-5 rounded-[1.5rem] border border-border/70 bg-background/65 p-5 sm:p-6">

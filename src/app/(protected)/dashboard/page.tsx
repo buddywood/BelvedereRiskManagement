@@ -28,18 +28,39 @@ export default async function DashboardPage() {
     redirect("/advisor");
   }
 
-  // Client: check if intake is approved (assessment access gated on advisor approval)
+  // Latest intake (any status) for hero + approval gate for assessments
   let intakeApproved = false;
-  const submittedInterview = await prisma.intakeInterview.findFirst({
-    where: { userId: session.user.id, status: "SUBMITTED" },
-    select: { id: true },
+  let intakeHeroLabel = "Not started";
+
+  const latestIntake = await prisma.intakeInterview.findFirst({
+    where: { userId: session.user.id },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true, status: true },
   });
-  if (submittedInterview) {
-    const approval = await prisma.intakeApproval.findUnique({
-      where: { interviewId: submittedInterview.id },
-      select: { status: true },
-    });
-    intakeApproved = approval?.status === "APPROVED";
+
+  if (latestIntake) {
+    if (latestIntake.status === "NOT_STARTED") {
+      intakeHeroLabel = "Not started";
+    } else if (latestIntake.status === "IN_PROGRESS") {
+      intakeHeroLabel = "In progress";
+    } else if (latestIntake.status === "COMPLETED") {
+      intakeHeroLabel = "Complete";
+    } else if (latestIntake.status === "SUBMITTED") {
+      const approval = await prisma.intakeApproval.findUnique({
+        where: { interviewId: latestIntake.id },
+        select: { status: true },
+      });
+      intakeApproved = approval?.status === "APPROVED";
+      if (approval?.status === "APPROVED") {
+        intakeHeroLabel = "Approved";
+      } else if (approval?.status === "IN_REVIEW") {
+        intakeHeroLabel = "In review";
+      } else if (approval?.status === "REJECTED") {
+        intakeHeroLabel = "Update needed";
+      } else {
+        intakeHeroLabel = "Pending review";
+      }
+    }
   }
 
   // Fetch assessments with responses and scores
@@ -55,45 +76,56 @@ export default async function DashboardPage() {
     orderBy: { updatedAt: "desc" },
   });
 
+  const assessmentHeroLabel =
+    assessments[0]?.status === "COMPLETED"
+      ? "Complete"
+      : assessments.length
+        ? "In progress"
+        : "None yet";
+
   const totalQuestions = await countVisibleGovernanceQuestions();
 
   return (
     <div className="space-y-6 sm:space-y-8">
       <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
-        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
-          <div className="flex flex-col justify-center space-y-2 sm:space-y-3">
+        <div className="grid min-w-0 gap-6 sm:gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-stretch">
+          <div className="flex min-w-0 flex-col justify-center space-y-2 sm:space-y-3">
             <p className="text-sm text-muted-foreground">
               Welcome back,{" "}
               {session.user.firstName ?? session.user.name ?? "Guest"}
             </p>
           </div>
 
-          <Card className="bg-background/60">
-            <CardContent className="grid gap-6 pt-5 sm:grid-cols-3 sm:gap-6 sm:px-6 sm:pt-6 lg:gap-8">
-              <div className="min-w-0">
-                <p className="editorial-kicker">Assessments</p>
-                <p className="mt-2 text-3xl font-semibold tabular-nums">
-                  {assessments.length}
-                </p>
-              </div>
-              <div className="min-w-0">
-                <p className="editorial-kicker">MFA</p>
-                <p className="mt-2 text-3xl font-semibold">
-                  {session?.user?.mfaEnabled ? "On" : "Off"}
-                </p>
-              </div>
-              <div className="min-w-0">
-                <p className="editorial-kicker">Latest Status</p>
-                <p className="mt-2 text-xl font-semibold leading-snug">
-                  {assessments[0]?.status === "COMPLETED"
-                    ? "Results Ready"
-                    : assessments.length
-                      ? "In Progress"
-                      : "Ready to Start"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="min-w-0">
+            <Card className="bg-background/60">
+              <CardContent className="grid grid-cols-2 gap-x-6 gap-y-8 pt-5 sm:gap-x-8 sm:px-6 sm:pt-6">
+                <div className="min-w-0 max-w-full">
+                  <p className="editorial-kicker block">Intake</p>
+                  <p className="mt-2 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+                    {intakeHeroLabel}
+                  </p>
+                </div>
+                <div className="min-w-0 max-w-full">
+                  <p className="editorial-kicker block">Assessment</p>
+                  <p className="mt-2 break-words text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+                    {assessmentHeroLabel}
+                  </p>
+                </div>
+                <div className="min-w-0 max-w-full">
+                  <p className="editorial-kicker block">Assessments</p>
+                  <p className="mt-2 text-2xl font-semibold tabular-nums leading-tight sm:text-3xl">
+                    {assessments.length}
+                  </p>
+                </div>
+                <div className="min-w-0 max-w-full">
+                  <p className="editorial-kicker block">MFA</p>
+                  <p className="mt-2 text-2xl font-semibold leading-tight sm:text-3xl">
+                    {session?.user?.mfaEnabled ? "On" : "Off"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 

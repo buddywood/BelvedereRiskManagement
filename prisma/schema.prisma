@@ -392,6 +392,8 @@ model HouseholdMember {
   governanceRoles GovernanceRole[]
   isResident     Boolean            @default(true)
   notes          String?
+  /// When false, advisors see relationship, roles, residency, and age only (name, contact, occupation, notes redacted).
+  shareNameAndContactWithAdvisor Boolean            @default(true)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 

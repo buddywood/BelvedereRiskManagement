@@ -8,6 +8,8 @@ interface ClientRawData {
   intake?: {
     status: IntakeStatus;
     updatedAt: Date;
+    /** When set, intake is finished even if `status` was not updated to SUBMITTED. */
+    submittedAt?: Date | null;
   };
   assessment?: {
     status: AssessmentStatus;
@@ -44,7 +46,11 @@ export function computeClientStage(data: ClientRawData): ClientWorkflowStage {
 
   // Check intake status (medium priority)
   if (intake) {
-    if (intake.status === 'COMPLETED' || intake.status === 'SUBMITTED') {
+    if (
+      intake.submittedAt != null ||
+      intake.status === 'COMPLETED' ||
+      intake.status === 'SUBMITTED'
+    ) {
       return 'INTAKE_COMPLETE';
     }
     if (intake.status === 'IN_PROGRESS') {

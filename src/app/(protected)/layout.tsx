@@ -9,10 +9,8 @@ import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncomplete
 import { BrandingProvider } from "@/components/providers/BrandingProvider";
 import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
 import { prisma } from "@/lib/db";
-import {
-  clientPortalLogoImgSrc,
-  getAssignedAdvisorBrandingForClient,
-} from "@/lib/client/assigned-advisor-branding";
+import { clientPortalBrandingDisplayTitle, clientPortalLogoImgSrc } from "@/lib/client/client-portal-branding";
+import { getAssignedAdvisorBrandingForClient } from "@/lib/client/assigned-advisor-branding";
 import { getPreviewBrandHex } from "@/lib/branding/preview-hex";
 import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
 import { cn } from "@/lib/utils";
@@ -63,10 +61,9 @@ export default async function ProtectedLayout({
     }
   }
 
-  const brandTitle =
-    clientAdvisorBranding?.brandName?.trim() ||
-    clientAdvisorBranding?.advisorFirmName?.trim() ||
-    "Partner portal";
+  const brandTitle = clientAdvisorBranding
+    ? clientPortalBrandingDisplayTitle(clientAdvisorBranding)
+    : "Partner portal";
   const previewHex = clientAdvisorBranding
     ? getPreviewBrandHex(clientAdvisorBranding)
     : null;

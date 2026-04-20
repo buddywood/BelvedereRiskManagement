@@ -13,6 +13,7 @@ type HouseholdMemberInput = {
   governanceRoles?: GovernanceRole[];
   isResident?: boolean;
   notes?: string;
+  shareNameAndContactWithAdvisor?: boolean;
 };
 
 function normalizeOptionalString(value?: string) {
@@ -40,6 +41,7 @@ export async function createHouseholdMemberRecord(userId: string, data: Househol
       governanceRoles: data.governanceRoles ?? [],
       isResident: data.isResident ?? true,
       notes: normalizeOptionalString(data.notes),
+      shareNameAndContactWithAdvisor: data.shareNameAndContactWithAdvisor ?? true,
     },
   });
 }
@@ -68,9 +70,22 @@ export async function updateHouseholdMemberRecord(
         governanceRoles: data.governanceRoles ?? [],
         isResident: data.isResident ?? true,
         notes: normalizeOptionalString(data.notes),
+        shareNameAndContactWithAdvisor:
+          data.shareNameAndContactWithAdvisor ?? existingMember.shareNameAndContactWithAdvisor,
       },
     });
   });
+}
+
+export async function setShareNameAndContactWithAdvisorForAllMembers(
+  userId: string,
+  share: boolean,
+): Promise<{ count: number }> {
+  const result = await prisma.householdMember.updateMany({
+    where: { userId },
+    data: { shareNameAndContactWithAdvisor: share },
+  });
+  return { count: result.count };
 }
 
 export async function deleteHouseholdMemberRecord(userId: string, id: string): Promise<boolean> {

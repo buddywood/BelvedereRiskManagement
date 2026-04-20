@@ -1,5 +1,6 @@
 'use client';
 
+import { clientPortalBrandingDisplayTitle } from '@/lib/client/client-portal-branding';
 import { AdvisorBrandingData } from '@/lib/validation/branding';
 
 /**
@@ -269,9 +270,12 @@ export function applyAdvisorTheme(branding: AdvisorBrandingData): void {
     root.style.setProperty(THEME_VARIABLES.ADVISOR_LOGO_URL, `url(${branding.logoUrl})`);
   }
 
-  // Apply brand name
-  if (branding.brandName) {
-    root.style.setProperty(THEME_VARIABLES.ADVISOR_BRAND_NAME, `"${branding.brandName}"`);
+  // Apply brand name (same resolution as client shell header)
+  if (branding.advisorFirmName?.trim() || branding.brandName?.trim()) {
+    root.style.setProperty(
+      THEME_VARIABLES.ADVISOR_BRAND_NAME,
+      `"${clientPortalBrandingDisplayTitle(branding)}"`,
+    );
   }
 
   // Add advisor theme class

@@ -1,4 +1,5 @@
-import type { AdvisorProfile, ClientAdvisorAssignment, IntakeApproval, AdvisorNotification, IntakeInterview, IntakeResponse, User } from '@prisma/client';
+import type { IntakeApproval, IntakeInterview, IntakeResponse } from '@prisma/client';
+import type { AdvisorHouseholdMemberView } from '@/lib/profiles/advisor-household-view';
 
 // Dashboard client data for advisor's client list
 export type AdvisorDashboardClient = {
@@ -32,6 +33,8 @@ export type IntakeReviewData = {
   };
   approval: IntakeApproval | null;
   questions: IntakeQuestion[];
+  /** Household directory mapped for advisor visibility (name/contact redacted per client preference). */
+  householdMembers: AdvisorHouseholdMemberView[];
 };
 
 export type IntakeQuestion = {

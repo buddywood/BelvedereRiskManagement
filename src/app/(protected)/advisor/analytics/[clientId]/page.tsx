@@ -10,7 +10,7 @@ import { AssessmentComparisonView } from '@/components/analytics/AssessmentCompa
 import { TrendIndicator } from '@/components/analytics/TrendIndicator';
 
 interface AnalyticsPageProps {
-  params: { clientId: string };
+  params: Promise<{ clientId: string }>;
 }
 
 async function AnalyticsContent({ clientId }: { clientId: string }) {
@@ -32,7 +32,7 @@ async function AnalyticsContent({ clientId }: { clientId: string }) {
       <div className="text-center py-12">
         <h2 className="text-lg font-semibold mb-2">No Completed Assessments Yet</h2>
         <p className="text-muted-foreground">
-          This family hasn't completed any governance assessments. Analytics will appear after the first assessment is completed.
+          This family hasn&apos;t completed any governance assessments. Analytics will appear after the first assessment is completed.
         </p>
       </div>
     );
@@ -81,8 +81,8 @@ async function AnalyticsContent({ clientId }: { clientId: string }) {
   );
 }
 
-export default function AnalyticsPage({ params }: AnalyticsPageProps) {
-  const { clientId } = params;
+export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
+  const { clientId } = await params;
 
   return (
     <div className="container mx-auto px-4 py-8">

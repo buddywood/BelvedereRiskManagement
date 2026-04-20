@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CircleHelp, Lightbulb, Loader2, Square, Volume2 } from "lucide-react";
+import { CircleHelp, Loader2, Square, Volume2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,8 +20,8 @@ interface AdvisorIntakeViewProps {
 }
 
 /**
- * Advisor view of the intake form: each question as the client sees it (with
- * "Play question" TTS) plus the client's recorded response (audio + transcript).
+ * Advisor view: question text (with optional “why we ask” tooltip and play-question TTS)
+ * and the client’s response (audio + transcript). Recording tips are client-only and omitted here.
  */
 export function AdvisorIntakeView({
   responses,
@@ -79,7 +79,6 @@ function QuestionBlock({
   const text = question.questionText ?? question.text;
   const ttsContext = question.context ?? question.helpText ?? "";
   const tooltipText = question.whyThisMatters?.trim();
-  const recordingTips = question.recordingTips ?? [];
 
   useEffect(() => {
     return () => {
@@ -132,7 +131,7 @@ function QuestionBlock({
         body: JSON.stringify({
           questionText: text,
           context: ttsContext,
-          recordingTips: recordingTips,
+          recordingTips: [],
           questionNumber,
           totalQuestions,
         }),
@@ -216,19 +215,6 @@ function QuestionBlock({
           </Button>
         )}
       </div>
-      {recordingTips.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Lightbulb className="size-4" />
-            <span className="font-medium">Recording tips</span>
-          </div>
-          <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
-            {recordingTips.map((tip, i) => (
-              <li key={i}>{tip}</li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

@@ -23,6 +23,9 @@
 --    All INSERT blocks use ON CONFLICT ... DO NOTHING so the
 --    script is safe to run multiple times.  A second run will
 --    skip rows that already exist rather than failing.
+--    Intake section DEM (Demographic Information) questions are
+--    inserted with is_visible = false by default — family profile
+--    carries structured demographics; admin may show rows in intake if needed.
 --    To update existing rows instead, change DO NOTHING to:
 --      DO UPDATE SET
 --        question_text       = EXCLUDED.question_text,
@@ -115,39 +118,39 @@ ON CONFLICT (category_id, code) DO NOTHING;
 -- QUESTIONS — INTAKE
 -- ============================================================
 
-INSERT INTO questions (section_id, question_number, question_text, answer_type, answer_0, answer_1, answer_2, answer_3, why_this_matters, recommended_actions, is_sub_question, cross_reference, display_order) VALUES
+INSERT INTO questions (section_id, question_number, question_text, answer_type, answer_0, answer_1, answer_2, answer_3, why_this_matters, recommended_actions, is_sub_question, cross_reference, display_order, is_visible) VALUES
 
 -- General Discovery
-('00000000-0000-0000-0001-000000000001', '1', 'How did your financial advisor describe what we do at Belvedere?', 'fillable', NULL, NULL, NULL, NULL, 'Opportunity to describe our services deeper', NULL, FALSE, NULL, 1),
-('00000000-0000-0000-0001-000000000001', '2', 'Have you talked to your professional advisors about your personal and "family risk"?', 'yes_no', NULL, NULL, NULL, NULL, 'Level set sophistication of audience; Value Proposition', NULL, FALSE, 'See 1_A.5', 2),
-('00000000-0000-0000-0001-000000000001', '3', 'How involved are you personally in managing your family''s or business''s risk protection—do you rely mostly on advisors, or do you like to be hands-on?', 'fillable', NULL, NULL, NULL, NULL, 'Level set sophistication of audience', NULL, FALSE, NULL, 3),
-('00000000-0000-0000-0001-000000000001', '4', 'Do you know where your key risk reside?', 'yes_no', NULL, NULL, NULL, NULL, 'Level set sophistication of audience', NULL, FALSE, NULL, 4),
-('00000000-0000-0000-0001-000000000001', '5', 'When you think about risk, what comes to mind first—financial, personal, cyber, or something else?', 'fillable', NULL, NULL, NULL, NULL, 'Help establish client priorities', NULL, FALSE, NULL, 5),
-('00000000-0000-0000-0001-000000000001', '6', 'Have you or anyone close to you ever experienced a situation where insurance or legal protections didn''t fully cover what you expected?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 6),
+('00000000-0000-0000-0001-000000000001', '1', 'How did your financial advisor describe what we do at Belvedere?', 'fillable', NULL, NULL, NULL, NULL, 'Opportunity to describe our services deeper', NULL, FALSE, NULL, 1, TRUE),
+('00000000-0000-0000-0001-000000000001', '2', 'Have you talked to your professional advisors about your personal and "family risk"?', 'yes_no', NULL, NULL, NULL, NULL, 'Level set sophistication of audience; Value Proposition', NULL, FALSE, 'See 1_A.5', 2, TRUE),
+('00000000-0000-0000-0001-000000000001', '3', 'How involved are you personally in managing your family''s or business''s risk protection—do you rely mostly on advisors, or do you like to be hands-on?', 'fillable', NULL, NULL, NULL, NULL, 'Level set sophistication of audience', NULL, FALSE, NULL, 3, TRUE),
+('00000000-0000-0000-0001-000000000001', '4', 'Do you know where your key risk reside?', 'yes_no', NULL, NULL, NULL, NULL, 'Level set sophistication of audience', NULL, FALSE, NULL, 4, TRUE),
+('00000000-0000-0000-0001-000000000001', '5', 'When you think about risk, what comes to mind first—financial, personal, cyber, or something else?', 'fillable', NULL, NULL, NULL, NULL, 'Help establish client priorities', NULL, FALSE, NULL, 5, TRUE),
+('00000000-0000-0000-0001-000000000001', '6', 'Have you or anyone close to you ever experienced a situation where insurance or legal protections didn''t fully cover what you expected?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 6, TRUE),
 
--- Demographic Information
-('00000000-0000-0000-0001-000000000002', '7',  'Household member full names',                                              'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 1),
-('00000000-0000-0000-0001-000000000002', '8',  'Ages',                                                                     'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 2),
-('00000000-0000-0000-0001-000000000002', '9',  'Extended Family not living in the home (adult children/grandchildren)',    'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 3),
-('00000000-0000-0000-0001-000000000002', '10', 'Occupation/Career',                                                        'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 4),
-('00000000-0000-0000-0001-000000000002', '11', 'Primary Contact Phone',                                                    'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 5),
-('00000000-0000-0000-0001-000000000002', '12', 'Primary Contact Email',                                                    'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 6),
+-- Demographic Information (hidden from client intake by default — use family profile)
+('00000000-0000-0000-0001-000000000002', '7',  'Household member full names',                                              'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 1, FALSE),
+('00000000-0000-0000-0001-000000000002', '8',  'Ages',                                                                     'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 2, FALSE),
+('00000000-0000-0000-0001-000000000002', '9',  'Extended Family not living in the home (adult children/grandchildren)',    'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 3, FALSE),
+('00000000-0000-0000-0001-000000000002', '10', 'Occupation/Career',                                                        'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 4, FALSE),
+('00000000-0000-0000-0001-000000000002', '11', 'Primary Contact Phone',                                                    'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 5, FALSE),
+('00000000-0000-0000-0001-000000000002', '12', 'Primary Contact Email',                                                    'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 6, FALSE),
 
 -- Lifestyle and Asset Profile
-('00000000-0000-0000-0001-000000000003', '13', 'Can you tell me a bit about your primary residences or vacation homes?', 'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 1),
-('00000000-0000-0000-0001-000000000003', '14', 'How many homes?', 'number', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 2),
-('00000000-0000-0000-0001-000000000003', '15', 'What are the zipcodes?', 'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 3),
-('00000000-0000-0000-0001-000000000003', '16', 'Are any located in coastal or wildfire-prone areas?', 'yes_no', NULL, NULL, NULL, NULL, 'Helps surface geography of coastal or wildfire zone exposure', NULL, FALSE, NULL, 4),
-('00000000-0000-0000-0001-000000000003', '17', 'Do you employ or contract with household staff, property managers, or vendors who access your home or technology systems?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See 1_D.3, See 1_D.5', 5),
-('00000000-0000-0000-0001-000000000003', '18', 'How would you describe your online presence or digital footprint—are you or your family members active on social media?', 'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See CyberSecurity', 6),
-('00000000-0000-0000-0001-000000000003', '19', 'Do you or your family travel frequently—domestic or internationally?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Physical Security', 7),
+('00000000-0000-0000-0001-000000000003', '13', 'Can you tell me a bit about your primary residences or vacation homes?', 'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 1, TRUE),
+('00000000-0000-0000-0001-000000000003', '14', 'How many homes?', 'number', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 2, TRUE),
+('00000000-0000-0000-0001-000000000003', '15', 'What are the zipcodes?', 'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, NULL, 3, TRUE),
+('00000000-0000-0000-0001-000000000003', '16', 'Are any located in coastal or wildfire-prone areas?', 'yes_no', NULL, NULL, NULL, NULL, 'Helps surface geography of coastal or wildfire zone exposure', NULL, FALSE, NULL, 4, TRUE),
+('00000000-0000-0000-0001-000000000003', '17', 'Do you employ or contract with household staff, property managers, or vendors who access your home or technology systems?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See 1_D.3, See 1_D.5', 5, TRUE),
+('00000000-0000-0000-0001-000000000003', '18', 'How would you describe your online presence or digital footprint—are you or your family members active on social media?', 'fillable', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See CyberSecurity', 6, TRUE),
+('00000000-0000-0000-0001-000000000003', '19', 'Do you or your family travel frequently—domestic or internationally?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Physical Security', 7, TRUE),
 
 -- Professional and Financial Exposures
-('00000000-0000-0000-0001-000000000004', '20', 'Does your professional role involve public visibility, media exposure, or fiduciary responsibilities?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Reputational Social', 1),
-('00000000-0000-0000-0001-000000000004', '21', 'Do you or your spouse serve on boards, own businesses, or hold investments that could expose you to liability?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 2),
-('00000000-0000-0000-0001-000000000004', '22', 'Are you aware of what your company-provided insurance covers—and what it doesn''t (e.g., auto, D&O, travel)?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 3),
-('00000000-0000-0000-0001-000000000004', '23', 'Do you have any special collections, art, aircraft, or watercraft that might require tailored coverage?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 4),
-('00000000-0000-0000-0001-000000000004', '24', 'When was the last time your personal insurance coverages were reviewed or benchmarked against your current income and net worth?', 'date_mm_yyyy', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 5)
+('00000000-0000-0000-0001-000000000004', '20', 'Does your professional role involve public visibility, media exposure, or fiduciary responsibilities?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Reputational Social', 1, TRUE),
+('00000000-0000-0000-0001-000000000004', '21', 'Do you or your spouse serve on boards, own businesses, or hold investments that could expose you to liability?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 2, TRUE),
+('00000000-0000-0000-0001-000000000004', '22', 'Are you aware of what your company-provided insurance covers—and what it doesn''t (e.g., auto, D&O, travel)?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 3, TRUE),
+('00000000-0000-0000-0001-000000000004', '23', 'Do you have any special collections, art, aircraft, or watercraft that might require tailored coverage?', 'yes_no', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 4, TRUE),
+('00000000-0000-0000-0001-000000000004', '24', 'When was the last time your personal insurance coverages were reviewed or benchmarked against your current income and net worth?', 'date_mm_yyyy', NULL, NULL, NULL, NULL, NULL, NULL, FALSE, 'See Insurance', 5, TRUE)
 ON CONFLICT (section_id, question_number) DO NOTHING;
 
 -- ============================================================

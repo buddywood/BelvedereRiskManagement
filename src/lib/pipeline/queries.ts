@@ -1,8 +1,23 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import type { PipelineClient, PipelineMetrics, ClientWorkflowStage, ClientDetail, WorkflowEvent } from "./types";
 import { computeClientStage, computeProgress, isStalled } from "./status";
+
+/** Voice answers often omit `answeredAt` until later; typed answers set it. */
+function whereIntakeResponseHasAnswer(interviewId: string): Prisma.IntakeResponseWhereInput {
+  return {
+    interviewId,
+    OR: [
+      { answeredAt: { not: null } },
+      { audioUrl: { not: null } },
+      {
+        AND: [{ transcription: { not: null } }, { NOT: { transcription: { equals: "" } } }],
+      },
+    ],
+  };
+}
 
 /**
  * Fetches complete pipeline data for an advisor's clients
@@ -102,6 +117,7 @@ export async function getClientPipeline(advisorProfileId: string): Promise<Pipel
       intake: latestIntake ? {
         status: latestIntake.status,
         updatedAt: latestIntake.updatedAt,
+        submittedAt: latestIntake.submittedAt,
       } : undefined,
       assessment: latestAssessment ? {
         status: latestAssessment.status,
@@ -130,10 +146,7 @@ export async function getClientPipeline(advisorProfileId: string): Promise<Pipel
       intake: latestIntake ? {
         status: latestIntake.status,
         responseCount: await prisma.intakeResponse.count({
-          where: {
-            interviewId: latestIntake.id,
-            answeredAt: { not: null }
-          }
+          where: whereIntakeResponseHasAnswer(latestIntake.id),
         }),
         submittedAt: latestIntake.submittedAt,
       } : null,
@@ -350,6 +363,7 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
     intake: latestIntake ? {
       status: latestIntake.status,
       updatedAt: latestIntake.updatedAt,
+      submittedAt: latestIntake.submittedAt,
     } : undefined,
     assessment: latestAssessment ? {
       status: latestAssessment.status,
@@ -387,10 +401,7 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
     intake: latestIntake ? {
       status: latestIntake.status,
       responseCount: await prisma.intakeResponse.count({
-        where: {
-          interviewId: latestIntake.id,
-          answeredAt: { not: null }
-        }
+        where: whereIntakeResponseHasAnswer(latestIntake.id),
       }),
       submittedAt: latestIntake.submittedAt,
     } : null,
@@ -414,13 +425,11 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
     });
 
     const responseCount = await prisma.intakeResponse.count({
-      where: {
-        interviewId: latestIntake.id,
-        answeredAt: { not: null }
-      }
+      where: whereIntakeResponseHasAnswer(latestIntake.id),
     });
 
     intakeDetails = {
+      interviewId: latestIntake.id,
       status: latestIntake.status,
       responseCount,
       totalQuestions: totalResponses, // Use total response slots as proxy for questions
@@ -444,7 +453,7 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
       score: score.score,
       riskLevel: score.riskLevel,
       completedAt: latestAssessment.completedAt,
-      pillarScores: pillarScores.map((pillar: any) => ({
+      pillarScores: pillarScores.map((pillar) => ({
         pillar: pillar.pillar,
         score: pillar.score,
         riskLevel: pillar.riskLevel,

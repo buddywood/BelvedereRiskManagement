@@ -1,6 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { getActiveIntakeInterviewAction, startIntakeInterview } from "@/lib/actions/intake-actions";
+import {
+  getActiveIntakeInterviewAction,
+  getLatestIntakeInterviewAction,
+  startIntakeInterview,
+} from "@/lib/actions/intake-actions";
 import { redirect } from "next/navigation";
 
 /**
@@ -17,6 +21,14 @@ export default async function IntakePage() {
   if (activeResult.success && activeResult.interview) {
     // User has an active interview - redirect to continue it
     redirect(`/intake/interview`);
+  }
+
+  const latestResult = await getLatestIntakeInterviewAction();
+  if (
+    latestResult.success &&
+    latestResult.interview?.status === "SUBMITTED"
+  ) {
+    redirect("/intake/complete");
   }
 
   // Server action to start a new interview
@@ -43,7 +55,7 @@ export default async function IntakePage() {
             <div className="space-y-3 text-muted-foreground">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-primary rounded-full shrink-0" />
-                <span>10 focused questions about your family's governance approach</span>
+                <span>10 focused questions about your family&apos;s governance approach</span>
               </div>
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-primary rounded-full shrink-0" />

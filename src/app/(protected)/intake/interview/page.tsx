@@ -13,7 +13,7 @@ import { QuestionDisplay } from "@/components/intake/QuestionDisplay";
 import { AudioRecorder } from "@/components/intake/AudioRecorder";
 import { StepIndicator } from "@/components/intake/StepIndicator";
 import { useIntakeInterview } from "@/lib/hooks/useIntakeInterview";
-import { useIntakeStore } from "@/lib/intake/store";
+import { useIntakeStore, type InterviewResponse } from "@/lib/intake/store";
 import { isInterviewResponseComplete } from "@/lib/intake/is-response-complete";
 import type { IntakeQuestion } from "@/lib/intake/types";
 import {
@@ -22,6 +22,7 @@ import {
   updateProgress,
   submitIntakeInterviewAction,
   getActiveIntakeInterviewAction,
+  getLatestIntakeInterviewAction,
   saveResponse
 } from "@/lib/actions/intake-actions";
 
@@ -55,7 +56,7 @@ export default function InterviewPage() {
     getResponseForQuestion
   } = useIntakeInterview(interviewId || "", scriptQuestions);
 
-  const { responses, setResponse, setCurrentQuestion } = useIntakeStore();
+  const { responses, setResponse, setCurrentQuestion, replaceResponses } = useIntakeStore();
 
   // Load interview on mount
   useEffect(() => {
@@ -81,6 +82,7 @@ export default function InterviewPage() {
 
           const script = [...scriptResult.questions];
           setScriptQuestions(script);
+          const scriptQuestionIds = new Set(script.map((q) => q.id));
 
           if (detailResult.success && detailResult.interview) {
             const loadedInterview = detailResult.interview;
@@ -88,26 +90,35 @@ export default function InterviewPage() {
             const idx = Math.min(loadedInterview.currentQuestionIndex ?? 0, maxIdx);
             setCurrentQuestion(idx);
 
-            if (loadedInterview.responses) {
-              for (const response of loadedInterview.responses) {
-                setResponse(response.questionId, {
-                  audioUrl: response.audioUrl || undefined,
-                  audioDuration: response.audioDuration || 0,
-                  transcription: response.transcription || undefined,
-                  transcriptionEditedAt: undefined,
-                  status:
-                    response.transcriptionStatus === 'COMPLETED' ||
-                    (!response.audioUrl && Boolean(response.transcription?.trim()))
-                      ? 'completed'
-                      : 'pending',
-                });
-              }
+            const nextResponses: Record<string, InterviewResponse> = {};
+            for (const response of loadedInterview.responses ?? []) {
+              if (!scriptQuestionIds.has(response.questionId)) continue;
+              nextResponses[response.questionId] = {
+                audioUrl: response.audioUrl || undefined,
+                audioDuration: response.audioDuration || 0,
+                transcription: response.transcription || undefined,
+                transcriptionEditedAt: undefined,
+                status:
+                  response.transcriptionStatus === "COMPLETED" ||
+                  (!response.audioUrl && Boolean(response.transcription?.trim()))
+                    ? "completed"
+                    : "pending",
+              };
             }
+            replaceResponses(nextResponses);
           } else {
             setCurrentQuestion(0);
+            replaceResponses({});
           }
         } else {
-          // No active interview - redirect to start page
+          const latestResult = await getLatestIntakeInterviewAction();
+          if (
+            latestResult.success &&
+            latestResult.interview?.status === "SUBMITTED"
+          ) {
+            router.push("/intake/complete");
+            return;
+          }
           router.push("/intake");
           return;
         }
@@ -121,7 +132,7 @@ export default function InterviewPage() {
     }
 
     loadInterview();
-  }, [router, setCurrentQuestion, setResponse]);
+  }, [router, replaceResponses, setCurrentQuestion]);
 
   const currentResponse = currentQuestion
     ? getResponseForQuestion(currentQuestion.id)
@@ -162,13 +173,16 @@ export default function InterviewPage() {
   const handleRecordingComplete = async (blob: Blob, duration: number) => {
     if (!interviewId || !currentQuestion || uploading || submitting || typedSaving) return;
 
+    const questionId = currentQuestion.id;
+    const recordedOnLastQuestion = isLastQuestion;
+
     setUploading(true);
 
     try {
       // Step 1: Upload audio file
       const formData = new FormData();
       formData.append("audio", blob);
-      formData.append("questionId", currentQuestion.id);
+      formData.append("questionId", questionId);
 
       const uploadResponse = await fetch(`/api/intake/${interviewId}/audio`, {
         method: "POST",
@@ -182,7 +196,7 @@ export default function InterviewPage() {
       const uploadData = await uploadResponse.json();
 
       // Step 2: Update local store with upload result
-      setResponse(currentQuestion.id, {
+      setResponse(questionId, {
         audioUrl: uploadData.audioUrl,
         audioDuration: duration,
         status: 'pending'
@@ -195,14 +209,14 @@ export default function InterviewPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ questionId: currentQuestion.id }),
+          body: JSON.stringify({ questionId }),
         });
 
         if (transcribeResponse.ok) {
           const transcribeData = await transcribeResponse.json();
 
           // Update store with transcription result
-          setResponse(currentQuestion.id, {
+          setResponse(questionId, {
             audioUrl: uploadData.audioUrl,
             audioDuration: duration,
             transcription: transcribeData.transcription,
@@ -212,7 +226,7 @@ export default function InterviewPage() {
           // Handle transcription failure gracefully
           console.warn("Transcription failed, but audio was saved:", await transcribeResponse.text());
 
-          setResponse(currentQuestion.id, {
+          setResponse(questionId, {
             audioUrl: uploadData.audioUrl,
             audioDuration: duration,
             transcription: undefined,
@@ -225,7 +239,7 @@ export default function InterviewPage() {
         console.warn("Transcription service error:", transcribeError);
 
         // Audio is saved, just mark as completed without transcription
-        setResponse(currentQuestion.id, {
+        setResponse(questionId, {
           audioUrl: uploadData.audioUrl,
           audioDuration: duration,
           transcription: undefined,
@@ -236,7 +250,7 @@ export default function InterviewPage() {
       }
 
       // Step 4: If this is the last question, auto-submit
-      if (isLastQuestion) {
+      if (recordedOnLastQuestion) {
         await submitInterviewIfLast();
       } else {
         toast.success("Response saved!");

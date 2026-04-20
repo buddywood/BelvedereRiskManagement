@@ -15,6 +15,7 @@ export const householdMemberSchema = z.object({
   governanceRoles: z.array(z.enum(['DECISION_MAKER', 'ADVISOR', 'SUCCESSOR', 'BENEFICIARY', 'TRUSTEE', 'EXECUTOR', 'OTHER'])),
   isResident: z.boolean(),
   notes: z.string().max(500, 'Notes must be 500 characters or less').optional(),
+  shareNameAndContactWithAdvisor: z.boolean().default(true),
 });
 
 // Schema for updating household members (partial except for required fields)

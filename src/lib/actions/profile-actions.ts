@@ -6,6 +6,7 @@ import {
   deleteHouseholdMemberRecord,
   updateHouseholdMemberRecord,
   listHouseholdMembers,
+  setShareNameAndContactWithAdvisorForAllMembers,
 } from '@/lib/data/household-members';
 import { householdMemberSchema, updateHouseholdMemberSchema } from '@/lib/schemas/profile';
 import { revalidatePath } from 'next/cache';
@@ -79,6 +80,20 @@ export async function getHouseholdMembers() {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get household members';
     return { success: false, error: message, members: null };
+  }
+}
+
+/** Apply the same advisor visibility preference to every household member for the signed-in client. */
+export async function setAllHouseholdMembersShareNameAndContactWithAdvisor(share: boolean) {
+  try {
+    const userId = await getAuthUserId();
+    await setShareNameAndContactWithAdvisorForAllMembers(userId, share);
+    revalidatePath('/profiles');
+    return { success: true as const };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Failed to update advisor visibility for household';
+    return { success: false as const, error: message };
   }
 }
 

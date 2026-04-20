@@ -5,6 +5,7 @@ import {
   createIntakeInterview,
   getIntakeInterview,
   getActiveIntakeInterview,
+  getLatestIntakeInterview,
   saveIntakeResponse,
   updateInterviewProgress,
   submitIntakeInterview,
@@ -201,6 +202,17 @@ export async function getActiveIntakeInterviewAction() {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to get active interview';
     return { success: false, error: message, interview: null };
+  }
+}
+
+export async function getLatestIntakeInterviewAction() {
+  try {
+    const userId = await getAuthUserId();
+    const interview = await getLatestIntakeInterview(userId);
+    return { success: true as const, interview };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to get latest interview';
+    return { success: false as const, error: message, interview: null };
   }
 }
 

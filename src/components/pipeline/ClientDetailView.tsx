@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
-import { ArrowLeft, User, Mail, Calendar, ExternalLink, BarChart3, FileText, CheckCircle } from "lucide-react";
+import { ArrowLeft, Mail, Calendar, ExternalLink, BarChart3, FileText, CheckCircle } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,13 +11,13 @@ import { Progress } from "@/components/ui/progress";
 import { WorkflowTimeline } from "./WorkflowTimeline";
 import { DocumentRequirements } from "./DocumentRequirements";
 import { getStageLabel } from "@/lib/pipeline/status";
-import type { ClientDetail } from "@/lib/pipeline/types";
+import type { ClientDetail, ClientWorkflowStage } from "@/lib/pipeline/types";
 
 interface ClientDetailViewProps {
   detail: ClientDetail;
 }
 
-function getStageBadgeVariant(stage: any) {
+function getStageBadgeVariant(stage: ClientWorkflowStage) {
   switch (stage) {
     case 'INVITED':
     case 'REGISTERED':
@@ -50,9 +50,19 @@ function getRiskLevelColor(riskLevel: string) {
   }
 }
 
+function isIntakeFinished(detail: ClientDetail['intakeDetails']) {
+  if (!detail) return false;
+  return (
+    detail.submittedAt != null ||
+    detail.status === 'SUBMITTED' ||
+    detail.status === 'COMPLETED'
+  );
+}
+
 export function ClientDetailView({ detail }: ClientDetailViewProps) {
   const { client, timeline, documentRequirements, intakeDetails, assessmentDetails } = detail;
   const displayName = client.name || 'Unnamed Client';
+  const intakeFinished = isIntakeFinished(intakeDetails);
 
   return (
     <div className="container mx-auto py-6">
@@ -134,15 +144,24 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Status</p>
-                    <Badge variant={intakeDetails.status === 'COMPLETED' ? 'success' : 'secondary'}>
-                      {intakeDetails.status === 'COMPLETED' ? 'Complete' : 'In Progress'}
+                    <Badge variant={intakeFinished ? 'success' : 'secondary'}>
+                      {intakeFinished ? 'Complete' : 'In Progress'}
                     </Badge>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">Progress</p>
-                    <p className="text-lg font-semibold">
-                      {intakeDetails.responseCount}/{intakeDetails.totalQuestions}
-                    </p>
+                    {intakeFinished ? (
+                      <div>
+                        <p className="text-lg font-semibold">Submitted</p>
+                        <p className="text-xs text-muted-foreground">
+                          {intakeDetails.responseCount}/{intakeDetails.totalQuestions} responses on file
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-lg font-semibold">
+                        {intakeDetails.responseCount}/{intakeDetails.totalQuestions}
+                      </p>
+                    )}
                   </div>
                   {intakeDetails.submittedAt && (
                     <div>
@@ -150,10 +169,10 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
                       <p className="text-sm">{format(intakeDetails.submittedAt, 'MMM d, yyyy')}</p>
                     </div>
                   )}
-                  {intakeDetails.submittedAt && intakeDetails.responseCount > 0 && (
+                  {intakeFinished && intakeDetails.responseCount > 0 && (
                     <div>
                       <Link
-                        href={`/advisor/review/${client.id}`}
+                        href={`/advisor/review/${intakeDetails.interviewId}`}
                         className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
                       >
                         <ExternalLink className="w-3 h-3" />
@@ -272,9 +291,9 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
                 </Button>
               )}
 
-              {intakeDetails?.submittedAt && (
+              {intakeDetails && intakeFinished && (
                 <Button variant="outline" className="w-full justify-start" asChild>
-                  <Link href={`/advisor/review/${client.id}`}>
+                  <Link href={`/advisor/review/${intakeDetails.interviewId}`}>
                     <FileText className="w-4 h-4 mr-2" />
                     Review Intake
                   </Link>

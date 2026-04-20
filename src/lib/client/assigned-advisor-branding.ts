@@ -3,19 +3,10 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import type { AdvisorBrandingData } from "@/lib/validation/branding";
 
-export const CLIENT_ADVISOR_LOGO_PATH = "/api/client/advisor-logo";
-
-/** Logo URL for `<img src>` in the client portal header (S3 proxy or public HTTPS). */
-export function clientPortalLogoImgSrc(branding: AdvisorBrandingData): string | null {
-  if (branding.logoS3Key) {
-    return CLIENT_ADVISOR_LOGO_PATH;
-  }
-  const url = branding.logoUrl?.trim();
-  if (url?.startsWith("https://")) {
-    return url;
-  }
-  return null;
-}
+export {
+  CLIENT_ADVISOR_LOGO_PATH,
+  clientPortalLogoImgSrc,
+} from "@/lib/client/client-portal-branding";
 
 /**
  * Branding for the client's currently active advisor assignment (main app /dashboard, not subdomain "branded" routes).
@@ -56,12 +47,10 @@ export async function getAssignedAdvisorBrandingForClient(
     return null;
   }
 
-  const brandName =
-    a.brandName?.trim() || a.firmName?.trim() || null;
-
   return {
-    brandName,
-    advisorFirmName: a.firmName,
+    /** Optional display override; may lag `firmName` if profile was edited outside branding save. */
+    brandName: a.brandName?.trim() || null,
+    advisorFirmName: a.firmName?.trim() || null,
     tagline: a.tagline,
     primaryColor: a.primaryColor,
     secondaryColor: a.secondaryColor,

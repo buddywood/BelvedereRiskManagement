@@ -61,6 +61,9 @@ export async function updateAdvisorByAdmin(input: UpdateAdvisorInput) {
           licenseNumber: parsed.data.licenseNumber ?? undefined,
           bio: parsed.data.bio ?? undefined,
           specializations: parsed.data.specializations ?? undefined,
+          ...(parsed.data.firmName !== undefined
+            ? { brandName: parsed.data.firmName?.trim() || null }
+            : {}),
         },
       });
     } else {
@@ -137,10 +140,12 @@ export async function createAdvisorByAdmin(input: CreateAdvisorInput) {
       select: { id: true, email: true },
     });
 
+    const firm = parsed.data.firmName?.trim() || null;
     await prisma.advisorProfile.create({
       data: {
         userId: user.id,
-        firmName: parsed.data.firmName ?? undefined,
+        firmName: firm ?? undefined,
+        brandName: firm,
         phone: parsed.data.phone ?? undefined,
         jobTitle: parsed.data.jobTitle ?? undefined,
         licenseNumber: parsed.data.licenseNumber ?? undefined,

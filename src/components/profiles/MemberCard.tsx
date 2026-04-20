@@ -26,6 +26,7 @@ type HouseholdMember = {
   governanceRoles: HouseholdMemberFormData['governanceRoles'];
   isResident: boolean;
   notes: string | null;
+  shareNameAndContactWithAdvisor: boolean;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -73,6 +74,14 @@ export function MemberCard({ member, onEdit, onDelete }: MemberCardProps) {
               <Badge variant={member.isResident ? 'secondary' : 'info'} className="bg-background/75">
                 {member.isResident ? 'Lives In Household' : 'Extended Family'}
               </Badge>
+              {!member.shareNameAndContactWithAdvisor ? (
+                <Badge
+                  variant="outline"
+                  className="max-w-full border-amber-500/40 bg-amber-500/10 text-left text-xs font-medium leading-snug text-amber-950 dark:text-amber-100"
+                >
+                  Name & contact hidden from advisor
+                </Badge>
+              ) : null}
             </div>
           </div>
           <div className="flex gap-2">

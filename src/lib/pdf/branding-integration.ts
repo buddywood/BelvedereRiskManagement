@@ -1,3 +1,4 @@
+import { clientPortalBrandingDisplayTitle } from '@/lib/client/client-portal-branding';
 import { prisma } from '@/lib/db';
 import { AdvisorBrandingData } from '@/lib/validation/branding';
 import {
@@ -110,8 +111,14 @@ export async function getAdvisorBrandingForPDFByUserId(userId: string): Promise<
 /**
  * Create branded PDF metadata
  */
+function pdfDisplayNameFromBranding(branding?: AdvisorBrandingData | null): string {
+  if (!branding) return "Belvedere Risk Management";
+  const t = clientPortalBrandingDisplayTitle(branding);
+  return t === "Partner portal" ? "Belvedere Risk Management" : t;
+}
+
 export function createBrandedPDFMetadata(branding?: AdvisorBrandingData) {
-  const brandName = branding?.brandName || branding?.advisorFirmName || 'Belvedere Risk Management';
+  const brandName = pdfDisplayNameFromBranding(branding);
 
   return {
     title: 'Family Risk Assessment Report',
@@ -132,7 +139,7 @@ export function generateBrandedDocumentTitle(
   clientName?: string,
   branding?: AdvisorBrandingData
 ): string {
-  const brandName = branding?.brandName || branding?.advisorFirmName || 'Belvedere Risk Management';
+  const brandName = pdfDisplayNameFromBranding(branding);
   const clientPart = clientName ? ` - ${clientName}` : '';
 
   return `${documentType} by ${brandName}${clientPart}`;

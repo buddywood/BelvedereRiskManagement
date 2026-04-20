@@ -1,8 +1,7 @@
-import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft, Clock, FileText, User } from "lucide-react";
+import { notFound } from "next/navigation";
+import { Clock, FileText, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { AdvisorHouseholdDirectory } from "@/components/advisor/AdvisorHouseholdDirectory";
 import { AdvisorIntakeView } from "@/components/advisor/AdvisorIntakeView";
 import { ReviewSidebar } from "@/components/advisor/ReviewSidebar";
 import { getIntakeReviewData } from "@/lib/actions/advisor-actions";
@@ -21,7 +20,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
     notFound();
   }
 
-  const { interview, approval, questions } = result.data;
+  const { interview, approval, questions, householdMembers } = result.data;
 
   // Format submission date
   const submittedAt = interview.submittedAt
@@ -116,6 +115,8 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
               </div>
             </div>
 
+            <AdvisorHouseholdDirectory members={householdMembers} />
+
             {/* Intake form: view each question (with Play question) and client response */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -143,6 +144,7 @@ export default async function ReviewPage({ params }: ReviewPageProps) {
                 <ReviewSidebar
                   interviewId={interview.id}
                   approval={approval}
+                  householdProfileCount={householdMembers.length}
                 />
               </div>
             </div>

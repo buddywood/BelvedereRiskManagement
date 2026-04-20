@@ -26,8 +26,9 @@ function recordingTipsFromRow(row: PillarQuestionWithHierarchy): string[] {
 }
 
 /**
- * Ordered intake script for the audio interview: visible `questions` rows whose category
- * is `PillarCategoryKind.INTAKE`. If none exist, returns legacy `INTAKE_QUESTIONS` (TypeScript).
+ * Ordered intake script for the audio interview: `questions` rows in category `INTAKE`
+ * with `is_visible` true (e.g. demographic / DEM section defaults to hidden in pillar seed;
+ * admins can show rows again). If none match, returns legacy `INTAKE_QUESTIONS` (TypeScript).
  */
 export async function loadIntakeScriptQuestions(): Promise<IntakeQuestion[]> {
   try {

@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { MemberCard } from '@/components/profiles/MemberCard';
 import { ProfileForm } from '@/components/profiles/ProfileForm';
-import { createHouseholdMember, updateHouseholdMember, deleteHouseholdMember } from '@/lib/actions/profile-actions';
-import { HouseholdMemberFormData, RELATIONSHIP_LABELS, GOVERNANCE_ROLE_LABELS } from '@/lib/schemas/profile';
+import {
+  createHouseholdMember,
+  updateHouseholdMember,
+  deleteHouseholdMember,
+  setAllHouseholdMembersShareNameAndContactWithAdvisor,
+} from '@/lib/actions/profile-actions';
+import { HouseholdMemberFormData } from '@/lib/schemas/profile';
 import { ArrowLeft, Plus, ShieldCheck, Users } from 'lucide-react';
 
 // Using Prisma type from the database
@@ -24,6 +30,7 @@ type HouseholdMember = {
   governanceRoles: HouseholdMemberFormData['governanceRoles'];
   isResident: boolean;
   notes: string | null;
+  shareNameAndContactWithAdvisor: boolean;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -39,9 +46,17 @@ export function ProfilesClient({ initialMembers }: ProfilesClientProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingMember, setEditingMember] = useState<HouseholdMember | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBulkSharePending, startBulkShareTransition] = useTransition();
   const router = useRouter();
   const residentCount = initialMembers.filter((member) => member.isResident).length;
   const advisoryCount = initialMembers.filter((member) => member.governanceRoles.length > 0).length;
+  const allShareNameWithAdvisor = initialMembers.every((m) => m.shareNameAndContactWithAdvisor);
+  const noneShareNameWithAdvisor = initialMembers.every((m) => !m.shareNameAndContactWithAdvisor);
+  const bulkShareChecked: boolean | 'indeterminate' = allShareNameWithAdvisor
+    ? true
+    : noneShareNameWithAdvisor
+      ? false
+      : 'indeterminate';
 
   const handleAddMember = () => {
     setEditingMember(null);
@@ -84,6 +99,24 @@ export function ProfilesClient({ initialMembers }: ProfilesClientProps) {
     }
   };
 
+  const handleBulkShareWithAdvisor = (share: boolean) => {
+    startBulkShareTransition(() => {
+      void (async () => {
+        const result = await setAllHouseholdMembersShareNameAndContactWithAdvisor(share);
+        if (result.success) {
+          toast.success(
+            share
+              ? 'All members now share name and contact with your advisor'
+              : 'Name and contact are hidden from your advisor for all members (roles still visible)',
+          );
+          router.refresh();
+        } else {
+          toast.error(result.error || 'Could not update advisor visibility');
+        }
+      })();
+    });
+  };
+
   const handleDelete = async (id: string) => {
     try {
       const result = await deleteHouseholdMember(id);
@@ -109,6 +142,7 @@ export function ProfilesClient({ initialMembers }: ProfilesClientProps) {
     governanceRoles: member.governanceRoles,
     isResident: member.isResident,
     notes: member.notes || undefined,
+    shareNameAndContactWithAdvisor: member.shareNameAndContactWithAdvisor,
   });
 
   if (showForm) {
@@ -244,6 +278,36 @@ export function ProfilesClient({ initialMembers }: ProfilesClientProps) {
           Add Member
         </Button>
       </div>
+
+      <Card className="overflow-hidden border-border/70 bg-background/65">
+        <CardHeader className="pb-2 pt-5 sm:pt-6">
+          <CardTitle className="text-lg">Advisor visibility</CardTitle>
+          <CardDescription className="max-w-3xl text-sm leading-6">
+            Control whether your advisor can see each person&apos;s name, phone, email, occupation, and notes.
+            Relationship, residency, governance roles, and age stay visible for risk assessments when sharing is
+            off.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pb-5 sm:pb-6">
+          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/70 bg-background/80 p-4">
+            <Checkbox
+              checked={bulkShareChecked}
+              onCheckedChange={(state) => handleBulkShareWithAdvisor(state === true)}
+              disabled={isBulkSharePending}
+              className="mt-1"
+              aria-describedby="bulk-advisor-visibility-hint"
+            />
+            <span className="min-w-0 space-y-1">
+              <span className="block text-sm font-semibold text-foreground">
+                Share name and contact with my advisor for everyone
+              </span>
+              <span id="bulk-advisor-visibility-hint" className="block text-xs leading-5 text-muted-foreground">
+                You can still change this per person when adding or editing a member.
+              </span>
+            </span>
+          </label>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3">
         {initialMembers.map((member) => (

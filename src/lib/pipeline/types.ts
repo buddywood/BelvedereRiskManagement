@@ -69,6 +69,7 @@ export type ClientDetail = {
     fileSize: number | null;
   }[];
   intakeDetails: {
+    interviewId: string;
     status: string;
     responseCount: number;
     totalQuestions: number;

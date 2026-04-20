@@ -39,9 +39,15 @@ export default async function DocumentsPage() {
   // For now, display requirements from the first advisor
   // In the future, this could be enhanced to handle multiple advisors
   const firstGroup = advisorGroups[0];
+  const rawLogo = firstGroup.advisor.logoUrl?.trim();
+  const fallbackLogoSrc =
+    rawLogo && (rawLogo.startsWith("https://") || rawLogo.startsWith("/"))
+      ? rawLogo
+      : null;
+
   const advisorInfo = {
     firmName: firstGroup.advisor.firmName,
-    logoUrl: firstGroup.advisor.logoUrl,
+    logoSrc: fallbackLogoSrc,
   };
 
   return (

@@ -5,8 +5,6 @@ import { computeClientStage, isStalled, getStageLabel } from "@/lib/pipeline/sta
 import { shouldSendNotification } from "@/lib/notifications/preferences";
 import { sendNotification } from "@/lib/notifications/service";
 import { renderNotificationEmail } from "@/lib/notifications/templates";
-import { ClientWorkflowStage } from "@prisma/client";
-
 interface ProcessResult {
   advisorsNotified: number;
   clientsEscalated: number;
@@ -137,6 +135,7 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
           intake: latestIntake ? {
             status: latestIntake.status,
             updatedAt: latestIntake.updatedAt,
+            submittedAt: latestIntake.submittedAt,
           } : undefined,
           assessment: latestAssessment ? {
             status: latestAssessment.status,

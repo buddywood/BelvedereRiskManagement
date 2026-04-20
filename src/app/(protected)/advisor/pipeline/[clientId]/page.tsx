@@ -6,9 +6,9 @@ import { ClientDetailView } from "@/components/pipeline/ClientDetailView";
 import ClientDetailLoading from "./loading";
 
 interface ClientDetailPageProps {
-  params: {
+  params: Promise<{
     clientId: string;
-  };
+  }>;
 }
 
 async function ClientDetailContent({ clientId }: { clientId: string }) {
@@ -24,10 +24,12 @@ async function ClientDetailContent({ clientId }: { clientId: string }) {
   return <ClientDetailView detail={result.data!} />;
 }
 
-export default function ClientDetailPage({ params }: ClientDetailPageProps) {
+export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
+  const { clientId } = await params;
+
   return (
     <Suspense fallback={<ClientDetailLoading />}>
-      <ClientDetailContent clientId={params.clientId} />
+      <ClientDetailContent clientId={clientId} />
     </Suspense>
   );
 }
