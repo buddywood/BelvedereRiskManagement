@@ -127,17 +127,30 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
         // Prepare data for stage computation
         const latestIntake = clientData.intakeInterviews?.[0];
         const latestAssessment = clientData.assessments?.[0];
+        const intakeWaived = assignment.intakeWaivedAt != null;
+        const intakeForStage =
+          latestIntake != null
+            ? {
+                status: latestIntake.status,
+                updatedAt: latestIntake.updatedAt,
+                submittedAt: latestIntake.submittedAt,
+                waived: intakeWaived,
+              }
+            : intakeWaived
+              ? {
+                  status: "NOT_STARTED" as const,
+                  updatedAt: assignment.assignedAt,
+                  submittedAt: null as Date | null,
+                  waived: true as const,
+                }
+              : undefined;
 
         const stageData = {
           invitation: invitation ? {
             status: invitation.status,
             statusUpdatedAt: invitation.statusUpdatedAt,
           } : undefined,
-          intake: latestIntake ? {
-            status: latestIntake.status,
-            updatedAt: latestIntake.updatedAt,
-            submittedAt: latestIntake.submittedAt,
-          } : undefined,
+          intake: intakeForStage,
           assessment: latestAssessment ? {
             status: latestAssessment.status,
             completedAt: latestAssessment.completedAt,

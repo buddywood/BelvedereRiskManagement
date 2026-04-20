@@ -8,9 +8,9 @@ import { ClientPortalBrandedHeaderMark } from "@/components/layout/ClientPortalB
 import { RedirectIncompleteIntake } from "@/components/layout/RedirectIncompleteIntake";
 import { BrandingProvider } from "@/components/providers/BrandingProvider";
 import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
-import { prisma } from "@/lib/db";
 import { clientPortalBrandingDisplayTitle, clientPortalLogoImgSrc } from "@/lib/client/client-portal-branding";
 import { getAssignedAdvisorBrandingForClient } from "@/lib/client/assigned-advisor-branding";
+import { getClientIntakeGateState } from "@/lib/client/intake-gate";
 import { getPreviewBrandHex } from "@/lib/branding/preview-hex";
 import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
 import { cn } from "@/lib/utils";
@@ -34,31 +34,21 @@ export default async function ProtectedLayout({
   const showAdvisor = role === "ADVISOR" || role === "ADMIN";
   const showAdmin = role === "ADMIN";
 
-  // For clients: restrict nav to Intake until they have submitted intake; Assessment stays disabled until advisor approves
+  // For clients: restrict nav to Intake until submitted or advisor waives; Assessment when approved or waived
   let restrictNavToIntake = false;
-  let intakeApprovedForClient = false;
+  let assessmentUnlockedForClient = false;
   let clientAdvisorBranding: Awaited<
     ReturnType<typeof getAssignedAdvisorBrandingForClient>
   > = null;
 
   if (role === "USER" && session.user.id) {
-    const [submittedInterview, branding] = await Promise.all([
-      prisma.intakeInterview.findFirst({
-        where: { userId: session.user.id, status: "SUBMITTED" },
-        select: { id: true },
-      }),
+    const [gate, branding] = await Promise.all([
+      getClientIntakeGateState(session.user.id),
       getAssignedAdvisorBrandingForClient(session.user.id),
     ]);
     clientAdvisorBranding = branding;
-
-    restrictNavToIntake = !submittedInterview;
-    if (submittedInterview) {
-      const approval = await prisma.intakeApproval.findUnique({
-        where: { interviewId: submittedInterview.id },
-        select: { status: true },
-      });
-      intakeApprovedForClient = approval?.status === "APPROVED";
-    }
+    restrictNavToIntake = gate.restrictNavToIntake;
+    assessmentUnlockedForClient = gate.assessmentUnlocked;
   }
 
   const brandTitle = clientAdvisorBranding
@@ -221,7 +211,7 @@ export default async function ProtectedLayout({
                     showAdvisor={showAdvisor}
                     showAdmin={showAdmin}
                     restrictNavToIntake={restrictNavToIntake}
-                    intakeApprovedForClient={intakeApprovedForClient}
+                    assessmentUnlockedForClient={assessmentUnlockedForClient}
                     clientBrandHex={previewHex}
                     advisorFeatureFlags={advisorFeatureFlags}
                   />

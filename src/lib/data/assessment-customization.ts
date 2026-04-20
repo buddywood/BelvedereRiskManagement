@@ -7,6 +7,7 @@
 
 import 'server-only';
 import { prisma } from '@/lib/db';
+import { getClientIntakeGateState } from '@/lib/client/intake-gate';
 import { getCustomizationConfig, type CustomizationConfig } from '@/lib/assessment/customization';
 
 /**
@@ -37,6 +38,17 @@ export async function getActiveApprovalForUser(userId: string) {
  * Returns null if no approved intake exists
  */
 export async function getCustomizationForUser(userId: string): Promise<CustomizationConfig | null> {
+  const gate = await getClientIntakeGateState(userId);
+
+  if (gate.intakeWaived && !gate.intakeApproved) {
+    const config = getCustomizationConfig([]);
+    return {
+      ...config,
+      advisorName: undefined,
+      approvalId: undefined,
+    };
+  }
+
   const approval = await getActiveApprovalForUser(userId);
 
   if (!approval) {

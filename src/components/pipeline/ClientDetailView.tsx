@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Mail, Calendar, ExternalLink, BarChart3, FileText, CheckCircle } from "lucide-react";
+
+import { setClientIntakeWaiver } from "@/lib/actions/advisor-intake-waiver-actions";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -60,9 +64,21 @@ function isIntakeFinished(detail: ClientDetail['intakeDetails']) {
 }
 
 export function ClientDetailView({ detail }: ClientDetailViewProps) {
-  const { client, timeline, documentRequirements, intakeDetails, assessmentDetails } = detail;
+  const { client, timeline, documentRequirements, intakeDetails, assessmentDetails, advisorAssignment } = detail;
   const displayName = client.name || 'Unnamed Client';
-  const intakeFinished = isIntakeFinished(intakeDetails);
+  const intakeFinished =
+    isIntakeFinished(intakeDetails) || advisorAssignment.intakeWaivedAt != null;
+  const router = useRouter();
+  const [waiverPending, startWaiverTransition] = useTransition();
+
+  function runWaiver(waive: boolean) {
+    startWaiverTransition(async () => {
+      const result = await setClientIntakeWaiver(client.id, waive);
+      if (result.success) {
+        router.refresh();
+      }
+    });
+  }
 
   return (
     <div className="container mx-auto py-6">
@@ -128,6 +144,48 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
             </CardHeader>
             <CardContent>
               <WorkflowTimeline events={timeline} currentStage={client.stage} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Governance intake requirement
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Clients normally complete intake before the assessment unlocks. Waive this only when
+                you are intentionally skipping the interview for this household.
+              </p>
+              {advisorAssignment.intakeWaivedAt ? (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <Badge variant="secondary">Intake waived</Badge>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Waived {formatDistanceToNow(new Date(advisorAssignment.intakeWaivedAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={waiverPending}
+                    onClick={() => runWaiver(false)}
+                  >
+                    Require intake again
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={waiverPending}
+                  onClick={() => runWaiver(true)}
+                >
+                  Allow assessment without intake
+                </Button>
+              )}
             </CardContent>
           </Card>
 

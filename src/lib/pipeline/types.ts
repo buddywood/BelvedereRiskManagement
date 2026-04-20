@@ -23,6 +23,8 @@ export type PipelineClient = {
     status: string;
     responseCount: number;
     submittedAt: Date | null;
+    /** Set when advisor waived intake requirement for this assignment */
+    waivedAt: Date | null;
   } | null;
   // Assessment data (if exists)
   assessment: {
@@ -75,6 +77,10 @@ export type ClientDetail = {
     totalQuestions: number;
     submittedAt: Date | null;
   } | null;
+  advisorAssignment: {
+    id: string;
+    intakeWaivedAt: Date | null;
+  };
   assessmentDetails: {
     status: string;
     score: number | null;

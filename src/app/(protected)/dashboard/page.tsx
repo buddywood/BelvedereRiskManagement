@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { getClientIntakeGateState } from "@/lib/client/intake-gate";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -28,15 +29,19 @@ export default async function DashboardPage() {
     redirect("/advisor");
   }
 
-  // Latest intake (any status) for hero + approval gate for assessments
-  let intakeApproved = false;
+  // Latest intake (any status) for hero; assessment access from gate (approve or advisor waiver)
   let intakeHeroLabel = "Not started";
 
-  const latestIntake = await prisma.intakeInterview.findFirst({
-    where: { userId: session.user.id },
-    orderBy: { updatedAt: "desc" },
-    select: { id: true, status: true },
-  });
+  const [latestIntake, intakeGate] = await Promise.all([
+    prisma.intakeInterview.findFirst({
+      where: { userId: session.user.id },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true, status: true },
+    }),
+    getClientIntakeGateState(session.user.id),
+  ]);
+
+  const assessmentUnlocked = intakeGate.assessmentUnlocked;
 
   if (latestIntake) {
     if (latestIntake.status === "NOT_STARTED") {
@@ -50,7 +55,6 @@ export default async function DashboardPage() {
         where: { interviewId: latestIntake.id },
         select: { status: true },
       });
-      intakeApproved = approval?.status === "APPROVED";
       if (approval?.status === "APPROVED") {
         intakeHeroLabel = "Approved";
       } else if (approval?.status === "IN_REVIEW") {
@@ -61,6 +65,10 @@ export default async function DashboardPage() {
         intakeHeroLabel = "Pending review";
       }
     }
+  }
+
+  if (intakeGate.intakeWaived && !intakeGate.intakeApproved) {
+    intakeHeroLabel = "Waived by advisor";
   }
 
   // Fetch assessments with responses and scores
@@ -130,17 +138,17 @@ export default async function DashboardPage() {
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-        <Card className={!intakeApproved ? "opacity-75" : undefined}>
+        <Card className={!assessmentUnlocked ? "opacity-75" : undefined}>
           <CardHeader>
             <CardTitle className="text-3xl">Your Assessments</CardTitle>
             <CardDescription>
-              {intakeApproved
+              {assessmentUnlocked
                 ? "Monitor progress and continue or review the latest family governance assessment."
                 : "Assessment unlocks after your advisor reviews and approves your intake."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!intakeApproved ? (
+            {!assessmentUnlocked ? (
               <div className="rounded-[1.5rem] border section-divider bg-muted/40 px-6 py-10 text-center">
                 <p className="mx-auto max-w-2xl text-sm leading-7 text-muted-foreground">
                   Complete your intake and wait for your advisor to approve it.
@@ -229,7 +237,7 @@ export default async function DashboardPage() {
                               </div>
                             </div>
 
-                            {intakeApproved ? (
+                            {assessmentUnlocked ? (
                               <Button asChild className="w-full" size="lg">
                                 <Link href="/assessment">
                                   Continue Assessment
@@ -287,7 +295,7 @@ export default async function DashboardPage() {
                                 </div>
 
                                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                                  {intakeApproved ? (
+                                  {assessmentUnlocked ? (
                                     <>
                                       <Button asChild size="lg">
                                         <Link href="/assessment/results">

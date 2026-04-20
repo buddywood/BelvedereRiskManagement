@@ -109,16 +109,30 @@ export async function getClientPipeline(advisorProfileId: string): Promise<Pipel
       : assignment.assignedAt;
 
     // Compute stage from all available data
+    const intakeWaived = assignment.intakeWaivedAt != null;
+    const intakeForStage =
+      latestIntake != null
+        ? {
+            status: latestIntake.status,
+            updatedAt: latestIntake.updatedAt,
+            submittedAt: latestIntake.submittedAt,
+            waived: intakeWaived,
+          }
+        : intakeWaived
+          ? {
+              status: "NOT_STARTED" as const,
+              updatedAt: assignment.assignedAt,
+              submittedAt: null as Date | null,
+              waived: true as const,
+            }
+          : undefined;
+
     const stage = computeClientStage({
       invitation: invitation ? {
         status: invitation.status,
         statusUpdatedAt: invitation.statusUpdatedAt,
       } : undefined,
-      intake: latestIntake ? {
-        status: latestIntake.status,
-        updatedAt: latestIntake.updatedAt,
-        submittedAt: latestIntake.submittedAt,
-      } : undefined,
+      intake: intakeForStage,
       assessment: latestAssessment ? {
         status: latestAssessment.status,
         completedAt: latestAssessment.completedAt,
@@ -143,13 +157,23 @@ export async function getClientPipeline(advisorProfileId: string): Promise<Pipel
         sentAt: invitation.createdAt,
         code: invitation.code,
       } : null,
-      intake: latestIntake ? {
-        status: latestIntake.status,
-        responseCount: await prisma.intakeResponse.count({
-          where: whereIntakeResponseHasAnswer(latestIntake.id),
-        }),
-        submittedAt: latestIntake.submittedAt,
-      } : null,
+      intake: latestIntake
+        ? {
+            status: latestIntake.status,
+            responseCount: await prisma.intakeResponse.count({
+              where: whereIntakeResponseHasAnswer(latestIntake.id),
+            }),
+            submittedAt: latestIntake.submittedAt,
+            waivedAt: assignment.intakeWaivedAt,
+          }
+        : intakeWaived
+          ? {
+              status: "NOT_STARTED",
+              responseCount: 0,
+              submittedAt: null,
+              waivedAt: assignment.intakeWaivedAt,
+            }
+          : null,
       assessment: latestAssessment ? {
         status: latestAssessment.status,
         completedAt: latestAssessment.completedAt,
@@ -354,17 +378,31 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
     { required: 0, fulfilled: 0 }
   );
 
+  const intakeWaived = assignment.intakeWaivedAt != null;
+  const intakeForStageDetail =
+    latestIntake != null
+      ? {
+          status: latestIntake.status,
+          updatedAt: latestIntake.updatedAt,
+          submittedAt: latestIntake.submittedAt,
+          waived: intakeWaived,
+        }
+      : intakeWaived
+        ? {
+            status: "NOT_STARTED" as const,
+            updatedAt: assignment.assignedAt,
+            submittedAt: null as Date | null,
+            waived: true as const,
+          }
+        : undefined;
+
   // Compute current stage and build pipeline client
   const stage = computeClientStage({
     invitation: invitation ? {
       status: invitation.status,
       statusUpdatedAt: invitation.statusUpdatedAt,
     } : undefined,
-    intake: latestIntake ? {
-      status: latestIntake.status,
-      updatedAt: latestIntake.updatedAt,
-      submittedAt: latestIntake.submittedAt,
-    } : undefined,
+    intake: intakeForStageDetail,
     assessment: latestAssessment ? {
       status: latestAssessment.status,
       completedAt: latestAssessment.completedAt,
@@ -398,13 +436,23 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
       sentAt: invitation.createdAt,
       code: invitation.code,
     } : null,
-    intake: latestIntake ? {
-      status: latestIntake.status,
-      responseCount: await prisma.intakeResponse.count({
-        where: whereIntakeResponseHasAnswer(latestIntake.id),
-      }),
-      submittedAt: latestIntake.submittedAt,
-    } : null,
+    intake: latestIntake
+      ? {
+          status: latestIntake.status,
+          responseCount: await prisma.intakeResponse.count({
+            where: whereIntakeResponseHasAnswer(latestIntake.id),
+          }),
+          submittedAt: latestIntake.submittedAt,
+          waivedAt: assignment.intakeWaivedAt,
+        }
+      : intakeWaived
+        ? {
+            status: "NOT_STARTED",
+            responseCount: 0,
+            submittedAt: null,
+            waivedAt: assignment.intakeWaivedAt,
+          }
+        : null,
     assessment: latestAssessment ? {
       status: latestAssessment.status,
       completedAt: latestAssessment.completedAt,
@@ -471,6 +519,10 @@ export async function getClientDetail(advisorProfileId: string, clientId: string
 
   return {
     client: pipelineClient,
+    advisorAssignment: {
+      id: assignment.id,
+      intakeWaivedAt: assignment.intakeWaivedAt,
+    },
     timeline: events,
     documentRequirements: documentRequirements.map(req => ({
       id: req.id,

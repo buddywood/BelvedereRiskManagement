@@ -1,10 +1,10 @@
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { getClientIntakeGateState } from "@/lib/client/intake-gate";
 import { redirect } from "next/navigation";
 
 /**
- * For clients (USER role): only allow access to /assessment when their intake
- * has been submitted and approved by an advisor. Otherwise redirect to dashboard.
+ * For clients (USER role): only allow access to /assessment when intake is
+ * submitted and approved, or the assigned advisor has waived the intake requirement.
  */
 export default async function AssessmentLayout({
   children,
@@ -19,19 +19,11 @@ export default async function AssessmentLayout({
     return <>{children}</>;
   }
 
-  const submittedInterview = await prisma.intakeInterview.findFirst({
-    where: { userId: session.user.id, status: "SUBMITTED" },
-    select: { id: true },
-  });
-  if (!submittedInterview) {
-    redirect("/dashboard?assessment=complete-intake");
-  }
-
-  const approval = await prisma.intakeApproval.findUnique({
-    where: { interviewId: submittedInterview.id },
-    select: { status: true },
-  });
-  if (approval?.status !== "APPROVED") {
+  const gate = await getClientIntakeGateState(session.user.id);
+  if (!gate.assessmentUnlocked) {
+    if (!gate.hasSubmittedInterview) {
+      redirect("/dashboard?assessment=complete-intake");
+    }
     redirect("/dashboard?assessment=awaiting-approval");
   }
 

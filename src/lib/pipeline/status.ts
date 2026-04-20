@@ -10,6 +10,8 @@ interface ClientRawData {
     updatedAt: Date;
     /** When set, intake is finished even if `status` was not updated to SUBMITTED. */
     submittedAt?: Date | null;
+    /** Advisor waived intake; treat as past intake for stage when no assessment yet. */
+    waived?: boolean;
   };
   assessment?: {
     status: AssessmentStatus;
@@ -46,6 +48,9 @@ export function computeClientStage(data: ClientRawData): ClientWorkflowStage {
 
   // Check intake status (medium priority)
   if (intake) {
+    if (intake.waived) {
+      return 'INTAKE_COMPLETE';
+    }
     if (
       intake.submittedAt != null ||
       intake.status === 'COMPLETED' ||

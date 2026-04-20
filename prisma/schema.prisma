@@ -542,6 +542,7 @@ model AdvisorProfile {
   createdAt        DateTime                   @default(now())
   updatedAt        DateTime                   @updatedAt
   clientAssignments ClientAdvisorAssignment[] @relation("AdvisorAssignments")
+  intakeWaiversSet  ClientAdvisorAssignment[] @relation("IntakeWaiverSetBy")
   approvals        IntakeApproval[]
   notifications    AdvisorNotification[]
   invitations      InviteCode[]
@@ -578,6 +579,10 @@ model ClientAdvisorAssignment {
   advisorId  String
   assignedAt DateTime         @default(now())
   status     AssignmentStatus @default(ACTIVE)
+  /// When set, client may skip submitted/approved intake for nav and /assessment access.
+  intakeWaivedAt             DateTime?
+  intakeWaivedByAdvisorId    String?
+  intakeWaivedBy             AdvisorProfile? @relation("IntakeWaiverSetBy", fields: [intakeWaivedByAdvisorId], references: [id], onDelete: SetNull)
   client     User             @relation("ClientAssignments", fields: [clientId], references: [id], onDelete: Cascade)
   advisor    AdvisorProfile   @relation("AdvisorAssignments", fields: [advisorId], references: [id], onDelete: Cascade)
 

@@ -43,8 +43,8 @@ interface ProtectedNavProps {
   showAdvisor?: boolean;
   showAdmin?: boolean;
   restrictNavToIntake?: boolean;
-  /** When false for clients, Assessment link is disabled until advisor approves intake */
-  intakeApprovedForClient?: boolean;
+  /** When false for clients, Assessment link is disabled until advisor approves intake or waives it */
+  assessmentUnlockedForClient?: boolean;
   /** Client portal + assigned advisor: match `BrandingPreview` nav (primary text, light active pill) */
   clientBrandHex?: PreviewBrandHex | null;
   /** When omitted for advisors, both features are shown (backward compatible). */
@@ -55,7 +55,7 @@ export function ProtectedNav({
   showAdvisor = false,
   showAdmin = false,
   restrictNavToIntake = false,
-  intakeApprovedForClient = false,
+  assessmentUnlockedForClient = false,
   clientBrandHex = null,
   advisorFeatureFlags = null,
 }: ProtectedNavProps) {
@@ -87,7 +87,7 @@ export function ProtectedNav({
 
   // For clients with submitted but not approved intake: Assessment is disabled
   const isClientAssessmentLocked =
-    !showAdvisor && !showAdmin && !intakeApprovedForClient;
+    !showAdvisor && !showAdmin && !assessmentUnlockedForClient;
   const disabledAssessmentHref = isClientAssessmentLocked
     ? "/assessment"
     : null;
