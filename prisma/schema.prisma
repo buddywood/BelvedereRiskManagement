@@ -496,6 +496,8 @@ model InviteCode {
   status      InvitationStatus @default(SENT)
   statusUpdatedAt DateTime @default(now())
   personalMessage String?
+  /** When true, advisor requested that the client may skip intake (waived). */
+  intakeWaived  Boolean  @default(false)
   clientName  String?
   resendCount Int       @default(0)
 

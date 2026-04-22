@@ -39,6 +39,7 @@ export async function createAdvisorInvitation(
       createdBy: advisorId,
       status: InvitationStatus.SENT,
       personalMessage: input.personalMessage,
+      intakeWaived: input.intakeWaived ?? false,
       clientName: input.clientName,
     },
     include: {
@@ -59,7 +60,8 @@ export async function createAdvisorInvitation(
 
   const token = createInvitationToken(invitation.id);
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-  const url = `${baseUrl}/signup?invite=${token}&callbackUrl=/intake`;
+  const callback = invitation.intakeWaived ? "/assessment" : "/intake";
+  const url = `${baseUrl}/signup?invite=${token}&callbackUrl=${encodeURIComponent(callback)}`;
 
   return {
     ...invitation,
@@ -174,7 +176,8 @@ export async function resendInvitation(
 
   const token = createInvitationToken(updatedInvitation.id);
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
-  const url = `${baseUrl}/signup?invite=${token}&callbackUrl=/intake`;
+  const callback = updatedInvitation.intakeWaived ? "/assessment" : "/intake";
+  const url = `${baseUrl}/signup?invite=${token}&callbackUrl=${encodeURIComponent(callback)}`;
 
   return {
     ...updatedInvitation,

@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     // Look up the invitation to check if it was created by an advisor
     const inviteCode = await prisma.inviteCode.findUnique({
       where: { id: inviteCodeId },
-      select: { createdBy: true, clientName: true }
+      select: { createdBy: true, clientName: true, intakeWaived: true }
     });
 
     if (!inviteCode) {
@@ -120,6 +120,7 @@ export async function POST(request: NextRequest) {
           data: {
             clientId: user.id,
             advisorId: inviteCode.createdBy,
+            ...(inviteCode.intakeWaived ? { intakeWaivedAt: new Date(), intakeWaivedByAdvisorId: inviteCode.createdBy } : {}),
           },
         });
 

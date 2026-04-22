@@ -6,6 +6,7 @@ export interface CreateInvitationInput {
   clientEmail: string;
   clientName?: string;
   personalMessage?: string;
+  intakeWaived?: boolean;
 }
 
 export interface InvitationWithDetails {
@@ -22,6 +23,7 @@ export interface InvitationWithDetails {
   personalMessage: string | null;
   clientName: string | null;
   resendCount: number;
+  intakeWaived?: boolean;
   advisor: {
     id: string;
     firmName: string | null;

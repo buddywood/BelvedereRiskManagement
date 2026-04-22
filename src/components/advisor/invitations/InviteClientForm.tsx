@@ -17,6 +17,7 @@ const formSchema = z.object({
   clientEmail: z.string().email("Valid email required"),
   clientName: z.string().optional(),
   personalMessage: z.string().max(2000, "Message too long").optional(),
+  intakeWaived: z.boolean().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,6 +39,7 @@ export function InviteClientForm() {
       clientEmail: '',
       clientName: '',
       personalMessage: "I'd like to invite you to complete a family governance assessment. This confidential process will help us identify areas where your family's wealth management governance can be strengthened.",
+      intakeWaived: false,
     },
   });
 
@@ -52,6 +54,7 @@ export function InviteClientForm() {
       formData.append('clientEmail', data.clientEmail);
       if (data.clientName) formData.append('clientName', data.clientName);
       if (data.personalMessage) formData.append('personalMessage', data.personalMessage);
+  if (data.intakeWaived) formData.append('intakeWaived', 'true');
 
       const result = await sendInvitation(formData);
 
@@ -184,6 +187,21 @@ export function InviteClientForm() {
             <p className="text-xs text-muted-foreground ml-auto">
               {messageLength}/2000 characters
             </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <input
+              id="intakeWaived"
+              type="checkbox"
+              {...register('intakeWaived')}
+              disabled={isSubmitting}
+              className="h-4 w-4"
+            />
+            <label htmlFor="intakeWaived" className="text-sm">
+              Skip intake — allow the client to go straight to the assessment after signing up
+            </label>
           </div>
         </div>
 

@@ -10,6 +10,7 @@ export const createInvitationSchema = z.object({
     .default(
       "I'd like to invite you to complete a family governance assessment. This confidential process will help us identify areas where your family's wealth management governance can be strengthened."
     ),
+  intakeWaived: z.boolean().optional().default(false),
 });
 
 export type CreateInvitationData = z.infer<typeof createInvitationSchema>;

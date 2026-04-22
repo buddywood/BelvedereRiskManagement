@@ -12,7 +12,7 @@ import {
   getAdvisorInvitations,
 } from "@/lib/invitations/service";
 import { sendAdvisorInvitationEmail } from "@/lib/invitations/email";
-import { createInvitationSchema, CreateInvitationData } from "@/lib/schemas/invitation";
+import { createInvitationSchema } from "@/lib/schemas/invitation";
 import { InvitationListFilters, InvitationWithDetails } from "@/lib/invitations/types";
 
 type ActionResult<T> =
@@ -35,6 +35,12 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
       clientEmail: formData.get("clientEmail")?.toString() || "",
       clientName: formData.get("clientName")?.toString() || undefined,
       personalMessage: formData.get("personalMessage")?.toString() || undefined,
+      intakeWaived: (() => {
+        const v = formData.get("intakeWaived");
+        if (v === null) return false;
+        const s = String(v).toLowerCase();
+        return s === "true" || s === "on" || s === "1";
+      })(),
     };
 
     const validatedInput = createInvitationSchema.parse(rawData);
