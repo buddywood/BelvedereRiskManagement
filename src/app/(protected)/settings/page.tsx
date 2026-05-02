@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +11,14 @@ import { AdvisorPersonalDetailsForm } from "@/components/settings/AdvisorPersona
 import { ClientPersonalDetailsForm } from "@/components/settings/ClientPersonalDetailsForm";
 import { getAdvisorPersonalDetails, getClientPersonalDetails } from "@/lib/actions/personal-profile";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ notice?: string }>;
+}) {
   const session = await auth();
+  const { notice } = await searchParams;
+  const advisorPortalDisabled = notice === "advisor_portal_disabled";
 
   if (!session?.user?.id) {
     redirect("/signin");
@@ -50,6 +58,17 @@ export default async function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
+      {advisorPortalDisabled ? (
+        <Alert variant="warning">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Advisor hub unavailable</AlertTitle>
+          <AlertDescription>
+            Your advisor portal access has been turned off for this account. You can still use
+            Settings and other non-advisor areas. If this is unexpected, contact your platform
+            administrator.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <section className="hero-surface rounded-[1.75rem] p-4 sm:p-8">
         <Card className="bg-background/60 max-w-xl">
             <CardContent className="grid gap-3 pt-5 sm:grid-cols-2 sm:pt-6">

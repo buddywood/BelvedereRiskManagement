@@ -41,7 +41,21 @@ export default async function AdminAdvisorsPage() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {a.subscription ? (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        {a.subscription.status.replace(/_/g, " ")}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        No subscription
+                      </Badge>
+                    )}
+                    {a.advisorPortalAccessEnabled === false ? (
+                      <Badge variant="warning" className="text-xs normal-case tracking-normal">
+                        Access off
+                      </Badge>
+                    ) : null}
                     {a.advisorProfile ? (
                       <Badge variant="secondary">Profile</Badge>
                     ) : (

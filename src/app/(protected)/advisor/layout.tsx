@@ -10,14 +10,15 @@ export default async function AdvisorLayout({
   children: ReactNode;
 }) {
   const session = await auth();
+  const userId = session?.user?.id;
 
   const role = session?.user?.role?.toString().toUpperCase();
   if (!role || (role !== "ADVISOR" && role !== "ADMIN")) {
     redirect("/dashboard?error=unauthorized");
   }
 
-  if (role === "ADVISOR" && session.user.id) {
-    const portalOk = await isAdvisorPortalAccessEnabled(session.user.id);
+  if (role === "ADVISOR" && userId) {
+    const portalOk = await isAdvisorPortalAccessEnabled(userId);
     if (!portalOk) {
       redirect("/settings?notice=advisor_portal_disabled");
     }

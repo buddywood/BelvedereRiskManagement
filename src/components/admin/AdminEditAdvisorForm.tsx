@@ -7,12 +7,24 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "react-hot-toast";
 import { z } from "zod";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateAdvisorByAdmin, type UpdateAdvisorInput } from "@/lib/admin/actions";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  setAdvisorPortalAccessByAdmin,
+  updateAdvisorByAdmin,
+  type UpdateAdvisorInput,
+} from "@/lib/admin/actions";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -29,12 +41,23 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+type AdvisorSubscription = {
+  status: string;
+  tier: string;
+  billingCycle: string;
+  currentPeriodEnd: Date | string;
+  cancelAtPeriodEnd: boolean;
+  stripeSubscriptionId: string | null;
+};
+
 type Advisor = {
   id: string;
   email: string;
   name: string | null;
   firstName: string | null;
   lastName: string | null;
+  advisorPortalAccessEnabled: boolean;
+  subscription: AdvisorSubscription | null;
   advisorProfile: {
     id: string;
     firmName: string | null;
@@ -46,6 +69,22 @@ type Advisor = {
   } | null;
 };
 
+function humanizeEnum(value: string) {
+  return value
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function formatPeriodEnd(value: Date | string) {
+  try {
+    const d = typeof value === "string" ? new Date(value) : value;
+    return format(d, "PP");
+  } catch {
+    return "—";
+  }
+}
+
 interface AdminEditAdvisorFormProps {
   advisor: Advisor;
 }
@@ -53,7 +92,12 @@ interface AdminEditAdvisorFormProps {
 export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [portalEnabled, setPortalEnabled] = useState(
+    advisor.advisorPortalAccessEnabled !== false
+  );
+  const [portalSaving, setPortalSaving] = useState(false);
   const profile = advisor.advisorProfile;
+  const sub = advisor.subscription;
 
   const {
     register,
@@ -109,8 +153,95 @@ export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
     }
   };
 
+  const onPortalAccessChange = async (checked: boolean | "indeterminate") => {
+    if (checked === "indeterminate") return;
+    setPortalSaving(true);
+    try {
+      const result = await setAdvisorPortalAccessByAdmin({
+        userId: advisor.id,
+        enabled: checked,
+      });
+      if (result.success) {
+        setPortalEnabled(checked);
+        toast.success(checked ? "Portal access enabled" : "Portal access disabled");
+        router.refresh();
+      } else {
+        toast.error(result.error ?? "Failed to update portal access");
+      }
+    } catch {
+      toast.error("Failed to update portal access");
+    } finally {
+      setPortalSaving(false);
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Subscription and portal access</CardTitle>
+          <CardDescription>
+            Read-only billing snapshot from the database. Portal access controls whether this
+            advisor can use the advisor hub and advisor APIs.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted-foreground">Subscription status</dt>
+              <dd className="mt-1 font-medium">
+                {sub ? humanizeEnum(sub.status) : "No subscription"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Plan tier</dt>
+              <dd className="mt-1 font-medium">{sub ? humanizeEnum(sub.tier) : "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Billing cycle</dt>
+              <dd className="mt-1 font-medium">
+                {sub ? humanizeEnum(sub.billingCycle) : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Current period ends</dt>
+              <dd className="mt-1 font-medium">
+                {sub ? formatPeriodEnd(sub.currentPeriodEnd) : "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Cancel at period end</dt>
+              <dd className="mt-1 font-medium">{sub ? (sub.cancelAtPeriodEnd ? "Yes" : "No") : "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">Stripe subscription</dt>
+              <dd className="mt-1 font-mono text-xs break-all">
+                {sub?.stripeSubscriptionId ?? "—"}
+              </dd>
+            </div>
+          </dl>
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4">
+            <Checkbox
+              id="portal-access"
+              checked={portalEnabled}
+              disabled={portalSaving}
+              onCheckedChange={onPortalAccessChange}
+              className="mt-0.5"
+            />
+            <div className="space-y-1">
+              <Label htmlFor="portal-access" className="cursor-pointer font-medium leading-snug">
+                Advisor portal access enabled
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                When unchecked, this advisor is redirected away from /advisor and advisor APIs
+                reject requests until access is re-enabled.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
@@ -194,5 +325,6 @@ export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
         </Button>
       </div>
     </form>
+    </div>
   );
 }

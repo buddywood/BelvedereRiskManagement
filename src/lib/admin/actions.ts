@@ -105,6 +105,47 @@ const createAdvisorSchema = z.object({
 
 export type CreateAdvisorInput = z.infer<typeof createAdvisorSchema>;
 
+const setAdvisorPortalAccessSchema = z.object({
+  userId: z.string().cuid(),
+  enabled: z.boolean(),
+});
+
+export async function setAdvisorPortalAccessByAdmin(input: unknown) {
+  try {
+    await requireAdminRole();
+    const parsed = setAdvisorPortalAccessSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.flatten().fieldErrors
+          ? Object.values(parsed.error.flatten().fieldErrors).flat().join("; ")
+          : "Validation failed",
+      };
+    }
+
+    const target = await prisma.user.findFirst({
+      where: { id: parsed.data.userId, role: "ADVISOR" },
+      select: { id: true },
+    });
+    if (!target) {
+      return { success: false, error: "Advisor not found" };
+    }
+
+    await prisma.user.update({
+      where: { id: target.id },
+      data: { advisorPortalAccessEnabled: parsed.data.enabled },
+    });
+
+    revalidatePath("/admin/advisors");
+    revalidatePath(`/admin/advisors/${parsed.data.userId}/edit`);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to update portal access";
+    return { success: false, error: message };
+  }
+}
+
 export async function createAdvisorByAdmin(input: CreateAdvisorInput) {
   try {
     await requireAdminRole();

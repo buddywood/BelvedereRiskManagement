@@ -47,6 +47,17 @@ export async function getAdvisorForAdmin(userId: string) {
       name: true,
       firstName: true,
       lastName: true,
+      advisorPortalAccessEnabled: true,
+      subscription: {
+        select: {
+          status: true,
+          tier: true,
+          billingCycle: true,
+          currentPeriodEnd: true,
+          cancelAtPeriodEnd: true,
+          stripeSubscriptionId: true,
+        },
+      },
       advisorProfile: {
         select: {
           id: true,
