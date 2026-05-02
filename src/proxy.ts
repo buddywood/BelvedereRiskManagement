@@ -27,6 +27,13 @@ function extractSubdomain(hostname: string): string | null {
   return null;
 }
 
+/** For server layouts (e.g. advisor) that branch on URL without middleware. */
+function withAkiliPathname(req: NextRequest): Headers {
+  const h = new Headers(req.headers);
+  h.set("x-akili-pathname", req.nextUrl.pathname);
+  return h;
+}
+
 /**
  * Check if path should be handled by subdomain routing
  */
@@ -54,7 +61,7 @@ export default async function proxy(req: NextRequest) {
 
         if (advisorSubdomain?.isActive && advisorSubdomain?.dnsVerified) {
           // Create headers for advisor context
-          const requestHeaders = new Headers(req.headers);
+          const requestHeaders = withAkiliPathname(req);
           requestHeaders.set('x-advisor-id', advisorSubdomain.advisorId);
           requestHeaders.set('x-subdomain', subdomain);
           requestHeaders.set('x-branded-mode', 'true');
@@ -126,7 +133,9 @@ export default async function proxy(req: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return NextResponse.next({
+    request: { headers: withAkiliPathname(req) },
+  });
 }
 
 export const config = {

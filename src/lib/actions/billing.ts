@@ -4,7 +4,7 @@ import type { BillingCycle, SubscriptionTier } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
-import { requireAdvisorRole, getAdvisorProfileOrThrow } from "@/lib/advisor/auth";
+import { requireAdvisorSession, getAdvisorProfileOrThrow } from "@/lib/advisor/auth";
 import { isBillingEnabled } from "@/lib/billing/config";
 import { TIER_LIMITS } from "@/lib/billing/constants";
 import {
@@ -42,7 +42,7 @@ export async function switchSubscriptionPlan(
     if (!isBillingEnabled()) {
       return { success: false, error: "Billing is disabled." };
     }
-    const { userId } = await requireAdvisorRole();
+    const { userId } = await requireAdvisorSession();
     await getAdvisorProfileOrThrow(userId);
 
     const parsed = checkoutSchema.safeParse(input);
@@ -112,7 +112,7 @@ export async function createCheckoutSession(
     if (!isBillingEnabled()) {
       return { success: false, error: "Billing is disabled." };
     }
-    const { userId } = await requireAdvisorRole();
+    const { userId } = await requireAdvisorSession();
     const profile = await getAdvisorProfileOrThrow(userId);
 
     const parsed = checkoutSchema.safeParse(input);
@@ -188,7 +188,7 @@ export async function createPortalSession(): Promise<BillingPortalResult> {
     if (!isBillingEnabled()) {
       return { success: false, error: "Billing is disabled." };
     }
-    const { userId } = await requireAdvisorRole();
+    const { userId } = await requireAdvisorSession();
     await getAdvisorProfileOrThrow(userId);
 
     const sub = await prisma.subscription.findUnique({
@@ -253,7 +253,7 @@ export async function getSubscriptionDetails(): Promise<
   | BillingActionError
 > {
   try {
-    const { userId } = await requireAdvisorRole();
+    const { userId } = await requireAdvisorSession();
     const profile = await getAdvisorProfileOrThrow(userId);
 
     const sub = await prisma.subscription.findUnique({
@@ -319,7 +319,7 @@ export async function getBillingHistory(): Promise<
     if (!isBillingEnabled()) {
       return { success: true, data: [] };
     }
-    const { userId } = await requireAdvisorRole();
+    const { userId } = await requireAdvisorSession();
     await getAdvisorProfileOrThrow(userId);
 
     const sub = await prisma.subscription.findUnique({

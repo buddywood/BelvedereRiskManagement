@@ -47,7 +47,10 @@ function subscriptionAllowsNewClients(
     if (cancelAtPeriodEnd && currentPeriodEnd > new Date()) return true;
     return false;
   }
-  return status === "ACTIVE" || status === "PAST_DUE" || status === "GRACE_PERIOD";
+  if (status === "GRACE_PERIOD") {
+    return currentPeriodEnd > new Date();
+  }
+  return status === "ACTIVE" || status === "PAST_DUE";
 }
 
 export async function countActiveClientsForAdvisor(
@@ -61,7 +64,7 @@ export async function countActiveClientsForAdvisor(
 
 /**
  * When billing is enabled but no Subscription row exists yet, enforce Starter limits
- * until the advisor completes Checkout (migration script should backfill advisors).
+ * until the advisor completes Stripe Checkout (admin portal access still requires a qualifying subscription).
  */
 function defaultLimitWhenMissingSubscription(): number {
   return TIER_LIMITS.STARTER;

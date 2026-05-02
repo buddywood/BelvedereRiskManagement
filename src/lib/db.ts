@@ -2,9 +2,17 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+/**
+ * Increment when Prisma schema changes require discarding the dev singleton
+ * (e.g. new User columns). Otherwise `globalThis.prisma` may keep a client
+ * generated before `prisma generate`, causing PrismaClientValidationError on new fields.
+ */
+const PRISMA_CLIENT_BUILD_ID = 2;
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
   pool: Pool | undefined;
+  prismaClientBuildId?: number;
 };
 
 /**
@@ -27,7 +35,11 @@ function isPrismaClientCurrent(client: PrismaClient): boolean {
 
 function getPrisma(): PrismaClient {
   const cached = globalForPrisma.prisma;
-  if (cached && isPrismaClientCurrent(cached)) {
+  if (
+    cached &&
+    globalForPrisma.prismaClientBuildId === PRISMA_CLIENT_BUILD_ID &&
+    isPrismaClientCurrent(cached)
+  ) {
     return cached;
   }
   if (cached) {
@@ -51,6 +63,7 @@ function getPrisma(): PrismaClient {
   });
 
   globalForPrisma.prisma = prisma;
+  globalForPrisma.prismaClientBuildId = PRISMA_CLIENT_BUILD_ID;
   return prisma;
 }
 

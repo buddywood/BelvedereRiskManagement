@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { subscriptionQualifiesForPortalEnablement } from "@/lib/billing/advisor-portal-subscription";
+import { isBillingEnabled } from "@/lib/billing/config";
 import { getAdvisorForAdmin } from "@/lib/admin/queries";
 import { AdminEditAdvisorForm } from "@/components/admin/AdminEditAdvisorForm";
 
@@ -14,6 +16,12 @@ export default async function AdminEditAdvisorPage({
   const advisor = await getAdvisorForAdmin(id);
   if (!advisor) notFound();
 
+  const billingFeaturesEnabled = isBillingEnabled();
+  const canEnablePortalAccess = subscriptionQualifiesForPortalEnablement(
+    advisor.subscription,
+    billingFeaturesEnabled
+  );
+
   return (
     <div className="space-y-6">
       <div>
@@ -24,7 +32,11 @@ export default async function AdminEditAdvisorPage({
           </Link>
         </Button>
       </div>
-      <AdminEditAdvisorForm advisor={advisor} />
+      <AdminEditAdvisorForm
+        advisor={advisor}
+        billingFeaturesEnabled={billingFeaturesEnabled}
+        canEnablePortalAccess={canEnablePortalAccess}
+      />
     </div>
   );
 }

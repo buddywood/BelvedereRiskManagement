@@ -19,6 +19,7 @@ export default async function SettingsPage({
   const session = await auth();
   const { notice } = await searchParams;
   const advisorPortalDisabled = notice === "advisor_portal_disabled";
+  const advisorSubscriptionRequired = notice === "advisor_subscription_required";
 
   if (!session?.user?.id) {
     redirect("/signin");
@@ -66,6 +67,17 @@ export default async function SettingsPage({
             Your advisor portal access has been turned off for this account. You can still use
             Settings and other non-advisor areas. If this is unexpected, contact your platform
             administrator.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      {advisorSubscriptionRequired ? (
+        <Alert variant="warning">
+          <AlertCircle className="size-4" />
+          <AlertTitle>Subscription required</AlertTitle>
+          <AlertDescription>
+            The advisor hub is only available with an active subscription linked to your account
+            (and Stripe checkout when billing is enabled). Complete checkout if your administrator
+            has sent you a billing link, or contact them to enable access after you are subscribed.
           </AlertDescription>
         </Alert>
       ) : null}

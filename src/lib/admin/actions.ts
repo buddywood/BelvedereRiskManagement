@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { subscriptionQualifiesForPortalEnablement } from "@/lib/billing/advisor-portal-subscription";
+import { isBillingEnabled } from "@/lib/billing/config";
 import { prisma } from "@/lib/db";
 import { requireAdminRole } from "@/lib/admin/auth";
 import { getAdvisorForAdmin } from "@/lib/admin/queries";
@@ -129,6 +131,27 @@ export async function setAdvisorPortalAccessByAdmin(input: unknown) {
     });
     if (!target) {
       return { success: false, error: "Advisor not found" };
+    }
+
+    if (parsed.data.enabled) {
+      const sub = await prisma.subscription.findUnique({
+        where: { userId: target.id },
+        select: {
+          status: true,
+          currentPeriodEnd: true,
+          cancelAtPeriodEnd: true,
+          stripeSubscriptionId: true,
+        },
+      });
+      const billingOn = isBillingEnabled();
+      if (!subscriptionQualifiesForPortalEnablement(sub, billingOn)) {
+        return {
+          success: false,
+          error: billingOn
+            ? "Complete an active Stripe subscription for this advisor before enabling portal access. Grace period only qualifies until the current period end date."
+            : "Subscription must be qualifying (active, past due, or grace period before current period end). Update the subscription row before enabling portal access.",
+        };
+      }
     }
 
     await prisma.user.update({

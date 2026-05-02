@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
-import { isAdvisorPortalAccessEnabled } from "@/lib/advisor/auth";
+import { getAdvisorHubAccessForUserId } from "@/lib/advisor/auth";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { AdvisorSrOnlyHeading } from "@/components/advisor/AdvisorSrOnlyHeading";
@@ -18,9 +19,17 @@ export default async function AdvisorLayout({
   }
 
   if (role === "ADVISOR" && userId) {
-    const portalOk = await isAdvisorPortalAccessEnabled(userId);
-    if (!portalOk) {
-      redirect("/settings?notice=advisor_portal_disabled");
+    const pathname = (await headers()).get("x-akili-pathname") ?? "";
+    const onBillingPage = pathname === "/advisor/billing";
+    if (!onBillingPage) {
+      const hub = await getAdvisorHubAccessForUserId(userId);
+      if (!hub.allowed) {
+        redirect(
+          hub.blockReason === "disabled"
+            ? "/settings?notice=advisor_portal_disabled"
+            : "/advisor/billing"
+        );
+      }
     }
   }
 

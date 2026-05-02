@@ -14,7 +14,8 @@
     "seed:pillar-ddl": "npx tsx scripts/seed-pillar-ddl-sql.ts",
     "import:reputational-social": "npx tsx scripts/import-reputational-social-spreadsheet.ts",
     "db:fix-cyber-migration": "bash scripts/fix-cybersecurity-migration-failure.sh",
-    "db:fix-enhanced-migration": "bash scripts/fix-failed-enhanced-migration.sh"
+    "db:fix-enhanced-migration": "bash scripts/fix-failed-enhanced-migration.sh",
+    "db:backfill-advisor-subscriptions": "node scripts/migrate-advisor-subscriptions.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

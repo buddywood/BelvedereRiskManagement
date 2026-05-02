@@ -16,7 +16,12 @@ export async function getAdvisorsForAdmin() {
       createdAt: true,
       advisorPortalAccessEnabled: true,
       subscription: {
-        select: { status: true },
+        select: {
+          status: true,
+          whiteLabel: true,
+          currentPeriodEnd: true,
+          cancelAtPeriodEnd: true,
+        },
       },
       advisorProfile: {
         select: {
@@ -27,6 +32,12 @@ export async function getAdvisorsForAdmin() {
           phone: true,
           jobTitle: true,
           bio: true,
+          logoUrl: true,
+          logoS3Key: true,
+          brandName: true,
+          primaryColor: true,
+          secondaryColor: true,
+          accentColor: true,
           _count: { select: { clientAssignments: true } },
         },
       },

@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * Backfill Subscription rows for existing ADVISOR users (STRIPE-SPEC migration).
- * Tier: >25 active clients → PROFESSIONAL (75), else GROWTH (25).
- * Status GRACE_PERIOD, 30-day window, no Stripe IDs until Checkout.
+ * Legacy: backfill Subscription rows without Stripe IDs (historical STRIPE-SPEC migration).
+ * Tier: >25 active clients → PROFESSIONAL (75), else GROWTH (25). Status GRACE_PERIOD, 30-day window.
+ *
+ * With billing enabled, this does NOT qualify an advisor for portal access (Stripe subscription
+ * id is required). Prefer real Checkout / webhooks for production advisors.
  *
  * Usage: node scripts/migrate-advisor-subscriptions.js
  */

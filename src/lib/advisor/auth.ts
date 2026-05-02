@@ -1,25 +1,107 @@
 import "server-only";
 
+import type { SubscriptionStatus } from "@prisma/client";
+
 import { auth } from "@/lib/auth";
+import { subscriptionQualifiesForPortalEnablement } from "@/lib/billing/advisor-portal-subscription";
+import { isBillingEnabled } from "@/lib/billing/config";
 import { prisma } from "@/lib/db";
 
 /** Thrown by `requireAdvisorRole` when an admin has disabled advisor hub/API access. */
 export const ADVISOR_PORTAL_DISABLED_MESSAGE =
   "Advisor portal access has been disabled for your account.";
 
-export async function isAdvisorPortalAccessEnabled(userId: string): Promise<boolean> {
+/** Thrown when billing is on and there is no qualifying Stripe-linked subscription. */
+export const ADVISOR_SUBSCRIPTION_REQUIRED_MESSAGE =
+  "Advisor portal requires an active subscription. Complete checkout in Billing or contact your administrator.";
+
+function advisorHubAccessFromRow(
+  portalFlag: boolean,
+  subscription: {
+    status: SubscriptionStatus;
+    currentPeriodEnd: Date;
+    cancelAtPeriodEnd: boolean;
+    stripeSubscriptionId: string | null;
+  } | null
+): boolean {
+  if (!portalFlag) return false;
+  const billingOn = isBillingEnabled();
+  if (!billingOn) {
+    return true;
+  }
+  return subscriptionQualifiesForPortalEnablement(subscription, true);
+}
+
+export type AdvisorHubBlockReason = "disabled" | "subscription";
+
+export async function getAdvisorHubAccessForUserId(userId: string): Promise<{
+  allowed: boolean;
+  blockReason: AdvisorHubBlockReason | null;
+}> {
   const row = await prisma.user.findUnique({
     where: { id: userId },
-    select: { advisorPortalAccessEnabled: true },
+    select: {
+      role: true,
+      advisorPortalAccessEnabled: true,
+      subscription: {
+        select: {
+          status: true,
+          currentPeriodEnd: true,
+          cancelAtPeriodEnd: true,
+          stripeSubscriptionId: true,
+        },
+      },
+    },
   });
-  return row?.advisorPortalAccessEnabled !== false;
+  if (!row || row.role !== "ADVISOR") {
+    return { allowed: true, blockReason: null };
+  }
+  if (row.advisorPortalAccessEnabled === false) {
+    return { allowed: false, blockReason: "disabled" };
+  }
+  if (advisorHubAccessFromRow(row.advisorPortalAccessEnabled, row.subscription)) {
+    return { allowed: true, blockReason: null };
+  }
+  return { allowed: false, blockReason: "subscription" };
+}
+
+/** @deprecated Use getAdvisorHubAccessForUserId for routing; kept for name clarity in older call sites. */
+export async function isAdvisorPortalAccessEnabled(userId: string): Promise<boolean> {
+  const { allowed } = await getAdvisorHubAccessForUserId(userId);
+  return allowed;
 }
 
 async function assertAdvisorPortalAccessForAdvisorRole(userId: string): Promise<void> {
-  const ok = await isAdvisorPortalAccessEnabled(userId);
-  if (!ok) {
-    throw new Error(ADVISOR_PORTAL_DISABLED_MESSAGE);
+  const { allowed, blockReason } = await getAdvisorHubAccessForUserId(userId);
+  if (!allowed) {
+    throw new Error(
+      blockReason === "disabled"
+        ? ADVISOR_PORTAL_DISABLED_MESSAGE
+        : ADVISOR_SUBSCRIPTION_REQUIRED_MESSAGE
+    );
   }
+}
+
+/**
+ * ADVISOR/ADMIN session only — use for billing checkout and `/advisor/billing` so advisors can
+ * subscribe before the full hub entitlement gate in `requireAdvisorRole`.
+ */
+export async function requireAdvisorSession() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    throw new Error("Not authenticated");
+  }
+
+  const userRole = session.user.role?.toString().toUpperCase();
+  if (userRole !== "ADVISOR" && userRole !== "ADMIN") {
+    throw new Error("Unauthorized: Advisor access required");
+  }
+
+  return {
+    userId: session.user.id,
+    role: userRole,
+  };
 }
 
 export async function requireAdvisorRole() {

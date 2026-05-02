@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { isAdvisorPortalAccessEnabled } from "@/lib/advisor/auth";
+import { getAdvisorHubAccessForUserId } from "@/lib/advisor/auth";
 import { getClientIntakeGateState } from "@/lib/client/intake-gate";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
@@ -27,9 +27,13 @@ export default async function DashboardPage() {
   // Advisors and admins land on the advisor hub instead of the client dashboard
   const role = session.user.role?.toString().toUpperCase();
   if (role === "ADVISOR") {
-    const portalOk = await isAdvisorPortalAccessEnabled(session.user.id);
-    if (!portalOk) {
-      redirect("/settings?notice=advisor_portal_disabled");
+    const hub = await getAdvisorHubAccessForUserId(session.user.id);
+    if (!hub.allowed) {
+      redirect(
+        hub.blockReason === "disabled"
+          ? "/settings?notice=advisor_portal_disabled"
+          : "/advisor/billing"
+      );
     }
     redirect("/advisor");
   }

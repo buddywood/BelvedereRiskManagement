@@ -87,9 +87,17 @@ function formatPeriodEnd(value: Date | string) {
 
 interface AdminEditAdvisorFormProps {
   advisor: Advisor;
+  /** When true, portal enablement requires a Stripe subscription id on the subscription row. */
+  billingFeaturesEnabled: boolean;
+  /** Whether the admin is allowed to turn portal access on (subscription rules satisfied). */
+  canEnablePortalAccess: boolean;
 }
 
-export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
+export function AdminEditAdvisorForm({
+  advisor,
+  billingFeaturesEnabled,
+  canEnablePortalAccess,
+}: AdminEditAdvisorFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [portalEnabled, setPortalEnabled] = useState(
@@ -181,8 +189,13 @@ export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
         <CardHeader>
           <CardTitle>Subscription and portal access</CardTitle>
           <CardDescription>
-            Read-only billing snapshot from the database. Portal access controls whether this
-            advisor can use the advisor hub and advisor APIs.
+            Subscription data is read-only from the database (Stripe checkout and webhooks update
+            it). Portal access can only be turned on when the subscription qualifies: active or past
+            due, or grace period while the current period end is still in the future (once that date
+            passes, grace no longer qualifies).
+            {billingFeaturesEnabled
+              ? " With billing enabled, a Stripe subscription id is required for active and similar statuses; grace period before current period end can qualify without one."
+              : null}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -224,7 +237,7 @@ export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
             <Checkbox
               id="portal-access"
               checked={portalEnabled}
-              disabled={portalSaving}
+              disabled={portalSaving || (!portalEnabled && !canEnablePortalAccess)}
               onCheckedChange={onPortalAccessChange}
               className="mt-0.5"
             />
@@ -233,9 +246,19 @@ export function AdminEditAdvisorForm({ advisor }: AdminEditAdvisorFormProps) {
                 Advisor portal access enabled
               </Label>
               <p className="text-xs text-muted-foreground">
-                When unchecked, this advisor is redirected away from /advisor and advisor APIs
-                reject requests until access is re-enabled.
+                When unchecked, this advisor cannot use the advisor hub or advisor APIs. Turning
+                access on requires a qualifying subscription. With billing enabled, new paid access
+                normally comes from Stripe checkout; grace period before current period end still
+                qualifies even if no Stripe id is stored on the row yet. After period end, grace
+                does not qualify.
               </p>
+              {!portalEnabled && !canEnablePortalAccess ? (
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  {billingFeaturesEnabled
+                    ? "Complete an active Stripe subscription for this advisor before enabling portal access."
+                    : "Fix the subscription so it is qualifying (including grace period before period end) before enabling portal access."}
+                </p>
+              ) : null}
             </div>
           </div>
         </CardContent>
