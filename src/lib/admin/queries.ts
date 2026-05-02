@@ -14,6 +14,10 @@ export async function getAdvisorsForAdmin() {
       firstName: true,
       lastName: true,
       createdAt: true,
+      advisorPortalAccessEnabled: true,
+      subscription: {
+        select: { status: true },
+      },
       advisorProfile: {
         select: {
           id: true,

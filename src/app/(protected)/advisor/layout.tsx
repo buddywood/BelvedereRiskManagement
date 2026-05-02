@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { isAdvisorPortalAccessEnabled } from "@/lib/advisor/auth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { AdvisorSrOnlyHeading } from "@/components/advisor/AdvisorSrOnlyHeading";
@@ -13,6 +14,13 @@ export default async function AdvisorLayout({
   const role = session?.user?.role?.toString().toUpperCase();
   if (!role || (role !== "ADVISOR" && role !== "ADMIN")) {
     redirect("/dashboard?error=unauthorized");
+  }
+
+  if (role === "ADVISOR" && session.user.id) {
+    const portalOk = await isAdvisorPortalAccessEnabled(session.user.id);
+    if (!portalOk) {
+      redirect("/settings?notice=advisor_portal_disabled");
+    }
   }
 
   return (
