@@ -18,6 +18,8 @@ export async function getAdvisorsForAdmin() {
       subscription: {
         select: {
           status: true,
+          tier: true,
+          billingCycle: true,
           whiteLabel: true,
           currentPeriodEnd: true,
           cancelAtPeriodEnd: true,

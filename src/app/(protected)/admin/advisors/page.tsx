@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { SubscriptionStatus } from "@prisma/client";
 import Link from "next/link";
-import { CreditCard, Pencil, UserPlus } from "lucide-react";
+import { CreditCard, Package, Pencil, UserPlus } from "lucide-react";
 import {
   advisorBrandInitials,
   pickAdvisorBrandPrimary,
@@ -18,6 +18,13 @@ import type { VariantProps } from "class-variance-authority";
 
 function humanizeSubscriptionStatus(status: string) {
   return status
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function humanizeEnumToken(value: string) {
+  return value
     .split("_")
     .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
     .join(" ");
@@ -191,6 +198,21 @@ export default async function AdminAdvisorsPage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                    {a.subscription ? (
+                      <Badge
+                        variant="outline"
+                        className="inline-flex max-w-[min(100%,16rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
+                        title="Subscription plan"
+                      >
+                        <Package className="size-3 shrink-0 opacity-80" aria-hidden />
+                        <span className="truncate">
+                          {humanizeEnumToken(a.subscription.tier)}
+                          {a.subscription.billingCycle
+                            ? ` · ${humanizeEnumToken(a.subscription.billingCycle)}`
+                            : ""}
+                        </span>
+                      </Badge>
+                    ) : null}
                     <Badge
                       variant={subscriptionStatusBadgeVariant(
                         a.subscription?.status,
