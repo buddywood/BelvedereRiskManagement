@@ -63,169 +63,166 @@ export default async function AdminAdvisorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <Button asChild>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-lg font-semibold tracking-tight">
+          Advisor accounts{" "}
+          <span className="font-normal text-muted-foreground">({advisors.length})</span>
+        </h1>
+        <Button asChild className="shrink-0 self-start sm:self-auto">
           <Link href="/admin/advisors/new" className="inline-flex items-center gap-2">
             <UserPlus className="h-4 w-4" />
             Add advisor
           </Link>
         </Button>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Advisor accounts ({advisors.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {advisors.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No advisors found.</p>
-          ) : (
-            <ul className="flex flex-col">
-              {advisors.map((a) => {
-                const isWhiteLabel = Boolean(a.subscription?.whiteLabel);
-                const profile = a.advisorProfile;
-                const primary = pickAdvisorBrandPrimary(profile?.primaryColor, profile?.accentColor);
-                const secondary = pickAdvisorBrandSecondary(
-                  profile?.secondaryColor,
-                  profile?.primaryColor,
-                  profile?.accentColor
-                );
-                const rawLogo = profile?.logoUrl?.trim() || "";
-                const showPublicLogo =
-                  Boolean(rawLogo) && !looksLikeAdvisorBrandingS3Url(rawLogo) && /^https?:\/\//i.test(rawLogo);
-                const hasS3Logo = Boolean(profile?.logoS3Key);
-                const adminLogoSrc = `/api/admin/advisors/${a.id}/logo`;
-                const initials = profile
-                  ? advisorBrandInitials(
-                      profile.brandName,
-                      profile.firmName,
-                      a.name ?? a.email
-                    )
-                  : (a.name ?? a.email).slice(0, 2).toUpperCase();
 
-                const wlSurfaceStyle: CSSProperties | undefined =
-                  isWhiteLabel && primary
-                    ? {
-                        borderColor: `color-mix(in srgb, ${primary} 38%, hsl(var(--border)))`,
-                        backgroundImage: secondary
-                          ? `linear-gradient(155deg, color-mix(in srgb, ${primary} 18%, transparent) 0%, color-mix(in srgb, ${secondary} 14%, transparent) 50%, transparent 88%)`
-                          : `linear-gradient(155deg, color-mix(in srgb, ${primary} 18%, transparent) 0%, transparent 75%)`,
-                      }
-                    : undefined;
+      {advisors.length === 0 ? (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-sm text-muted-foreground">No advisors found.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {advisors.map((a) => {
+            const isWhiteLabel = Boolean(a.subscription?.whiteLabel);
+            const profile = a.advisorProfile;
+            const primary = pickAdvisorBrandPrimary(profile?.primaryColor, profile?.accentColor);
+            const secondary = pickAdvisorBrandSecondary(
+              profile?.secondaryColor,
+              profile?.primaryColor,
+              profile?.accentColor
+            );
+            const rawLogo = profile?.logoUrl?.trim() || "";
+            const showPublicLogo =
+              Boolean(rawLogo) && !looksLikeAdvisorBrandingS3Url(rawLogo) && /^https?:\/\//i.test(rawLogo);
+            const hasS3Logo = Boolean(profile?.logoS3Key);
+            const adminLogoSrc = `/api/admin/advisors/${a.id}/logo`;
+            const initials = profile
+              ? advisorBrandInitials(profile.brandName, profile.firmName, a.name ?? a.email)
+              : (a.name ?? a.email).slice(0, 2).toUpperCase();
 
-                const topBarBackground =
-                  isWhiteLabel && primary
-                    ? secondary && secondary !== primary
-                      ? `linear-gradient(90deg, ${primary}, ${secondary})`
-                      : `linear-gradient(90deg, ${primary}, color-mix(in srgb, ${primary} 45%, white))`
-                    : undefined;
+            const hasBrandColors = Boolean(primary);
+            const brandDisplayName =
+              profile?.brandName?.trim() || profile?.firmName?.trim() || null;
 
-                return (
-                  <li
-                    key={a.id}
-                    className={cn(
-                      "flex flex-col",
-                      isWhiteLabel
-                        ? "my-1 overflow-hidden rounded-2xl border bg-card shadow-md first:mt-0 last:mb-0"
-                        : "border-b border-border/60 py-3 last:border-b-0"
-                    )}
-                    style={wlSurfaceStyle}
-                  >
-                    {isWhiteLabel && topBarBackground ? (
-                      <div
-                        className="h-1 w-full shrink-0"
-                        style={{ background: topBarBackground }}
-                        aria-hidden
+            const cardSurfaceStyle: CSSProperties | undefined =
+              hasBrandColors && primary
+                ? {
+                    borderColor: `color-mix(in srgb, ${primary} ${isWhiteLabel ? 42 : 28}%, hsl(var(--border)))`,
+                    backgroundImage: secondary
+                      ? `linear-gradient(155deg, color-mix(in srgb, ${primary} ${isWhiteLabel ? 18 : 10}%, transparent) 0%, color-mix(in srgb, ${secondary} ${isWhiteLabel ? 14 : 8}%, transparent) 52%, transparent 88%)`
+                      : `linear-gradient(155deg, color-mix(in srgb, ${primary} ${isWhiteLabel ? 18 : 10}%, transparent) 0%, transparent 78%)`,
+                  }
+                : undefined;
+
+            const topBarBackground =
+              hasBrandColors && primary
+                ? secondary && secondary !== primary
+                  ? `linear-gradient(90deg, ${primary}, ${secondary})`
+                  : `linear-gradient(90deg, ${primary}, color-mix(in srgb, ${primary} 45%, white))`
+                : undefined;
+
+            return (
+              <Card
+                key={a.id}
+                className={cn(
+                  "overflow-hidden transition-shadow",
+                  hasBrandColors ? "border-2 shadow-sm" : "border shadow-sm",
+                  isWhiteLabel && "shadow-md"
+                )}
+                style={cardSurfaceStyle}
+              >
+                {topBarBackground ? (
+                  <div
+                    className="h-1.5 w-full shrink-0"
+                    style={{ background: topBarBackground }}
+                    aria-hidden
+                  />
+                ) : null}
+                <CardHeader className="flex flex-col gap-4 space-y-0 pb-4 pt-5 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 flex-1 gap-4">
+                    {showPublicLogo ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- public CDN URLs only
+                      <img
+                        src={rawLogo}
+                        alt=""
+                        className="size-14 shrink-0 rounded-xl border border-border/60 bg-background object-contain p-1 shadow-sm"
                       />
-                    ) : null}
-                    <div
-                      className={cn(
-                        "flex flex-wrap items-center justify-between gap-3",
-                        isWhiteLabel && "px-4 pb-4 pt-3"
-                      )}
-                    >
-                      <div className="flex min-w-0 flex-1 items-start gap-3">
-                        {isWhiteLabel ? (
-                          showPublicLogo ? (
-                            // eslint-disable-next-line @next/next/no-img-element -- public CDN URLs only
-                            <img
-                              src={rawLogo}
-                              alt=""
-                              className="mt-0.5 size-11 shrink-0 rounded-lg border border-border/50 bg-background object-contain p-0.5"
-                            />
-                          ) : hasS3Logo ? (
-                            // eslint-disable-next-line @next/next/no-img-element -- admin-authenticated same-origin logo route
-                            <img
-                              src={adminLogoSrc}
-                              alt=""
-                              className="mt-0.5 size-11 shrink-0 rounded-lg border border-border/50 bg-background object-contain p-0.5"
-                            />
-                          ) : (
-                            <div
-                              className="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-lg border border-border/50 text-[11px] font-bold leading-none text-white shadow-inner"
-                              style={{
-                                background: secondary
-                                  ? `linear-gradient(145deg, ${primary ?? "hsl(var(--primary))"}, ${secondary})`
-                                  : (primary ?? "hsl(var(--primary))"),
-                              }}
-                              aria-hidden
-                            >
-                              {initials}
-                            </div>
-                          )
-                        ) : null}
-                        <div className="min-w-0">
-                          <p className="font-medium">{a.name ?? a.email}</p>
-                          <p className="text-sm text-muted-foreground">{a.email}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            {profile ? (
-                              <>
-                                {profile.firmName ?? "No firm name"} · {profile._count.clientAssignments}{" "}
-                                client(s)
-                              </>
-                            ) : (
-                              <>Practice details not added — open edit to complete setup.</>
-                            )}
-                          </p>
-                        </div>
+                    ) : hasS3Logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- admin-authenticated same-origin logo route
+                      <img
+                        src={adminLogoSrc}
+                        alt=""
+                        className="size-14 shrink-0 rounded-xl border border-border/60 bg-background object-contain p-1 shadow-sm"
+                      />
+                    ) : (
+                      <div
+                        className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-border/50 text-sm font-bold leading-none text-white shadow-inner"
+                        style={{
+                          background: secondary
+                            ? `linear-gradient(145deg, ${primary ?? "hsl(var(--primary))"}, ${secondary})`
+                            : (primary ?? "hsl(var(--primary))"),
+                        }}
+                        aria-hidden
+                      >
+                        {initials}
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge
-                          variant={subscriptionStatusBadgeVariant(
-                            a.subscription?.status,
-                            a.subscription ?? undefined
-                          )}
-                          className="inline-flex max-w-[min(100%,14rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
-                          title="Subscription status"
-                        >
-                          <CreditCard className="size-3 shrink-0 opacity-80" aria-hidden />
-                          <span className="truncate">
-                            {a.subscription
-                              ? humanizeSubscriptionStatus(a.subscription.status)
-                              : "No subscription"}
+                    )}
+                    <div className="min-w-0 space-y-1">
+                      <CardTitle className="text-base leading-snug">{a.name ?? a.email}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{a.email}</p>
+                      {profile ? (
+                        <p className="pt-1 text-sm">
+                          <span className="font-medium text-foreground">
+                            {brandDisplayName ?? "Practice"}
                           </span>
-                        </Badge>
-                        {a.advisorPortalAccessEnabled === false ? (
-                          <Badge variant="warning" className="text-xs normal-case tracking-normal">
-                            Access off
-                          </Badge>
-                        ) : null}
-                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                          <Link
-                            href={`/admin/advisors/${a.id}/edit`}
-                            aria-label={`Edit ${a.name ?? a.email}`}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · {profile._count.clientAssignments} client
+                            {profile._count.clientAssignments === 1 ? "" : "s"}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="pt-1 text-sm text-muted-foreground">
+                          Practice details not added — open edit to complete setup.
+                        </p>
+                      )}
                     </div>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+                  </div>
+                  <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                    <Badge
+                      variant={subscriptionStatusBadgeVariant(
+                        a.subscription?.status,
+                        a.subscription ?? undefined
+                      )}
+                      className="inline-flex max-w-[min(100%,14rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
+                      title="Subscription status"
+                    >
+                      <CreditCard className="size-3 shrink-0 opacity-80" aria-hidden />
+                      <span className="truncate">
+                        {a.subscription
+                          ? humanizeSubscriptionStatus(a.subscription.status)
+                          : "No subscription"}
+                      </span>
+                    </Badge>
+                    {a.advisorPortalAccessEnabled === false ? (
+                      <Badge variant="warning" className="text-xs normal-case tracking-normal">
+                        Access off
+                      </Badge>
+                    ) : null}
+                    <Button variant="outline" size="icon" className="h-9 w-9" asChild>
+                      <Link href={`/admin/advisors/${a.id}/edit`} aria-label={`Edit ${a.name ?? a.email}`}>
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

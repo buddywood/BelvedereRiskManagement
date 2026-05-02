@@ -9,6 +9,7 @@ import { toast } from "react-hot-toast";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,14 +123,22 @@ export function AdminAddAdvisorForm() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="password">Password *</Label>
-              <Input id="password" type="password" {...register("password")} />
+              <PasswordInput
+                id="password"
+                autoComplete="new-password"
+                {...register("password")}
+              />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm password *</Label>
-              <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
+              <PasswordInput
+                id="confirmPassword"
+                autoComplete="new-password"
+                {...register("confirmPassword")}
+              />
               {errors.confirmPassword && (
                 <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
               )}

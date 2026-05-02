@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CreditCard, ExternalLink } from "lucide-react";
@@ -407,6 +407,26 @@ export function BillingDashboard({
       canAddClient: true,
     } satisfies SubscriptionDetailsDTO);
 
+  /** After Checkout redirect, the DB updates via webhook — poll RSC until Stripe ids land, then drop ?checkout=success. */
+  useEffect(() => {
+    if (checkoutNotice !== "success") return;
+
+    if (data.stripeSubscriptionId?.trim()) {
+      router.replace("/advisor/billing", { scroll: false });
+      return;
+    }
+
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 2500);
+    const maxWait = setTimeout(() => clearInterval(interval), 90_000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(maxWait);
+    };
+  }, [checkoutNotice, data.stripeSubscriptionId, router]);
+
   const changePlanMode: "checkout" | "stripe_update" =
     Boolean(data.stripeSubscriptionId) && data.status !== "CANCELLED"
       ? "stripe_update"
@@ -494,8 +514,8 @@ export function BillingDashboard({
           className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100"
           role="status"
         >
-          Checkout completed. Your subscription will update in a few seconds once Stripe confirms
-          payment.
+          Checkout completed. This page refreshes automatically until your subscription appears
+          (usually a few seconds after Stripe confirms payment).
         </div>
       ) : null}
       {checkoutNotice === "cancel" ? (

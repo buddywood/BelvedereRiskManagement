@@ -4,8 +4,17 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { subscriptionQualifiesForPortalEnablement } from "@/lib/billing/advisor-portal-subscription";
+import { TIER_LIMITS } from "@/lib/billing/constants";
 import { isBillingEnabled } from "@/lib/billing/config";
+import {
+  buildNewAdvisorWelcomeEmailHtml,
+  formatUtcCalendarDate,
+  newAdvisorGracePeriodEndsAt,
+  newAdvisorPaidSignupDeadline,
+} from "@/lib/billing/new-advisor-grace";
 import { prisma } from "@/lib/db";
+import { sendNotification } from "@/lib/notifications/service";
+import { resolvePublicAppUrl } from "@/lib/public-app-url";
 import { requireAdminRole } from "@/lib/admin/auth";
 import { getAdvisorForAdmin } from "@/lib/admin/queries";
 
@@ -191,32 +200,95 @@ export async function createAdvisorByAdmin(input: CreateAdvisorInput) {
     }
 
     const hashedPassword = await bcrypt.hash(parsed.data.password, 12);
-
-    const user = await prisma.user.create({
-      data: {
-        email: parsed.data.email,
-        password: hashedPassword,
-        role: "ADVISOR",
-        name: parsed.data.name ?? undefined,
-        firstName: parsed.data.firstName ?? undefined,
-        lastName: parsed.data.lastName ?? undefined,
-      },
-      select: { id: true, email: true },
-    });
+    const createdAt = new Date();
+    const gracePeriodEnd = newAdvisorGracePeriodEndsAt(createdAt);
+    const paidSignupDeadline = newAdvisorPaidSignupDeadline(createdAt);
 
     const firm = parsed.data.firmName?.trim() || null;
-    await prisma.advisorProfile.create({
-      data: {
-        userId: user.id,
-        firmName: firm ?? undefined,
-        brandName: firm,
-        phone: parsed.data.phone ?? undefined,
-        jobTitle: parsed.data.jobTitle ?? undefined,
-        licenseNumber: parsed.data.licenseNumber ?? undefined,
-        bio: parsed.data.bio ?? undefined,
-        specializations: parsed.data.specializations ?? [],
-      },
+    const displayName =
+      parsed.data.name?.trim() ||
+      [parsed.data.firstName, parsed.data.lastName].filter(Boolean).join(" ").trim() ||
+      parsed.data.email;
+
+    const { user, profile } = await prisma.$transaction(async (tx) => {
+      const u = await tx.user.create({
+        data: {
+          email: parsed.data.email,
+          password: hashedPassword,
+          role: "ADVISOR",
+          name: parsed.data.name ?? undefined,
+          firstName: parsed.data.firstName ?? undefined,
+          lastName: parsed.data.lastName ?? undefined,
+        },
+        select: { id: true, email: true },
+      });
+
+      const p = await tx.advisorProfile.create({
+        data: {
+          userId: u.id,
+          firmName: firm ?? undefined,
+          brandName: firm,
+          phone: parsed.data.phone ?? undefined,
+          jobTitle: parsed.data.jobTitle ?? undefined,
+          licenseNumber: parsed.data.licenseNumber ?? undefined,
+          bio: parsed.data.bio ?? undefined,
+          specializations: parsed.data.specializations ?? [],
+        },
+      });
+
+      const sub = await tx.subscription.create({
+        data: {
+          userId: u.id,
+          tier: "GROWTH",
+          status: "GRACE_PERIOD",
+          clientLimit: TIER_LIMITS.GROWTH,
+          billingCycle: "MONTHLY",
+          currentPeriodEnd: gracePeriodEnd,
+        },
+      });
+
+      await tx.subscriptionAuditLog.create({
+        data: {
+          subscriptionId: sub.id,
+          action: "admin_new_advisor_grace",
+          newTier: "GROWTH",
+          metadata: {
+            gracePeriodEnd: gracePeriodEnd.toISOString(),
+            paidSignupDeadline: paidSignupDeadline.toISOString(),
+          },
+        },
+      });
+
+      return { user: u, profile: p };
     });
+
+    try {
+      const base = (await resolvePublicAppUrl()).replace(/\/$/, "");
+      const signInUrl = `${base}/signin`;
+      const billingUrl = `${base}/advisor/billing`;
+      const billingOn = isBillingEnabled();
+      const emailHtml = buildNewAdvisorWelcomeEmailHtml({
+        displayName,
+        graceEndsAt: gracePeriodEnd,
+        paidSignupDeadline,
+        signInUrl,
+        billingUrl,
+        billingEnabled: billingOn,
+      });
+      await sendNotification({
+        recipientUserId: user.id,
+        recipientEmail: user.email,
+        category: "system",
+        title: "Welcome — complete signup within 30 days",
+        message: `Grace for hub access ends ${formatUtcCalendarDate(gracePeriodEnd)} (UTC, start of next calendar day). Complete paid subscription within 30 days by ${formatUtcCalendarDate(paidSignupDeadline)}.`,
+        referenceId: `new-advisor-${user.id}`,
+        advisorProfileId: profile.id,
+        emailSubject: "Your advisor account — grace period and 30-day signup",
+        emailHtml,
+      });
+    } catch (notifyErr) {
+      console.error("New advisor welcome notification failed:", notifyErr);
+    }
 
     revalidatePath("/admin/advisors");
     revalidatePath("/admin");
