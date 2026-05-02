@@ -12,6 +12,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async signIn({ user }) {
+      if (user.id) {
+        const active = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { deletedAt: true },
+        });
+        if (active?.deletedAt) {
+          return false;
+        }
+      }
+
       // Create a database session on sign-in for MFA tracking
       if (user.id) {
         // Use Web Crypto API for Edge Runtime compatibility
@@ -54,11 +64,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (userId) {
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
-          select: { mfaEnabled: true, role: true, firstName: true },
+          select: { mfaEnabled: true, role: true, firstName: true, deletedAt: true },
         });
         token.mfaEnabled = dbUser?.mfaEnabled ?? false;
         token.role = (dbUser?.role ?? "USER").toString().toUpperCase();
         token.firstName = dbUser?.firstName ?? undefined;
+        token.accountDeactivated = Boolean(dbUser?.deletedAt);
         if (token.mfaEnabled) {
           const [session] = await prisma.session.findMany({
             where: {
@@ -82,6 +93,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.mfaEnabled = Boolean(token.mfaEnabled);
         session.user.mfaVerified = Boolean(token.mfaVerified);
         session.user.firstName = (token.firstName as string) ?? undefined;
+        session.user.accountDeactivated = Boolean(
+          (token as { accountDeactivated?: boolean }).accountDeactivated
+        );
         let role = (token.role as string) ?? "USER";
         // ADMIN is only valid for the designated admin account
         if (role === "ADMIN" && session.user.email !== "buddy@ebilly.com") {

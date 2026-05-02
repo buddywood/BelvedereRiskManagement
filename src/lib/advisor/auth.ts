@@ -15,6 +15,10 @@ export const ADVISOR_PORTAL_DISABLED_MESSAGE =
 export const ADVISOR_SUBSCRIPTION_REQUIRED_MESSAGE =
   "Advisor portal requires an active subscription. Complete checkout in Billing or contact your administrator.";
 
+/** Thrown when the advisor account has been deactivated by an administrator. */
+export const ADVISOR_ACCOUNT_DEACTIVATED_MESSAGE =
+  "Your account has been deactivated. Contact your administrator if you need access restored.";
+
 function advisorHubAccessFromRow(
   portalFlag: boolean,
   subscription: {
@@ -32,7 +36,7 @@ function advisorHubAccessFromRow(
   return subscriptionQualifiesForPortalEnablement(subscription, true);
 }
 
-export type AdvisorHubBlockReason = "disabled" | "subscription";
+export type AdvisorHubBlockReason = "deactivated" | "disabled" | "subscription";
 
 export async function getAdvisorHubAccessForUserId(userId: string): Promise<{
   allowed: boolean;
@@ -42,6 +46,7 @@ export async function getAdvisorHubAccessForUserId(userId: string): Promise<{
     where: { id: userId },
     select: {
       role: true,
+      deletedAt: true,
       advisorPortalAccessEnabled: true,
       subscription: {
         select: {
@@ -55,6 +60,9 @@ export async function getAdvisorHubAccessForUserId(userId: string): Promise<{
   });
   if (!row || row.role !== "ADVISOR") {
     return { allowed: true, blockReason: null };
+  }
+  if (row.deletedAt) {
+    return { allowed: false, blockReason: "deactivated" };
   }
   if (row.advisorPortalAccessEnabled === false) {
     return { allowed: false, blockReason: "disabled" };
@@ -75,9 +83,11 @@ async function assertAdvisorPortalAccessForAdvisorRole(userId: string): Promise<
   const { allowed, blockReason } = await getAdvisorHubAccessForUserId(userId);
   if (!allowed) {
     throw new Error(
-      blockReason === "disabled"
-        ? ADVISOR_PORTAL_DISABLED_MESSAGE
-        : ADVISOR_SUBSCRIPTION_REQUIRED_MESSAGE
+      blockReason === "deactivated"
+        ? ADVISOR_ACCOUNT_DEACTIVATED_MESSAGE
+        : blockReason === "disabled"
+          ? ADVISOR_PORTAL_DISABLED_MESSAGE
+          : ADVISOR_SUBSCRIPTION_REQUIRED_MESSAGE
     );
   }
 }

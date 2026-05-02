@@ -3,10 +3,16 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { requireAdminRole } from "@/lib/admin/auth";
 
-export async function getAdvisorsForAdmin() {
+export type AdvisorsAdminScope = "active" | "all";
+
+export async function getAdvisorsForAdmin(opts?: { scope?: AdvisorsAdminScope }) {
   await requireAdminRole();
+  const scope = opts?.scope ?? "active";
   const advisors = await prisma.user.findMany({
-    where: { role: "ADVISOR" },
+    where: {
+      role: "ADVISOR",
+      ...(scope === "active" ? { deletedAt: null } : {}),
+    },
     select: {
       id: true,
       email: true,
@@ -14,6 +20,7 @@ export async function getAdvisorsForAdmin() {
       firstName: true,
       lastName: true,
       createdAt: true,
+      deletedAt: true,
       advisorPortalAccessEnabled: true,
       subscription: {
         select: {
@@ -60,6 +67,7 @@ export async function getAdvisorForAdmin(userId: string) {
       name: true,
       firstName: true,
       lastName: true,
+      deletedAt: true,
       advisorPortalAccessEnabled: true,
       subscription: {
         select: {
@@ -184,6 +192,7 @@ export async function getGovernanceReviewLeadsForAdmin() {
 export async function getAdvisorProfilesForLeadAssignment() {
   await requireAdminRole();
   return prisma.advisorProfile.findMany({
+    where: { user: { deletedAt: null } },
     select: {
       id: true,
       firmName: true,

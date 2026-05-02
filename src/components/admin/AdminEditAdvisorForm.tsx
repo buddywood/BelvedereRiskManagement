@@ -21,10 +21,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  restoreAdvisorByAdmin,
   setAdvisorPortalAccessByAdmin,
+  softDeleteAdvisorByAdmin,
   updateAdvisorByAdmin,
   type UpdateAdvisorInput,
 } from "@/lib/admin/actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -56,6 +59,7 @@ type Advisor = {
   name: string | null;
   firstName: string | null;
   lastName: string | null;
+  deletedAt: Date | string | null;
   advisorPortalAccessEnabled: boolean;
   subscription: AdvisorSubscription | null;
   advisorProfile: {
@@ -100,12 +104,14 @@ export function AdminEditAdvisorForm({
 }: AdminEditAdvisorFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [accountActionLoading, setAccountActionLoading] = useState(false);
   const [portalEnabled, setPortalEnabled] = useState(
     advisor.advisorPortalAccessEnabled !== false
   );
   const [portalSaving, setPortalSaving] = useState(false);
   const profile = advisor.advisorProfile;
   const sub = advisor.subscription;
+  const isDeactivated = Boolean(advisor.deletedAt);
 
   const {
     register,
@@ -161,7 +167,46 @@ export function AdminEditAdvisorForm({
     }
   };
 
+  const onRestore = async () => {
+    setAccountActionLoading(true);
+    try {
+      const result = await restoreAdvisorByAdmin({ userId: advisor.id });
+      if (result.success) {
+        toast.success("Advisor restored");
+        router.refresh();
+      } else {
+        toast.error(result.error ?? "Failed to restore advisor");
+      }
+    } catch {
+      toast.error("Failed to restore advisor");
+    } finally {
+      setAccountActionLoading(false);
+    }
+  };
+
+  const onDeactivate = async () => {
+    const ok = window.confirm(
+      "Deactivate this advisor? They will be signed out, unable to sign in, client assignments will show as inactive until you restore them, and prior client links will become active again on restore."
+    );
+    if (!ok) return;
+    setAccountActionLoading(true);
+    try {
+      const result = await softDeleteAdvisorByAdmin({ userId: advisor.id });
+      if (result.success) {
+        toast.success("Advisor deactivated");
+        router.refresh();
+      } else {
+        toast.error(result.error ?? "Failed to deactivate advisor");
+      }
+    } catch {
+      toast.error("Failed to deactivate advisor");
+    } finally {
+      setAccountActionLoading(false);
+    }
+  };
+
   const onPortalAccessChange = async (checked: boolean | "indeterminate") => {
+    if (isDeactivated) return;
     if (checked === "indeterminate") return;
     setPortalSaving(true);
     try {
@@ -185,6 +230,26 @@ export function AdminEditAdvisorForm({
 
   return (
     <div className="space-y-6">
+      {isDeactivated ? (
+        <Alert>
+          <AlertTitle>Account deactivated</AlertTitle>
+          <AlertDescription className="space-y-3">
+            <p>
+              This advisor cannot sign in and has no active sessions. Client assignments were set
+              inactive; restoring the account reactivates those assignments.
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              disabled={accountActionLoading}
+              onClick={() => void onRestore()}
+            >
+              {accountActionLoading ? "Restoring…" : "Restore advisor"}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>Subscription and portal access</CardTitle>
@@ -237,7 +302,11 @@ export function AdminEditAdvisorForm({
             <Checkbox
               id="portal-access"
               checked={portalEnabled}
-              disabled={portalSaving || (!portalEnabled && !canEnablePortalAccess)}
+              disabled={
+                isDeactivated ||
+                portalSaving ||
+                (!portalEnabled && !canEnablePortalAccess)
+              }
               onCheckedChange={onPortalAccessChange}
               className="mt-0.5"
             />
@@ -265,6 +334,7 @@ export function AdminEditAdvisorForm({
       </Card>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <fieldset disabled={isDeactivated} className="min-w-0 space-y-6 border-0 p-0">
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
@@ -340,14 +410,37 @@ export function AdminEditAdvisorForm({
       </Card>
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || isDeactivated}>
           {isSubmitting ? "Saving…" : "Save changes"}
         </Button>
         <Button type="button" variant="outline" asChild>
           <Link href="/admin/advisors">Cancel</Link>
         </Button>
       </div>
+      </fieldset>
     </form>
+
+      {!isDeactivated ? (
+        <Card className="border-destructive/40">
+          <CardHeader>
+            <CardTitle className="text-destructive">Danger zone</CardTitle>
+            <CardDescription>
+              Deactivation signs the advisor out everywhere, blocks sign-in, and sets their client
+              assignments inactive until you restore this account.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={accountActionLoading}
+              onClick={() => void onDeactivate()}
+            >
+              {accountActionLoading ? "Working…" : "Deactivate advisor"}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

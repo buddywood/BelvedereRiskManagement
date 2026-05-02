@@ -15,6 +15,7 @@ import { safeAfterSignInPath } from "@/lib/auth-callback-path";
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
+  const accountDeactivatedNotice = searchParams.get("notice") === "account_deactivated";
   const isAdvisorPortal = searchParams.get("portal") === "advisor";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -84,6 +85,14 @@ function SignInForm() {
         </div>
       }
     >
+      {accountDeactivatedNotice ? (
+        <Alert className="mb-5" variant="info">
+          <AlertDescription>
+            This account has been deactivated. Contact your administrator if you need access
+            restored.
+          </AlertDescription>
+        </Alert>
+      ) : null}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

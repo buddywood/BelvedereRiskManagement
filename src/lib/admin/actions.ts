@@ -51,6 +51,12 @@ export async function updateAdvisorByAdmin(input: UpdateAdvisorInput) {
     if (!existing) {
       return { success: false, error: "Advisor not found" };
     }
+    if (existing.deletedAt) {
+      return {
+        success: false,
+        error: "This advisor is deactivated. Restore the account before editing.",
+      };
+    }
 
     await prisma.user.update({
       where: { id: parsed.data.userId },
@@ -136,10 +142,16 @@ export async function setAdvisorPortalAccessByAdmin(input: unknown) {
 
     const target = await prisma.user.findFirst({
       where: { id: parsed.data.userId, role: "ADVISOR" },
-      select: { id: true },
+      select: { id: true, deletedAt: true },
     });
     if (!target) {
       return { success: false, error: "Advisor not found" };
+    }
+    if (target.deletedAt) {
+      return {
+        success: false,
+        error: "Cannot change portal access for a deactivated advisor. Restore the account first.",
+      };
     }
 
     if (parsed.data.enabled) {
@@ -283,7 +295,7 @@ export async function createAdvisorByAdmin(input: CreateAdvisorInput) {
         message: `Grace for hub access ends ${formatUtcCalendarDate(gracePeriodEnd)} (UTC, start of next calendar day). Complete paid subscription within 30 days by ${formatUtcCalendarDate(paidSignupDeadline)}.`,
         referenceId: `new-advisor-${user.id}`,
         advisorProfileId: profile.id,
-        emailSubject: "Your advisor account — grace period and 30-day signup",
+        emailSubject: "Akili Risk — Your advisor account is ready",
         emailHtml,
       });
     } catch (notifyErr) {
@@ -295,6 +307,127 @@ export async function createAdvisorByAdmin(input: CreateAdvisorInput) {
     return { success: true, data: { userId: user.id } };
   } catch (e) {
     const message = e instanceof Error ? e.message : "Failed to create advisor";
+    return { success: false, error: message };
+  }
+}
+
+const adminAdvisorUserIdSchema = z.object({
+  userId: z.string().cuid(),
+});
+
+export async function softDeleteAdvisorByAdmin(input: unknown) {
+  try {
+    const { userId: adminUserId } = await requireAdminRole();
+    const parsed = adminAdvisorUserIdSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.flatten().fieldErrors
+          ? Object.values(parsed.error.flatten().fieldErrors).flat().join("; ")
+          : "Validation failed",
+      };
+    }
+
+    if (parsed.data.userId === adminUserId) {
+      return { success: false, error: "You cannot deactivate your own account." };
+    }
+
+    const target = await prisma.user.findFirst({
+      where: { id: parsed.data.userId, role: "ADVISOR" },
+      select: {
+        id: true,
+        deletedAt: true,
+        advisorProfile: { select: { id: true } },
+      },
+    });
+    if (!target) {
+      return { success: false, error: "Advisor not found" };
+    }
+    if (target.deletedAt) {
+      return { success: false, error: "Advisor is already deactivated" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: target.id },
+        data: {
+          deletedAt: new Date(),
+          advisorPortalAccessEnabled: false,
+        },
+      });
+      if (target.advisorProfile?.id) {
+        await tx.clientAdvisorAssignment.updateMany({
+          where: { advisorId: target.advisorProfile.id, status: "ACTIVE" },
+          data: { status: "INACTIVE" },
+        });
+      }
+      await tx.session.deleteMany({ where: { userId: target.id } });
+    });
+
+    revalidatePath("/admin/advisors");
+    revalidatePath(`/admin/advisors/${parsed.data.userId}/edit`);
+    revalidatePath("/admin/clients");
+    revalidatePath("/admin/leads");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to deactivate advisor";
+    return { success: false, error: message };
+  }
+}
+
+export async function restoreAdvisorByAdmin(input: unknown) {
+  try {
+    await requireAdminRole();
+    const parsed = adminAdvisorUserIdSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.flatten().fieldErrors
+          ? Object.values(parsed.error.flatten().fieldErrors).flat().join("; ")
+          : "Validation failed",
+      };
+    }
+
+    const target = await prisma.user.findFirst({
+      where: { id: parsed.data.userId, role: "ADVISOR" },
+      select: {
+        id: true,
+        deletedAt: true,
+        advisorProfile: { select: { id: true } },
+      },
+    });
+    if (!target) {
+      return { success: false, error: "Advisor not found" };
+    }
+    if (!target.deletedAt) {
+      return { success: false, error: "Advisor is not deactivated" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: target.id },
+        data: {
+          deletedAt: null,
+          advisorPortalAccessEnabled: true,
+        },
+      });
+      if (target.advisorProfile?.id) {
+        await tx.clientAdvisorAssignment.updateMany({
+          where: { advisorId: target.advisorProfile.id, status: "INACTIVE" },
+          data: { status: "ACTIVE" },
+        });
+      }
+    });
+
+    revalidatePath("/admin/advisors");
+    revalidatePath(`/admin/advisors/${parsed.data.userId}/edit`);
+    revalidatePath("/admin/clients");
+    revalidatePath("/admin/leads");
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Failed to restore advisor";
     return { success: false, error: message };
   }
 }

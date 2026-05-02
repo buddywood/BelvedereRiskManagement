@@ -42,6 +42,11 @@ export default {
           return null;
         }
 
+        if (user.deletedAt) {
+          console.warn("Credentials authorize failed: account deactivated", { email });
+          return null;
+        }
+
         console.info("Credentials authorize succeeded", {
           email: user.email,
           userId: user.id,

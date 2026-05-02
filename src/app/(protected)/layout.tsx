@@ -13,6 +13,7 @@ import { getAssignedAdvisorBrandingForClient } from "@/lib/client/assigned-advis
 import { getClientIntakeGateState } from "@/lib/client/intake-gate";
 import { getPreviewBrandHex } from "@/lib/branding/preview-hex";
 import { getPlatformFeatureFlags } from "@/lib/platform/feature-flags";
+import { prisma } from "@/lib/db";
 import { cn } from "@/lib/utils";
 
 /** Shown above the workspace title when the client portal is advisor-branded (not the advisor tagline field). */
@@ -28,6 +29,18 @@ export default async function ProtectedLayout({
   // Belt-and-suspenders: redirect if no session (middleware should catch this too)
   if (!session?.user) {
     redirect("/signin");
+  }
+
+  if (session.user.id) {
+    const userRow = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { deletedAt: true },
+    });
+    if (userRow?.deletedAt) {
+      redirect(
+        `/api/auth/signout?callbackUrl=${encodeURIComponent("/signin?notice=account_deactivated")}`
+      );
+    }
   }
 
   const role = session?.user?.role?.toString().toUpperCase();

@@ -8,7 +8,7 @@ import {
   pickAdvisorBrandSecondary,
 } from "@/components/admin/admin-advisor-list-styles";
 import { subscriptionEntitlesAdvisorPortal } from "@/lib/billing/advisor-portal-subscription";
-import { getAdvisorsForAdmin } from "@/lib/admin/queries";
+import { getAdvisorsForAdmin, type AdvisorsAdminScope } from "@/lib/admin/queries";
 import { looksLikeAdvisorBrandingS3Url } from "@/lib/branding/advisor-logo-display";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -65,16 +65,42 @@ function subscriptionStatusBadgeVariant(
   }
 }
 
-export default async function AdminAdvisorsPage() {
-  const advisors = await getAdvisorsForAdmin();
+export default async function AdminAdvisorsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
+  const sp = await searchParams;
+  const scope: AdvisorsAdminScope = sp.filter === "all" ? "all" : "active";
+  const advisors = await getAdvisorsForAdmin({ scope });
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-lg font-semibold tracking-tight">
-          Advisor accounts{" "}
-          <span className="font-normal text-muted-foreground">({advisors.length})</span>
-        </h1>
+        <div className="space-y-2">
+          <h1 className="text-lg font-semibold tracking-tight">
+            Advisor accounts{" "}
+            <span className="font-normal text-muted-foreground">({advisors.length})</span>
+          </h1>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Button
+              variant={scope === "active" ? "default" : "outline"}
+              size="sm"
+              className="h-8"
+              asChild
+            >
+              <Link href="/admin/advisors">Active</Link>
+            </Button>
+            <Button
+              variant={scope === "all" ? "default" : "outline"}
+              size="sm"
+              className="h-8"
+              asChild
+            >
+              <Link href="/admin/advisors?filter=all">All</Link>
+            </Button>
+          </div>
+        </div>
         <Button asChild className="shrink-0 self-start sm:self-auto">
           <Link href="/admin/advisors/new" className="inline-flex items-center gap-2">
             <UserPlus className="h-4 w-4" />
@@ -92,6 +118,7 @@ export default async function AdminAdvisorsPage() {
       ) : (
         <div className="grid gap-4">
           {advisors.map((a) => {
+            const isDeactivated = Boolean(a.deletedAt);
             const isWhiteLabel = Boolean(a.subscription?.whiteLabel);
             const profile = a.advisorProfile;
             const primary = pickAdvisorBrandPrimary(profile?.primaryColor, profile?.accentColor);
@@ -114,7 +141,7 @@ export default async function AdminAdvisorsPage() {
               profile?.brandName?.trim() || profile?.firmName?.trim() || null;
 
             const cardSurfaceStyle: CSSProperties | undefined =
-              hasBrandColors && primary
+              !isDeactivated && hasBrandColors && primary
                 ? {
                     borderColor: `color-mix(in srgb, ${primary} ${isWhiteLabel ? 42 : 28}%, hsl(var(--border)))`,
                     backgroundImage: secondary
@@ -124,7 +151,7 @@ export default async function AdminAdvisorsPage() {
                 : undefined;
 
             const topBarBackground =
-              hasBrandColors && primary
+              !isDeactivated && hasBrandColors && primary
                 ? secondary && secondary !== primary
                   ? `linear-gradient(90deg, ${primary}, ${secondary})`
                   : `linear-gradient(90deg, ${primary}, color-mix(in srgb, ${primary} 45%, white))`
@@ -135,12 +162,22 @@ export default async function AdminAdvisorsPage() {
                 key={a.id}
                 className={cn(
                   "overflow-hidden transition-shadow",
-                  hasBrandColors ? "border-2 shadow-sm" : "border shadow-sm",
-                  isWhiteLabel && "shadow-md"
+                  isDeactivated
+                    ? "border border-dashed border-muted-foreground/35 bg-muted/30 shadow-none"
+                    : hasBrandColors
+                      ? "border-2 shadow-sm"
+                      : "border shadow-sm",
+                  !isDeactivated && isWhiteLabel && "shadow-md"
                 )}
                 style={cardSurfaceStyle}
+                aria-disabled={isDeactivated ? true : undefined}
               >
-                {topBarBackground ? (
+                {isDeactivated ? (
+                  <div
+                    className="h-1.5 w-full shrink-0 bg-muted-foreground/25"
+                    aria-hidden
+                  />
+                ) : topBarBackground ? (
                   <div
                     className="h-1.5 w-full shrink-0"
                     style={{ background: topBarBackground }}
@@ -154,31 +191,64 @@ export default async function AdminAdvisorsPage() {
                       <img
                         src={rawLogo}
                         alt=""
-                        className="size-14 shrink-0 rounded-xl border border-border/60 bg-background object-contain p-1 shadow-sm"
+                        className={cn(
+                          "size-14 shrink-0 rounded-xl border object-contain p-1 shadow-sm",
+                          isDeactivated
+                            ? "border-muted-foreground/25 bg-muted/50 opacity-60 grayscale"
+                            : "border-border/60 bg-background"
+                        )}
                       />
                     ) : hasS3Logo ? (
                       // eslint-disable-next-line @next/next/no-img-element -- admin-authenticated same-origin logo route
                       <img
                         src={adminLogoSrc}
                         alt=""
-                        className="size-14 shrink-0 rounded-xl border border-border/60 bg-background object-contain p-1 shadow-sm"
+                        className={cn(
+                          "size-14 shrink-0 rounded-xl border object-contain p-1 shadow-sm",
+                          isDeactivated
+                            ? "border-muted-foreground/25 bg-muted/50 opacity-60 grayscale"
+                            : "border-border/60 bg-background"
+                        )}
                       />
                     ) : (
                       <div
-                        className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-border/50 text-sm font-bold leading-none text-white shadow-inner"
-                        style={{
-                          background: secondary
-                            ? `linear-gradient(145deg, ${primary ?? "hsl(var(--primary))"}, ${secondary})`
-                            : (primary ?? "hsl(var(--primary))"),
-                        }}
+                        className={cn(
+                          "flex size-14 shrink-0 items-center justify-center rounded-xl border text-sm font-bold leading-none shadow-inner",
+                          isDeactivated
+                            ? "border-muted-foreground/30 bg-muted text-muted-foreground"
+                            : "border-border/50 text-white"
+                        )}
+                        style={
+                          isDeactivated
+                            ? undefined
+                            : {
+                                background: secondary
+                                  ? `linear-gradient(145deg, ${primary ?? "hsl(var(--primary))"}, ${secondary})`
+                                  : (primary ?? "hsl(var(--primary))"),
+                              }
+                        }
                         aria-hidden
                       >
                         {initials}
                       </div>
                     )}
                     <div className="min-w-0 space-y-1">
-                      <CardTitle className="text-base leading-snug">{a.name ?? a.email}</CardTitle>
-                      <p className="text-sm text-muted-foreground">{a.email}</p>
+                      <CardTitle
+                        className={cn(
+                          "text-base leading-snug",
+                          isDeactivated && "text-muted-foreground"
+                        )}
+                      >
+                        {a.name ?? a.email}
+                      </CardTitle>
+                      <p
+                        className={cn(
+                          "text-sm text-muted-foreground",
+                          isDeactivated && "opacity-90"
+                        )}
+                      >
+                        {a.email}
+                      </p>
                       {profile ? (
                         <p className="pt-1 text-sm">
                           <span className="font-medium text-foreground">
@@ -198,36 +268,48 @@ export default async function AdminAdvisorsPage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-                    {a.subscription ? (
+                    <div
+                      className={cn(
+                        "flex flex-wrap items-center gap-2",
+                        isDeactivated && "opacity-70"
+                      )}
+                    >
+                      {a.subscription ? (
+                        <Badge
+                          variant="outline"
+                          className="inline-flex max-w-[min(100%,16rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
+                          title="Subscription plan"
+                        >
+                          <Package className="size-3 shrink-0 opacity-80" aria-hidden />
+                          <span className="truncate">
+                            {humanizeEnumToken(a.subscription.tier)}
+                            {a.subscription.billingCycle
+                              ? ` · ${humanizeEnumToken(a.subscription.billingCycle)}`
+                              : ""}
+                          </span>
+                        </Badge>
+                      ) : null}
                       <Badge
-                        variant="outline"
-                        className="inline-flex max-w-[min(100%,16rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
-                        title="Subscription plan"
+                        variant={subscriptionStatusBadgeVariant(
+                          a.subscription?.status,
+                          a.subscription ?? undefined
+                        )}
+                        className="inline-flex max-w-[min(100%,14rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
+                        title="Subscription status"
                       >
-                        <Package className="size-3 shrink-0 opacity-80" aria-hidden />
+                        <CreditCard className="size-3 shrink-0 opacity-80" aria-hidden />
                         <span className="truncate">
-                          {humanizeEnumToken(a.subscription.tier)}
-                          {a.subscription.billingCycle
-                            ? ` · ${humanizeEnumToken(a.subscription.billingCycle)}`
-                            : ""}
+                          {a.subscription
+                            ? humanizeSubscriptionStatus(a.subscription.status)
+                            : "No subscription"}
                         </span>
                       </Badge>
+                    </div>
+                    {a.deletedAt ? (
+                      <Badge variant="secondary" className="text-xs normal-case tracking-normal">
+                        Deactivated
+                      </Badge>
                     ) : null}
-                    <Badge
-                      variant={subscriptionStatusBadgeVariant(
-                        a.subscription?.status,
-                        a.subscription ?? undefined
-                      )}
-                      className="inline-flex max-w-[min(100%,14rem)] items-center gap-1.5 text-xs font-medium normal-case tracking-normal"
-                      title="Subscription status"
-                    >
-                      <CreditCard className="size-3 shrink-0 opacity-80" aria-hidden />
-                      <span className="truncate">
-                        {a.subscription
-                          ? humanizeSubscriptionStatus(a.subscription.status)
-                          : "No subscription"}
-                      </span>
-                    </Badge>
                     {a.advisorPortalAccessEnabled === false ? (
                       <Badge variant="warning" className="text-xs normal-case tracking-normal">
                         Access off

@@ -24,6 +24,11 @@ export default async function AdvisorLayout({
     if (!onBillingPage) {
       const hub = await getAdvisorHubAccessForUserId(userId);
       if (!hub.allowed) {
+        if (hub.blockReason === "deactivated") {
+          redirect(
+            `/api/auth/signout?callbackUrl=${encodeURIComponent("/signin?notice=account_deactivated")}`
+          );
+        }
         redirect(
           hub.blockReason === "disabled"
             ? "/settings?notice=advisor_portal_disabled"

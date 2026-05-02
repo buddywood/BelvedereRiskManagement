@@ -29,6 +29,11 @@ export default async function DashboardPage() {
   if (role === "ADVISOR") {
     const hub = await getAdvisorHubAccessForUserId(session.user.id);
     if (!hub.allowed) {
+      if (hub.blockReason === "deactivated") {
+        redirect(
+          `/api/auth/signout?callbackUrl=${encodeURIComponent("/signin?notice=account_deactivated")}`
+        );
+      }
       redirect(
         hub.blockReason === "disabled"
           ? "/settings?notice=advisor_portal_disabled"

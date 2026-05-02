@@ -51,6 +51,30 @@ export default async function proxy(req: NextRequest) {
   const hostname = req.headers.get('host') || '';
   const pathname = req.nextUrl.pathname;
 
+  const proto = req.headers.get("x-forwarded-proto");
+  const secureCookie = proto === "https" || req.nextUrl.protocol === "https:";
+  const token = await getToken({
+    req,
+    secret: process.env.AUTH_SECRET,
+    secureCookie,
+  });
+  const isAuthenticated = !!token;
+
+  const accountDeactivated = Boolean(
+    (token as { accountDeactivated?: boolean })?.accountDeactivated
+  );
+  if (isAuthenticated && accountDeactivated) {
+    const allowWhileDeactivated =
+      pathname.startsWith("/signin") ||
+      pathname.startsWith("/api/auth") ||
+      pathname.startsWith("/_next");
+    if (!allowWhileDeactivated) {
+      const signOutUrl = new URL("/api/auth/signout", req.url);
+      signOutUrl.searchParams.set("callbackUrl", "/signin?notice=account_deactivated");
+      return NextResponse.redirect(signOutUrl);
+    }
+  }
+
   // Handle subdomain routing first
   if (shouldHandleSubdomain(pathname)) {
     const subdomain = extractSubdomain(hostname);
@@ -95,18 +119,7 @@ export default async function proxy(req: NextRequest) {
     }
   }
 
-  // Continue with existing authentication logic
-  const proto = req.headers.get("x-forwarded-proto");
-  const secureCookie = proto === "https" || req.nextUrl.protocol === "https:";
-
-  const token = await getToken({
-    req,
-    secret: process.env.AUTH_SECRET,
-    secureCookie,
-  });
-
-  const isAuthenticated = !!token;
-
+  // Continue with existing authentication logic (token from above)
   const protectedRoutes = ["/dashboard", "/assessment", "/settings"];
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)

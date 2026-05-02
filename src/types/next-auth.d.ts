@@ -8,6 +8,7 @@ declare module "next-auth" {
       mfaVerified?: boolean;
       role?: string;
       firstName?: string | null;
+      accountDeactivated?: boolean;
     };
   }
 
@@ -26,5 +27,6 @@ declare module "next-auth/jwt" {
     mfaVerified?: boolean;
     role?: string;
     firstName?: string | null;
+    accountDeactivated?: boolean;
   }
 }

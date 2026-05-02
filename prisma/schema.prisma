@@ -30,6 +30,8 @@ model User {
   mfaRecoveryCodes Json?
   /// When false, ADVISOR users cannot use /advisor or advisor APIs (admin kill switch).
   advisorPortalAccessEnabled Boolean @default(true)
+  /// Admin soft-delete: when set, user cannot sign in and should be excluded from active advisor lists.
+  deletedAt     DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -46,6 +48,7 @@ model User {
   subscription            Subscription?
 
   @@index([email])
+  @@index([deletedAt])
 }
 
 enum SubscriptionTier {
