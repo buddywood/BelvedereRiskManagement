@@ -14,6 +14,12 @@
 /coverage
 /qa-temp
 
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # next.js
 /.next/
 /out/

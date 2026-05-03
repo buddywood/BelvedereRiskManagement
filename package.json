@@ -10,6 +10,11 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
     "seed:assessment-bank": "npx tsx scripts/seed-assessment-bank.ts",
     "seed:pillar-ddl": "npx tsx scripts/seed-pillar-ddl-sql.ts",
     "import:reputational-social": "npx tsx scripts/import-reputational-social-spreadsheet.ts",
@@ -58,6 +63,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",

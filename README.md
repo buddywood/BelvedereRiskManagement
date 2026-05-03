@@ -85,6 +85,22 @@ node scripts/seed-invite-code.js ABC123 buddy+belvcustomer@ebilly.com
 
 After changing roles or re-seeding, sign out and sign in again (and hard refresh if needed) so the session and nav reflect the updates.
 
+## End-to-end tests (Playwright)
+
+Smoke tests live in `tests/`. They run against `https://preview.akilirisk.com` by default.
+
+```bash
+npm run test:e2e            # run headless
+npm run test:e2e:headed     # show the browser
+npm run test:e2e:ui         # interactive UI mode
+npm run test:e2e:report     # open the last HTML report
+```
+
+Override the target with `PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e`.
+Credentials default to the Test Users table above; override per-role with `ADVISOR_EMAIL`,
+`ADVISOR_PASSWORD`, `CLIENT_EMAIL`, `CLIENT_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
+Coverage tracker: `tests/INVENTORY.md`.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
