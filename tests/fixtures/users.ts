@@ -1,4 +1,4 @@
-export type Role = "advisor" | "client" | "admin" | "clientFresh";
+export type Role = "advisor" | "advisor2" | "client" | "admin" | "clientFresh";
 
 export interface TestUser {
   role: Role;
@@ -14,6 +14,17 @@ export const USERS: Record<Role, TestUser> = {
     role: "advisor",
     email: env("ADVISOR_EMAIL", "advisor@test.com"),
     password: env("ADVISOR_PASSWORD", "testpassword123"),
+    expectedLandingPath: "/advisor",
+  },
+  /**
+   * Independent advisor with their own AdvisorProfile and no client
+   * assignments. Used by cross-advisor isolation tests to verify direct-URL
+   * access to another advisor's client returns 404.
+   */
+  advisor2: {
+    role: "advisor2",
+    email: env("ADVISOR2_EMAIL", "advisor2@test.com"),
+    password: env("ADVISOR2_PASSWORD", "testpassword123"),
     expectedLandingPath: "/advisor",
   },
   client: {

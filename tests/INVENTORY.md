@@ -26,6 +26,8 @@ under `tests/`.
 | `tests/smoke/admin-advisors.spec.ts` | admin can view advisors list with at least one row | TBD | Implemented |
 | `tests/smoke/client-intake.spec.ts` | intake wizard end-to-end via Type tab (Q1..Q18 → /intake/complete) | TBD | Implemented |
 | `tests/smoke/client-intake.spec.ts` | Next + Save disabled until response is typed | TBD | Implemented |
+| `tests/smoke/client-portal-branding.spec.ts` | branded client sees advisor branding signals on /dashboard | TBD | Implemented |
+| `tests/smoke/tenant-isolation.spec.ts` | advisor cannot open another advisor's client via direct URL | TBD | Implemented |
 
 ## Not Implemented (BRD Test Plan Coverage Gap)
 
@@ -108,9 +110,34 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Grace period behavior on payment failure
 
 ### Branding & Multi-Tenant
-- Client portal shows assigned advisor branding
-- Preview brand hex applied
-- Default Akili branding when no advisor branding
+
+> **Architectural note:** there is no `Tenant` model. Each `AdvisorProfile`
+> is its own tenant unit. Branding lives on the advisor row
+> (`brandName`, `firmName`, `tagline`, `primary/secondary/accentColor`,
+> `logoUrl`/`logoS3Key`, `brandingEnabled`). The client portal pulls the
+> client's assigned advisor's branding via `getAssignedAdvisorBrandingForClient`
+> and applies it through `BrandingProvider` in `(protected)/layout.tsx`.
+
+Implemented:
+- ~~Client portal shows assigned advisor branding~~ *(covered by `client-portal-branding.spec.ts`)*
+- ~~Cross-advisor data isolation on direct URL access~~ *(covered by `tenant-isolation.spec.ts`)*
+
+Not Implemented (feature exists, not yet covered):
+- Default Akili branding shown when client has no assigned advisor with `brandingEnabled`
+- `/api/client/advisor-logo` returns the advisor's actual S3 logo bytes (not just 200)
+- Advisor branding edit flow (admin or advisor sets `brandName`/colors/logo, change is reflected in client portal)
+- Advisor branding audit log entries created on update (`AdvisorBrandingAuditLog`)
+- `subscriptionQualifiesForPortalEnablement` gate: advisor without subscription redirected to `/advisor/billing`
+
+Not Implemented (feature pending - subdomain/custom-domain routing not exercisable from `preview.akilirisk.com`):
+- Subdomain branded portal: `<advisor>.akilirisk.com` resolves through `src/proxy.ts`, sets `x-advisor-id`/`x-subdomain` headers, rewrites to `/branded/*`. Requires DNS for a real subdomain plus an active+verified `AdvisorSubdomain` row to exercise.
+- Reserved subdomain rejection (e.g. `www`, `app`, `api`, `admin` excluded by `extractSubdomain`)
+- `AdvisorSubdomain.isActive=false` shows "Subdomain Not Available" 404
+- `customDomainEnabled` flag: routing logic for non-`*.akilirisk.com` hosts is not implemented in `proxy.ts` (flag-only, no domain mapping)
+- Subdomain claim/validate/release UX (`generateSubdomainSuggestions`, `isSubdomainReserved`, `validateSubdomainFormat`)
+
+Not Implemented (no such feature in the app):
+- "Create tenant" admin flow - the platform has no tenant entity separate from `AdvisorProfile`
 
 ## State reset for stateful tests
 
