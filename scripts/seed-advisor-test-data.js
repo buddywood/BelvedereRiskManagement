@@ -435,9 +435,88 @@ async function main() {
 
   console.log(`✅ Created fresh-intake client (no interview row): ${clientFreshUser.email}`);
 
+  // Second independent advisor "tenant" - has their own profile, no clients
+  // assigned. Used by the cross-advisor isolation test to confirm advisor B
+  // gets 404 when navigating to advisor A's client URL directly.
+  const advisor2User = await prisma.user.upsert({
+    where: { email: 'advisor2@test.com' },
+    update: {
+      password: hashedPassword,
+      name: 'Test Advisor Two',
+      firstName: 'Second',
+      lastName: 'Advisor',
+      role: 'ADVISOR'
+    },
+    create: {
+      email: 'advisor2@test.com',
+      password: hashedPassword,
+      name: 'Test Advisor Two',
+      firstName: 'Second',
+      lastName: 'Advisor',
+      role: 'ADVISOR'
+    }
+  });
+
+  await prisma.advisorProfile.upsert({
+    where: { userId: advisor2User.id },
+    update: {
+      firmName: 'Independent Wealth Group',
+      brandName: 'Independent Wealth Group',
+      jobTitle: 'Managing Partner',
+      phone: '+1 (555) 300-4000',
+      brandingEnabled: true,
+      primaryColor: '#0c2d57',
+      secondaryColor: '#fafafa',
+      accentColor: '#f59e0b'
+    },
+    create: {
+      userId: advisor2User.id,
+      specializations: ['estate-planning'],
+      licenseNumber: 'TEST-99999',
+      firmName: 'Independent Wealth Group',
+      brandName: 'Independent Wealth Group',
+      bio: 'Second test advisor for tenant isolation tests',
+      phone: '+1 (555) 300-4000',
+      jobTitle: 'Managing Partner',
+      brandingEnabled: true,
+      primaryColor: '#0c2d57',
+      secondaryColor: '#fafafa',
+      accentColor: '#f59e0b'
+    }
+  });
+
+  // Grace-period subscription so the advisor portal layout doesn't redirect
+  // them to /advisor/billing before tenant-isolation logic runs. Mirrors the
+  // pattern used in scripts/migrate-advisor-subscriptions.js (no Stripe id).
+  const advisor2PeriodEnd = new Date();
+  advisor2PeriodEnd.setDate(advisor2PeriodEnd.getDate() + 30);
+  await prisma.subscription.upsert({
+    where: { userId: advisor2User.id },
+    update: {
+      tier: 'STARTER',
+      status: 'GRACE_PERIOD',
+      clientLimit: 10,
+      billingCycle: 'MONTHLY',
+      currentPeriodEnd: advisor2PeriodEnd,
+      cancelAtPeriodEnd: false
+    },
+    create: {
+      userId: advisor2User.id,
+      tier: 'STARTER',
+      status: 'GRACE_PERIOD',
+      clientLimit: 10,
+      billingCycle: 'MONTHLY',
+      currentPeriodEnd: advisor2PeriodEnd,
+      cancelAtPeriodEnd: false
+    }
+  });
+
+  console.log(`✅ Created second advisor (no client assignments): ${advisor2User.email}`);
+
   console.log('\n🎉 Test data seeded successfully!');
   console.log('\n📋 Verification credentials:');
   console.log(`   Advisor: advisor@test.com / testpassword123`);
+  console.log(`   Advisor (no clients, isolation tests): advisor2@test.com / testpassword123`);
   console.log(`   Client: client@test.com / testpassword123`);
   console.log(`   Client (MFA testing): client-mfa@test.com / testpassword123`);
   console.log(`   Client (fresh intake): client-fresh@test.com / testpassword123`);
