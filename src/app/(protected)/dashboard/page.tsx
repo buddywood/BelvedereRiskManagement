@@ -43,7 +43,7 @@ export default async function DashboardPage() {
     redirect("/advisor");
   }
   if (role === "ADMIN") {
-    redirect("/advisor");
+    redirect("/admin");
   }
 
   // Latest intake (any status) for hero; assessment access from gate (approve or advisor waiver)
