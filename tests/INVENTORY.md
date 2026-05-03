@@ -21,6 +21,9 @@ under `tests/`.
 | `tests/smoke/auth.spec.ts` | advisor can sign in and load `/advisor` | TBD | Implemented |
 | `tests/smoke/auth.spec.ts` | client can sign in and load `/dashboard` | TBD | Implemented |
 | `tests/smoke/auth.spec.ts` | admin can sign in and load `/admin` | TBD | Implemented |
+| `tests/smoke/client-dashboard.spec.ts` | client dashboard reflects submitted intake state | TBD | Implemented |
+| `tests/smoke/advisor-clients.spec.ts` | advisor can view client list and open a client | TBD | Implemented |
+| `tests/smoke/admin-advisors.spec.ts` | admin can view advisors list with at least one row | TBD | Implemented |
 
 ## Not Implemented (BRD Test Plan Coverage Gap)
 
@@ -40,7 +43,9 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Open-redirect protection on `callbackUrl`
 
 ### Client Intake
-- Client starts intake from dashboard
+- Client starts intake from dashboard *(blocked: needs a fresh-intake test user — see "Open Blockers")*
+- Intake "Type" tab happy path: answer 10 questions, submit, land on `/intake/complete`
+- Intake validation: Next button disabled until response saved
 - Intake save-and-resume
 - Intake submit moves to `IN_REVIEW`
 - Advisor approval unlocks assessment (`intakeGate.assessmentUnlocked`)
@@ -60,8 +65,10 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Hidden questions (`questions.is_visible=false`) excluded
 
 ### Advisor Workflows
-- Advisor portfolio lists assigned clients
-- Pipeline metrics (`activeInFlight`, `totalAssigned`)
+- ~~Advisor portfolio lists assigned clients~~ *(covered by `advisor-clients.spec.ts`)*
+- ~~Open client detail from pipeline~~ *(covered by `advisor-clients.spec.ts`)*
+- Pipeline metrics (`activeInFlight`, `totalAssigned`) match expected counts
+- Pipeline filters (by stage, search) update visible rows
 - Send client invitation
 - Review client intake submission
 - Approve/reject intake
@@ -74,7 +81,7 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Soft-deleted advisor: deactivated styling on admin advisors list
 
 ### Admin Functions
-- Admin can list advisors (`/admin/advisors`)
+- ~~Admin can list advisors (`/admin/advisors`)~~ *(covered by `admin-advisors.spec.ts`)*
 - Admin can soft-delete an advisor
 - Admin can list clients (`/admin/clients`)
 - Admin can assign lead to advisor (`/admin/leads`)
@@ -101,6 +108,26 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Client portal shows assigned advisor branding
 - Preview brand hex applied
 - Default Akili branding when no advisor branding
+
+## Open Blockers
+
+### Intake happy-path test needs a fresh-intake user
+
+Both seeded clients (`client@test.com`, `client-mfa@test.com`) have SUBMITTED
+intakes from `seed-advisor-test-data.js`, so `/intake` redirects them to
+`/intake/complete` and the interview wizard cannot be exercised end-to-end.
+
+Options to unblock (none implemented):
+1. Add a third seeded client (e.g. `client-fresh@test.com`) with no intake
+   interview row, used only by intake tests that re-create state.
+2. Add a dev-only API endpoint (gated by env flag) to reset a user's intake,
+   called from a Playwright `beforeAll`.
+3. Use the public signup flow: generate a per-run email, redeem invite code
+   `123456`, complete signup, run intake. Pollutes the DB with one user per
+   run but is fully self-contained.
+
+Audio recording is not a blocker - the interview wizard has a "Type" tab
+(`tests/smoke/...` would use `responseTab="type"`).
 
 ## Process
 
