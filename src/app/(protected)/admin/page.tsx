@@ -12,6 +12,11 @@ const SECTIONS = [
     description: "Public lead form submissions; assign each request to an advisor.",
   },
   { href: "/admin/intake", label: "Intake Management", description: "Review intake interviews and submission status." },
+  {
+    href: "/admin/intake/questions",
+    label: "Intake script",
+    description: "Edit spoken questions for the client audio intake (database pillar rows).",
+  },
   { href: "/admin/assessment", label: "Assessment Management", description: "Review assessments and completion status." },
   {
     href: "/admin/question-bank",

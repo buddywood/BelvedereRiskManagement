@@ -1,5 +1,8 @@
+import Link from "next/link";
+import { Mic } from "lucide-react";
 import { getIntakeForAdmin } from "@/lib/admin/queries";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const STATUS_COLORS: Record<string, "default" | "secondary" | "success" | "warning" | "info" | "outline"> = {
@@ -14,6 +17,24 @@ export default async function AdminIntakePage() {
 
   return (
     <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-col gap-3 space-y-0 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-base">Intake interview script</CardTitle>
+            <CardDescription>
+              View and edit the spoken questions loaded from INTAKE pillar rows (or the static
+              fallback when the database has none).
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" className="shrink-0" asChild>
+            <Link href="/admin/intake/questions" className="inline-flex items-center gap-2">
+              <Mic className="size-4" aria-hidden />
+              Manage script questions
+            </Link>
+          </Button>
+        </CardHeader>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Intake interviews ({interviews.length})</CardTitle>

@@ -7,6 +7,7 @@ import {
   UserCircle,
   Inbox,
   FileText,
+  Mic,
   ClipboardCheck,
   ListChecks,
   Settings,
@@ -57,6 +58,16 @@ const ADMIN_HEADER_CONFIG: { path: string; config: AdminPageHeaderConfig }[] = [
       title: "Assessment requests",
       subtitle:
         "Review submissions from the public request form and assign them to an advisor",
+    },
+  },
+  {
+    path: "/admin/intake/questions",
+    config: {
+      icon: Mic,
+      kicker: "Content management",
+      title: "Intake interview script",
+      subtitle:
+        "Edit spoken questions for the client audio intake (pillar INTAKE rows in the database)",
     },
   },
   {
