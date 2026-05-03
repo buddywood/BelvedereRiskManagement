@@ -513,6 +513,74 @@ async function main() {
 
   console.log(`✅ Created second advisor (no client assignments): ${advisor2User.email}`);
 
+  // Active+verified subdomain for advisor2 -> exercises the proxy.ts branded
+  // rewrite path. Bound in Vercel: `independent-wealth.akilirisk.com` -> staging.
+  const advisor2Profile = await prisma.advisorProfile.findUnique({
+    where: { userId: advisor2User.id },
+    select: { id: true }
+  });
+  await prisma.advisorSubdomain.deleteMany({ where: { advisorId: advisor2Profile.id } });
+  await prisma.advisorSubdomain.create({
+    data: {
+      advisorId: advisor2Profile.id,
+      subdomain: 'independent-wealth',
+      isActive: true,
+      dnsVerified: true,
+      sslProvisioned: true,
+      verifiedAt: new Date(),
+      lastCheckedAt: new Date()
+    }
+  });
+  console.log("✅ Created AdvisorSubdomain 'independent-wealth' (active+verified) for advisor2");
+
+  // Third advisor wired to an active-but-unverified subdomain so the proxy
+  // returns the "Subdomain Not Available" 404 page. Bound in Vercel:
+  // `inactive-tenant.akilirisk.com` -> staging.
+  const advisor3User = await prisma.user.upsert({
+    where: { email: 'advisor3@test.com' },
+    update: {
+      password: hashedPassword,
+      name: 'Test Advisor Three',
+      firstName: 'Third',
+      lastName: 'Advisor',
+      role: 'ADVISOR'
+    },
+    create: {
+      email: 'advisor3@test.com',
+      password: hashedPassword,
+      name: 'Test Advisor Three',
+      firstName: 'Third',
+      lastName: 'Advisor',
+      role: 'ADVISOR'
+    }
+  });
+  const advisor3Profile = await prisma.advisorProfile.upsert({
+    where: { userId: advisor3User.id },
+    update: {
+      firmName: 'Inactive Test Firm',
+      brandName: 'Inactive Test Firm',
+      brandingEnabled: true
+    },
+    create: {
+      userId: advisor3User.id,
+      firmName: 'Inactive Test Firm',
+      brandName: 'Inactive Test Firm',
+      bio: 'Third test advisor whose subdomain is intentionally unverified',
+      brandingEnabled: true
+    }
+  });
+  await prisma.advisorSubdomain.deleteMany({ where: { advisorId: advisor3Profile.id } });
+  await prisma.advisorSubdomain.create({
+    data: {
+      advisorId: advisor3Profile.id,
+      subdomain: 'inactive-tenant',
+      isActive: true,
+      dnsVerified: false,
+      sslProvisioned: false
+    }
+  });
+  console.log("✅ Created advisor3 + AdvisorSubdomain 'inactive-tenant' (active, NOT verified)");
+
   console.log('\n🎉 Test data seeded successfully!');
   console.log('\n📋 Verification credentials:');
   console.log(`   Advisor: advisor@test.com / testpassword123`);
