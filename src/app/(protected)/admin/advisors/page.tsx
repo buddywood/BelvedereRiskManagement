@@ -241,17 +241,20 @@ export default async function AdminAdvisorsPage({
                       >
                         {a.name ?? a.email}
                       </CardTitle>
-                      <p
-                        className={cn(
-                          "text-sm text-muted-foreground",
-                          isDeactivated && "opacity-90"
-                        )}
-                      >
-                        {a.email}
-                      </p>
+                      <p className="text-sm text-muted-foreground">{a.email}</p>
                       {profile ? (
-                        <p className="pt-1 text-sm">
-                          <span className="font-medium text-foreground">
+                        <p
+                          className={cn(
+                            "pt-1 text-sm",
+                            isDeactivated && "text-muted-foreground"
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "font-medium",
+                              isDeactivated ? "text-muted-foreground" : "text-foreground"
+                            )}
+                          >
                             {brandDisplayName ?? "Practice"}
                           </span>
                           <span className="text-muted-foreground">
