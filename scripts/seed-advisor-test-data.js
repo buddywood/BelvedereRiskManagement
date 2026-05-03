@@ -391,11 +391,56 @@ async function main() {
 
   console.log(`✅ Created ${requirements2.length} document requirements for ${client2User.email}`);
 
+  // Third client user with NO intake interview row - used by Playwright intake
+  // happy-path tests. Tests reset state via scripts/reset-fresh-client-intake.js
+  // before each run.
+  const clientFreshUser = await prisma.user.upsert({
+    where: { email: 'client-fresh@test.com' },
+    update: {
+      password: hashedPassword,
+      name: 'Test Client (Fresh)',
+      firstName: 'Fresh',
+      lastName: 'Client',
+      role: 'USER'
+    },
+    create: {
+      email: 'client-fresh@test.com',
+      password: hashedPassword,
+      name: 'Test Client (Fresh)',
+      firstName: 'Fresh',
+      lastName: 'Client',
+      role: 'USER'
+    }
+  });
+
+  // Hard reset any prior intake state so this user always starts NOT_STARTED.
+  // Cascades drop IntakeResponse + IntakeApproval rows automatically.
+  await prisma.intakeInterview.deleteMany({ where: { userId: clientFreshUser.id } });
+
+  await prisma.clientAdvisorAssignment.upsert({
+    where: {
+      clientId_advisorId: {
+        clientId: clientFreshUser.id,
+        advisorId: advisorProfile.id
+      }
+    },
+    update: { status: 'ACTIVE' },
+    create: {
+      clientId: clientFreshUser.id,
+      advisorId: advisorProfile.id,
+      status: 'ACTIVE',
+      assignedAt: new Date()
+    }
+  });
+
+  console.log(`✅ Created fresh-intake client (no interview row): ${clientFreshUser.email}`);
+
   console.log('\n🎉 Test data seeded successfully!');
   console.log('\n📋 Verification credentials:');
   console.log(`   Advisor: advisor@test.com / testpassword123`);
   console.log(`   Client: client@test.com / testpassword123`);
   console.log(`   Client (MFA testing): client-mfa@test.com / testpassword123`);
+  console.log(`   Client (fresh intake): client-fresh@test.com / testpassword123`);
   console.log(`   Intake ID: ${intakeInterview.id}`);
   console.log('\n🚀 Application should be running at http://localhost:3000');
 }
