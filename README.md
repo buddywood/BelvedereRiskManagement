@@ -42,6 +42,7 @@ Use these only in local/development. Ensure the app and database are running, th
 | **Advisor** | `advisor@test.com` | `testpassword123` | Has advisor profile and assigned client. After login, use Advisor Hub / Portfolio. |
 | **Client** | `client@test.com` | `testpassword123` | Seeded with a submitted intake; use for advisor review flow. |
 | **Client (MFA)** | `client-mfa@test.com` | `testpassword123` | Second client for MFA testing. Sign in, go to Settings, enable MFA, then sign out and sign in again to hit the MFA verify screen. |
+| **Client (fresh intake)** | `client-fresh@test.com` | `testpassword123` | No `IntakeInterview` row - used by Playwright intake happy-path tests. Reset between runs with `node scripts/reset-fresh-client-intake.js` (the test suite calls this in `beforeEach`). |
 | **Admin** | `buddy@ebilly.com` | `Test1111!` | Admin access is restricted to this account in code. Run `set-admin-role.js` first. |
 
 ### Invitation emails (advisor → client)
@@ -100,6 +101,13 @@ Override the target with `PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test
 Credentials default to the Test Users table above; override per-role with `ADVISOR_EMAIL`,
 `ADVISOR_PASSWORD`, `CLIENT_EMAIL`, `CLIENT_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
 Coverage tracker: `tests/INVENTORY.md`.
+
+The intake spec uses a dedicated seeded user (`client-fresh@test.com`) and resets
+its intake state in `beforeEach` via `scripts/reset-fresh-client-intake.js`. The
+reset reads `DATABASE_URL` from the same env files the seed scripts use, so if
+your local `.env`/`.env.local` points at the staging Neon DB, the reset hits
+staging too. Run `node scripts/seed-advisor-test-data.js` once to provision the
+user (it's idempotent).
 
 ## Learn More
 

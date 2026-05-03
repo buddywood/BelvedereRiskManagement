@@ -121,8 +121,9 @@ Use these credentials for local development testing:
 | Role | Email | Password | Notes |
 |------|--------|----------|--------|
 | **Advisor** | `advisor@test.com` | `testpassword123` | Access Advisor Hub/Portfolio |
-| **Client** | `client@test.com` | `testpassword123` | Standard client account |
+| **Client** | `client@test.com` | `testpassword123` | Standard client account (SUBMITTED + Approved intake) |
 | **Client (MFA)** | `client-mfa@test.com` | `testpassword123` | For MFA flow testing |
+| **Client (fresh)** | `client-fresh@test.com` | `testpassword123` | No intake row; used by Playwright intake tests. Reset via `node scripts/reset-fresh-client-intake.js` |
 | **Admin** | `buddy@ebilly.com` | `Test1111!` | Admin access (run set-admin-role.js first) |
 
 ### Invite Codes

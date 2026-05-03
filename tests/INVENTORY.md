@@ -24,6 +24,8 @@ under `tests/`.
 | `tests/smoke/client-dashboard.spec.ts` | client dashboard reflects submitted intake state | TBD | Implemented |
 | `tests/smoke/advisor-clients.spec.ts` | advisor can view client list and open a client | TBD | Implemented |
 | `tests/smoke/admin-advisors.spec.ts` | admin can view advisors list with at least one row | TBD | Implemented |
+| `tests/smoke/client-intake.spec.ts` | intake wizard end-to-end via Type tab (Q1..Q18 → /intake/complete) | TBD | Implemented |
+| `tests/smoke/client-intake.spec.ts` | Next + Save disabled until response is typed | TBD | Implemented |
 
 ## Not Implemented (BRD Test Plan Coverage Gap)
 
@@ -43,13 +45,14 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Open-redirect protection on `callbackUrl`
 
 ### Client Intake
-- Client starts intake from dashboard *(blocked: needs a fresh-intake test user — see "Open Blockers")*
-- Intake "Type" tab happy path: answer 10 questions, submit, land on `/intake/complete`
-- Intake validation: Next button disabled until response saved
-- Intake save-and-resume
-- Intake submit moves to `IN_REVIEW`
+- ~~Intake "Type" tab happy path: 18 questions → submit → `/intake/complete`~~ *(covered by `client-intake.spec.ts`)*
+- ~~Intake validation: Next + Save disabled until response saved~~ *(covered by `client-intake.spec.ts`)*
+- Client starts intake from dashboard CTA (vs. direct `/intake` navigation)
+- Intake "Voice" tab: AudioRecorder upload + transcription
+- Intake save-and-resume across sessions (sign out mid-interview, sign back in, resume from last completed question)
+- Submitted intake moves to `IN_REVIEW` state and surfaces on advisor's review queue
 - Advisor approval unlocks assessment (`intakeGate.assessmentUnlocked`)
-- Advisor rejection surfaces "Update needed" hero state
+- Advisor rejection surfaces "Update needed" hero state on dashboard
 - Advisor waiver path (intake skipped, assessment unlocked)
 
 ### Risk Assessments
@@ -109,25 +112,21 @@ Ordered roughly by BRD section. Fill in TC IDs and split into specs as work proc
 - Preview brand hex applied
 - Default Akili branding when no advisor branding
 
-## Open Blockers
+## State reset for stateful tests
 
-### Intake happy-path test needs a fresh-intake user
+The intake spec uses `client-fresh@test.com`, a seeded user with no
+`IntakeInterview` row. Each happy-path run flips them to SUBMITTED, so the
+spec runs `node scripts/reset-fresh-client-intake.js` in `beforeEach` to wipe
+their interview rows (cascades drop `IntakeResponse` + `IntakeApproval`).
 
-Both seeded clients (`client@test.com`, `client-mfa@test.com`) have SUBMITTED
-intakes from `seed-advisor-test-data.js`, so `/intake` redirects them to
-`/intake/complete` and the interview wizard cannot be exercised end-to-end.
+The reset script loads `DATABASE_URL` from `.env.local` then `.env` - same
+order as the seed scripts. If your local env points at the staging Neon DB,
+the reset hits staging. If you're running tests against `localhost:3000` with
+a local DB, set the local `DATABASE_URL` accordingly.
 
-Options to unblock (none implemented):
-1. Add a third seeded client (e.g. `client-fresh@test.com`) with no intake
-   interview row, used only by intake tests that re-create state.
-2. Add a dev-only API endpoint (gated by env flag) to reset a user's intake,
-   called from a Playwright `beforeAll`.
-3. Use the public signup flow: generate a per-run email, redeem invite code
-   `123456`, complete signup, run intake. Pollutes the DB with one user per
-   run but is fully self-contained.
-
-Audio recording is not a blocker - the interview wizard has a "Type" tab
-(`tests/smoke/...` would use `responseTab="type"`).
+To bootstrap a new machine: run `node scripts/seed-advisor-test-data.js` once.
+The fresh-client section of that script is idempotent - re-running it leaves
+the user in NOT_STARTED state.
 
 ## Process
 
