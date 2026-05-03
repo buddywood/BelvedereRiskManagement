@@ -28,6 +28,8 @@ under `tests/`.
 | `tests/smoke/client-intake.spec.ts` | Next + Save disabled until response is typed | TBD | Implemented |
 | `tests/smoke/client-portal-branding.spec.ts` | branded client sees advisor branding signals on /dashboard | TBD | Implemented |
 | `tests/smoke/tenant-isolation.spec.ts` | advisor cannot open another advisor's client via direct URL | TBD | Implemented |
+| `tests/smoke/subdomain-routing.spec.ts` | active subdomain serves the branded client portal | TBD | Implemented |
+| `tests/smoke/subdomain-routing.spec.ts` | unverified subdomain shows "Subdomain Not Available" | TBD | Implemented |
 
 ## Not Implemented (BRD Test Plan Coverage Gap)
 
@@ -129,12 +131,16 @@ Not Implemented (feature exists, not yet covered):
 - Advisor branding audit log entries created on update (`AdvisorBrandingAuditLog`)
 - `subscriptionQualifiesForPortalEnablement` gate: advisor without subscription redirected to `/advisor/billing`
 
-Not Implemented (feature pending - subdomain/custom-domain routing not exercisable from `preview.akilirisk.com`):
-- Subdomain branded portal: `<advisor>.akilirisk.com` resolves through `src/proxy.ts`, sets `x-advisor-id`/`x-subdomain` headers, rewrites to `/branded/*`. Requires DNS for a real subdomain plus an active+verified `AdvisorSubdomain` row to exercise.
-- Reserved subdomain rejection (e.g. `www`, `app`, `api`, `admin` excluded by `extractSubdomain`)
-- `AdvisorSubdomain.isActive=false` shows "Subdomain Not Available" 404
-- `customDomainEnabled` flag: routing logic for non-`*.akilirisk.com` hosts is not implemented in `proxy.ts` (flag-only, no domain mapping)
-- Subdomain claim/validate/release UX (`generateSubdomainSuggestions`, `isSubdomainReserved`, `validateSubdomainFormat`)
+Subdomain routing - now exercisable thanks to two staging-bound subdomains:
+- `independent-wealth.akilirisk.com` -> advisor2, AdvisorSubdomain `isActive=true, dnsVerified=true` -> branded portal renders. *(covered by `subdomain-routing.spec.ts`)*
+- `inactive-tenant.akilirisk.com` -> advisor3, `isActive=true, dnsVerified=false` -> "Subdomain Not Available" 404. *(covered by `subdomain-routing.spec.ts`)*
+
+Not Implemented (subdomain/custom-domain features still pending):
+- Reserved subdomain rejection (`www`, `app`, `api`, `admin` excluded by `extractSubdomain`). E2E test would require binding one of those names in Vercel which is invasive; consider a unit test against `extractSubdomain` instead.
+- `AdvisorSubdomain.isActive=false` path (proxy falls through to normal app instead of 404 because `getAdvisorBySubdomain` returns null when `isActive=false`). Covered case is `dnsVerified=false`, not `isActive=false`.
+- `customDomainEnabled` flag: routing logic for non-`*.akilirisk.com` hosts is not implemented in `proxy.ts` (flag-only, no domain mapping).
+- Subdomain claim/validate/release UX (`generateSubdomainSuggestions`, `isSubdomainReserved`, `validateSubdomainFormat`).
+- Per-tenant `<title>` (currently overridden by static `app/layout.tsx` metadata - real bug, see "Surfaced bugs" below).
 
 Not Implemented (no such feature in the app):
 - "Create tenant" admin flow - the platform has no tenant entity separate from `AdvisorProfile`
@@ -154,6 +160,17 @@ a local DB, set the local `DATABASE_URL` accordingly.
 To bootstrap a new machine: run `node scripts/seed-advisor-test-data.js` once.
 The fresh-client section of that script is idempotent - re-running it leaves
 the user in NOT_STARTED state.
+
+## Surfaced bugs (filed during test writing)
+
+- **Branded portal `<title>` is wrong.** `src/app/branded/layout.tsx` sets
+  `<title>{branding.brandName}</title>` in the `<head>`, but
+  `src/app/layout.tsx` exports `metadata.title = "Belvedere Risk Management"`,
+  which Next.js's Metadata API renders and overrides the manual tag. Result:
+  every branded subdomain shows "Belvedere Risk Management" in the browser
+  tab regardless of the advisor. Fix: have the branded route group export its
+  own `generateMetadata` (server-side, sourced from the same subdomain
+  branding lookup) instead of writing `<title>` in the layout body.
 
 ## Process
 
