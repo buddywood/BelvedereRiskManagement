@@ -188,14 +188,23 @@ export async function getControlCenterActivity(): Promise<
   try {
     const rows = await prisma.auditLog.findMany({
       where: {
-        NOT: {
-          OR: [
-            ...EXCLUDED_ACTION_PREFIXES.map((prefix) => ({
-              action: { startsWith: prefix },
-            })),
-            { metadata: { path: ["testOrigin"], equals: true } },
-          ],
-        },
+        AND: [
+          // Drop excluded action families. These are non-null boolean
+          // predicates, so NOT/OR over them is safe.
+          {
+            NOT: {
+              OR: EXCLUDED_ACTION_PREFIXES.map((prefix) => ({
+                action: { startsWith: prefix },
+              })),
+            },
+          },
+          // Exclude test-origin rows. Keep the `{ not: { testOrigin: true } }`
+          // form: Prisma's JSON `path`/`equals` under NOT drops rows whose key
+          // is absent (missing key -> NULL -> NOT NULL -> filtered), which here
+          // would silently drop nearly every real activity row. See
+          // src/lib/audit/queries.ts and src/lib/admin/control-center-metrics.ts.
+          { metadata: { not: { testOrigin: true } } },
+        ],
       },
       orderBy: { createdAt: "desc" },
       take: TAKE,
