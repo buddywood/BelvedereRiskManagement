@@ -40,7 +40,12 @@ async function countUniqueLoginsBetween(start: Date, end: Date): Promise<number>
       action: { in: [...LOGIN_AUDIT_ACTIONS] },
       actorUserId: { not: null },
       createdAt: { gte: start, lt: end },
-      NOT: { metadata: { path: ["testOrigin"], equals: true } },
+      // Exclude test-origin rows. Prisma's JSON `path`/`equals` with NOT drops
+      // rows whose key is absent (missing key -> NULL -> NOT NULL -> filtered),
+      // which excluded every real login row (none carry `testOrigin`) and pinned
+      // this metric to 0. The `{ not: { testOrigin: true } }` form keeps rows
+      // where the flag is absent or false. See src/lib/audit/queries.ts.
+      metadata: { not: { testOrigin: true } },
     },
   });
   const actorUserIds = rows
