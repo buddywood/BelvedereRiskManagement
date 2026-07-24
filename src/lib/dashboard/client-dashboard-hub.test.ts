@@ -294,7 +294,7 @@ describe("assessment waiver (skip to reporting)", () => {
       assessmentInProgress: false,
       assessmentComplete: false,
     });
-    const assessmentStep = journey.find((s) => s.label.toLowerCase().includes("profile"));
+    const assessmentStep = journey.find((s) => s.label.toLowerCase().includes("assessment"));
     expect(assessmentStep?.state).toBe("complete");
   });
 
