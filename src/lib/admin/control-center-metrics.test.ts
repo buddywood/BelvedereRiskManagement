@@ -48,7 +48,7 @@ describe("getControlCenterMetrics", () => {
       >);
     let dashboardUserCountCall = 0;
     const dashboardUserCounts = [5, 1, 0, 10, 8, 6, 4];
-    mockUserCount.mockImplementation(async (args) => {
+    mockUserCount.mockImplementation(((args?: Parameters<typeof prisma.user.count>[0]) => {
       const actorIds =
         args?.where &&
         typeof args.where === "object" &&
@@ -58,9 +58,11 @@ describe("getControlCenterMetrics", () => {
         "in" in args.where.id
           ? (args.where.id.in as string[])
           : null;
-      if (actorIds) return actorIds.length;
-      return dashboardUserCounts[dashboardUserCountCall++] ?? 0;
-    });
+      const count = actorIds
+        ? actorIds.length
+        : dashboardUserCounts[dashboardUserCountCall++] ?? 0;
+      return Promise.resolve(count);
+    }) as typeof prisma.user.count);
     mockAssessmentCount
       .mockResolvedValueOnce(3) // in progress
       .mockResolvedValueOnce(2) // started last 30d
