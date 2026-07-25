@@ -290,115 +290,50 @@ export default async function ProtectedLayout({
                   }
                   userEmail={session.user.email ?? undefined}
                 />
-              ) : (
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
-                    <div className="min-w-0">
-                      {activeBranding ? (
-                        <ClientPortalBrandedHeaderMark
-                          brandTitle={brandTitle}
-                          logoSrc={getLogoSrc(activeBranding)}
-                          primaryHex={previewHex?.primary}
-                        />
-                      ) : (
-                        <Link
-                          href="/"
-                          className="inline-flex shrink-0 leading-none text-foreground transition-opacity duration-200 hover:opacity-80"
-                          aria-label="AKILI home"
-                        >
-                          <AkiliHeaderLockup height={40} />
-                        </Link>
-                      )}
-
-                      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-                        {previewHex ? (
-                          <p className="text-sm">
-                            <span
-                              style={{
-                                color: previewHex.primary,
-                                opacity: 0.72,
-                              }}
-                            >
-                              Signed in as{" "}
-                            </span>
-                            <span
-                              className="font-semibold break-all"
-                              style={{ color: previewHex.primary }}
-                            >
-                              {isAdvisorBrandedWorkspace ? session.user.email : clientSignedInIdentity}
-                            </span>
-                          </p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            Signed in as{" "}
-                            <span className="font-semibold text-foreground break-all">
-                              {isAdvisorBrandedWorkspace ? session.user.email : clientSignedInIdentity}
-                            </span>
-                          </p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-3">
-                          <ThemeToggle
-                            className="shrink-0"
-                            style={
-                              previewHex
-                                ? {
-                                    borderColor: `${previewHex.primary}55`,
-                                    color: previewHex.primary,
-                                  }
-                                : undefined
-                            }
-                          />
-                          <SignOutButton
-                            variant="outline"
-                            size="sm"
-                            className="min-w-[110px] px-4"
-                            style={
-                              previewHex
-                                ? {
-                                    borderColor: `${previewHex.primary}55`,
-                                    color: previewHex.primary,
-                                  }
-                                : undefined
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="min-w-0 xl:max-w-[560px] xl:text-right">
+              ) : activeBranding ? (
+                /* Clean white-label header: logo left, user controls right, nav below */
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <ClientPortalBrandedHeaderMark
+                      brandTitle={brandTitle}
+                      logoSrc={getLogoSrc(activeBranding)}
+                      primaryHex={previewHex?.primary}
+                      logoOnly={!!getLogoSrc(activeBranding)}
+                    />
+                    <div className="flex flex-wrap items-center gap-3">
                       <p
-                        className={cn(
-                          "mb-1",
-                          compactWorkspaceHeader
-                            ? "text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                            : "editorial-kicker",
-                        )}
-                        style={
-                          previewHex ? { color: previewHex.primary } : undefined
-                        }
+                        className="text-sm"
+                        style={previewHex ? { color: previewHex.primary, opacity: 0.85 } : undefined}
                       >
-                        {isAdvisorBrandedWorkspace
-                          ? "Advisor Workspace"
-                          : clientAdvisorBranding
-                          ? BRANDED_CLIENT_HEADER_KICKER
-                          : "AKILI Risk Intelligence"}
+                        {isAdvisorBrandedWorkspace ? session.user.email : clientSignedInIdentity}
                       </p>
-                      <h1
-                        className={cn(
-                          compactWorkspaceHeader
-                            ? "text-xl font-semibold tracking-tight sm:text-2xl"
-                            : "text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]",
-                        )}
+                      <ThemeToggle
+                        className="shrink-0"
                         style={
-                          previewHex ? { color: previewHex.primary } : undefined
+                          previewHex
+                            ? {
+                                borderColor: `${previewHex.primary}55`,
+                                color: previewHex.primary,
+                              }
+                            : undefined
                         }
-                      >
-                        {isAdvisorBrandedWorkspace ? brandTitle : "Client Workspace"}
-                      </h1>
+                      />
+                      <SignOutButton
+                        variant="outline"
+                        size="sm"
+                        style={
+                          previewHex
+                            ? {
+                                borderColor: `${previewHex.primary}55`,
+                                color: previewHex.primary,
+                              }
+                            : undefined
+                        }
+                      />
                     </div>
                   </div>
-
                   <div
-                    className="mt-3 border-t border-border/60 pt-4"
+                    className="border-t border-border/60 pt-4"
                     style={
                       previewHex
                         ? { borderTopColor: `${previewHex.primary}30` }
@@ -415,6 +350,53 @@ export default async function ProtectedLayout({
                       hideIntakeNav={hideIntakeNav}
                       clientBrandHex={previewHex}
                       advisorBrandedWorkspace={isAdvisorBrandedWorkspace}
+                      advisorFeatureFlags={advisorFeatureFlags}
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* Non-branded (Akili) header */
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
+                    <div className="min-w-0">
+                      <Link
+                        href="/"
+                        className="inline-flex shrink-0 leading-none text-foreground transition-opacity duration-200 hover:opacity-80"
+                        aria-label="AKILI home"
+                      >
+                        <AkiliHeaderLockup height={40} />
+                      </Link>
+                      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                        <p className="text-sm text-muted-foreground">
+                          Signed in as{" "}
+                          <span className="font-semibold text-foreground break-all">
+                            {clientSignedInIdentity}
+                          </span>
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <ThemeToggle className="shrink-0" />
+                          <SignOutButton variant="outline" size="sm" className="min-w-[110px] px-4" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="min-w-0 xl:max-w-[560px] xl:text-right">
+                      <p className="editorial-kicker mb-1">AKILI Risk Intelligence</p>
+                      <h1 className="text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]">
+                        Client Workspace
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="mt-3 border-t border-border/60 pt-4">
+                    <ProtectedNav
+                      showAdvisor={showAdvisor}
+                      showAdmin={showAdmin}
+                      restrictNavToIntake={restrictNavToIntake}
+                      assessmentUnlockedForClient={assessmentUnlockedForClient}
+                      hideProfilesNav={hideProfilesNav}
+                      hideDocumentsNav={hideDocumentsNav}
+                      hideIntakeNav={hideIntakeNav}
+                      clientBrandHex={null}
+                      advisorBrandedWorkspace={false}
                       advisorFeatureFlags={advisorFeatureFlags}
                     />
                   </div>
