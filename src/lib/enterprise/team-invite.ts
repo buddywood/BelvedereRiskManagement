@@ -221,6 +221,7 @@ export async function resolveEnterpriseTeamInvite(
       user: {
         select: {
           password: true,
+          emailVerified: true,
           emailCiphertext: true,
         },
       },
@@ -236,13 +237,18 @@ export async function resolveEnterpriseTeamInvite(
     membership.invitedEmail?.trim().toLowerCase() ??
     decryptUserEmail(membership.user.emailCiphertext);
 
+  const hasPassword = Boolean(membership.user.password?.trim());
+  // Invite stubs (never verified) always get the create-account form, even if a
+  // prior incomplete attempt left a password hash. Established advisors who
+  // already verified their email sign in on the join page instead.
+  const needsRegistration = !hasPassword || !membership.user.emailVerified;
+
   return {
     ok: true,
     membershipId,
     enterpriseName: membership.enterprise.name,
     inviteeEmail,
-    // Treat null/empty as "no credentials yet" so invitees land on create-account.
-    needsRegistration: !membership.user.password?.trim(),
+    needsRegistration,
   };
 }
 

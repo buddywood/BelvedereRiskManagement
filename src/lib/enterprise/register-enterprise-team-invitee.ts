@@ -89,13 +89,20 @@ export async function registerEnterpriseTeamInvitee(
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: membership.userId },
-        select: { id: true, password: true, advisorProfile: { select: { id: true, enterpriseId: true } } },
+        select: {
+          id: true,
+          password: true,
+          emailVerified: true,
+          advisorProfile: { select: { id: true, enterpriseId: true } },
+        },
       });
 
       if (!user) {
         throw new EnterpriseTeamInviteError("This team invitation is no longer valid.");
       }
-      if (user.password) {
+      // Established advisors (verified + password) must sign in. Invite stubs
+      // may set or replace a password left by an incomplete earlier attempt.
+      if (user.password && user.emailVerified) {
         throw new EnterpriseTeamInviteError(
           "This invitation already has an account. Sign in to continue."
         );

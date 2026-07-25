@@ -27,7 +27,7 @@ describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
-      user: { password: null, emailCiphertext: "cipher" },
+      user: { password: null, emailVerified: null, emailCiphertext: "cipher" },
       enterprise: { name: "Northbridge Elite" },
     });
 
@@ -41,11 +41,15 @@ describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
     );
   });
 
-  it("does not redirect invitees who already have credentials", async () => {
+  it("does not redirect invitees who already have a verified account", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
-      user: { password: "hashed", emailCiphertext: "cipher" },
+      user: {
+        password: "hashed",
+        emailVerified: new Date("2026-01-01"),
+        emailCiphertext: "cipher",
+      },
       enterprise: { name: "Northbridge Elite" },
     });
 

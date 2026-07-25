@@ -24,7 +24,7 @@ describe("resolveEnterpriseTeamInvite", () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
-      user: { password: null, emailCiphertext: "cipher" },
+      user: { password: null, emailVerified: null, emailCiphertext: "cipher" },
       enterprise: { name: "Northbridge Elite" },
     });
 
@@ -40,11 +40,15 @@ describe("resolveEnterpriseTeamInvite", () => {
     });
   });
 
-  it("requires sign-in when the invitee already has credentials", async () => {
+  it("requires sign-in when the invitee already has a verified account", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
-      user: { password: "hashed", emailCiphertext: "cipher" },
+      user: {
+        password: "hashed",
+        emailVerified: new Date("2026-01-01"),
+        emailCiphertext: "cipher",
+      },
       enterprise: { name: "Northbridge Elite" },
     });
 
@@ -61,7 +65,28 @@ describe("resolveEnterpriseTeamInvite", () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
-      user: { password: "   ", emailCiphertext: "cipher" },
+      user: { password: "   ", emailVerified: null, emailCiphertext: "cipher" },
+      enterprise: { name: "Northbridge Elite" },
+    });
+
+    const token = createEnterpriseTeamInviteToken(MEMBERSHIP_ID);
+    const result = await resolveEnterpriseTeamInvite(token);
+
+    expect(result).toMatchObject({
+      ok: true,
+      needsRegistration: true,
+    });
+  });
+
+  it("lets unverified invite stubs recreate a password after a failed attempt", async () => {
+    prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
+      status: "INVITED",
+      invitedEmail: "member@firm.com",
+      user: {
+        password: "partial-hash",
+        emailVerified: null,
+        emailCiphertext: "cipher",
+      },
       enterprise: { name: "Northbridge Elite" },
     });
 

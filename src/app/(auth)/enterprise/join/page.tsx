@@ -1,11 +1,9 @@
-import { redirect } from "next/navigation";
-
 import { EnterpriseTeamJoinConfirmPanel } from "@/components/auth/EnterpriseTeamJoinConfirmPanel";
 import { EnterpriseTeamJoinWrongAccount } from "@/components/auth/EnterpriseTeamJoinWrongAccount";
+import { EnterpriseTeamInviteSignInForm } from "@/components/auth/EnterpriseTeamInviteSignInForm";
 import { EnterpriseTeamInviteSignupForm } from "@/components/auth/EnterpriseTeamInviteSignupForm";
 import { InviteAcceptFailure } from "@/components/auth/InviteAcceptFailure";
 import { auth } from "@/lib/auth";
-import { buildSignInHref } from "@/lib/auth/sign-in-routes";
 import { resolveEnterpriseTeamInvite } from "@/lib/enterprise/team-invite";
 import { buildEnterpriseTeamJoinPath } from "@/lib/enterprise/team-invite-token";
 
@@ -24,6 +22,8 @@ export default async function EnterpriseJoinPage({
 
   const joinPath = buildEnterpriseTeamJoinPath(token);
 
+  // Keep the entire accept flow on /enterprise/join — never bounce invitees
+  // through the generic Client/Advisor/Platform SignInHub.
   if (invite.needsRegistration) {
     return (
       <EnterpriseTeamInviteSignupForm
@@ -37,12 +37,12 @@ export default async function EnterpriseJoinPage({
 
   const session = await auth();
   if (!session?.user?.id) {
-    redirect(
-      buildSignInHref({
-        role: "advisor",
-        callbackUrl: joinPath,
-        email: invite.inviteeEmail,
-      })
+    return (
+      <EnterpriseTeamInviteSignInForm
+        joinPath={joinPath}
+        enterpriseName={invite.enterpriseName}
+        inviteeEmail={invite.inviteeEmail}
+      />
     );
   }
 
