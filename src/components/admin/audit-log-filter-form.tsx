@@ -72,37 +72,40 @@ export function AuditLogFilterForm({
         <Label htmlFor="to">To (UTC)</Label>
         <Input id="to" name="to" type="datetime-local" defaultValue={initialTo} />
       </div>
-      <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-        <Label>Actions</Label>
-        <div className="grid max-h-64 grid-cols-1 gap-x-4 gap-y-1.5 overflow-y-auto rounded-xl border border-border/80 p-3 text-xs sm:grid-cols-2 xl:grid-cols-3">
-          {allActions.map((a, i) => {
-            const fieldId = `audit-action-${i}`;
-            return (
-            <div key={a} className="flex min-w-0 items-center gap-2">
-              <input type="hidden" name="action" value={a} disabled={!actionSelected[a]} />
-              <Checkbox
-                id={fieldId}
-                checked={actionSelected[a] ?? false}
-                onCheckedChange={(v) =>
-                  setActionSelected((prev) => ({
-                    ...prev,
-                    [a]: v === true,
-                  }))
-                }
-                aria-labelledby={`${fieldId}-label`}
-                className="shrink-0"
-              />
-              <Label 
-                id={`${fieldId}-label`} 
-                htmlFor={fieldId} 
-                className="min-w-0 cursor-pointer truncate font-mono text-[11px] font-normal"
-                title={a}
-              >
-                {a}
-              </Label>
-            </div>
-            );
-          })}
+      <div className="space-y-2 sm:col-span-2 lg:col-span-3">
+        <Label className="text-sm font-medium">Actions</Label>
+        <div className="max-h-72 overflow-y-auto rounded-lg border border-border bg-muted/30 p-4">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+            {allActions.map((a, i) => {
+              const fieldId = `audit-action-${i}`;
+              return (
+                <label
+                  key={a}
+                  htmlFor={fieldId}
+                  className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 transition-colors hover:bg-muted"
+                >
+                  <input type="hidden" name="action" value={a} disabled={!actionSelected[a]} />
+                  <Checkbox
+                    id={fieldId}
+                    checked={actionSelected[a] ?? false}
+                    onCheckedChange={(v) =>
+                      setActionSelected((prev) => ({
+                        ...prev,
+                        [a]: v === true,
+                      }))
+                    }
+                    className="shrink-0"
+                  />
+                  <span 
+                    className="min-w-0 truncate font-mono text-xs text-foreground/90"
+                    title={a}
+                  >
+                    {a}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2 lg:col-span-3">
