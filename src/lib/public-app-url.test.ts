@@ -20,6 +20,7 @@ describe("public app URL resolvers", () => {
     "VERCEL_URL",
     "VERCEL",
     "NODE_ENV",
+    "PORT",
   ] as const;
   const previous = new Map<string, string | undefined>();
 
@@ -71,19 +72,24 @@ describe("public app URL resolvers", () => {
     expect(getPublicAppUrlStrict()).toBe("http://localhost:3000");
   });
 
-  it("falls through localhost request hosts to a public env origin", async () => {
+  it("uses PORT for the local fallback origin", () => {
+    process.env.NODE_ENV = "development";
+    process.env.PORT = "3001";
+
+    expect(getPublicAppUrlFromEnv()).toBe("http://localhost:3001");
+    expect(getPublicAppUrlStrict()).toBe("http://localhost:3001");
+  });
+
+  it("uses the localhost request host and port for local testing", async () => {
     process.env.AUTH_URL = "https://preview.akilirisk.com";
     process.env.NEXT_PUBLIC_URL = "http://localhost:3000";
     headersMock.mockResolvedValue(
       new Headers({
-        host: "localhost:3000",
-        "x-forwarded-proto": "http",
+        host: "localhost:3001",
       })
     );
 
-    await expect(resolvePublicAppUrl()).resolves.toBe(
-      "https://preview.akilirisk.com"
-    );
+    await expect(resolvePublicAppUrl()).resolves.toBe("http://localhost:3001");
   });
 
   it("uses a public request host when present", async () => {
