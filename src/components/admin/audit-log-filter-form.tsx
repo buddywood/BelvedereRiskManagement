@@ -74,11 +74,11 @@ export function AuditLogFilterForm({
       </div>
       <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
         <Label>Actions</Label>
-        <div className="grid max-h-48 grid-cols-1 gap-1.5 overflow-y-auto rounded-xl border border-border/80 p-2 text-xs sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid max-h-64 grid-cols-1 gap-x-4 gap-y-1.5 overflow-y-auto rounded-xl border border-border/80 p-3 text-xs sm:grid-cols-2 xl:grid-cols-3">
           {allActions.map((a, i) => {
             const fieldId = `audit-action-${i}`;
             return (
-            <div key={a} className="flex items-center gap-2">
+            <div key={a} className="flex min-w-0 items-center gap-2">
               <input type="hidden" name="action" value={a} disabled={!actionSelected[a]} />
               <Checkbox
                 id={fieldId}
@@ -90,8 +90,14 @@ export function AuditLogFilterForm({
                   }))
                 }
                 aria-labelledby={`${fieldId}-label`}
+                className="shrink-0"
               />
-              <Label id={`${fieldId}-label`} htmlFor={fieldId} className="cursor-pointer font-mono font-normal">
+              <Label 
+                id={`${fieldId}-label`} 
+                htmlFor={fieldId} 
+                className="min-w-0 cursor-pointer truncate font-mono text-[11px] font-normal"
+                title={a}
+              >
                 {a}
               </Label>
             </div>
