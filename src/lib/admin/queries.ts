@@ -679,3 +679,45 @@ export async function getEnterpriseOwnerCandidates(
   });
 }
 
+export type EnterpriseAdminMember = {
+  membershipId: string;
+  userId: string;
+  name: string | null;
+  email: string | null;
+  role: "ADMIN" | "ADVISOR";
+  status: "ACTIVE" | "INVITED" | "SUSPENDED";
+};
+
+/**
+ * Non-owner firm members shown on the platform-admin "Firm administrators"
+ * panel: current admins plus active team members eligible for promotion.
+ */
+export async function getEnterpriseAdminMembersForAdmin(
+  enterpriseId: string
+): Promise<EnterpriseAdminMember[]> {
+  await requireAdminRole();
+  const rows = await prisma.enterpriseMembership.findMany({
+    where: {
+      enterpriseId,
+      role: { in: ["ADMIN", "ADVISOR"] },
+    },
+    orderBy: [{ role: "asc" }, { status: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      status: true,
+      user: { select: { id: true, name: true, emailCiphertext: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    membershipId: row.id,
+    userId: row.userId,
+    name: row.user.name,
+    email: safeDecryptUserEmail(row.user.emailCiphertext, { rowId: row.user.id }),
+    role: row.role as "ADMIN" | "ADVISOR",
+    status: row.status,
+  }));
+}
+
