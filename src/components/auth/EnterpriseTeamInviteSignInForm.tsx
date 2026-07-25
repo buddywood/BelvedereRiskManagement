@@ -80,17 +80,28 @@ export function EnterpriseTeamInviteSignInForm({
       title={`Join ${enterpriseName}`}
       description="Sign in with the invited email to accept this invitation."
       footer={
-        <p className="text-sm text-muted-foreground">
-          Forgot your password?{" "}
-          <Link
-            href={scopePostAuthPath(
-              `/forgot-password?email=${encodeURIComponent(inviteeEmail)}`
-            )}
-            className="font-semibold text-foreground hover:underline"
-          >
-            Reset it
-          </Link>
-        </p>
+        <div className="space-y-2 text-sm text-muted-foreground">
+          <p>
+            New to this invite?{" "}
+            <Link
+              href={scopePostAuthPath(`${_joinPath}${_joinPath.includes("?") ? "&" : "?"}setup=1`)}
+              className="font-semibold text-foreground hover:underline"
+            >
+              Create your account
+            </Link>
+          </p>
+          <p>
+            Forgot your password?{" "}
+            <Link
+              href={scopePostAuthPath(
+                `/forgot-password?email=${encodeURIComponent(inviteeEmail)}`
+              )}
+              className="font-semibold text-foreground hover:underline"
+            >
+              Reset it
+            </Link>
+          </p>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">

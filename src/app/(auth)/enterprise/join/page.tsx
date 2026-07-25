@@ -10,10 +10,11 @@ import { buildEnterpriseTeamJoinPath } from "@/lib/enterprise/team-invite-token"
 export default async function EnterpriseJoinPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; setup?: string }>;
 }) {
   const sp = await searchParams;
   const token = sp.token?.trim() ?? "";
+  const forceSetup = sp.setup === "1";
   const invite = await resolveEnterpriseTeamInvite(token);
 
   if (!invite.ok) {
@@ -29,8 +30,7 @@ export default async function EnterpriseJoinPage({
     signedInEmail === invite.inviteeEmail;
 
   // Prefer the signed-in accept step over create-account. Otherwise a successful
-  // signup that returns to this same URL keeps rendering the signup form (and
-  // can leave the client button stuck on "Creating account…").
+  // signup that returns to this same URL keeps rendering the signup form.
   if (signedInAsInvitee) {
     return (
       <EnterpriseTeamJoinConfirmPanel
@@ -56,7 +56,7 @@ export default async function EnterpriseJoinPage({
     );
   }
 
-  if (invite.needsRegistration) {
+  if (invite.needsRegistration || forceSetup) {
     return (
       <EnterpriseTeamInviteSignupForm
         token={token}
