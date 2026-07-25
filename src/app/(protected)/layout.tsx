@@ -440,6 +440,8 @@ export default async function ProtectedLayout({
                 tenantPathPrefix={tenantPathPrefix}
                 className="mt-0"
                 hideSignIn={isAdvisorBrandedWorkspace || role === "USER"}
+                compact={isAdvisorBrandedWorkspace}
+                brandHex={previewHex?.primary ?? null}
               />
             </div>
           ) : null}

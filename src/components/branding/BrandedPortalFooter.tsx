@@ -11,8 +11,12 @@ type BrandedPortalFooterProps = {
   branding: AdvisorBrandingData;
   className?: string;
   tenantPathPrefix?: string | null;
-  /** Hide public “Sign in” (e.g. already authenticated advisor workspace). */
+  /** Hide public "Sign in" (e.g. already authenticated advisor workspace). */
   hideSignIn?: boolean;
+  /** Compact mode for advisor workspace - single-line minimal footer. */
+  compact?: boolean;
+  /** Hex color for branding accents (used in compact mode). */
+  brandHex?: string | null;
 };
 
 export function BrandedPortalFooter({
@@ -20,12 +24,59 @@ export function BrandedPortalFooter({
   className,
   tenantPathPrefix = null,
   hideSignIn = false,
+  compact = false,
+  brandHex = null,
 }: BrandedPortalFooterProps) {
   const brandTitle = clientPortalBrandingDisplayTitle(branding);
   const year = new Date().getFullYear();
   const hasContact = Boolean(
     branding.supportEmail || branding.supportPhone || branding.websiteUrl,
   );
+
+  if (compact) {
+    return (
+      <footer
+        className={cn(
+          "mt-4 border-t pt-6 text-sm text-muted-foreground",
+          className,
+        )}
+        style={brandHex ? { borderTopColor: `${brandHex}30` } : undefined}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <p style={brandHex ? { color: brandHex, opacity: 0.85 } : undefined}>
+              &copy; {year} {brandTitle}
+            </p>
+            <div className="flex items-center gap-2">
+              <AkiliIcon size={18} className="opacity-60" />
+              <span className="text-xs text-muted-foreground">
+                Powered by AkiliRisk
+              </span>
+            </div>
+          </div>
+          <nav
+            className="flex flex-wrap items-center gap-x-4 gap-y-2"
+            aria-label="Footer links"
+          >
+            <Link
+              href={buildTenantScopedPublicPath("/privacy", tenantPathPrefix)}
+              className="text-xs underline-offset-4 hover:underline"
+              style={brandHex ? { color: brandHex, opacity: 0.75 } : undefined}
+            >
+              Privacy
+            </Link>
+            <Link
+              href={buildTenantScopedPublicPath("/terms", tenantPathPrefix)}
+              className="text-xs underline-offset-4 hover:underline"
+              style={brandHex ? { color: brandHex, opacity: 0.75 } : undefined}
+            >
+              Terms
+            </Link>
+          </nav>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer
