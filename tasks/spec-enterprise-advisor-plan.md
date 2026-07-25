@@ -160,7 +160,7 @@ Add nullable `enterpriseId String? @unique`.
 | Path | `userId` | `enterpriseId` | `tier` |
 |------|----------|----------------|--------|
 | Solo advisor | set | null | STARTER / GROWTH / PROFESSIONAL |
-| Enterprise firm | null | set | ESSENTIALS / PROFESSIONAL / BUSINESS / PLATINUM |
+| Enterprise firm | null | set | ESSENTIALS / PROFESSIONAL / BUSINESS / INTELLIGENCE |
 
 Keep existing columns (`clientLimit`, Stripe ids, branding flags, status, etc.). For enterprise rows, `clientLimit` mirrors `AdvisorEnterprise.clientLimit` (denormalized for existing read paths).
 
@@ -304,7 +304,7 @@ Webhook handler resolves row by `enterpriseId` when `userId` absent.
 
 ### Tier features
 
-Enterprise members inherit the firm's **module tier** (`ESSENTIALS`–`PLATINUM`) from the enterprise `Subscription` row. Feature resolution uses `tierIncludesFeature` on that tier — not a separate `ENTERPRISE` subscription tier.
+Enterprise members inherit the firm's **module tier** (`ESSENTIALS`–`INTELLIGENCE`) from the enterprise `Subscription` row. Feature resolution uses `tierIncludesFeature` on that tier — not a separate `ENTERPRISE` subscription tier.
 
 ---
 
@@ -490,7 +490,7 @@ type BillingContext =
 ### Phase 1
 
 - [ ] AC-1: Admin can create an `AdvisorEnterprise` with owner, `seatLimit`, and `clientLimit`.
-- [ ] AC-2: Enterprise has `Subscription` with module tier (`ESSENTIALS`–`PLATINUM`), `enterpriseId` set, `userId` null.
+- [ ] AC-2: Enterprise has `Subscription` with module tier (`ESSENTIALS`–`INTELLIGENCE`), `enterpriseId` set, `userId` null.
 - [ ] AC-3: Owner with ACTIVE membership and qualifying subscription passes `getAdvisorHubAccessForUserId`.
 - [ ] AC-4: Solo advisors without enterprise membership behave exactly as before (regression).
 - [ ] AC-5: Stripe webhook updates enterprise subscription by `enterpriseId` metadata.

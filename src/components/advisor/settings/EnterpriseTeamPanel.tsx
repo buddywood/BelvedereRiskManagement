@@ -11,13 +11,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LabelWithHelp } from "@/components/ui/field-help";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  changeEnterpriseTeamMemberRoleAction,
   inviteEnterpriseTeamMemberAction,
   reactivateEnterpriseTeamMemberAction,
   resendEnterpriseTeamInviteAction,
   revokeEnterpriseTeamInviteAction,
   suspendEnterpriseTeamMemberAction,
 } from "@/lib/actions/enterprise-team-actions";
-import type { EnterpriseTeamMemberView } from "@/lib/enterprise/team-invite";
+import type { EnterpriseInviteRole, EnterpriseTeamMemberView } from "@/lib/enterprise/team-invite";
 import type { EnterpriseSeatUsage } from "@/lib/enterprise/seat-reporting";
 
 function formatEnterpriseTeamRole(role: EnterpriseTeamMemberView["role"]): string {
@@ -49,6 +57,7 @@ export function EnterpriseTeamPanel({
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [email, setEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<EnterpriseInviteRole>("ADVISOR");
   const [inviting, setInviting] = useState(false);
   const [pendingMemberId, setPendingMemberId] = useState<string | null>(null);
 
@@ -58,13 +67,21 @@ export function EnterpriseTeamPanel({
     event.preventDefault();
     setInviting(true);
     try {
-      const result = await inviteEnterpriseTeamMemberAction({ email });
+      const result = await inviteEnterpriseTeamMemberAction({
+        email,
+        role: inviteRole,
+      });
       if (!result.success) {
         toast.error(result.error);
         return;
       }
-      toast.success("Team invitation sent.");
+      toast.success(
+        inviteRole === "ADMIN"
+          ? "Firm administrator invitation sent."
+          : "Team invitation sent."
+      );
       setEmail("");
+      setInviteRole("ADVISOR");
       startTransition(() => router.refresh());
     } catch {
       toast.error("Failed to send invitation.");
@@ -133,6 +150,31 @@ export function EnterpriseTeamPanel({
     }
   };
 
+  const handleChangeRole = async (
+    membershipId: string,
+    nextRole: EnterpriseInviteRole
+  ) => {
+    setPendingMemberId(membershipId);
+    try {
+      const result = await changeEnterpriseTeamMemberRoleAction({
+        membershipId,
+        role: nextRole,
+      });
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(
+        nextRole === "ADMIN"
+          ? "Promoted to firm administrator."
+          : "Changed to team member."
+      );
+      startTransition(() => router.refresh());
+    } finally {
+      setPendingMemberId(null);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-tour="config-page-header">
@@ -157,10 +199,14 @@ export function EnterpriseTeamPanel({
         <div className="mb-4 space-y-1">
           <h2 className="text-lg font-semibold tracking-tight">Invite team member</h2>
           <p className="text-sm text-muted-foreground">
-            Invited team members receive their own login. Seat overage is reported but not blocked in v1.
+            Invite team members or additional firm administrators. Seat overage is reported but not
+            blocked in v1.
           </p>
         </div>
-        <form onSubmit={handleInvite} className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
+        <form
+          onSubmit={handleInvite}
+          className="grid gap-4 sm:grid-cols-[1fr_11rem_auto] sm:items-end"
+        >
           <div className="space-y-2">
             <LabelWithHelp htmlFor="team-invite-email" helpKey="team-invite-email">
               Email
@@ -173,6 +219,23 @@ export function EnterpriseTeamPanel({
               placeholder="member@firm.com"
               required
             />
+          </div>
+          <div className="space-y-2">
+            <LabelWithHelp htmlFor="team-invite-role" helpKey="team-invite-role">
+              Role
+            </LabelWithHelp>
+            <Select
+              value={inviteRole}
+              onValueChange={(value) => setInviteRole(value as EnterpriseInviteRole)}
+            >
+              <SelectTrigger id="team-invite-role" aria-label="Invite role">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ADVISOR">Team member</SelectItem>
+                <SelectItem value="ADMIN">Admin</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <Button type="submit" disabled={inviting}>
             {inviting ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
@@ -190,6 +253,10 @@ export function EnterpriseTeamPanel({
             const isOwner = member.role === "OWNER";
             const canManageMember =
               !isOwner && (role === "OWNER" || member.role === "ADVISOR");
+            const canChangeRole =
+              canManageMember &&
+              (member.role === "ADMIN" || member.role === "ADVISOR") &&
+              (member.status === "ACTIVE" || member.status === "INVITED");
             const busy = pendingMemberId === member.id;
 
             return (
@@ -214,6 +281,27 @@ export function EnterpriseTeamPanel({
                   >
                     {member.status}
                   </Badge>
+                  {canChangeRole ? (
+                    member.role === "ADVISOR" ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => handleChangeRole(member.id, "ADMIN")}
+                      >
+                        Make admin
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={busy}
+                        onClick={() => handleChangeRole(member.id, "ADVISOR")}
+                      >
+                        Make team member
+                      </Button>
+                    )
+                  ) : null}
                   {canManageMember && member.status === "INVITED" ? (
                     <>
                       <Button

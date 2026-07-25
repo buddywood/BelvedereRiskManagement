@@ -13,7 +13,7 @@ export function emptyPlanPricesForUi(): PlanPricesForUi {
     ESSENTIALS: { monthly: null, annual: null },
     PROFESSIONAL: { monthly: null, annual: null },
     BUSINESS: { monthly: null, annual: null },
-    PLATINUM: { monthly: null, annual: null },
+    INTELLIGENCE: { monthly: null, annual: null },
   };
 }
 
@@ -21,5 +21,5 @@ export function isModuleTier(tier: SubscriptionTier): tier is SelfServeTier {
   return tier === "ESSENTIALS" ||
     tier === "PROFESSIONAL" ||
     tier === "BUSINESS" ||
-    tier === "PLATINUM";
+    tier === "INTELLIGENCE";
 }

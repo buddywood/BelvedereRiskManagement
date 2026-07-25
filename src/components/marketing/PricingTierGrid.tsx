@@ -867,7 +867,7 @@ export function PricingTierGrid({
                 </div>
               </div>
               <p className="max-w-xl text-sm leading-7 text-muted-foreground">
-                Enterprises subscribe to Essentials through Platinum with volume pricing — not a
+                Enterprises subscribe to Essentials through Intelligence with volume pricing — not a
                 separate product line. The difference is shared firm branding, multiple advisor
                 seats, and centralized billing under one contract.
               </p>

@@ -148,9 +148,12 @@ export default function InterviewPage() {
     ? getResponseForQuestion(currentQuestion.id)
     : undefined;
 
+  // Only re-seed the draft when the question changes — not whenever the
+  // responses map identity updates (e.g. after saving another answer), which
+  // would wipe in-progress multi-select toggles.
   useEffect(() => {
     if (!currentQuestion) return;
-    const r = getResponseForQuestion(currentQuestion.id);
+    const r = useIntakeStore.getState().responses[currentQuestion.id];
     setResponseTab(
       r?.skipped || r?.transcription?.trim()
         ? "type"
@@ -159,7 +162,7 @@ export default function InterviewPage() {
           : "type",
     );
     setTypedDraft(r?.skipped ? "" : (r?.transcription ?? ""));
-  }, [currentQuestion?.id, getResponseForQuestion]);
+  }, [currentQuestion?.id]);
 
   const saveCurrentTypedAnswer = useCallback(async (): Promise<boolean> => {
     if (!interviewId || !currentQuestion) return true;

@@ -18,6 +18,7 @@ interface PipelineTableProps {
   clients: PipelineClient[];
   showDocumentsColumn?: boolean;
   monitoringEnabled?: boolean;
+  showAssignedAdvisor?: boolean;
 }
 
 const columnHelper = createColumnHelper<PipelineClient>();
@@ -33,6 +34,7 @@ export function PipelineTable({
   clients,
   showDocumentsColumn = true,
   monitoringEnabled = false,
+  showAssignedAdvisor = false,
 }: PipelineTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "lastActivity", desc: true },
@@ -106,6 +108,7 @@ export function PipelineTable({
             client={row.original}
             showDocumentsColumn={showDocumentsColumn}
             monitoringEnabled={monitoringEnabled}
+            showAssignedAdvisor={showAssignedAdvisor}
           />
         ))}
       </div>

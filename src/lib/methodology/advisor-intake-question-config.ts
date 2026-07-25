@@ -49,7 +49,7 @@ export const ADVISOR_INTAKE_ANSWER_TYPE_OPTIONS: ReadonlyArray<{
   label: string;
 }> = [
   ...ADVISOR_ASSESSMENT_ANSWER_TYPE_OPTIONS,
-  { value: "choice_list", label: "Multiple choice — pick one (2–10 options)" },
+  { value: "choice_list", label: "Multiple choice — select all that apply (2–10 options)" },
   { value: "multi_select", label: "Select all that apply (2–10 options)" },
   { value: "property_list", label: "Properties — ZIP codes (up to 5)" },
 ];

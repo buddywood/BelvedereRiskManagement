@@ -95,6 +95,7 @@ describe("createAdvisorInvitation (US-1)", () => {
       clientName: "Jane",
       personalMessage: buildDefaultInvitationPersonalMessage("Test Firm"),
       intakeWaived: false,
+      externalClientId: "CRM-9",
     });
     const after = Date.now();
 
@@ -106,6 +107,7 @@ describe("createAdvisorInvitation (US-1)", () => {
       expiresAt: Date;
       intakeWaived: boolean;
       createdBy: string;
+      externalClientId: string | null;
     };
 
     expect(data.prefillEmail).toBe("client@example.com");
@@ -113,6 +115,7 @@ describe("createAdvisorInvitation (US-1)", () => {
     expect(data.status).toBe(InvitationStatus.SENT);
     expect(data.createdBy).toBe("advisor-profile-1");
     expect(data.intakeWaived).toBe(false);
+    expect(data.externalClientId).toBe("CRM-9");
 
     const expectedMin = before + INVITATION_TTL_SEC * 1000;
     const expectedMax = after + INVITATION_TTL_SEC * 1000;

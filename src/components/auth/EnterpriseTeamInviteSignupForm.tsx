@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 
 import { AuthPanel } from "@/components/auth/AuthPanel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -12,8 +13,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
-import { registerEnterpriseTeamInviteeAction } from "@/lib/actions/enterprise-team-actions";
-import { buildSignInHref } from "@/lib/auth/sign-in-routes";
+import {
+  acceptEnterpriseTeamInviteAction,
+  registerEnterpriseTeamInviteeAction,
+} from "@/lib/actions/enterprise-team-actions";
 import { PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/auth/password-policy";
 import { broadcastAuthSessionChange } from "@/lib/auth/session-sync";
 
@@ -28,16 +31,11 @@ type FieldErrors = Record<string, string[]>;
 
 export function EnterpriseTeamInviteSignupForm({
   token,
-  joinPath,
+  joinPath: _joinPath,
   enterpriseName,
   inviteeEmail,
 }: EnterpriseTeamInviteSignupFormProps) {
   const router = useRouter();
-  const signInHref = buildSignInHref({
-    role: "advisor",
-    callbackUrl: joinPath,
-    email: inviteeEmail,
-  });
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -69,7 +67,6 @@ export function EnterpriseTeamInviteSignupForm({
       if (!result.success) {
         setError(result.error);
         setFieldErrors(result.fieldErrors ?? {});
-        setIsLoading(false);
         return;
       }
 
@@ -80,16 +77,27 @@ export function EnterpriseTeamInviteSignupForm({
       });
 
       if (signInResult?.error || signInResult?.ok === false) {
-        setError("Account created, but sign-in failed. Use the sign-in link below.");
-        setIsLoading(false);
+        setError(
+          "Account created, but sign-in failed. Refresh this page and sign in with the password you just set."
+        );
         return;
       }
 
       broadcastAuthSessionChange();
-      router.push(joinPath);
+
+      const acceptResult = await acceptEnterpriseTeamInviteAction(token);
+      if (!acceptResult.success) {
+        setError(acceptResult.error);
+        router.refresh();
+        return;
+      }
+
+      toast.success(`You joined ${acceptResult.data.enterpriseName}.`);
+      router.replace("/advisor?notice=enterprise_joined");
       router.refresh();
     } catch {
       setError("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   }
@@ -99,14 +107,6 @@ export function EnterpriseTeamInviteSignupForm({
       eyebrow="Team invitation"
       title={`Join ${enterpriseName}`}
       description="Create your team member account to accept this invitation."
-      footer={
-        <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href={signInHref} className="font-semibold text-foreground hover:underline">
-            Sign in
-          </Link>
-        </p>
-      }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
@@ -194,7 +194,8 @@ export function EnterpriseTeamInviteSignupForm({
             and{" "}
             <Link href="/privacy" className="font-semibold text-foreground hover:underline">
               Privacy Policy
-            </Link>.
+            </Link>
+            .
           </label>
         </div>
         {fieldError("acceptTerms") ? (

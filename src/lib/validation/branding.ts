@@ -233,7 +233,7 @@ export interface AdvisorBrandingData {
  * Interface for subscription feature access
  */
 export interface SubscriptionFeatures {
-  tier: 'ESSENTIALS' | 'PROFESSIONAL' | 'BUSINESS' | 'PLATINUM';
+  tier: 'ESSENTIALS' | 'PROFESSIONAL' | 'BUSINESS' | 'INTELLIGENCE';
   basicBrandingEnabled: boolean;
   advancedBrandingEnabled: boolean;
   customSubdomainEnabled: boolean;

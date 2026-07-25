@@ -49,7 +49,7 @@ export function EnterprisePricingPageContent({
           <p className="max-w-3xl text-base leading-7 text-muted-foreground">
             {contractedTier
               ? `Your contract includes the ${contractedTier} module tier. Complete Stripe checkout to activate firm billing — shared branding, ${firm.seatLimit} advisor seats, and centralized subscription management.`
-              : `Your agreement is in place. Select Essentials through Platinum to activate firm billing — shared branding, ${firm.seatLimit} advisor seats, and centralized subscription checkout on Stripe.`}
+              : `Your agreement is in place. Select Essentials through Intelligence to activate firm billing — shared branding, ${firm.seatLimit} advisor seats, and centralized subscription checkout on Stripe.`}
           </p>
           <div className="flex flex-wrap gap-3 pt-1">
             <Button asChild variant="outline" size="sm">

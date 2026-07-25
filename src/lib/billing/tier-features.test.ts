@@ -11,7 +11,7 @@ describe("tierIncludesFeature", () => {
   it("allows Professional+ for methodology customization", () => {
     expect(tierIncludesFeature("ESSENTIALS", "METHODOLOGY_CUSTOMIZATION")).toBe(false);
     expect(tierIncludesFeature("PROFESSIONAL", "METHODOLOGY_CUSTOMIZATION")).toBe(true);
-    expect(tierIncludesFeature("PLATINUM", "METHODOLOGY_CUSTOMIZATION")).toBe(true);
+    expect(tierIncludesFeature("INTELLIGENCE", "METHODOLOGY_CUSTOMIZATION")).toBe(true);
   });
 
   it("allows Business+ for implementation engagements", () => {
@@ -19,9 +19,9 @@ describe("tierIncludesFeature", () => {
     expect(tierIncludesFeature("BUSINESS", "IMPLEMENTATION_ENGAGEMENTS")).toBe(true);
   });
 
-  it("allows Platinum+ for portfolio analytics", () => {
+  it("allows Intelligence+ for portfolio analytics", () => {
     expect(tierIncludesFeature("BUSINESS", "PORTFOLIO_ANALYTICS")).toBe(false);
-    expect(tierIncludesFeature("PLATINUM", "PORTFOLIO_ANALYTICS")).toBe(true);
+    expect(tierIncludesFeature("INTELLIGENCE", "PORTFOLIO_ANALYTICS")).toBe(true);
   });
 });
 
@@ -42,8 +42,8 @@ describe("advisorTierFeatureBillingHref", () => {
 });
 
 describe("resolveAdvisorDashboardHref", () => {
-  it("routes Platinum+ to portfolio analytics", () => {
-    expect(resolveAdvisorDashboardHref("PLATINUM")).toBe("/advisor/dashboard");
+  it("routes Intelligence+ to portfolio analytics", () => {
+    expect(resolveAdvisorDashboardHref("INTELLIGENCE")).toBe("/advisor/dashboard");
   });
 
   it("routes lower tiers to Overview", () => {
@@ -53,7 +53,7 @@ describe("resolveAdvisorDashboardHref", () => {
 
   it("falls back to Overview when governance dashboard is disabled", () => {
     expect(
-      resolveAdvisorDashboardHref("PLATINUM", { governanceDashboardEnabled: false })
+      resolveAdvisorDashboardHref("INTELLIGENCE", { governanceDashboardEnabled: false })
     ).toBe("/advisor");
   });
 });

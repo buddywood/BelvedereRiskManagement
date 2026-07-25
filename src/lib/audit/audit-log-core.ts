@@ -64,6 +64,10 @@ export const AUDIT_ACTIONS = {
    *  the demoted owner becomes ADMIN. Also re-points the tenant subdomain's
    *  advisorId and the firm's billing contact to the new owner. */
   ENTERPRISE_OWNER_CHANGE: "enterprise.owner_change",
+  /** Platform admin promotes or demotes a firm member between ADMIN and ADVISOR.
+   *  beforeData/afterData capture membershipId + previous/next role. OWNER is
+   *  never changed by this action (use ENTERPRISE_OWNER_CHANGE). */
+  ENTERPRISE_ADMIN_ROLE_CHANGE: "enterprise.admin_role_change",
 
   // ── Admin user provisioning actions (super admin only) ────────────────────
   /** Super admin creates a new admin user account. */
@@ -195,6 +199,8 @@ export const AUDIT_ACTIONS = {
    *  client. metadata.email captures the destination (hashed by the
    *  redactor); metadata.tokenId references the new MagicLinkToken row. */
   CLIENT_MAGIC_LINK_REISSUE: "client.magic_link_reissue",
+  /** Advisor sets or clears their CRM / external client ID on an assignment. */
+  CLIENT_EXTERNAL_ID_UPDATE: "client.external_id_update",
 
   // ── Advisor workflow actions (P4) ─────────────────────────────────────────
   INTAKE_REVIEW_STARTED: "intake.review_started",

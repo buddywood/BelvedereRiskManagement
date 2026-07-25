@@ -452,6 +452,52 @@ describe("syncEnterpriseMethodologyToAdvisorInTx", () => {
     });
   });
 
+  it("adopts an existing platform assessment question instead of inserting a duplicate", async () => {
+    const tx = createMethodologyTx({
+      enterprisePillarQuestion: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "ent-assess-1",
+            pillarId: "pillar-gov",
+            sourceKind: AdvisorQuestionSource.PLATFORM,
+            platformSourceId: "platform-q-1",
+            sectionCode: "A",
+            displayOrder: 0,
+            questionNumber: "1",
+            questionText: "Firm question text",
+            answerType: "scored_0_3",
+            scoreMap: { "0": 0, "1": 1, "2": 2, "3": 3 },
+            whyThisMatters: null,
+            recommendedActions: null,
+            isVisible: true,
+            isKeyRiskIndicator: false,
+            relatedPillarIds: [],
+          },
+        ]),
+      },
+      advisorPillarQuestion: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "adv-platform-assess-1",
+            enterpriseSourceId: null,
+            platformSourceId: "platform-q-1",
+          },
+        ]),
+      },
+    });
+
+    await syncEnterpriseMethodologyToAdvisorInTx(tx, "ent-1", "profile-member");
+
+    expect(tx.advisorPillarQuestion.create).not.toHaveBeenCalled();
+    expect(tx.advisorPillarQuestion.update).toHaveBeenCalledWith({
+      where: { id: "adv-platform-assess-1" },
+      data: expect.objectContaining({
+        enterpriseSource: { connect: { id: "ent-assess-1" } },
+        platformSource: { connect: { id: "platform-q-1" } },
+      }),
+    });
+  });
+
   it("creates missing advisor intake clones from enterprise intake rows", async () => {
     const tx = createMethodologyTx({
       enterpriseIntakeQuestion: {
@@ -547,6 +593,51 @@ describe("syncEnterpriseMethodologyToAdvisorInTx", () => {
           { value: "0", label: "Retired" },
           { value: "1", label: "Employed" },
         ],
+      }),
+    });
+  });
+
+  it("adopts an existing platform intake question instead of inserting a duplicate", async () => {
+    const tx = createMethodologyTx({
+      enterpriseIntakeQuestion: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "ent-intake-1",
+            sourceKind: AdvisorQuestionSource.PLATFORM,
+            platformSourceId: "platform-intake-1",
+            displayOrder: 0,
+            questionNumber: "1",
+            questionText: "Firm intake question",
+            context: null,
+            helpText: null,
+            learnMore: null,
+            answerType: "audio",
+            options: null,
+            relatedPillarIds: [],
+            recommendedActions: null,
+            isVisible: true,
+          },
+        ]),
+      },
+      advisorIntakeQuestion: {
+        findMany: vi.fn().mockResolvedValue([
+          {
+            id: "adv-platform-intake-1",
+            enterpriseSourceId: null,
+            platformSourceId: "platform-intake-1",
+          },
+        ]),
+      },
+    });
+
+    await syncEnterpriseMethodologyToAdvisorInTx(tx, "ent-1", "profile-member");
+
+    expect(tx.advisorIntakeQuestion.create).not.toHaveBeenCalled();
+    expect(tx.advisorIntakeQuestion.update).toHaveBeenCalledWith({
+      where: { id: "adv-platform-intake-1" },
+      data: expect.objectContaining({
+        enterpriseSource: { connect: { id: "ent-intake-1" } },
+        platformSource: { connect: { id: "platform-intake-1" } },
       }),
     });
   });

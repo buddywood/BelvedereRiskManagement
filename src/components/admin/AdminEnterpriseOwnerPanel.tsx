@@ -120,7 +120,8 @@ export function AdminEnterpriseOwnerPanel({
             </Select>
             <p className="text-xs text-muted-foreground">
               Only active members of this firm can become owner. The previous
-              owner stays on as an administrator.
+              owner stays on as an administrator. To add another administrator
+              without changing billing ownership, use Firm administrators below.
             </p>
           </div>
 

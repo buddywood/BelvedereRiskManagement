@@ -3,6 +3,8 @@
 import {
   createEnterprisePillarQuestion,
   deleteEnterprisePillarQuestion,
+  moveEnterprisePillarQuestionOrder,
+  reorderEnterprisePillarQuestionToPosition,
   updateEnterpriseAssessmentQuestionBankMode,
   updateEnterprisePillarQuestion,
 } from "@/lib/actions/enterprise-methodology-actions";
@@ -39,6 +41,8 @@ export function EnterpriseAssessmentQuestionsEditor({
         createQuestion: createEnterprisePillarQuestion,
         deleteQuestion: deleteEnterprisePillarQuestion,
         updateBankMode: updateEnterpriseAssessmentQuestionBankMode,
+        moveQuestion: moveEnterprisePillarQuestionOrder,
+        reorderQuestion: reorderEnterprisePillarQuestionToPosition,
       }}
     />
   );

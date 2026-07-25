@@ -489,7 +489,6 @@ export async function sendEnhancedAdvisorInvitationEmail(
 
     const senderName =
       data.branding.advisorFirmName ||
-      data.branding.firmName ||
       data.branding.brandName ||
       advisorName;
     

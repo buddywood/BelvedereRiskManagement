@@ -43,8 +43,8 @@ describe("validateTierPriceEnvConfiguration", () => {
     process.env.STRIPE_PRICE_PROFESSIONAL_ANNUAL = "price_professional_annual";
     process.env.STRIPE_PRICE_BUSINESS_MONTHLY = "price_business_monthly";
     process.env.STRIPE_PRICE_BUSINESS_ANNUAL = "price_business_annual";
-    process.env.STRIPE_PRICE_PLATINUM_MONTHLY = "price_platinum_monthly";
-    process.env.STRIPE_PRICE_PLATINUM_ANNUAL = "price_platinum_annual";
+    process.env.STRIPE_PRICE_INTELLIGENCE_MONTHLY = "price_intelligence_monthly";
+    process.env.STRIPE_PRICE_INTELLIGENCE_ANNUAL = "price_intelligence_annual";
 
     const issues = validateTierPriceEnvConfiguration();
     expect(

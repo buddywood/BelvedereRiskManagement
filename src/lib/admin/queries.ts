@@ -163,48 +163,101 @@ async function findClientIdsByEmailSubstring(
 async function buildClientsAdminWhere(
   scope: ClientsAdminScope,
   q?: string,
-  advisorId?: string,
+  advisorProfileId?: string,
 ): Promise<Prisma.UserWhereInput> {
   const baseWhere = clientsAdminBaseWhere(scope);
+  const needle = q?.trim();
+
   let where: Prisma.UserWhereInput = baseWhere;
 
-  if (advisorId) {
+  if (needle) {
+    const orConditions: Prisma.UserWhereInput[] = [
+      { id: { contains: needle, mode: "insensitive" } },
+      { name: { contains: needle, mode: "insensitive" } },
+    ];
+
+    if (needle.includes("@")) {
+      const exactEmailMatch = await findUserByEmail(needle, {
+        where: baseWhere,
+        select: { id: true },
+      });
+      if (exactEmailMatch) {
+        orConditions.push({ id: exactEmailMatch.id });
+      }
+    }
+
+    const emailMatchIds = await findClientIdsByEmailSubstring(needle, baseWhere);
+    if (emailMatchIds.length > 0) {
+      orConditions.push({ id: { in: emailMatchIds } });
+    }
+
+    where = { ...baseWhere, OR: orConditions };
+  }
+
+  if (advisorProfileId) {
     where = {
       ...where,
       clientAssignments: {
         some: {
-          advisorId,
-          status: "ACTIVE",
+          advisorId: advisorProfileId,
+          ...(scope === "active" ? { status: "ACTIVE" as const } : {}),
         },
       },
     };
   }
 
-  const needle = q?.trim();
-  if (!needle) return where;
+  return where;
+}
 
-  const orConditions: Prisma.UserWhereInput[] = [
-    { id: { contains: needle, mode: "insensitive" } },
-    { name: { contains: needle, mode: "insensitive" } },
-    { clientReferenceCode: { contains: needle, mode: "insensitive" } },
-  ];
+export type AdminClientAdvisorFilterOption = {
+  id: string;
+  label: string;
+};
 
-  if (needle.includes("@")) {
-    const exactEmailMatch = await findUserByEmail(needle, {
-      where: baseWhere,
-      select: { id: true },
-    });
-    if (exactEmailMatch) {
-      orConditions.push({ id: exactEmailMatch.id });
-    }
-  }
+/** Advisors with at least one client assignment — for the admin clients filter. */
+export async function getClientAdvisorFilterOptionsForAdmin(): Promise<
+  AdminClientAdvisorFilterOption[]
+> {
+  await requireAdminRole();
+  const profiles = await prisma.advisorProfile.findMany({
+    where: {
+      user: { deletedAt: null, role: "ADVISOR" },
+      clientAssignments: { some: {} },
+    },
+    select: {
+      id: true,
+      firmName: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          lastName: true,
+          emailCiphertext: true,
+        },
+      },
+    },
+    orderBy: [{ firmName: "asc" }, { id: "asc" }],
+  });
 
-  const emailMatchIds = await findClientIdsByEmailSubstring(needle, baseWhere);
-  if (emailMatchIds.length > 0) {
-    orConditions.push({ id: { in: emailMatchIds } });
-  }
-
-  return { ...where, OR: orConditions };
+  return profiles
+    .map((profile) => {
+      const fullName = [profile.user.firstName, profile.user.lastName]
+        .map((part) => part?.trim())
+        .filter(Boolean)
+        .join(" ");
+      const name = profile.user.name?.trim() || fullName;
+      const email = safeDecryptUserEmail(profile.user.emailCiphertext, {
+        rowId: profile.user.id,
+      });
+      const primary = name || email || "Advisor";
+      const firm = profile.firmName?.trim();
+      return {
+        id: profile.id,
+        label: firm ? `${primary} · ${firm}` : primary,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
 }
 
 export async function getClientsForAdmin(opts?: {
@@ -212,6 +265,7 @@ export async function getClientsForAdmin(opts?: {
   page?: number;
   pageSize?: number;
   q?: string;
+  /** AdvisorProfile.id — clients assigned to this advisor */
   advisorId?: string;
 }) {
   const { userId, email, role } = await requireAdminRole();
@@ -302,35 +356,14 @@ export async function getClientsForAdmin(opts?: {
     action: AUDIT_ACTIONS.DATA_ACCESS_ADMIN_CLIENTS_LIST,
     entityType: "User",
     entityId: null,
-    metadata: { rowCount: users.length, totalCount, filterParams: { scope, page, q, advisorId } },
+    metadata: {
+      rowCount: users.length,
+      totalCount,
+      filterParams: { scope, page, q, advisorId },
+    },
   });
 
   return { clients: users, totalCount, page, pageSize };
-}
-
-/** Get list of advisors for the admin client filter dropdown. */
-export async function getAdvisorsForClientFilter() {
-  await requireAdminRole();
-  const advisors = await prisma.advisorProfile.findMany({
-    where: {
-      user: { deletedAt: null, role: "ADVISOR" },
-      clientAssignments: { some: { status: "ACTIVE" } },
-    },
-    select: {
-      id: true,
-      firmName: true,
-      user: { select: { id: true, name: true, emailCiphertext: true } },
-      _count: { select: { clientAssignments: { where: { status: "ACTIVE" } } } },
-    },
-    orderBy: [{ firmName: "asc" }, { user: { name: "asc" } }],
-  });
-  return advisors.map((a) => ({
-    id: a.id,
-    firmName: a.firmName,
-    userName: a.user.name,
-    email: safeDecryptUserEmail(a.user.emailCiphertext, { rowId: a.user.id }),
-    activeClientCount: a._count.clientAssignments,
-  }));
 }
 
 export async function getIntakeForAdmin() {
@@ -720,5 +753,47 @@ export async function getEnterpriseOwnerCandidates(
       },
     ];
   });
+}
+
+export type EnterpriseAdminMember = {
+  membershipId: string;
+  userId: string;
+  name: string | null;
+  email: string | null;
+  role: "ADMIN" | "ADVISOR";
+  status: "ACTIVE" | "INVITED" | "SUSPENDED";
+};
+
+/**
+ * Non-owner firm members shown on the platform-admin "Firm administrators"
+ * panel: current admins plus active team members eligible for promotion.
+ */
+export async function getEnterpriseAdminMembersForAdmin(
+  enterpriseId: string
+): Promise<EnterpriseAdminMember[]> {
+  await requireAdminRole();
+  const rows = await prisma.enterpriseMembership.findMany({
+    where: {
+      enterpriseId,
+      role: { in: ["ADMIN", "ADVISOR"] },
+    },
+    orderBy: [{ role: "asc" }, { status: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      userId: true,
+      role: true,
+      status: true,
+      user: { select: { id: true, name: true, emailCiphertext: true } },
+    },
+  });
+
+  return rows.map((row) => ({
+    membershipId: row.id,
+    userId: row.userId,
+    name: row.user.name,
+    email: safeDecryptUserEmail(row.user.emailCiphertext, { rowId: row.user.id }),
+    role: row.role as "ADMIN" | "ADVISOR",
+    status: row.status,
+  }));
 }
 

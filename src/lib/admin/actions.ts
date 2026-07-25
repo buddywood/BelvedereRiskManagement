@@ -884,8 +884,15 @@ export async function permanentlyDeleteClientByAdmin(input: unknown) {
       });
       if (intakeInterviewIds.length > 0) {
         const ids = intakeInterviewIds.map((i) => i.id);
-        await tx.intakeResponseAdminNote.deleteMany({ where: { response: { interviewId: { in: ids } } } });
-        await tx.intakeResponseAdvisorNote.deleteMany({ where: { response: { interviewId: { in: ids } } } });
+        const responseIds = await tx.intakeResponse.findMany({
+          where: { interviewId: { in: ids } },
+          select: { id: true },
+        });
+        if (responseIds.length > 0) {
+          const rIds = responseIds.map((r) => r.id);
+          await tx.intakeResponseAdminNote.deleteMany({ where: { intakeResponseId: { in: rIds } } });
+          await tx.intakeResponseAdvisorNote.deleteMany({ where: { intakeResponseId: { in: rIds } } });
+        }
         await tx.intakeResponse.deleteMany({ where: { interviewId: { in: ids } } });
         await tx.intakeApproval.deleteMany({ where: { interviewId: { in: ids } } });
       }
@@ -897,22 +904,28 @@ export async function permanentlyDeleteClientByAdmin(input: unknown) {
       });
       if (assessmentIds.length > 0) {
         const ids = assessmentIds.map((a) => a.id);
-        await tx.assessmentResponseAdminNote.deleteMany({ where: { response: { assessmentId: { in: ids } } } });
-        await tx.assessmentResponseAdvisorNote.deleteMany({ where: { response: { assessmentId: { in: ids } } } });
+        const aResponseIds = await tx.assessmentResponse.findMany({
+          where: { assessmentId: { in: ids } },
+          select: { id: true },
+        });
+        if (aResponseIds.length > 0) {
+          const arIds = aResponseIds.map((r) => r.id);
+          await tx.assessmentResponseAdminNote.deleteMany({ where: { assessmentResponseId: { in: arIds } } });
+          await tx.assessmentResponseAdvisorNote.deleteMany({ where: { assessmentResponseId: { in: arIds } } });
+        }
         await tx.assessmentResponse.deleteMany({ where: { assessmentId: { in: ids } } });
         await tx.pillarScore.deleteMany({ where: { assessmentId: { in: ids } } });
-        await tx.assessmentScore.deleteMany({ where: { assessmentId: { in: ids } } });
         await tx.report.deleteMany({ where: { assessmentId: { in: ids } } });
       }
       await tx.assessment.deleteMany({ where: { userId: target.id } });
 
       await tx.clientAdvisorAssignment.deleteMany({ where: { clientId: target.id } });
-      await tx.advisorSignal.deleteMany({ where: { userId: target.id } });
+      await tx.advisorSignal.deleteMany({ where: { clientId: target.id } });
       await tx.householdMember.deleteMany({ where: { userId: target.id } });
       await tx.documentRequirement.deleteMany({ where: { clientId: target.id } });
       await tx.notificationPreference.deleteMany({ where: { userId: target.id } });
       await tx.clientProfile.deleteMany({ where: { userId: target.id } });
-      await tx.portfolioEngagement.deleteMany({ where: { clientUserId: target.id } });
+      await tx.portfolioEngagement.deleteMany({ where: { clientId: target.id } });
       await tx.facilitatedSession.deleteMany({ where: { clientId: target.id } });
 
       await tx.user.delete({ where: { id: target.id } });
@@ -1026,7 +1039,7 @@ export async function setUserTestAccountBySuperAdmin(input: unknown) {
   }
 }
 
-const moduleTierSchema = z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "PLATINUM"]);
+const moduleTierSchema = z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "INTELLIGENCE"]);
 
 const createEnterpriseSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),
@@ -1720,5 +1733,80 @@ export async function changeEnterpriseOwnerByAdmin(input: unknown) {
   } catch (e) {
     logSafeError("admin/changeEnterpriseOwner", e);
     return { success: false as const, error: safeErrorMessage(e, "Failed to transfer ownership") };
+  }
+}
+
+const changeEnterpriseAdminRoleSchema = z.object({
+  enterpriseId: z.string().min(1),
+  membershipId: z.string().cuid(),
+  role: z.enum(["ADMIN", "ADVISOR"]),
+});
+
+/**
+ * Platform-admin: promote a firm team member to ADMIN, or demote an ADMIN back
+ * to ADVISOR. Does not touch OWNER (use changeEnterpriseOwnerByAdmin). Firms
+ * may have multiple ADMIN memberships; billing ownership stays singular.
+ */
+export async function changeEnterpriseAdminRoleByAdmin(input: unknown) {
+  try {
+    const { userId, email, role } = await requireAdminRole();
+    const parsed = changeEnterpriseAdminRoleSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        success: false as const,
+        error:
+          Object.values(parsed.error.flatten().fieldErrors).flat().join("; ") ||
+          "Validation failed",
+      };
+    }
+
+    const { enterpriseId, membershipId, role: nextRole } = parsed.data;
+
+    const membership = await prisma.enterpriseMembership.findFirst({
+      where: { id: membershipId, enterpriseId },
+      select: { id: true, userId: true, role: true, status: true },
+    });
+    if (!membership) {
+      return { success: false as const, error: "That firm member was not found." };
+    }
+    if (membership.role === "OWNER") {
+      return {
+        success: false as const,
+        error: "Use Transfer ownership to change the firm owner.",
+      };
+    }
+    if (membership.status !== "ACTIVE" && membership.status !== "INVITED") {
+      return {
+        success: false as const,
+        error: "Only active or invited members can have their admin role changed.",
+      };
+    }
+    if (membership.role === nextRole) {
+      return { success: true as const, data: { role: nextRole } };
+    }
+
+    await prisma.enterpriseMembership.update({
+      where: { id: membership.id },
+      data: { role: nextRole },
+    });
+
+    await writeAudit({
+      actor: { userId, role: role as UserRole, email },
+      action: AUDIT_ACTIONS.ENTERPRISE_ADMIN_ROLE_CHANGE,
+      entityType: "EnterpriseMembership",
+      entityId: membership.id,
+      beforeData: { role: membership.role, userId: membership.userId },
+      afterData: { role: nextRole, userId: membership.userId },
+      metadata: { enterpriseId },
+    });
+
+    revalidateEnterpriseAdminPaths(enterpriseId);
+    return { success: true as const, data: { role: nextRole } };
+  } catch (e) {
+    logSafeError("admin/changeEnterpriseAdminRole", e);
+    return {
+      success: false as const,
+      error: safeErrorMessage(e, "Failed to update firm administrator role"),
+    };
   }
 }

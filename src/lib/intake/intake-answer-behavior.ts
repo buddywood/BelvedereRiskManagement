@@ -79,14 +79,15 @@ export function formatIntakeStructuredAnswerForDisplay(
   const value = storedValue?.trim();
   if (!value) return null;
 
-  if (question.answerType === "choice_list") {
+  if (
+    question.answerType === "choice_list" ||
+    question.answerType === "multi_select"
+  ) {
     const options = parseStoredIntakeChoiceListOptions(question.options);
+    // Legacy single-token answers (pre multi-select storage) still resolve.
+    const multiLabel = formatMultiSelectForDisplay(options, value);
+    if (multiLabel) return multiLabel;
     return resolveIntakeChoiceListLabel(options, value) ?? value;
-  }
-
-  if (question.answerType === "multi_select") {
-    const options = parseStoredIntakeChoiceListOptions(question.options);
-    return formatMultiSelectForDisplay(options, value);
   }
 
   if (question.answerType === "property_list") {

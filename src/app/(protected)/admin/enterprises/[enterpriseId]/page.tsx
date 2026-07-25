@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
+import { AdminEnterpriseAdminsPanel } from "@/components/admin/AdminEnterpriseAdminsPanel";
 import { AdminEnterpriseLifecyclePanel } from "@/components/admin/AdminEnterpriseLifecyclePanel";
 import { AdminEnterpriseOwnerPanel } from "@/components/admin/AdminEnterpriseOwnerPanel";
 import { AdminEnterpriseSubdomainPanel } from "@/components/admin/AdminEnterpriseSubdomainPanel";
 import { AdminEnterpriseSubscriptionPanel } from "@/components/admin/AdminEnterpriseSubscriptionPanel";
 import {
+  getEnterpriseAdminMembersForAdmin,
   getEnterpriseDetailForAdmin,
   getEnterpriseOwnerCandidates,
 } from "@/lib/admin/queries";
@@ -31,7 +33,10 @@ export default async function AdminEnterpriseDetailPage({ params }: PageProps) {
   const enterprise = await getEnterpriseDetailForAdmin(enterpriseId);
   if (!enterprise) notFound();
 
-  const ownerCandidates = await getEnterpriseOwnerCandidates(enterprise.id);
+  const [ownerCandidates, adminMembers] = await Promise.all([
+    getEnterpriseOwnerCandidates(enterprise.id),
+    getEnterpriseAdminMembersForAdmin(enterprise.id),
+  ]);
 
   const isSuspended = enterprise.status === "SUSPENDED";
   const isProvisioning = enterprise.status === "PROVISIONING";
@@ -153,6 +158,18 @@ export default async function AdminEnterpriseDetailPage({ params }: PageProps) {
               email: c.email,
               role: c.role,
             }))}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Firm administrators</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AdminEnterpriseAdminsPanel
+            enterpriseId={enterprise.id}
+            members={adminMembers}
           />
         </CardContent>
       </Card>

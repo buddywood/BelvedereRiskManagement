@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 1) Calls Stripe CLI (`stripe prices list --live`) to discover live Price IDs
- *    for products named Essentials, Professional, Business, and Platinum (monthly + annual).
+ *    for products named Essentials, Professional, Business, and Intelligence (monthly + annual).
  * 2) Upserts those plus live API keys to Vercel **Production** only.
  *
  * Prerequisites:
@@ -31,7 +31,7 @@ const TIER_BY_PRODUCT = {
   essentials: "ESSENTIALS",
   professional: "PROFESSIONAL",
   business: "BUSINESS",
-  platinum: "PLATINUM",
+  intelligence: "INTELLIGENCE",
   // Legacy product names during migration
   starter: "ESSENTIALS",
 };
@@ -44,16 +44,18 @@ function resolveTierFromProductName(rawName) {
   if (n.includes("essentials")) return "ESSENTIALS";
   if (n.includes("professional")) return "PROFESSIONAL";
   if (n.includes("business")) return "BUSINESS";
-  if (n.includes("platinum")) return "PLATINUM";
+  if (n.includes("intelligence")) return "INTELLIGENCE";
   return null;
 }
 
-/** Pre–modular-tier-rename Stripe price env vars; app no longer reads these. */
+/** Pre-rename Stripe price env vars (Starter/Growth/Platinum); app no longer reads these. */
 const LEGACY_STRIPE_ENV_KEYS = [
   "STRIPE_PRICE_STARTER_MONTHLY",
   "STRIPE_PRICE_STARTER_ANNUAL",
   "STRIPE_PRICE_GROWTH_MONTHLY",
   "STRIPE_PRICE_GROWTH_ANNUAL",
+  "STRIPE_PRICE_PLATINUM_MONTHLY",
+  "STRIPE_PRICE_PLATINUM_ANNUAL",
 ];
 
 function usage() {
@@ -262,15 +264,15 @@ const requiredKeys = [
   "STRIPE_PRICE_PROFESSIONAL_ANNUAL",
   "STRIPE_PRICE_BUSINESS_MONTHLY",
   "STRIPE_PRICE_BUSINESS_ANNUAL",
-  "STRIPE_PRICE_PLATINUM_MONTHLY",
-  "STRIPE_PRICE_PLATINUM_ANNUAL",
+  "STRIPE_PRICE_INTELLIGENCE_MONTHLY",
+  "STRIPE_PRICE_INTELLIGENCE_ANNUAL",
 ];
 const missing = requiredKeys.filter((k) => !priceEnv[k]);
 if (missing.length) {
   console.error(
     "Could not map live prices for:",
     missing.join(", "),
-    "\nEnsure Stripe live products are named Essentials, Professional, Business, and Platinum (check Dashboard)."
+    "\nEnsure Stripe live products are named Essentials, Professional, Business, and Intelligence (check Dashboard)."
   );
   process.exit(1);
 }
@@ -310,7 +312,7 @@ for (const [key, value] of Object.entries(toPush)) {
 
 if (LEGACY_STRIPE_ENV_KEYS.length) {
   console.log(
-    `Removing ${LEGACY_STRIPE_ENV_KEYS.length} legacy Starter/Growth key(s) from Production…`
+    `Removing ${LEGACY_STRIPE_ENV_KEYS.length} legacy tier price key(s) from Production…`
   );
   for (const key of LEGACY_STRIPE_ENV_KEYS) {
     removeProduction({ key, dryRun: opts.dryRun, cwd });

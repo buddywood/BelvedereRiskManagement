@@ -50,7 +50,7 @@ export function clientLimitUpgradeMessage(status: ClientLimitSnapshot): string {
     return `You've reached your plan limit (${status.currentCount}/${status.limit}). Upgrade to ${TIER_DISPLAY_NAME[next]} for up to ${TIER_LIMITS[next]} active clients.`;
   }
 
-  return `You've reached the maximum client limit (${status.currentCount}/${status.limit}) on Platinum. Contact sales for Enterprise capacity.`;
+  return `You've reached the maximum client limit (${status.currentCount}/${status.limit}) on Intelligence. Contact sales for Enterprise capacity.`;
 }
 
 export function clientLimitBillingHref(status: ClientLimitSnapshot): string {

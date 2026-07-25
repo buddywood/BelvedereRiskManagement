@@ -15,6 +15,8 @@ export const TENANT_PUBLIC_PREFIXES = [
   "/privacy",
   "/about",
   "/contact",
+  // Firm team invite accept links must stay on the main auth tree (not /branded/*).
+  "/enterprise/join",
 ] as const;
 
 /**

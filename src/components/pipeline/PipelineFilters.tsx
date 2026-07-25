@@ -18,7 +18,11 @@ import { cn } from "@/lib/utils";
 import { PIPELINE_SEARCH_COPY } from "@/lib/advisor/pii-policy";
 import { getAdvisorPipelineStageLabel } from "@/lib/pipeline/status";
 import { PipelineProcessStateLabel } from "@/components/pipeline/PipelineProcessStateLabel";
-import type { PipelineFilters, PipelineMetrics } from "@/lib/pipeline/types";
+import type {
+  FirmAdvisorFilterOption,
+  PipelineFilters,
+  PipelineMetrics,
+} from "@/lib/pipeline/types";
 import type { ClientWorkflowStage } from "@prisma/client";
 
 interface PipelineFiltersProps {
@@ -31,6 +35,8 @@ interface PipelineFiltersProps {
   pageSize?: number;
   pseudonymousWorkspaceLabeling?: boolean;
   documentRequirementsEnabled?: boolean;
+  /** When set (firm portfolio), show Assigned advisor filter. */
+  firmAdvisorOptions?: FirmAdvisorFilterOption[];
 }
 
 const stages: ClientWorkflowStage[] = [
@@ -142,6 +148,7 @@ export function PipelineFilters({
   pageSize = 20,
   pseudonymousWorkspaceLabeling = false,
   documentRequirementsEnabled = true,
+  firmAdvisorOptions = [],
 }: PipelineFiltersProps) {
   const searchCopy = pseudonymousWorkspaceLabeling
     ? PIPELINE_SEARCH_COPY.pseudonymous
@@ -169,6 +176,13 @@ export function PipelineFilters({
   const handleStageChange = (value: string) => {
     const stage = value === "all" ? undefined : (value as ClientWorkflowStage);
     onFilterChange({ ...filters, stage });
+  };
+
+  const handleAssignedAdvisorChange = (value: string) => {
+    onFilterChange({
+      ...filters,
+      assignedAdvisorId: value === "all" ? undefined : value,
+    });
   };
 
   const setWorkflowStatus = (inactive: boolean) => {
@@ -199,6 +213,12 @@ export function PipelineFilters({
     );
   }
   if (filters.search) activeFilterLabels.push(`"${filters.search}"`);
+  if (filters.assignedAdvisorId && firmAdvisorOptions.length > 0) {
+    const advisorLabel =
+      firmAdvisorOptions.find((o) => o.id === filters.assignedAdvisorId)?.label ??
+      "Assigned advisor";
+    activeFilterLabels.push(advisorLabel);
+  }
   for (const { key, summaryLabel } of INTAKE_FILTERS) {
     if (filters[key]) activeFilterLabels.push(summaryLabel);
   }
@@ -207,6 +227,8 @@ export function PipelineFilters({
     if (filters[key]) activeFilterLabels.push(summaryLabel);
   }
   if (filters.inactive) activeFilterLabels.push("Inactive");
+
+  const showAdvisorFilter = firmAdvisorOptions.length > 0;
 
   return (
     <div
@@ -287,6 +309,28 @@ export function PipelineFilters({
               ))}
             </SelectContent>
           </Select>
+
+          {showAdvisorFilter ? (
+            <Select
+              value={filters.assignedAdvisorId || "all"}
+              onValueChange={handleAssignedAdvisorChange}
+            >
+              <SelectTrigger
+                className="h-10 w-full min-w-[12rem] sm:w-52"
+                aria-label="Filter by assigned advisor"
+              >
+                <SelectValue placeholder="Assigned advisor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All advisors</SelectItem>
+                {firmAdvisorOptions.map((advisor) => (
+                  <SelectItem key={advisor.id} value={advisor.id}>
+                    <span className="truncate">{advisor.label}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
         </div>
       </div>
 

@@ -7,12 +7,12 @@ export const SELF_SERVE_TIERS = [
   "ESSENTIALS",
   "PROFESSIONAL",
   "BUSINESS",
-  "PLATINUM",
+  "INTELLIGENCE",
 ] as const satisfies readonly SubscriptionTier[];
 
 export type SelfServeTier = (typeof SELF_SERVE_TIERS)[number];
 
-/** Module tier on firm or solo subscriptions (Essentials–Platinum). */
+/** Module tier on firm or solo subscriptions (Essentials–Intelligence). */
 export type ModuleTier = SelfServeTier;
 
 export type TierCatalogEntry = {
@@ -26,7 +26,7 @@ export type TierCatalogEntry = {
   highlights: readonly string[];
   /** Compact positives for plan comparison cards (billing + pricing). */
   cardIncludes: readonly string[];
-  /** Key gaps vs higher tiers — omit on Platinum. */
+  /** Key gaps vs higher tiers — omit on Intelligence. */
   cardExcludes?: readonly string[];
   /** Marketing emphasis on pricing page. */
   featured?: boolean;
@@ -102,13 +102,13 @@ export const TIER_CATALOG: Record<SelfServeTier, TierCatalogEntry> = {
       "Portfolio analytics, reassessments & monitoring",
     ],
   },
-  PLATINUM: {
-    tier: "PLATINUM",
-    name: "Platinum",
-    tagline: "Ongoing governance intelligence",
+  INTELLIGENCE: {
+    tier: "INTELLIGENCE",
+    name: "Intelligence",
+    tagline: "Ongoing monitoring and portfolio insight",
     modules: "Continuous monitoring + reassessments + analytics",
     clientLimit: 150,
-    stripeProductName: "Platinum",
+    stripeProductName: "Intelligence",
     highlights: [
       "Everything in Business",
       "Scheduled reassessments and trend comparison",
@@ -117,7 +117,7 @@ export const TIER_CATALOG: Record<SelfServeTier, TierCatalogEntry> = {
     ],
     cardIncludes: [
       "Everything in Business",
-      "Portfolio analytics & risk intelligence dashboard",
+      "Portfolio analytics & risk heat-map dashboard",
       "Reassessments, trends & continuous monitoring",
     ],
   },
@@ -127,14 +127,14 @@ export const TIER_DISPLAY_NAME: Record<SelfServeTier, string> = {
   ESSENTIALS: "Essentials",
   PROFESSIONAL: "Professional",
   BUSINESS: "Business",
-  PLATINUM: "Platinum",
+  INTELLIGENCE: "Intelligence",
 };
 
 export const TIER_RANK: Record<SelfServeTier, number> = {
   ESSENTIALS: 0,
   PROFESSIONAL: 1,
   BUSINESS: 2,
-  PLATINUM: 3,
+  INTELLIGENCE: 3,
 };
 
 export function tierEnvKey(tier: SelfServeTier, cycle: BillingCycle): string {
@@ -192,7 +192,7 @@ export function parseSignupCheckoutIntent(searchParams: {
     searchParams.checkout_plan === "ESSENTIALS" ||
     searchParams.checkout_plan === "PROFESSIONAL" ||
     searchParams.checkout_plan === "BUSINESS" ||
-    searchParams.checkout_plan === "PLATINUM"
+    searchParams.checkout_plan === "INTELLIGENCE"
       ? searchParams.checkout_plan
       : null;
   const billingCycle =

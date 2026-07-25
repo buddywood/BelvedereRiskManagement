@@ -1,21 +1,20 @@
-import { redirect } from "next/navigation";
-
 import { EnterpriseTeamJoinConfirmPanel } from "@/components/auth/EnterpriseTeamJoinConfirmPanel";
 import { EnterpriseTeamJoinWrongAccount } from "@/components/auth/EnterpriseTeamJoinWrongAccount";
+import { EnterpriseTeamInviteSignInForm } from "@/components/auth/EnterpriseTeamInviteSignInForm";
 import { EnterpriseTeamInviteSignupForm } from "@/components/auth/EnterpriseTeamInviteSignupForm";
 import { InviteAcceptFailure } from "@/components/auth/InviteAcceptFailure";
 import { auth } from "@/lib/auth";
-import { buildSignInHref } from "@/lib/auth/sign-in-routes";
 import { resolveEnterpriseTeamInvite } from "@/lib/enterprise/team-invite";
 import { buildEnterpriseTeamJoinPath } from "@/lib/enterprise/team-invite-token";
 
 export default async function EnterpriseJoinPage({
   searchParams,
 }: {
-  searchParams: Promise<{ token?: string }>;
+  searchParams: Promise<{ token?: string; setup?: string }>;
 }) {
   const sp = await searchParams;
   const token = sp.token?.trim() ?? "";
+  const forceSetup = sp.setup === "1";
   const invite = await resolveEnterpriseTeamInvite(token);
 
   if (!invite.ok) {
@@ -23,8 +22,41 @@ export default async function EnterpriseJoinPage({
   }
 
   const joinPath = buildEnterpriseTeamJoinPath(token);
+  const session = await auth();
+  const signedInEmail = session?.user?.email?.trim().toLowerCase() ?? null;
+  const signedInAsInvitee =
+    Boolean(session?.user?.id) &&
+    session?.user?.role === "ADVISOR" &&
+    signedInEmail === invite.inviteeEmail;
 
-  if (invite.needsRegistration) {
+  // Prefer the signed-in accept step over create-account. Otherwise a successful
+  // signup that returns to this same URL keeps rendering the signup form.
+  if (signedInAsInvitee) {
+    return (
+      <EnterpriseTeamJoinConfirmPanel
+        token={token}
+        enterpriseName={invite.enterpriseName}
+        inviteeEmail={invite.inviteeEmail}
+      />
+    );
+  }
+
+  if (session?.user?.id) {
+    if (session.user.role !== "ADVISOR") {
+      return (
+        <InviteAcceptFailure message="Team invitations require a team member account. Sign in with the invited email address." />
+      );
+    }
+    return (
+      <EnterpriseTeamJoinWrongAccount
+        inviteeEmail={invite.inviteeEmail}
+        signedInEmail={signedInEmail ?? "your current account"}
+        joinPath={joinPath}
+      />
+    );
+  }
+
+  if (invite.needsRegistration || forceSetup) {
     return (
       <EnterpriseTeamInviteSignupForm
         token={token}
@@ -35,37 +67,10 @@ export default async function EnterpriseJoinPage({
     );
   }
 
-  const session = await auth();
-  if (!session?.user?.id) {
-    redirect(
-      buildSignInHref({
-        role: "advisor",
-        callbackUrl: joinPath,
-        email: invite.inviteeEmail,
-      })
-    );
-  }
-
-  if (session.user.role !== "ADVISOR") {
-    return (
-      <InviteAcceptFailure message="Team invitations require a team member account. Sign in with the invited email address." />
-    );
-  }
-
-  const signedInEmail = session.user.email?.trim().toLowerCase();
-  if (!signedInEmail || signedInEmail !== invite.inviteeEmail) {
-    return (
-      <EnterpriseTeamJoinWrongAccount
-        inviteeEmail={invite.inviteeEmail}
-        signedInEmail={signedInEmail ?? "your current account"}
-        joinPath={joinPath}
-      />
-    );
-  }
-
   return (
-    <EnterpriseTeamJoinConfirmPanel
+    <EnterpriseTeamInviteSignInForm
       token={token}
+      joinPath={joinPath}
       enterpriseName={invite.enterpriseName}
       inviteeEmail={invite.inviteeEmail}
     />

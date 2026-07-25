@@ -59,15 +59,23 @@ Optional but recommended to align for email links and auth callbacks when testin
 
 | Variable | Local value |
 |----------|-------------|
-| `AUTH_URL` | `http://localhost:3000` |
-| `NEXT_PUBLIC_URL` | `http://localhost:3000` |
-| `NEXTAUTH_URL` | `http://localhost:3000` |
+| `AUTH_URL` | `http://localhost:3000` (or whatever port `npm run dev` is using) |
+| `NEXT_PUBLIC_URL` | same origin as `AUTH_URL` |
+| `NEXTAUTH_URL` | same origin as `AUTH_URL` |
 
 If you `vercel env pull` directly into `.env.local`, reset the three URL variables above — Preview pulls use `https://preview.akilirisk.com`.
+
+If the app is on a non-3000 port (e.g. 3001 because 3000 is busy), Auth.js still builds post-auth redirects from `AUTH_URL`. The Auth.js route rewrites those redirects back to the request origin, so sign-out should stay on the port you opened. Prefer keeping `AUTH_URL` / `NEXT_PUBLIC_URL` aligned with that port for email links and Stripe return URLs.
 
 ---
 
 ## Authentication
+
+### Sign-out lands on `localhost:3000` while the app is on another port
+
+**Cause:** `AUTH_URL` (or `NEXTAUTH_URL`) is set to `http://localhost:3000`, and Auth.js uses that origin for redirect targets.
+
+**Fix:** Already handled in `/api/auth/[...nextauth]` (redirects are rewritten to the request origin). Restart the dev server after pulling latest. Optionally update `AUTH_URL` / `NEXT_PUBLIC_URL` in `.env.local` to match your real local origin.
 
 ### `MissingCSRF` on sign-in
 
@@ -139,9 +147,9 @@ Do **not** run `rm -rf /` or delete paths outside the project root.
 
 ## Advisor signup: `Invalid value for argument tier`. Expected SubscriptionTier
 
-**Symptom:** `POST /api/auth/advisor-signup` returns 500; Prisma error on `subscription.create` with tier `ESSENTIALS`, `BUSINESS`, or `PLATINUM`.
+**Symptom:** `POST /api/auth/advisor-signup` returns 500; Prisma error on `subscription.create` with tier `ESSENTIALS`, `BUSINESS`, or `INTELLIGENCE`.
 
-**Cause:** The Neon database enum still has legacy values (`STARTER`, `GROWTH`, …) while the app expects the modular tier rename (`ESSENTIALS`, `PROFESSIONAL`, `BUSINESS`, `PLATINUM`).
+**Cause:** The Neon database enum still has legacy values (`STARTER`, `GROWTH`, …) while the app expects the modular tier rename (`ESSENTIALS`, `PROFESSIONAL`, `BUSINESS`, `INTELLIGENCE`).
 
 **Fix:**
 
