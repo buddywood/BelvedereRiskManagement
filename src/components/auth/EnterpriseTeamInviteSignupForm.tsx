@@ -13,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { registerEnterpriseTeamInviteeAction } from "@/lib/actions/enterprise-team-actions";
-import { buildSignInHref } from "@/lib/auth/sign-in-routes";
 import { PASSWORD_REQUIREMENTS_MESSAGE } from "@/lib/auth/password-policy";
 import { broadcastAuthSessionChange } from "@/lib/auth/session-sync";
 
@@ -33,11 +32,6 @@ export function EnterpriseTeamInviteSignupForm({
   inviteeEmail,
 }: EnterpriseTeamInviteSignupFormProps) {
   const router = useRouter();
-  const signInHref = buildSignInHref({
-    role: "advisor",
-    callbackUrl: joinPath,
-    email: inviteeEmail,
-  });
 
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -99,14 +93,6 @@ export function EnterpriseTeamInviteSignupForm({
       eyebrow="Team invitation"
       title={`Join ${enterpriseName}`}
       description="Create your team member account to accept this invitation."
-      footer={
-        <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href={signInHref} className="font-semibold text-foreground hover:underline">
-            Sign in
-          </Link>
-        </p>
-      }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-2">
