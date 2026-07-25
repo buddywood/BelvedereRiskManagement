@@ -157,6 +157,23 @@ export function isEnterpriseTeamJoinCallback(
   return pathOnly === "/enterprise/join";
 }
 
+/** Extract the invite token from a `/enterprise/join?token=…` callback URL. */
+export function enterpriseTeamJoinTokenFromCallback(
+  callbackUrl: string | null | undefined
+): string | null {
+  if (!isEnterpriseTeamJoinCallback(callbackUrl) || !callbackUrl) {
+    return null;
+  }
+  try {
+    const token = new URL(callbackUrl, "http://local").searchParams
+      .get("token")
+      ?.trim();
+    return token || null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Resolves the active sign-in role from URL params and optional callback context.
  * Supports legacy `portal=advisor` and infers role from protected destinations.

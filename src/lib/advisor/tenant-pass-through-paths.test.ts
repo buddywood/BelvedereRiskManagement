@@ -16,6 +16,7 @@ describe("isTenantPassThroughPath", () => {
     expect(isTenantPassThroughPath("/signin")).toBe(true);
     expect(isTenantPassThroughPath("/mfa/verify")).toBe(true);
     expect(isTenantPassThroughPath("/change-password")).toBe(true);
+    expect(isTenantPassThroughPath("/enterprise/join")).toBe(true);
   });
 
   it("does not pass unknown app paths through to branded rewrites", () => {

@@ -1,9 +1,11 @@
 import "server-only";
 
 import type { EnterpriseRole } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 import { findUserByEmail, userEmailWriteData } from "@/lib/auth/user-email";
 import { decryptUserEmail } from "@/lib/auth/user-email-crypto";
+import { enterpriseTeamJoinTokenFromCallback } from "@/lib/auth/sign-in-routes";
 import { prisma } from "@/lib/db";
 import { cancelSoloSubscriptionForEnterprise } from "@/lib/enterprise/cancel-solo-subscription";
 import { cancelStripeSubscriptionBestEffort } from "@/lib/billing/cancel-stripe-subscription";
@@ -14,6 +16,7 @@ import { provisionEnterpriseTeamMemberContent } from "@/lib/enterprise/provision
 import { getEnterpriseSeatUsage } from "@/lib/enterprise/seat-reporting";
 import {
   buildEnterpriseTeamInviteUrl,
+  buildEnterpriseTeamJoinPath,
   createEnterpriseTeamInviteToken,
   verifyEnterpriseTeamInviteToken,
 } from "@/lib/enterprise/team-invite-token";
@@ -223,8 +226,26 @@ export async function resolveEnterpriseTeamInvite(
     membershipId,
     enterpriseName: membership.enterprise.name,
     inviteeEmail,
-    needsRegistration: !membership.user.password,
+    // Treat null/empty as "no credentials yet" so invitees land on create-account.
+    needsRegistration: !membership.user.password?.trim(),
   };
+}
+
+/**
+ * Passwordless team invitees must not sit on the credentials sign-in hub.
+ * When a sign-in URL carries an `/enterprise/join` callback for an invite that
+ * still needs registration, send them back to the join page (signup form).
+ */
+export async function redirectIfEnterpriseTeamJoinNeedsRegistration(
+  callbackUrl: string | null | undefined
+): Promise<void> {
+  const token = enterpriseTeamJoinTokenFromCallback(callbackUrl);
+  if (!token) return;
+
+  const invite = await resolveEnterpriseTeamInvite(token);
+  if (invite.ok && invite.needsRegistration) {
+    redirect(buildEnterpriseTeamJoinPath(token));
+  }
 }
 
 function assertCanManageEnterpriseMember(

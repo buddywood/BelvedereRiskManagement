@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   buildSignInHref,
   CLIENT_MAGIC_LINK_SIGN_IN_PATH,
+  enterpriseTeamJoinTokenFromCallback,
   getSignInPathForWorkspace,
+  isEnterpriseTeamJoinCallback,
   resolveSignInRole,
   sanitizeMagicLinkRedirectTo,
   shouldRedirectCredentialsSignInToMagicLink,
@@ -72,5 +74,32 @@ describe("sign-in routes", () => {
     expect(sanitizeMagicLinkRedirectTo("//evil.example")).toBe("/dashboard");
     expect(sanitizeMagicLinkRedirectTo("/advisor")).toBe("/dashboard");
     expect(sanitizeMagicLinkRedirectTo(null, "/assessment")).toBe("/assessment");
+  });
+
+  it("detects enterprise team join callbacks and extracts invite tokens", () => {
+    expect(isEnterpriseTeamJoinCallback("/enterprise/join?token=ent.abc.1.sig")).toBe(
+      true
+    );
+    expect(isEnterpriseTeamJoinCallback("/advisor")).toBe(false);
+    expect(
+      enterpriseTeamJoinTokenFromCallback("/enterprise/join?token=ent.abc.1.sig")
+    ).toBe("ent.abc.1.sig");
+    expect(enterpriseTeamJoinTokenFromCallback("/enterprise/join")).toBeNull();
+    expect(enterpriseTeamJoinTokenFromCallback("/advisor")).toBeNull();
+  });
+
+  it("routes enterprise join callbacks to the advisor sign-in tab", () => {
+    expect(
+      buildSignInHref({
+        role: "advisor",
+        callbackUrl: "/enterprise/join?token=ent.abc.1.sig",
+        email: "member@firm.com",
+      })
+    ).toBe(
+      "/signin/advisor?callbackUrl=%2Fenterprise%2Fjoin%3Ftoken%3Dent.abc.1.sig&email=member%40firm.com"
+    );
+    expect(
+      resolveSignInRole({ callbackUrl: "/enterprise/join?token=ent.abc.1.sig" })
+    ).toBe("advisor");
   });
 });

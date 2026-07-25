@@ -56,4 +56,21 @@ describe("resolveEnterpriseTeamInvite", () => {
       needsRegistration: false,
     });
   });
+
+  it("treats blank passwords as needing registration", async () => {
+    prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
+      status: "INVITED",
+      invitedEmail: "member@firm.com",
+      user: { password: "   ", emailCiphertext: "cipher" },
+      enterprise: { name: "Northbridge Elite" },
+    });
+
+    const token = createEnterpriseTeamInviteToken(MEMBERSHIP_ID);
+    const result = await resolveEnterpriseTeamInvite(token);
+
+    expect(result).toMatchObject({
+      ok: true,
+      needsRegistration: true,
+    });
+  });
 });
