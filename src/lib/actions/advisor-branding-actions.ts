@@ -39,6 +39,7 @@ const ENTERPRISE_BRANDING_MUTABLE_SELECT = {
   emailFooterText: true,
   supportEmail: true,
   supportPhone: true,
+  clientEmailFromAddress: true,
   logoUrl: true,
   logoS3Key: true,
   logoContentType: true,
@@ -148,6 +149,7 @@ export async function updateAdvisorBrandingAction(formData: FormData): Promise<A
       emailFooterText: formData.get('emailFooterText')?.toString() || '',
       supportEmail: formData.get('supportEmail')?.toString() || '',
       supportPhone: formData.get('supportPhone')?.toString() || '',
+      clientEmailFromAddress: formData.get('clientEmailFromAddress')?.toString() || '',
       logoUrl: formData.get('logoUrl')?.toString() || '', // Legacy support
     };
 
@@ -216,6 +218,7 @@ export async function updateAdvisorBrandingAction(formData: FormData): Promise<A
             emailFooterText: true,
             supportEmail: true,
             supportPhone: true,
+            clientEmailFromAddress: true,
             logoUrl: true,
           },
         });

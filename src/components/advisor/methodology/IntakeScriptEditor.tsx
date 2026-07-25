@@ -4,14 +4,33 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import type { AdvisorQuestionSource, IntakeQuestionBankMode } from "@prisma/client";
-import { ArrowDown, ArrowUp } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ArrowDown, ArrowUp, GripVertical } from "lucide-react";
 import {
   createAdvisorIntakeQuestion,
   deleteAdvisorIntakeQuestion,
   moveAdvisorIntakeQuestionOrder,
+  reorderAdvisorIntakeQuestionToPosition,
   updateAdvisorIntakeQuestion,
   updateAdvisorIntakeQuestionBankMode,
 } from "@/lib/actions/methodology-actions";
+import { cn } from "@/lib/utils";
 import { isEnterpriseAdvisorQuestion } from "@/lib/methodology/advisor-question-policy";
 import {
   customOnlyEmptyBankMessage,
@@ -63,6 +82,7 @@ type IntakeQuestionActions = {
   deleteQuestion: typeof deleteAdvisorIntakeQuestion;
   updateBankMode: typeof updateAdvisorIntakeQuestionBankMode;
   moveQuestion: typeof moveAdvisorIntakeQuestionOrder;
+  reorderQuestion: typeof reorderAdvisorIntakeQuestionToPosition;
 };
 
 const defaultActions: IntakeQuestionActions = {
@@ -71,6 +91,7 @@ const defaultActions: IntakeQuestionActions = {
   deleteQuestion: deleteAdvisorIntakeQuestion,
   updateBankMode: updateAdvisorIntakeQuestionBankMode,
   moveQuestion: moveAdvisorIntakeQuestionOrder,
+  reorderQuestion: reorderAdvisorIntakeQuestionToPosition,
 };
 
 function sourceBadgeLabel(sourceKind: AdvisorQuestionSource): string {
@@ -88,7 +109,7 @@ type MutationHandlers = {
   refreshAfterSuccess: (onSuccess?: () => void) => void;
 };
 
-function QuestionCard({
+function SortableQuestionCard({
   q,
   index,
   pending,
@@ -100,6 +121,8 @@ function QuestionCard({
   canReorder,
   canMoveUp,
   canMoveDown,
+  onMoveUp,
+  onMoveDown,
 }: {
   q: IntakeQuestionRow;
   index: number;
@@ -112,30 +135,55 @@ function QuestionCard({
   canReorder: boolean;
   canMoveUp: boolean;
   canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
   const isCustom = isCustomIntakeQuestionSource(q.sourceKind);
 
-  const move = (direction: "up" | "down") => {
-    runPending(async () => {
-      const result = await actions.moveQuestion(q.id, direction);
-      if (!result.success) {
-        toast.error(result.error ?? "Failed to reorder question");
-        return;
-      }
-      refreshAfterSuccess();
-    });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: q.id, disabled: !canReorder });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   };
 
   return (
-    <Card key={q.id} className={!q.isVisible ? "opacity-70" : undefined}>
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        !q.isVisible && "opacity-70",
+        isDragging && "opacity-50 shadow-lg z-50"
+      )}
+    >
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-        <div className="space-y-1">
-          <CardTitle className="text-base">Question {index + 1}</CardTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={isCustom ? "secondary" : "outline"}>
-              {sourceBadgeLabel(q.sourceKind)}
-            </Badge>
-            <Badge variant="outline">{labelForAdvisorIntakeAnswerType(q.answerType)}</Badge>
+        <div className="flex items-start gap-3">
+          {canReorder && (
+            <button
+              type="button"
+              className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-foreground focus:outline-none active:cursor-grabbing"
+              {...attributes}
+              {...listeners}
+              aria-label="Drag to reorder"
+            >
+              <GripVertical className="size-5" />
+            </button>
+          )}
+          <div className="space-y-1">
+            <CardTitle className="text-base">Question {index + 1}</CardTitle>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={isCustom ? "secondary" : "outline"}>
+                {sourceBadgeLabel(q.sourceKind)}
+              </Badge>
+              <Badge variant="outline">{labelForAdvisorIntakeAnswerType(q.answerType)}</Badge>
+            </div>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-1">
@@ -148,7 +196,7 @@ function QuestionCard({
                 className="size-8"
                 disabled={pending || !canMoveUp}
                 aria-label="Move question up"
-                onClick={() => move("up")}
+                onClick={onMoveUp}
               >
                 <ArrowUp className="size-4" />
               </Button>
@@ -159,7 +207,7 @@ function QuestionCard({
                 className="size-8"
                 disabled={pending || !canMoveDown}
                 aria-label="Move question down"
-                onClick={() => move("down")}
+                onClick={onMoveDown}
               >
                 <ArrowDown className="size-4" />
               </Button>
@@ -489,6 +537,54 @@ export function IntakeScriptEditor({
     refreshAfterSuccess();
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const reorderableQuestions = activeQuestions.filter((q) => q.sourceKind === "CUSTOM");
+    const oldIndex = reorderableQuestions.findIndex((q) => q.id === active.id);
+    const newIndex = reorderableQuestions.findIndex((q) => q.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+    runPending(async () => {
+      const result = await actions.reorderQuestion(active.id as string, newIndex);
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to reorder question");
+      } else {
+        toast.success("Question order updated");
+        refreshAfterSuccess();
+      }
+    });
+  };
+
+  const handleMoveUp = (questionId: string) => {
+    runPending(async () => {
+      const result = await actions.moveQuestion(questionId, "up");
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to reorder question");
+        return;
+      }
+      refreshAfterSuccess();
+    });
+  };
+
+  const handleMoveDown = (questionId: string) => {
+    runPending(async () => {
+      const result = await actions.moveQuestion(questionId, "down");
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to reorder question");
+        return;
+      }
+      refreshAfterSuccess();
+    });
+  };
+
   return (
     <div className="space-y-4" data-tour="intake-questions">
       <QuestionBankModeStatusBanner
@@ -552,29 +648,41 @@ export function IntakeScriptEditor({
               : "No intake questions yet for this bank mode."}
         </p>
       ) : (
-        <div className="space-y-4">
-          {activeQuestions.map((q, index) => {
-            // Only the scope's own custom rows reorder, within the custom block.
-            const reorderPos = reorderableIds.indexOf(q.id);
-            const canReorder = reorderPos >= 0 && reorderableIds.length > 1;
-            return (
-              <QuestionCard
-                key={q.id}
-                q={q}
-                index={index}
-                pending={pending}
-                actions={actions}
-                runPending={runPending}
-                handleMutationResult={handleMutationResult}
-                refreshAfterSuccess={refreshAfterSuccess}
-                canDelete={canDeleteCustom && isCustomIntakeQuestionSource(q.sourceKind)}
-                canReorder={canReorder}
-                canMoveUp={canReorder && reorderPos > 0}
-                canMoveDown={canReorder && reorderPos < reorderableIds.length - 1}
-              />
-            );
-          })}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={reorderableIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className={cn("space-y-4", pending && "opacity-60 pointer-events-none")}>
+              {activeQuestions.map((q, index) => {
+                const reorderPos = reorderableIds.indexOf(q.id);
+                const canReorder = reorderPos >= 0 && reorderableIds.length > 1;
+                return (
+                  <SortableQuestionCard
+                    key={q.id}
+                    q={q}
+                    index={index}
+                    pending={pending}
+                    actions={actions}
+                    runPending={runPending}
+                    handleMutationResult={handleMutationResult}
+                    refreshAfterSuccess={refreshAfterSuccess}
+                    canDelete={canDeleteCustom && isCustomIntakeQuestionSource(q.sourceKind)}
+                    canReorder={canReorder}
+                    canMoveUp={canReorder && reorderPos > 0}
+                    canMoveDown={canReorder && reorderPos < reorderableIds.length - 1}
+                    onMoveUp={() => handleMoveUp(q.id)}
+                    onMoveDown={() => handleMoveDown(q.id)}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {canAddCustomQuestions ? (

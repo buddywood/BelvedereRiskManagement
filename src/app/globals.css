@@ -1028,3 +1028,31 @@
 .driver-popover.akili-driver-popover .driver-popover-close-btn {
   color: var(--muted-foreground);
 }
+
+/* Facilitated session white-label branding */
+.facilitated-session-branded {
+  --primary: var(--facilitated-brand-primary);
+  --primary-foreground: #ffffff;
+}
+
+.facilitated-session-branded .btn-primary,
+.facilitated-session-branded [data-slot="control"]:focus-visible {
+  background-color: var(--facilitated-brand-primary);
+  border-color: var(--facilitated-brand-primary);
+}
+
+.facilitated-session-branded .text-primary {
+  color: var(--facilitated-brand-primary);
+}
+
+.facilitated-session-branded .border-primary {
+  border-color: var(--facilitated-brand-primary);
+}
+
+.facilitated-session-branded .bg-primary {
+  background-color: var(--facilitated-brand-primary);
+}
+
+.facilitated-session-branded .ring-primary {
+  --tw-ring-color: var(--facilitated-brand-primary);
+}

@@ -2,8 +2,16 @@ import "server-only";
 
 import { Resend } from "resend";
 
-import { resolveFromEmail } from "@/lib/email/resolve-from-email";
+import { escapeHtml } from "@/lib/escape-html";
+import { resolveFromEmail, resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
 import { formatEmailSubject } from "@/lib/email/format-email-subject";
+import {
+  wrapWhiteLabelEmailContent,
+  renderWhiteLabelEmailHeadline,
+  renderWhiteLabelEmailCta,
+  renderWhiteLabelEmailUrlFallback,
+  type WhiteLabelEmailBranding,
+} from "@/lib/email/white-label-email-layout";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -13,6 +21,10 @@ export type SendEnterpriseTeamInviteEmailInput = {
   inviterName: string;
   roleLabel: string;
   inviteUrl: string;
+  /** Optional custom "from" email address from enterprise branding. */
+  clientEmailFromAddress?: string | null;
+  /** Optional branding for white-label email styling. */
+  branding?: WhiteLabelEmailBranding | null;
 };
 
 export async function sendEnterpriseTeamInviteEmail(
@@ -26,17 +38,35 @@ export async function sendEnterpriseTeamInviteEmail(
     return { success: true };
   }
 
+  const branding: WhiteLabelEmailBranding | null = input.branding ?? (input.enterpriseName ? { brandName: input.enterpriseName } : null);
+  
   const subject = formatEmailSubject(`Join ${input.enterpriseName} on AkiliRisk`);
-  const html = `
-    <p>You have been invited to join <strong>${input.enterpriseName}</strong> as ${input.roleLabel}.</p>
-    <p>${input.inviterName} sent this invitation.</p>
-    <p><a href="${input.inviteUrl}">Accept invitation</a></p>
-    <p>This link expires in 7 days.</p>
+  const bodyHtml = `
+    ${renderWhiteLabelEmailHeadline("You're invited to join the team", branding)}
+    <p style="margin:0 0 16px;">Hello,</p>
+    <p style="margin:0 0 16px;">You have been invited to join <strong>${escapeHtml(input.enterpriseName)}</strong> as ${escapeHtml(input.roleLabel)}.</p>
+    <p style="margin:0 0 24px;">${escapeHtml(input.inviterName)} sent this invitation.</p>
+    ${renderWhiteLabelEmailCta("Accept Invitation", input.inviteUrl, branding)}
+    ${renderWhiteLabelEmailUrlFallback(input.inviteUrl)}
+    <p style="margin:24px 0 0;font-size:14px;color:#64748b;">This invitation link expires in 7 days.</p>
   `;
+
+  const html = wrapWhiteLabelEmailContent({
+    documentTitle: `Join ${input.enterpriseName}`,
+    bodyHtml,
+    branding,
+  });
+
+  const fromAddress = input.clientEmailFromAddress
+    ? resolveWhiteLabelFromEmail(
+        { clientEmailFromAddress: input.clientEmailFromAddress, brandName: input.enterpriseName },
+        input.enterpriseName,
+      )
+    : resolveFromEmail();
 
   try {
     await resend.emails.send({
-      from: resolveFromEmail(),
+      from: fromAddress,
       to: input.inviteeEmail,
       subject,
       html,

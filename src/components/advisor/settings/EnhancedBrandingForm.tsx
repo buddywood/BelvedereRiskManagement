@@ -85,6 +85,7 @@ interface EnhancedBrandingFormProps {
     emailFooterText?: string | null;
     supportEmail?: string | null;
     supportPhone?: string | null;
+    clientEmailFromAddress?: string | null;
     logoUrl?: string | null;
     logoS3Key?: string | null;
     logoContentType?: string | null;
@@ -211,6 +212,7 @@ export function EnhancedBrandingForm({
     emailFooterText: profile.emailFooterText || '',
     supportEmail: profile.supportEmail || '',
     supportPhone: profile.supportPhone || '',
+    clientEmailFromAddress: profile.clientEmailFromAddress || '',
     logoUrl: profile.logoUrl || '',
   };
 
@@ -863,6 +865,26 @@ export function EnhancedBrandingForm({
                     />
                     {errors.emailFooterText && (
                       <p className="text-sm text-destructive">{errors.emailFooterText.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <LabelWithHelp htmlFor="clientEmailFromAddress" helpKey="branding-client-email-from">
+                      Email sender address
+                    </LabelWithHelp>
+                    <Input
+                      id="clientEmailFromAddress"
+                      type="email"
+                      {...register('clientEmailFromAddress')}
+                      placeholder="no-reply@yourcompany.com"
+                      readOnly={readOnly}
+                      disabled={readOnly}
+                      className={readOnly ? 'bg-muted/40' : undefined}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Custom &quot;from&quot; address for white-label emails (client invitations, team invites, and advisor notifications). Must be a verified domain in your email provider.
+                    </p>
+                    {errors.clientEmailFromAddress && (
+                      <p className="text-sm text-destructive">{errors.clientEmailFromAddress.message}</p>
                     )}
                   </div>
                 </SettingsSection>

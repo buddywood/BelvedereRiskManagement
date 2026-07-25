@@ -11,7 +11,7 @@ import {
   wrapPlatformEmailContent,
 } from "@/lib/email/platform-email-layout";
 import { withPlatformLogoAttachment } from "@/lib/email/platform-email-logo";
-import { resolveFromEmail } from "@/lib/email/resolve-from-email";
+import { resolveFromEmail, resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
 import { renderEnhancedClientSystemTemplate } from "@/lib/invitations/enhanced-email";
 import type { SendEmailResult } from "@/lib/invitations/email";
 
@@ -92,7 +92,7 @@ export async function sendClientSystemEmail(
 
     const payload = context?.isBranded
       ? {
-          from: resolveFromEmail(),
+          from: resolveWhiteLabelFromEmail(context.branding, context.firmDisplayName),
           to,
           subject,
           html,
