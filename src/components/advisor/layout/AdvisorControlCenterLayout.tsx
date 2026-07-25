@@ -22,6 +22,8 @@ interface AdvisorControlCenterLayoutProps {
   clientLimitStatus: ClientLimitSnapshot | null;
   unreadNotificationCount: number;
   workspaceTitle: string;
+  /** Logo URL for branded workspace sidebar. */
+  workspaceLogoUrl?: string | null;
   enterpriseTeamEnabled?: boolean;
   billingNavEnabled?: boolean;
   brandingNavEnabled?: boolean;
@@ -37,6 +39,7 @@ export function AdvisorControlCenterLayout({
   clientLimitStatus,
   unreadNotificationCount,
   workspaceTitle,
+  workspaceLogoUrl,
   enterpriseTeamEnabled = false,
   billingNavEnabled = true,
   brandingNavEnabled = false,
@@ -59,6 +62,7 @@ export function AdvisorControlCenterLayout({
             clientLimitStatus={clientLimitStatus}
             unreadNotificationCount={unreadNotificationCount}
             workspaceTitle={workspaceTitle}
+            workspaceLogoUrl={workspaceLogoUrl}
             enterpriseTeamEnabled={enterpriseTeamEnabled}
             billingNavEnabled={billingNavEnabled}
             brandingNavEnabled={brandingNavEnabled}
@@ -73,6 +77,7 @@ export function AdvisorControlCenterLayout({
               clientLimitStatus={clientLimitStatus}
               unreadNotificationCount={unreadNotificationCount}
               workspaceTitle={workspaceTitle}
+              workspaceLogoUrl={workspaceLogoUrl}
               enterpriseTeamEnabled={enterpriseTeamEnabled}
               billingNavEnabled={billingNavEnabled}
               brandingNavEnabled={brandingNavEnabled}

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Briefcase, Menu, X } from "lucide-react";
 import type { SubscriptionTier } from "@prisma/client";
+import Image from "next/image";
 
 import type { ClientLimitSnapshot } from "@/lib/billing/client-limit";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,8 @@ interface AdvisorMobileNavProps {
   clientLimitStatus: ClientLimitSnapshot | null;
   unreadNotificationCount: number;
   workspaceTitle: string;
+  /** Logo URL for branded workspace sidebar. */
+  workspaceLogoUrl?: string | null;
   enterpriseTeamEnabled?: boolean;
   billingNavEnabled?: boolean;
   brandingNavEnabled?: boolean;
@@ -30,6 +33,7 @@ export function AdvisorMobileNav({
   clientLimitStatus,
   unreadNotificationCount,
   workspaceTitle,
+  workspaceLogoUrl,
   enterpriseTeamEnabled = false,
   billingNavEnabled = true,
   brandingNavEnabled = false,
@@ -122,8 +126,24 @@ export function AdvisorMobileNav({
           >
             <div className="flex items-start justify-between gap-3 border-b border-border/60 p-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Briefcase className="size-4" />
+                <div
+                  className={cn(
+                    "flex size-9 shrink-0 items-center justify-center overflow-hidden",
+                    workspaceLogoUrl ? "rounded-md bg-background" : "rounded-lg bg-primary/10 text-primary",
+                  )}
+                >
+                  {workspaceLogoUrl ? (
+                    <Image
+                      src={workspaceLogoUrl}
+                      alt={workspaceTitle}
+                      width={36}
+                      height={36}
+                      className="object-contain"
+                      unoptimized
+                    />
+                  ) : (
+                    <Briefcase className="size-4" />
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p
