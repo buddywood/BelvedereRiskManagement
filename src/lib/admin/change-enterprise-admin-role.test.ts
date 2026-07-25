@@ -11,6 +11,11 @@ const writeAudit = vi.hoisted(() => vi.fn(async () => undefined));
 const revalidatePath = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/db", () => ({ prisma: prismaSpies }));
+vi.mock("@/lib/auth", () => ({
+  auth: vi.fn(async () => ({
+    user: { id: "admin-1", email: "admin@test.com", role: "ADMIN" },
+  })),
+}));
 vi.mock("@/lib/admin/auth", () => ({
   requireAdminRole: vi.fn(async () => ({
     userId: "admin-1",
