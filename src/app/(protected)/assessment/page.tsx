@@ -461,7 +461,10 @@ function AssessmentHubPageContent() {
           </h2>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2" data-testid="assessment-pillar-grid">
+        <div
+          className="grid auto-rows-fr gap-4 md:grid-cols-2 xl:grid-cols-3"
+          data-testid="assessment-pillar-grid"
+        >
           {pillarStats.map(
             ({ pillar, status, questionsAnswered, totalQuestions, score, riskLevel }) => (
               <PillarCard
