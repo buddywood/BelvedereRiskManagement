@@ -325,14 +325,15 @@ export default async function AdminAdvisorsPage({
                     <div className="min-w-0 flex-1 space-y-1">
                       <CardTitle
                         className={cn(
-                          "text-base leading-snug",
+                          "truncate text-base leading-snug",
                           isDeactivated && "text-muted-foreground"
                         )}
+                        title={a.name ?? a.email}
                       >
                         {a.name ?? a.email}
                       </CardTitle>
                       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-                        <span className="break-all">{a.email}</span>
+                        <span className="max-w-full truncate" title={a.email}>{a.email}</span>
                         {a.emailVerified ? (
                           <span
                             className="inline-flex shrink-0 items-center gap-1 text-xs text-green-600 dark:text-green-500"
@@ -354,19 +355,20 @@ export default async function AdminAdvisorsPage({
                       {profile ? (
                         <p
                           className={cn(
-                            "pt-1 text-sm",
+                            "flex items-baseline gap-1 pt-1 text-sm",
                             isDeactivated && "text-muted-foreground"
                           )}
                         >
                           <span
                             className={cn(
-                              "font-medium",
+                              "min-w-0 truncate font-medium",
                               isDeactivated ? "text-muted-foreground" : "text-foreground"
                             )}
+                            title={brandDisplayName ?? "Practice"}
                           >
                             {brandDisplayName ?? "Practice"}
                           </span>
-                          <span className="whitespace-nowrap text-muted-foreground">
+                          <span className="shrink-0 whitespace-nowrap text-muted-foreground">
                             {" · "}
                             {profile._count.clientAssignments} client{profile._count.clientAssignments === 1 ? "" : "s"}
                           </span>
