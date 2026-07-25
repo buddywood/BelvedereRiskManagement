@@ -42,6 +42,8 @@ export type BrandingSettingsProfile = {
   emailFooterText?: string | null;
   supportEmail?: string | null;
   supportPhone?: string | null;
+  /** Custom "from" email address for white-label client emails. */
+  clientEmailFromAddress?: string | null;
   logoUrl?: string | null;
   logoS3Key?: string | null;
   logoContentType?: string | null;
@@ -80,6 +82,7 @@ function mapResolvedBrandingToProfile(
     emailFooterText: branding.emailFooterText,
     supportEmail: branding.supportEmail,
     supportPhone: branding.supportPhone,
+    clientEmailFromAddress: branding.clientEmailFromAddress,
     logoUrl: branding.logoUrl,
     logoS3Key: branding.logoS3Key,
     logoContentType: branding.logoContentType,
@@ -189,6 +192,7 @@ export async function loadAdvisorBrandingSettingsView(
       emailFooterText: true,
       supportEmail: true,
       supportPhone: true,
+      clientEmailFromAddress: true,
       logoUrl: true,
       logoS3Key: true,
       logoContentType: true,

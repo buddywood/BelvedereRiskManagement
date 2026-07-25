@@ -131,6 +131,11 @@ export const brandingUpdateSchema = z.object({
     .optional()
     .or(z.literal('')),
 
+  clientEmailFromAddress: z.string()
+    .email('Invalid client email sender address')
+    .optional()
+    .or(z.literal('')),
+
   // Legacy field for backward compatibility
   logoUrl: z
     .union([
@@ -201,6 +206,8 @@ export interface AdvisorBrandingData {
   emailFooterText?: string | null;
   supportEmail?: string | null;
   supportPhone?: string | null;
+  /** Custom "from" email address for white-label client emails. */
+  clientEmailFromAddress?: string | null;
 
   // Logo assets
   logoUrl?: string | null;

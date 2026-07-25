@@ -43,6 +43,33 @@ export function resolveFromEmailWithName(displayName: string): string {
 }
 
 /**
+ * Resolve the from email for white-label client emails.
+ * Uses the firm's custom clientEmailFromAddress if configured,
+ * otherwise falls back to platform default.
+ *
+ * @param branding - Optional branding data with potential custom from address
+ * @param displayName - Optional display name to include in the from header
+ */
+export function resolveWhiteLabelFromEmail(
+  branding?: { clientEmailFromAddress?: string | null; brandName?: string | null } | null,
+  displayName?: string | null,
+): string {
+  const customFrom = branding?.clientEmailFromAddress?.trim();
+  
+  if (customFrom) {
+    const sanitized = sanitizeFromEmailAvoidingNoReply(customFrom);
+    const name = displayName?.replace(/[<>"]/g, '').trim() || branding?.brandName?.replace(/[<>"]/g, '').trim();
+    if (name) {
+      const emailOnly = sanitized.match(/^(.*?)<\s*([^@\s<>]+@[^>\s]+)\s*>\s*$/)?.[2] ?? sanitized;
+      return `${name} <${emailOnly}>`;
+    }
+    return sanitized;
+  }
+  
+  return displayName ? resolveFromEmailWithName(displayName) : resolveFromEmail();
+}
+
+/**
  * Replace no-reply / noreply local parts with a friendlier default.
  * Supports plain addresses and `Display Name <local@domain>` forms.
  */

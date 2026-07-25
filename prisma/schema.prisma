@@ -184,6 +184,9 @@ model AdvisorEnterprise {
   emailFooterText       String?
   supportEmail          String?
   supportPhone          String?
+  /// Custom "from" email address for white-label client emails (e.g. no-reply@firmname.com).
+  /// When set, outbound client emails use this address instead of the platform default.
+  clientEmailFromAddress String?
   logoUrl               String?
   logoS3Key             String?
   logoContentType       String?
@@ -1096,6 +1099,9 @@ model AdvisorProfile {
   emailFooterText  String?
   supportEmail     String?
   supportPhone     String?
+  /// Custom "from" email address for white-label client emails (e.g. no-reply@firmname.com).
+  /// When set, outbound client emails use this address instead of the platform default.
+  clientEmailFromAddress String?
 
   // S3 Asset Management
   logoS3Key        String?
