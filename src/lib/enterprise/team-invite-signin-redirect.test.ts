@@ -49,7 +49,7 @@ describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
     );
   });
 
-  it("does not redirect pre-existing verified advisors", async () => {
+  it("does not redirect invitees who already have a verified account", async () => {
     const invitedAt = new Date("2026-07-25T03:00:00.000Z");
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",

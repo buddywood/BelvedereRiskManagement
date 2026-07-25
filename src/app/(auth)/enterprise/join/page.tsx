@@ -21,9 +21,41 @@ export default async function EnterpriseJoinPage({
   }
 
   const joinPath = buildEnterpriseTeamJoinPath(token);
+  const session = await auth();
+  const signedInEmail = session?.user?.email?.trim().toLowerCase() ?? null;
+  const signedInAsInvitee =
+    Boolean(session?.user?.id) &&
+    session?.user?.role === "ADVISOR" &&
+    signedInEmail === invite.inviteeEmail;
 
-  // Keep the entire accept flow on /enterprise/join — never bounce invitees
-  // through the generic Client/Advisor/Platform SignInHub.
+  // Prefer the signed-in accept step over create-account. Otherwise a successful
+  // signup that returns to this same URL keeps rendering the signup form (and
+  // can leave the client button stuck on "Creating account…").
+  if (signedInAsInvitee) {
+    return (
+      <EnterpriseTeamJoinConfirmPanel
+        token={token}
+        enterpriseName={invite.enterpriseName}
+        inviteeEmail={invite.inviteeEmail}
+      />
+    );
+  }
+
+  if (session?.user?.id) {
+    if (session.user.role !== "ADVISOR") {
+      return (
+        <InviteAcceptFailure message="Team invitations require a team member account. Sign in with the invited email address." />
+      );
+    }
+    return (
+      <EnterpriseTeamJoinWrongAccount
+        inviteeEmail={invite.inviteeEmail}
+        signedInEmail={signedInEmail ?? "your current account"}
+        joinPath={joinPath}
+      />
+    );
+  }
+
   if (invite.needsRegistration) {
     return (
       <EnterpriseTeamInviteSignupForm
@@ -35,37 +67,10 @@ export default async function EnterpriseJoinPage({
     );
   }
 
-  const session = await auth();
-  if (!session?.user?.id) {
-    return (
-      <EnterpriseTeamInviteSignInForm
-        joinPath={joinPath}
-        enterpriseName={invite.enterpriseName}
-        inviteeEmail={invite.inviteeEmail}
-      />
-    );
-  }
-
-  if (session.user.role !== "ADVISOR") {
-    return (
-      <InviteAcceptFailure message="Team invitations require a team member account. Sign in with the invited email address." />
-    );
-  }
-
-  const signedInEmail = session.user.email?.trim().toLowerCase();
-  if (!signedInEmail || signedInEmail !== invite.inviteeEmail) {
-    return (
-      <EnterpriseTeamJoinWrongAccount
-        inviteeEmail={invite.inviteeEmail}
-        signedInEmail={signedInEmail ?? "your current account"}
-        joinPath={joinPath}
-      />
-    );
-  }
-
   return (
-    <EnterpriseTeamJoinConfirmPanel
+    <EnterpriseTeamInviteSignInForm
       token={token}
+      joinPath={joinPath}
       enterpriseName={invite.enterpriseName}
       inviteeEmail={invite.inviteeEmail}
     />
