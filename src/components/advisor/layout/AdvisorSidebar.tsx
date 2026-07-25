@@ -2,7 +2,6 @@
 
 import type { SubscriptionTier } from "@prisma/client";
 import { Briefcase, PanelLeft, PanelLeftClose } from "lucide-react";
-import Image from "next/image";
 
 import type { ClientLimitSnapshot } from "@/lib/billing/client-limit";
 import { ClientLimitUsageMeter } from "@/components/advisor/billing/ClientLimitGate";
@@ -26,8 +25,6 @@ interface AdvisorSidebarProps {
   clientLimitStatus: ClientLimitSnapshot | null;
   unreadNotificationCount: number;
   workspaceTitle: string;
-  /** Logo URL for branded workspace sidebar. When provided, shows logo instead of workspace title text. */
-  workspaceLogoUrl?: string | null;
   enterpriseTeamEnabled?: boolean;
   billingNavEnabled?: boolean;
   brandingNavEnabled?: boolean;
@@ -41,7 +38,6 @@ export function AdvisorSidebar({
   clientLimitStatus,
   unreadNotificationCount,
   workspaceTitle,
-  workspaceLogoUrl,
   enterpriseTeamEnabled = false,
   billingNavEnabled = true,
   brandingNavEnabled = false,
@@ -104,18 +100,7 @@ export function AdvisorSidebar({
               </TooltipTrigger>
               {collapsed ? (
                 <TooltipContent side="right" className="max-w-56">
-                  {workspaceLogoUrl ? (
-                    <Image
-                      src={workspaceLogoUrl}
-                      alt={workspaceTitle}
-                      width={120}
-                      height={40}
-                      className="mb-2 object-contain"
-                      unoptimized
-                    />
-                  ) : (
-                    <p className="font-medium">{workspaceTitle}</p>
-                  )}
+                  <p className="font-medium">{workspaceTitle}</p>
                   <p className="text-xs text-muted-foreground">Practice operations</p>
                   <div className="mt-2">
                     <AdvisorSubscriptionPlanBadge subscriptionTier={subscriptionTier} />
@@ -126,31 +111,18 @@ export function AdvisorSidebar({
 
             {!collapsed ? (
               <div className="min-w-0 flex-1">
-                {workspaceLogoUrl ? (
-                  <div className="py-1">
-                    <Image
-                      src={workspaceLogoUrl}
-                      alt={workspaceTitle}
-                      width={140}
-                      height={48}
-                      className="max-h-12 w-auto object-contain object-left"
-                      unoptimized
-                    />
-                  </div>
-                ) : (
-                  <h2
-                    className={cn(
-                      "text-pretty font-semibold leading-snug tracking-tight text-foreground break-words",
-                      workspaceTitle.length > 32
-                        ? "text-sm"
-                        : workspaceTitle.length > 20
-                          ? "text-base"
-                          : "text-lg",
-                    )}
-                  >
-                    {workspaceTitle}
-                  </h2>
-                )}
+                <h2
+                  className={cn(
+                    "text-pretty font-semibold leading-snug tracking-tight text-foreground break-words",
+                    workspaceTitle.length > 32
+                      ? "text-sm"
+                      : workspaceTitle.length > 20
+                        ? "text-base"
+                        : "text-lg",
+                  )}
+                >
+                  {workspaceTitle}
+                </h2>
                 <div className="mt-1 flex flex-wrap items-center gap-2">
                   <p className="text-xs text-muted-foreground">Practice operations</p>
                   <AdvisorSubscriptionPlanBadge subscriptionTier={subscriptionTier} />

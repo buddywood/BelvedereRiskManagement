@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Briefcase, Menu, X } from "lucide-react";
 import type { SubscriptionTier } from "@prisma/client";
-import Image from "next/image";
 
 import type { ClientLimitSnapshot } from "@/lib/billing/client-limit";
 import { cn } from "@/lib/utils";
@@ -19,8 +18,6 @@ interface AdvisorMobileNavProps {
   clientLimitStatus: ClientLimitSnapshot | null;
   unreadNotificationCount: number;
   workspaceTitle: string;
-  /** Logo URL for branded workspace sidebar. */
-  workspaceLogoUrl?: string | null;
   enterpriseTeamEnabled?: boolean;
   billingNavEnabled?: boolean;
   brandingNavEnabled?: boolean;
@@ -33,7 +30,6 @@ export function AdvisorMobileNav({
   clientLimitStatus,
   unreadNotificationCount,
   workspaceTitle,
-  workspaceLogoUrl,
   enterpriseTeamEnabled = false,
   billingNavEnabled = true,
   brandingNavEnabled = false,
@@ -130,31 +126,18 @@ export function AdvisorMobileNav({
                   <Briefcase className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  {workspaceLogoUrl ? (
-                    <div className="py-1">
-                      <Image
-                        src={workspaceLogoUrl}
-                        alt={workspaceTitle}
-                        width={120}
-                        height={40}
-                        className="max-h-10 w-auto object-contain object-left"
-                        unoptimized
-                      />
-                    </div>
-                  ) : (
-                    <p
-                      className={cn(
-                        "text-pretty font-semibold leading-snug text-foreground break-words",
-                        workspaceTitle.length > 32
-                          ? "text-sm"
-                          : workspaceTitle.length > 20
-                            ? "text-base"
-                            : "text-lg",
-                      )}
-                    >
-                      {workspaceTitle}
-                    </p>
-                  )}
+                  <p
+                    className={cn(
+                      "text-pretty font-semibold leading-snug text-foreground break-words",
+                      workspaceTitle.length > 32
+                        ? "text-sm"
+                        : workspaceTitle.length > 20
+                          ? "text-base"
+                          : "text-lg",
+                    )}
+                  >
+                    {workspaceTitle}
+                  </p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <p className="text-xs text-muted-foreground">Practice operations</p>
                     <AdvisorSubscriptionPlanBadge subscriptionTier={subscriptionTier} />
