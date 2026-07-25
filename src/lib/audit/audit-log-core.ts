@@ -197,6 +197,8 @@ export const AUDIT_ACTIONS = {
    *  client. metadata.email captures the destination (hashed by the
    *  redactor); metadata.tokenId references the new MagicLinkToken row. */
   CLIENT_MAGIC_LINK_REISSUE: "client.magic_link_reissue",
+  /** Advisor sets or clears their CRM / external client ID on an assignment. */
+  CLIENT_EXTERNAL_ID_UPDATE: "client.external_id_update",
 
   // ── Advisor workflow actions (P4) ─────────────────────────────────────────
   INTAKE_REVIEW_STARTED: "intake.review_started",

@@ -21,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { WorkflowTimeline } from "./WorkflowTimeline";
 import { DocumentRequirements } from "./DocumentRequirements";
 import { ClientAuthControls } from "./ClientAuthControls";
+import { ClientExternalIdControls } from "./ClientExternalIdControls";
 import { ClientWorkflowStatusControls } from "./ClientWorkflowStatusControls";
 import { RestartIntakeButton } from "./RestartIntakeButton";
 import { restartIntakeBlockedMessage } from "@/lib/intake/restart-intake-copy";
@@ -526,6 +527,11 @@ export function ClientDetailView({
               pseudonymousLabeling={clientLabels.pseudonymous}
             />
           ) : null}
+
+          <ClientExternalIdControls
+            clientId={client.id}
+            externalClientId={advisorAssignment.externalClientId}
+          />
 
           {/* Document Requirements */}
           {assignmentActive && documentRequirementsEnabled ? (
