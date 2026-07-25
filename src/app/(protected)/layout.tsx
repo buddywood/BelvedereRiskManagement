@@ -39,6 +39,10 @@ import { getClientPageHeaderConfig } from "@/components/layout/client-page-heade
 import { SessionSync } from "@/components/auth/SessionSync";
 import { SignOutButton } from "@/components/auth/SignOutButton";
 import { resolveAdvisorWorkspaceBranding } from "@/lib/advisor/workspace-branding";
+import {
+  extractFacilitatedSessionId,
+  resolveFacilitatedSessionBrandingForLayout,
+} from "@/lib/facilitated/session-branding-for-layout";
 
 /** Shown above the workspace title when the client portal is advisor-branded (not the advisor tagline field). */
 const BRANDED_CLIENT_HEADER_KICKER = "Brought to you by AKILI Risk Intelligence";
@@ -169,15 +173,27 @@ export default async function ProtectedLayout({
     hideIntakeNav = gate.intakeWaived;
   }
 
-  // Resolve advisor workspace branding when on subdomain
+  // Resolve advisor workspace branding when on subdomain or in facilitated session
   if (showAdvisor && session.user.id) {
-    const [onTenant, tenantSubdomain] = await Promise.all([
+    const [onTenant, tenantSubdomain, advisorPathname] = await Promise.all([
       isTenantBrandedRequest(),
       getTenantSubdomainFromHeaders(),
+      headers().then(h => h.get("x-akili-pathname") ?? ""),
     ]);
     if (onTenant) {
       advisorWorkspaceBranding = await resolveAdvisorWorkspaceBranding(session.user.id);
       clientPortalSubdomain = tenantSubdomain;
+    }
+
+    // Also apply branding for facilitated sessions (even from main domain)
+    if (!advisorWorkspaceBranding) {
+      const facilitatedSessionId = extractFacilitatedSessionId(advisorPathname);
+      if (facilitatedSessionId) {
+        advisorWorkspaceBranding = await resolveFacilitatedSessionBrandingForLayout(
+          facilitatedSessionId,
+          session.user.id,
+        );
+      }
     }
   }
 
