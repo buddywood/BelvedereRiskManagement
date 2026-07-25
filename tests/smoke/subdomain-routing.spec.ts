@@ -48,9 +48,9 @@ test.describe("tenant portal routing", () => {
     await expect(
       page.getByRole("link", { name: /Independent Wealth Group/i }).first(),
     ).toBeVisible();
-    await expect(
-      page.getByText(/Brought to you by AKILI Risk Intelligence/i).first(),
-    ).toBeVisible();
+    // Public tenant landing uses platform default hero copy — not the signed-in
+    // client header kicker ("Brought to you by …") from (protected)/layout.
+    await expect(page.getByText(/^For families$/i).first()).toBeVisible();
     await expect(
       page.getByRole("heading", {
         name: /governance intelligence platform for modern family wealth/i,
