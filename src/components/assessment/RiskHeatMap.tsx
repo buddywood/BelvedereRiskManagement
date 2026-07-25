@@ -174,8 +174,13 @@ function PortfolioHeatMap({ catalog, rows, className }: PortfolioProps) {
   const headerCells = enriched[0]!.cells;
 
   return (
-    <div className={cn("overflow-x-auto", className)} data-testid="risk-heat-map-portfolio">
-      <table className="w-full min-w-[640px] border-collapse text-sm">
+    <div className={cn("relative", className)} data-testid="risk-heat-map-portfolio">
+      {/* Scroll hint for mobile */}
+      <div className="pointer-events-none absolute right-0 top-0 z-10 flex h-8 items-center bg-gradient-to-l from-background via-background/80 to-transparent px-2 text-xs text-muted-foreground sm:hidden">
+        scroll →
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse text-sm">
         <thead>
           <tr className="border-b text-xs uppercase tracking-wide text-muted-foreground">
             <th className="px-3 py-2 text-left">Client</th>
@@ -204,6 +209,7 @@ function PortfolioHeatMap({ catalog, rows, className }: PortfolioProps) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
