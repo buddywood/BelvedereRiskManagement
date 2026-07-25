@@ -235,7 +235,7 @@ export default async function AdminClientsPage({
                             accountLabel="client"
                           />
                         ) : null}
-                        <AdminClientAccountActions clientId={c.id} deactivated={isDeactivated} />
+                        <AdminClientAccountActions clientId={c.id} deactivated={isDeactivated} isSuperAdmin={superUser} />
                       </div>
                     </div>
                   </li>
