@@ -1555,3 +1555,78 @@ export async function changeEnterpriseOwnerByAdmin(input: unknown) {
     return { success: false as const, error: safeErrorMessage(e, "Failed to transfer ownership") };
   }
 }
+
+const changeEnterpriseAdminRoleSchema = z.object({
+  enterpriseId: z.string().min(1),
+  membershipId: z.string().cuid(),
+  role: z.enum(["ADMIN", "ADVISOR"]),
+});
+
+/**
+ * Platform-admin: promote a firm team member to ADMIN, or demote an ADMIN back
+ * to ADVISOR. Does not touch OWNER (use changeEnterpriseOwnerByAdmin). Firms
+ * may have multiple ADMIN memberships; billing ownership stays singular.
+ */
+export async function changeEnterpriseAdminRoleByAdmin(input: unknown) {
+  try {
+    const { userId, email, role } = await requireAdminRole();
+    const parsed = changeEnterpriseAdminRoleSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        success: false as const,
+        error:
+          Object.values(parsed.error.flatten().fieldErrors).flat().join("; ") ||
+          "Validation failed",
+      };
+    }
+
+    const { enterpriseId, membershipId, role: nextRole } = parsed.data;
+
+    const membership = await prisma.enterpriseMembership.findFirst({
+      where: { id: membershipId, enterpriseId },
+      select: { id: true, userId: true, role: true, status: true },
+    });
+    if (!membership) {
+      return { success: false as const, error: "That firm member was not found." };
+    }
+    if (membership.role === "OWNER") {
+      return {
+        success: false as const,
+        error: "Use Transfer ownership to change the firm owner.",
+      };
+    }
+    if (membership.status !== "ACTIVE" && membership.status !== "INVITED") {
+      return {
+        success: false as const,
+        error: "Only active or invited members can have their admin role changed.",
+      };
+    }
+    if (membership.role === nextRole) {
+      return { success: true as const, data: { role: nextRole } };
+    }
+
+    await prisma.enterpriseMembership.update({
+      where: { id: membership.id },
+      data: { role: nextRole },
+    });
+
+    await writeAudit({
+      actor: { userId, role: role as UserRole, email },
+      action: AUDIT_ACTIONS.ENTERPRISE_ADMIN_ROLE_CHANGE,
+      entityType: "EnterpriseMembership",
+      entityId: membership.id,
+      beforeData: { role: membership.role, userId: membership.userId },
+      afterData: { role: nextRole, userId: membership.userId },
+      metadata: { enterpriseId },
+    });
+
+    revalidateEnterpriseAdminPaths(enterpriseId);
+    return { success: true as const, data: { role: nextRole } };
+  } catch (e) {
+    logSafeError("admin/changeEnterpriseAdminRole", e);
+    return {
+      success: false as const,
+      error: safeErrorMessage(e, "Failed to update firm administrator role"),
+    };
+  }
+}
