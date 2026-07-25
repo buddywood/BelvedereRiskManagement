@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 1) Calls Stripe CLI (`stripe prices list --live`) to discover live Price IDs
- *    for products named Essentials, Professional, Business, and Platinum (monthly + annual).
+ *    for products named Essentials, Professional, Business, and Intelligence (monthly + annual).
  * 2) Upserts those plus live API keys to Vercel **Production** only.
  *
  * Prerequisites:
@@ -31,7 +31,7 @@ const TIER_BY_PRODUCT = {
   essentials: "ESSENTIALS",
   professional: "PROFESSIONAL",
   business: "BUSINESS",
-  platinum: "PLATINUM",
+  intelligence: "INTELLIGENCE",
   // Legacy product names during migration
   starter: "ESSENTIALS",
 };
@@ -44,7 +44,7 @@ function resolveTierFromProductName(rawName) {
   if (n.includes("essentials")) return "ESSENTIALS";
   if (n.includes("professional")) return "PROFESSIONAL";
   if (n.includes("business")) return "BUSINESS";
-  if (n.includes("platinum")) return "PLATINUM";
+  if (n.includes("intelligence")) return "INTELLIGENCE";
   return null;
 }
 
@@ -262,15 +262,15 @@ const requiredKeys = [
   "STRIPE_PRICE_PROFESSIONAL_ANNUAL",
   "STRIPE_PRICE_BUSINESS_MONTHLY",
   "STRIPE_PRICE_BUSINESS_ANNUAL",
-  "STRIPE_PRICE_PLATINUM_MONTHLY",
-  "STRIPE_PRICE_PLATINUM_ANNUAL",
+  "STRIPE_PRICE_INTELLIGENCE_MONTHLY",
+  "STRIPE_PRICE_INTELLIGENCE_ANNUAL",
 ];
 const missing = requiredKeys.filter((k) => !priceEnv[k]);
 if (missing.length) {
   console.error(
     "Could not map live prices for:",
     missing.join(", "),
-    "\nEnsure Stripe live products are named Essentials, Professional, Business, and Platinum (check Dashboard)."
+    "\nEnsure Stripe live products are named Essentials, Professional, Business, and Intelligence (check Dashboard)."
   );
   process.exit(1);
 }

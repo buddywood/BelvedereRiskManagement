@@ -270,7 +270,7 @@ function EnterpriseContactSalesCard() {
           </Badge>
         </div>
         <p className="max-w-xl text-sm leading-6 text-muted-foreground">
-          Same Essentials–Platinum modules with shared branding, multiple advisor seats, and
+          Same Essentials–Intelligence modules with shared branding, multiple advisor seats, and
           centralized billing. Talk to sales for firm pricing.
         </p>
       </div>

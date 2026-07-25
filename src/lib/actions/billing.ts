@@ -26,7 +26,7 @@ import { resolvePublicAppUrl } from "@/lib/public-app-url";
 import { getStripe } from "@/lib/stripe";
 
 const checkoutSchema = z.object({
-  tier: z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "PLATINUM"]),
+  tier: z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "INTELLIGENCE"]),
   billingCycle: z.enum(["MONTHLY", "ANNUAL"]),
 });
 

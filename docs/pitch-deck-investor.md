@@ -187,7 +187,7 @@ Ten domains. One household profile. Firms scope 1–10 per engagement.
 | **Essentials** | 25 | Solo practitioner / small practice |
 | **Professional** | 50 | Established firm + methodology customization |
 | **Business** | 100 | Growing firm + white-label branding |
-| **Platinum** | 250 | High-volume firm + advanced analytics |
+| **Intelligence** | 250 | High-volume firm + advanced analytics |
 | **Enterprise** | Negotiated seats + firm cap | Multi-professional firms (sales-assisted) |
 
 - Monthly / annual billing (Stripe live in production)

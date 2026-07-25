@@ -25,7 +25,7 @@ const TIER_FEATURES = {
     customSubdomainEnabled: true,
     whiteLabel: true,
   },
-  PLATINUM: {
+  INTELLIGENCE: {
     basicBrandingEnabled: true,
     advancedBrandingEnabled: true,
     customSubdomainEnabled: true,

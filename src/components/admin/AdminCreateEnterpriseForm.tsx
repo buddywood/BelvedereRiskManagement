@@ -51,7 +51,7 @@ const formSchema = z.object({
     .max(SUBDOMAIN_SLUG_MAX_LENGTH)
     .regex(SUBDOMAIN_SLUG_REGEX, SUBDOMAIN_SLUG_VALIDATION_MESSAGE),
   ownerUserId: z.string().min(1, "Select an owner"),
-  moduleTier: z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "PLATINUM"]),
+  moduleTier: z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "INTELLIGENCE"]),
   seatLimit: z.string().optional(),
   clientLimit: z.string().optional(),
   perAdvisorClientLimit: z.string().optional(),

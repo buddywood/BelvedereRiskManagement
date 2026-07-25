@@ -11,7 +11,7 @@ import { withCanonical } from "@/lib/seo/site";
 export const metadata: Metadata = withCanonical("/pricing", {
   title: "Pricing",
   description:
-    "Compare AKILI Essentials through Platinum — see what each module tier includes, client limits, and which capabilities unlock as you upgrade.",
+    "Compare AKILI Essentials through Intelligence — see what each module tier includes, client limits, and which capabilities unlock as you upgrade.",
 });
 
 export const dynamic = "force-dynamic";

@@ -2,12 +2,12 @@
 
 Sales-assisted provisioning for **Enterprise firms** (multi-seat, firm-level billing). There is no self-serve enterprise signup; firms are created by platform admin after a contract is signed.
 
-**Enterprise is a provisioning classification**, not a subscription module tier. Admin selects the **module tier** (Essentials → Platinum) at provision time; that value is stored on `Subscription.tier` and controls firm-wide feature entitlements for all team members.
+**Enterprise is a provisioning classification**, not a subscription module tier. Admin selects the **module tier** (Essentials → Intelligence) at provision time; that value is stored on `Subscription.tier` and controls firm-wide feature entitlements for all team members.
 
 ## Prerequisites
 
 - Sales quote agreed (defaults: **25 seats**, **100 firm clients**, **25 clients per advisor** unless negotiated).
-- **Module tier** agreed (Essentials, Professional, Business, or Platinum).
+- **Module tier** agreed (Essentials, Professional, Business, or Intelligence).
 - **Owner** is an existing Akili advisor user (`ADVISOR` role) with an `AdvisorProfile`.
 - Owner has **no active solo Stripe subscription** at provision time — any solo row (including admin grace) is **cancelled automatically** when the firm is created.
 - Owner is **not** already a member of another enterprise.
@@ -20,7 +20,7 @@ Sales-assisted provisioning for **Enterprise firms** (multi-seat, firm-level bil
    - **Firm name** — display name on billing and team UI.
    - **Subdomain slug** — lowercase, 3–20 chars; becomes `{slug}-staging.akilirisk.com` (staging) or `{slug}.akilirisk.com` (production).
    - **Owner** — select the advisor user who will manage billing and team.
-   - **Module tier** — Essentials through Platinum (default: Professional).
+   - **Module tier** — Essentials through Intelligence (default: Professional).
    - **Billing cycle** — Monthly or Annual (default: Annual).
    - **Limits** — seat / firm client / per-advisor caps (defaults pre-filled).
    - **Payment method** — **Wire transfer (offline)**.
@@ -44,7 +44,7 @@ Sales-assisted provisioning for **Enterprise firms** (multi-seat, firm-level bil
    }
    ```
 
-   `tier` must be a **module tier** (`ESSENTIALS`, `PROFESSIONAL`, `BUSINESS`, or `PLATINUM`), not `ENTERPRISE`.
+   `tier` must be a **module tier** (`ESSENTIALS`, `PROFESSIONAL`, `BUSINESS`, or `INTELLIGENCE`), not `ENTERPRISE`.
 
 3. Admin → **Provision enterprise** with **Payment method = Credit card (Stripe)** and paste `stripeCustomerId` / `stripeSubscriptionId` when available.
 4. If Stripe IDs are omitted at provision, the firm owner completes checkout at `/advisor/enterprise/pricing` for the **admin-selected module tier** (contract-locked).
