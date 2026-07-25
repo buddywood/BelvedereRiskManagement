@@ -569,18 +569,18 @@ export default function InterviewPage() {
         )}
       </Card>
 
-      <div className="flex items-center justify-between pt-4">
+      <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
         <Button
           variant="outline"
           onClick={() => void handlePrevious()}
           disabled={!canGoPrev || responseBusy}
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2 order-2 sm:order-1"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="size-4" />
           Previous
         </Button>
 
-        <div className="text-sm text-muted-foreground">
+        <div className="text-center text-sm text-muted-foreground order-1 sm:order-2">
           Question {currentIndex + 1} of {totalQuestions}
         </div>
 
@@ -588,15 +588,16 @@ export default function InterviewPage() {
           <Button
             onClick={() => void handleNext()}
             disabled={!hasResponse || responseBusy}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 order-3"
           >
             Next
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="size-4" />
           </Button>
         ) : (
           <Button
             onClick={() => void submitInterviewIfLast()}
             disabled={!hasResponse || responseBusy}
+            className="order-3"
           >
             {submitting ? "Submitting…" : "Submit interview"}
           </Button>

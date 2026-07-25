@@ -93,17 +93,17 @@ export function PipelineChevronTrack({
             <div
               title={PIPELINE_CHEVRON_LABELS[phase]}
               className={cn(
-                "flex h-9 min-w-0 items-center justify-center gap-1 border px-2 py-1.5 sm:gap-1.5 sm:px-3",
+                "flex h-10 min-w-0 items-center justify-center gap-1.5 border px-2 py-1.5 sm:h-9 sm:gap-1.5 sm:px-3",
                 chevronClipClass(index, phases.length),
                 STEP_SURFACE[stepStatus],
               )}
             >
               {isComplete ? (
-                <Check className="size-3.5 shrink-0 sm:size-4" aria-hidden />
+                <Check className="size-4 shrink-0" aria-hidden />
               ) : (
-                <Icon className="size-3.5 shrink-0 opacity-90 sm:size-4" aria-hidden />
+                <Icon className="size-4 shrink-0 opacity-90" aria-hidden />
               )}
-              <span className="truncate text-[10px] font-medium leading-none sm:text-xs">
+              <span className="hidden truncate text-xs font-medium leading-none sm:inline">
                 {PIPELINE_CHEVRON_LABELS[phase]}
               </span>
             </div>

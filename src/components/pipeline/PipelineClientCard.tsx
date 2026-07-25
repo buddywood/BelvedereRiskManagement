@@ -165,15 +165,15 @@ export function PipelineClientCard({
         </div>
 
         {/* Actions */}
-        <div className="flex shrink-0 items-center gap-2 self-start lg:self-center">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 self-start lg:self-center">
           {needsProfilePublish ? (
-            <Button asChild size="sm" className="hidden sm:inline-flex">
+            <Button asChild size="sm">
               <Link href={`/advisor/pipeline/${client.id}/report`}>
                 Publish profile
               </Link>
             </Button>
           ) : reviewHref ? (
-            <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
+            <Button asChild size="sm" variant="outline">
               <Link href={reviewHref}>Review intake</Link>
             </Button>
           ) : null}
@@ -183,10 +183,10 @@ export function PipelineClientCard({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-8 text-muted-foreground"
+                className="size-10 text-muted-foreground"
                 aria-label={`Actions for ${headline}`}
               >
-                <MoreHorizontal className="size-4" />
+                <MoreHorizontal className="size-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
