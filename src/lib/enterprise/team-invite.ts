@@ -218,14 +218,11 @@ export async function resolveEnterpriseTeamInvite(
     select: {
       status: true,
       invitedEmail: true,
-      invitedAt: true,
-      createdAt: true,
       user: {
         select: {
           password: true,
           emailVerified: true,
           emailCiphertext: true,
-          createdAt: true,
         },
       },
       enterprise: { select: { name: true } },
@@ -244,8 +241,6 @@ export async function resolveEnterpriseTeamInvite(
   const needsRegistration = inviteeNeedsRegistration({
     hasPassword,
     emailVerified: membership.user.emailVerified,
-    userCreatedAt: membership.user.createdAt,
-    invitedAt: membership.invitedAt ?? membership.createdAt,
   });
 
   return {
@@ -257,26 +252,16 @@ export async function resolveEnterpriseTeamInvite(
   };
 }
 
-/** Users created as part of the invite (within 2 minutes of the invite row). */
-const INVITE_STUB_USER_WINDOW_MS = 2 * 60 * 1000;
-
 /**
- * Pending invitees who were provisioned by the invite (or never verified) always
- * get create-account — even if an earlier incomplete attempt left a password.
- * Pre-existing advisors with verified credentials sign in instead.
+ * Create-account when the invitee has no usable credentials yet.
+ * Unverified invitees may replace a partial password from a failed attempt.
+ * Verified advisors with a password sign in on the join page instead.
  */
 export function inviteeNeedsRegistration(input: {
   hasPassword: boolean;
   emailVerified: Date | null;
-  userCreatedAt: Date;
-  invitedAt: Date;
 }): boolean {
-  if (!input.hasPassword || !input.emailVerified) return true;
-
-  const deltaMs = Math.abs(
-    input.userCreatedAt.getTime() - input.invitedAt.getTime()
-  );
-  return deltaMs <= INVITE_STUB_USER_WINDOW_MS;
+  return !input.hasPassword || !input.emailVerified;
 }
 
 /**

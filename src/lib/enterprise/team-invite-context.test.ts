@@ -21,30 +21,24 @@ describe("inviteeNeedsRegistration", () => {
       inviteeNeedsRegistration({
         hasPassword: false,
         emailVerified: null,
-        userCreatedAt: INVITED_AT,
-        invitedAt: INVITED_AT,
       })
     ).toBe(true);
   });
 
-  it("requires create-account for invite stubs even after a partial password set", () => {
+  it("requires create-account when email is not verified yet", () => {
     expect(
       inviteeNeedsRegistration({
         hasPassword: true,
-        emailVerified: new Date("2026-07-25T03:00:30.000Z"),
-        userCreatedAt: INVITED_AT,
-        invitedAt: INVITED_AT,
+        emailVerified: null,
       })
     ).toBe(true);
   });
 
-  it("requires sign-in for pre-existing verified advisors", () => {
+  it("requires sign-in for verified advisors with a password", () => {
     expect(
       inviteeNeedsRegistration({
         hasPassword: true,
         emailVerified: new Date("2026-01-01T00:00:00.000Z"),
-        userCreatedAt: new Date("2025-12-01T00:00:00.000Z"),
-        invitedAt: INVITED_AT,
       })
     ).toBe(false);
   });
@@ -83,7 +77,7 @@ describe("resolveEnterpriseTeamInvite", () => {
     });
   });
 
-  it("requires sign-in when a pre-existing verified advisor is invited", async () => {
+  it("requires sign-in when the invitee already has a verified account", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
@@ -107,7 +101,7 @@ describe("resolveEnterpriseTeamInvite", () => {
     });
   });
 
-  it("keeps invite stubs on create-account after a failed earlier signup", async () => {
+  it("lets unverified invitees recreate a password after a failed attempt", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
@@ -115,7 +109,7 @@ describe("resolveEnterpriseTeamInvite", () => {
       createdAt: INVITED_AT,
       user: {
         password: "partial-hash",
-        emailVerified: new Date("2026-07-25T03:00:20.000Z"),
+        emailVerified: null,
         emailCiphertext: "cipher",
         createdAt: INVITED_AT,
       },

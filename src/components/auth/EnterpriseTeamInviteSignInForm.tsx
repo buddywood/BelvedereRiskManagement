@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 
 import { AuthPanel } from "@/components/auth/AuthPanel";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -11,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { acceptEnterpriseTeamInviteAction } from "@/lib/actions/enterprise-team-actions";
 import { broadcastAuthSessionChange } from "@/lib/auth/session-sync";
 import { scopePostAuthPath } from "@/lib/client/tenant-path-prefix-client";
 
 type EnterpriseTeamInviteSignInFormProps = {
+  token: string;
   joinPath: string;
   enterpriseName: string;
   inviteeEmail: string;
@@ -25,7 +28,8 @@ type EnterpriseTeamInviteSignInFormProps = {
  * Stays on /enterprise/join so they never bounce through the generic SignInHub.
  */
 export function EnterpriseTeamInviteSignInForm({
-  joinPath,
+  token,
+  joinPath: _joinPath,
   enterpriseName,
   inviteeEmail,
 }: EnterpriseTeamInviteSignInFormProps) {
@@ -48,15 +52,24 @@ export function EnterpriseTeamInviteSignInForm({
 
       if (signInResult?.error || signInResult?.ok === false) {
         setError("Invalid password. Try again or reset your password.");
-        setIsLoading(false);
         return;
       }
 
       broadcastAuthSessionChange();
-      router.push(joinPath);
+
+      const acceptResult = await acceptEnterpriseTeamInviteAction(token);
+      if (!acceptResult.success) {
+        setError(acceptResult.error);
+        router.refresh();
+        return;
+      }
+
+      toast.success(`You joined ${acceptResult.data.enterpriseName}.`);
+      router.replace("/advisor?notice=enterprise_joined");
       router.refresh();
     } catch {
       setError("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   }

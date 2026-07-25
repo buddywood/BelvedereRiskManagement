@@ -74,8 +74,6 @@ export async function registerEnterpriseTeamInvitee(
       status: true,
       userId: true,
       enterpriseId: true,
-      invitedAt: true,
-      createdAt: true,
       enterprise: { select: { name: true } },
     },
   });
@@ -96,7 +94,6 @@ export async function registerEnterpriseTeamInvitee(
           id: true,
           password: true,
           emailVerified: true,
-          createdAt: true,
           advisorProfile: { select: { id: true, enterpriseId: true } },
         },
       });
@@ -108,11 +105,9 @@ export async function registerEnterpriseTeamInvitee(
       const canSetPassword = inviteeNeedsRegistration({
         hasPassword: Boolean(user.password?.trim()),
         emailVerified: user.emailVerified,
-        userCreatedAt: user.createdAt,
-        invitedAt: membership.invitedAt ?? membership.createdAt,
       });
-      // Established advisors (verified password, account predates invite) sign in.
-      // Invite-provisioned stubs may set or replace a password.
+      // Verified advisors with a password sign in. Unverified / passwordless
+      // invitees may set or replace a password.
       if (!canSetPassword) {
         throw new EnterpriseTeamInviteError(
           "This invitation already has an account. Sign in to continue."
