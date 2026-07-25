@@ -932,6 +932,7 @@ export async function getClientDetail(
       intakeWaivedAt: assignment.intakeWaivedAt,
       includedPillars: engagementScope.includedPillars,
       focusAreas: engagementScope.focusAreas,
+      externalClientId: assignment.externalClientId ?? null,
     },
     timeline: events,
     documentRequirements: documentRequirements.map(req => ({

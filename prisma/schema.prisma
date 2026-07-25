@@ -1055,6 +1055,8 @@ model InviteCode {
   focusAreas      String[] @default([]) @map("focus_areas")
   clientName  String?
   resendCount Int       @default(0)
+  /// Optional advisor CRM / external client ID staged until provision.
+  externalClientId String? @map("external_client_id")
 
   advisor     AdvisorProfile? @relation(fields: [createdBy], references: [id])
   /// Round-11 commit 2: magic-link tokens issued for this invite (one
@@ -1064,6 +1066,7 @@ model InviteCode {
   @@index([code])
   @@index([createdBy])
   @@index([status])
+  @@index([createdBy, externalClientId])
 }
 
 model AdvisorProfile {
@@ -1225,11 +1228,15 @@ model ClientAdvisorAssignment {
   /// defensively as "fall through to advisor.piiPolicy" for in-flight
   /// assignments created during the migration window.
   fieldVisibility            Json?
+  /// Optional advisor-managed CRM / external client ID (not the system
+  /// User.clientReferenceCode). Unique per advisor when set.
+  externalClientId           String?          @map("external_client_id")
   intakeWaivedBy             AdvisorProfile? @relation("IntakeWaiverSetBy", fields: [intakeWaivedByAdvisorId], references: [id], onDelete: SetNull)
   client     User             @relation("ClientAssignments", fields: [clientId], references: [id], onDelete: Cascade)
   advisor    AdvisorProfile   @relation("AdvisorAssignments", fields: [advisorId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, advisorId])
+  @@unique([advisorId, externalClientId])
   @@index([advisorId])
   @@index([clientId])
 }

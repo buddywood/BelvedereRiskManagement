@@ -125,6 +125,7 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
       })(),
       includedPillars: parseStringArrayField(formData.get("includedPillars")),
       focusAreas: parseStringArrayField(formData.get("focusAreas")),
+      externalClientId: formData.get("externalClientId")?.toString() || undefined,
     };
 
     const validatedInput = createInvitationSchema.parse(rawData);
@@ -220,6 +221,7 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
         prefillEmail: validatedInput.clientEmail,
         intakeWaived: validatedInput.intakeWaived,
         includedPillars: validatedInput.includedPillars,
+        externalClientId: validatedInput.externalClientId ?? null,
       },
       metadata: {
         advisorId: profile.id,

@@ -128,6 +128,8 @@ export type ClientDetail = {
     intakeWaivedAt: Date | null;
     includedPillars: string[];
     focusAreas: string[];
+    /** Advisor CRM / external client ID (not system clientReferenceCode). */
+    externalClientId: string | null;
   };
   /** Active methodology pillars for waiver/scope pickers (from DB). */
   assessmentDomains: AssessmentDomainOption[];
