@@ -42,12 +42,14 @@ interface PipelineClientCardProps {
   client: PipelineClient;
   showDocumentsColumn?: boolean;
   monitoringEnabled?: boolean;
+  showAssignedAdvisor?: boolean;
 }
 
 export function PipelineClientCard({
   client,
   showDocumentsColumn = true,
   monitoringEnabled = false,
+  showAssignedAdvisor = false,
 }: PipelineClientCardProps) {
   const { headline, secondary } = resolveAdvisorClientPipelineLabels(client);
   const lastActivityLabel = formatDistanceToNow(client.lastActivity, {
@@ -96,6 +98,11 @@ export function PipelineClientCard({
             </Link>
             {secondary ? (
               <p className="truncate text-sm text-muted-foreground">{secondary}</p>
+            ) : null}
+            {showAssignedAdvisor && client.assignedAdvisorLabel ? (
+              <p className="truncate text-xs text-muted-foreground">
+                Advisor: {client.assignedAdvisorLabel}
+              </p>
             ) : null}
             <div className="flex flex-wrap items-center gap-1.5">
               <PipelineProcessStateLabel

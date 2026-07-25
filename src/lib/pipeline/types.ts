@@ -20,6 +20,10 @@ export type PipelineClient = {
   /** When true, workspace UI uses Client CL-… references instead of email for clients without a legal name. */
   pseudonymousWorkspaceLabeling: boolean;
   assignedAt: Date;
+  /** AdvisorProfile.id for the ClientAdvisorAssignment behind this row. */
+  assignedAdvisorProfileId: string;
+  /** Display label for the assigned advisor (name or email); firm portfolio only. */
+  assignedAdvisorLabel: string | null;
   stage: ClientWorkflowStage;
   progress: number;        // 0-100 percentage
   lastActivity: Date;      // Most recent status change
@@ -91,9 +95,17 @@ export type PipelineFilters = {
   documentsNeeded?: boolean;
   /** When true, list inactive (ended) client workflows instead of active ones */
   inactive?: boolean;
+  /** Firm portfolio: filter to clients assigned to this AdvisorProfile.id */
+  assignedAdvisorId?: string;
   search?: string;
   sortBy?: 'name' | 'stage' | 'progress' | 'lastActivity';
   sortDir?: 'asc' | 'desc';
+};
+
+/** Firm-scoped pipeline: options for the assigned-advisor filter. */
+export type FirmAdvisorFilterOption = {
+  id: string;
+  label: string;
 };
 
 import type { AdvisorAssessmentDomainPickerData, AssessmentDomainOption } from "@/lib/advisor/assessment-domain-option";

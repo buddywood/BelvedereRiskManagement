@@ -30,6 +30,7 @@ import { loadAdvisorAssessmentDomainPickerData } from "@/lib/methodology/advisor
 import { resolveClientReferenceCode } from "@/lib/client/client-reference-code.server";
 import { getRestartIntakeEligibility } from "@/lib/intake/restart-intake";
 import { getPlatformPillarCatalog } from "@/lib/methodology/cached-pillar-catalog";
+import { formatAssignedAdvisorLabel } from "./firm-advisor-filter";
 
 type AssessmentWithCounts = AssessmentPipelineSnapshot & {
   scores?: unknown[];
@@ -136,6 +137,19 @@ export async function getClientPipeline(
     prisma.clientAdvisorAssignment.findMany({
     where: assignmentWhere,
     include: {
+      advisor: {
+        select: {
+          id: true,
+          user: {
+            select: {
+              name: true,
+              firstName: true,
+              lastName: true,
+              emailCiphertext: true,
+            },
+          },
+        },
+      },
       client: {
         include: {
           assessments: {
@@ -397,6 +411,11 @@ export async function getClientPipeline(
       clientReferenceCode: referenceCodeByClientId.get(client.id)!,
       pseudonymousWorkspaceLabeling: advisorPolicy.pseudonymousWorkspaceLabeling,
       assignedAt: assignment.assignedAt,
+      assignedAdvisorProfileId: assignment.advisorId,
+      assignedAdvisorLabel:
+        scope.mode === "firm"
+          ? formatAssignedAdvisorLabel(assignment.advisor.user)
+          : null,
       stage,
       progress: computeProgress(stage),
       lastActivity,
@@ -803,6 +822,20 @@ export async function getClientDetail(
     ? assessmentNeedsRescore(latestAssessment)
     : false;
 
+  const assignedAdvisorUser = await prisma.advisorProfile.findUnique({
+    where: { id: assignmentAdvisorProfileId },
+    select: {
+      user: {
+        select: {
+          name: true,
+          firstName: true,
+          lastName: true,
+          emailCiphertext: true,
+        },
+      },
+    },
+  });
+
   const pipelineClient: PipelineClient = {
     id: client.id,
     name: clientDisplayName,
@@ -812,6 +845,10 @@ export async function getClientDetail(
     clientReferenceCode,
     pseudonymousWorkspaceLabeling: advisorPolicy.pseudonymousWorkspaceLabeling,
     assignedAt: assignment.assignedAt,
+    assignedAdvisorProfileId: assignmentAdvisorProfileId,
+    assignedAdvisorLabel: assignedAdvisorUser
+      ? formatAssignedAdvisorLabel(assignedAdvisorUser.user)
+      : null,
     stage,
     progress: computeProgress(stage),
     lastActivity,

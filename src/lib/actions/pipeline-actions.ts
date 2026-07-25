@@ -11,6 +11,7 @@ import {
   getClientPipelineForAdvisorUser,
   getPipelineMetrics,
 } from '@/lib/pipeline/queries';
+import { listFirmAdvisorFilterOptions } from '@/lib/pipeline/firm-advisor-filter';
 import { findPortfolioAssignmentForClient, listAdvisorProfileIdsForScope, resolvePortfolioScope } from '@/lib/enterprise/portfolio-access';
 import { getAdvisorClientDataPolicyContext } from '@/lib/enterprise/enterprise-client-data-policy';
 import {
@@ -27,19 +28,24 @@ export async function getClientPipelineData(options?: { inactive?: boolean }) {
     const { userId } = await requireAdvisorRole();
 
     const showInactive = options?.inactive === true;
-    const [clients, inactiveCount] = await Promise.all([
+    const [clients, inactiveCount, scope] = await Promise.all([
       getClientPipelineForAdvisorUser(userId, {
         assignmentStatus: showInactive ? 'INACTIVE' : 'ACTIVE',
       }),
       countInactiveClientAssignmentsForAdvisorUser(userId),
+      resolvePortfolioScope(userId),
     ]);
     const metrics = { ...getPipelineMetrics(clients), inactive: inactiveCount };
-    const [profile, policyContext, visibilityContext, platformFlags] = await Promise.all([
-      getAdvisorProfileOrThrow(userId),
-      getAdvisorClientDataPolicyContext(userId),
-      resolveEnterpriseMemberVisibilityContext(userId),
-      getPlatformFeatureFlags(),
-    ]);
+    const [profile, policyContext, visibilityContext, platformFlags, firmAdvisorOptions] =
+      await Promise.all([
+        getAdvisorProfileOrThrow(userId),
+        getAdvisorClientDataPolicyContext(userId),
+        resolveEnterpriseMemberVisibilityContext(userId),
+        getPlatformFeatureFlags(),
+        scope?.mode === "firm"
+          ? listFirmAdvisorFilterOptions(scope.enterpriseId)
+          : Promise.resolve([]),
+      ]);
 
     return {
       success: true,
@@ -47,6 +53,7 @@ export async function getClientPipelineData(options?: { inactive?: boolean }) {
         clients,
         metrics,
         profile,
+        firmAdvisorOptions,
         pseudonymousWorkspaceLabeling:
           policyContext.effective.pseudonymousWorkspaceLabeling,
         documentRequirementsEnabled:
