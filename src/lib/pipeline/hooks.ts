@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import type { PipelineClient, PipelineFilters } from './types';
-import { pipelineClientSortSearchLabel } from './client-display';
-import { getStageOrder } from './status';
+import { applyPipelineFilters } from './apply-pipeline-filters';
 
 export function usePipelineUpdates(initialClients: PipelineClient[]) {
   const [clients, setClients] = useState<PipelineClient[]>(initialClients);
@@ -107,80 +106,10 @@ export function usePipelineFilters(
     });
   }, [initialFiltersKey]);
 
-  const filteredClients = useMemo(() => {
-    let filtered = clients.slice();
-
-    if (filters.stage) {
-      filtered = filtered.filter((client) => client.stage === filters.stage);
-    }
-
-    if (filters.stalled) {
-      filtered = filtered.filter((client) => client.stalled);
-    }
-
-    if (filters.awaitingIntakeReview) {
-      filtered = filtered.filter((client) => client.awaitingIntakeReview);
-    }
-
-    if (filters.assessmentInProgress) {
-      filtered = filtered.filter(
-        (client) => client.stage === "ASSESSMENT_IN_PROGRESS",
-      );
-    }
-
-    if (filters.documentsNeeded) {
-      filtered = filtered.filter((client) => client.documentsNeeded);
-    }
-
-    // Filter by search (reference, name, or email depending on labeling mode)
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter((client) =>
-        pipelineClientSortSearchLabel(client).toLowerCase().includes(searchLower),
-      );
-    }
-
-    // Sort
-    if (filters.sortBy) {
-      filtered.sort((a, b) => {
-        let aValue: any;
-        let bValue: any;
-
-        switch (filters.sortBy) {
-          case 'name':
-            aValue = pipelineClientSortSearchLabel(a);
-            bValue = pipelineClientSortSearchLabel(b);
-            break;
-          case 'stage':
-            aValue = getStageOrder(a.stage);
-            bValue = getStageOrder(b.stage);
-            break;
-          case 'progress':
-            aValue = a.progress;
-            bValue = b.progress;
-            break;
-          case 'lastActivity':
-            aValue = a.lastActivity.getTime();
-            bValue = b.lastActivity.getTime();
-            break;
-          default:
-            return 0;
-        }
-
-        // Handle string comparison
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-          const comparison = aValue.localeCompare(bValue);
-          return filters.sortDir === 'desc' ? -comparison : comparison;
-        }
-
-        // Handle numeric comparison
-        const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-        return filters.sortDir === 'desc' ? -comparison : comparison;
-      });
-    }
-
-    return filtered;
-  }, [clients, filters]);
+  const filteredClients = useMemo(
+    () => applyPipelineFilters(clients, filters),
+    [clients, filters],
+  );
 
   const updateFilters = (newFilters: Partial<PipelineFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));

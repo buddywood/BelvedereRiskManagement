@@ -89,8 +89,14 @@ async function PipelineContent({
     );
   }
 
-  const { clients, metrics, pseudonymousWorkspaceLabeling, documentRequirementsEnabled, monitoringEnabled } =
-    result.data!;
+  const {
+    clients,
+    metrics,
+    pseudonymousWorkspaceLabeling,
+    documentRequirementsEnabled,
+    monitoringEnabled,
+    firmAdvisorOptions,
+  } = result.data!;
 
   return (
     <div className="space-y-6">
@@ -114,6 +120,7 @@ async function PipelineContent({
         pseudonymousWorkspaceLabeling={pseudonymousWorkspaceLabeling}
         documentRequirementsEnabled={documentRequirementsEnabled}
         monitoringEnabled={monitoringEnabled}
+        firmAdvisorOptions={firmAdvisorOptions}
       />
     </div>
   );

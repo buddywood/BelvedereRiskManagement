@@ -163,32 +163,101 @@ async function findClientIdsByEmailSubstring(
 async function buildClientsAdminWhere(
   scope: ClientsAdminScope,
   q?: string,
+  advisorProfileId?: string,
 ): Promise<Prisma.UserWhereInput> {
   const baseWhere = clientsAdminBaseWhere(scope);
   const needle = q?.trim();
-  if (!needle) return baseWhere;
 
-  const orConditions: Prisma.UserWhereInput[] = [
-    { id: { contains: needle, mode: "insensitive" } },
-    { name: { contains: needle, mode: "insensitive" } },
-  ];
+  let where: Prisma.UserWhereInput = baseWhere;
 
-  if (needle.includes("@")) {
-    const exactEmailMatch = await findUserByEmail(needle, {
-      where: baseWhere,
-      select: { id: true },
-    });
-    if (exactEmailMatch) {
-      orConditions.push({ id: exactEmailMatch.id });
+  if (needle) {
+    const orConditions: Prisma.UserWhereInput[] = [
+      { id: { contains: needle, mode: "insensitive" } },
+      { name: { contains: needle, mode: "insensitive" } },
+    ];
+
+    if (needle.includes("@")) {
+      const exactEmailMatch = await findUserByEmail(needle, {
+        where: baseWhere,
+        select: { id: true },
+      });
+      if (exactEmailMatch) {
+        orConditions.push({ id: exactEmailMatch.id });
+      }
     }
+
+    const emailMatchIds = await findClientIdsByEmailSubstring(needle, baseWhere);
+    if (emailMatchIds.length > 0) {
+      orConditions.push({ id: { in: emailMatchIds } });
+    }
+
+    where = { ...baseWhere, OR: orConditions };
   }
 
-  const emailMatchIds = await findClientIdsByEmailSubstring(needle, baseWhere);
-  if (emailMatchIds.length > 0) {
-    orConditions.push({ id: { in: emailMatchIds } });
+  if (advisorProfileId) {
+    where = {
+      ...where,
+      clientAssignments: {
+        some: {
+          advisorId: advisorProfileId,
+          ...(scope === "active" ? { status: "ACTIVE" as const } : {}),
+        },
+      },
+    };
   }
 
-  return { ...baseWhere, OR: orConditions };
+  return where;
+}
+
+export type AdminClientAdvisorFilterOption = {
+  id: string;
+  label: string;
+};
+
+/** Advisors with at least one client assignment — for the admin clients filter. */
+export async function getClientAdvisorFilterOptionsForAdmin(): Promise<
+  AdminClientAdvisorFilterOption[]
+> {
+  await requireAdminRole();
+  const profiles = await prisma.advisorProfile.findMany({
+    where: {
+      user: { deletedAt: null, role: "ADVISOR" },
+      clientAssignments: { some: {} },
+    },
+    select: {
+      id: true,
+      firmName: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          firstName: true,
+          lastName: true,
+          emailCiphertext: true,
+        },
+      },
+    },
+    orderBy: [{ firmName: "asc" }, { id: "asc" }],
+  });
+
+  return profiles
+    .map((profile) => {
+      const fullName = [profile.user.firstName, profile.user.lastName]
+        .map((part) => part?.trim())
+        .filter(Boolean)
+        .join(" ");
+      const name = profile.user.name?.trim() || fullName;
+      const email = safeDecryptUserEmail(profile.user.emailCiphertext, {
+        rowId: profile.user.id,
+      });
+      const primary = name || email || "Advisor";
+      const firm = profile.firmName?.trim();
+      return {
+        id: profile.id,
+        label: firm ? `${primary} · ${firm}` : primary,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: "base" }));
 }
 
 export async function getClientsForAdmin(opts?: {
@@ -196,13 +265,16 @@ export async function getClientsForAdmin(opts?: {
   page?: number;
   pageSize?: number;
   q?: string;
+  /** AdvisorProfile.id — clients assigned to this advisor */
+  advisorId?: string;
 }) {
   const { userId, email, role } = await requireAdminRole();
   const scope = opts?.scope ?? "active";
   const pageSize = opts?.pageSize ?? CLIENTS_ADMIN_PAGE_SIZE;
   const requestedPage = opts?.page && opts.page > 0 ? opts.page : 1;
   const q = opts?.q?.trim() || undefined;
-  const where = await buildClientsAdminWhere(scope, q);
+  const advisorId = opts?.advisorId?.trim() || undefined;
+  const where = await buildClientsAdminWhere(scope, q, advisorId);
   const totalCount = await prisma.user.count({ where });
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const page = Math.min(requestedPage, totalPages);
@@ -284,7 +356,11 @@ export async function getClientsForAdmin(opts?: {
     action: AUDIT_ACTIONS.DATA_ACCESS_ADMIN_CLIENTS_LIST,
     entityType: "User",
     entityId: null,
-    metadata: { rowCount: users.length, totalCount, filterParams: { scope, page, q } },
+    metadata: {
+      rowCount: users.length,
+      totalCount,
+      filterParams: { scope, page, q, advisorId },
+    },
   });
 
   return { clients: users, totalCount, page, pageSize };
