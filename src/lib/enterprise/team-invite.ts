@@ -218,11 +218,14 @@ export async function resolveEnterpriseTeamInvite(
     select: {
       status: true,
       invitedEmail: true,
+      invitedAt: true,
+      createdAt: true,
       user: {
         select: {
           password: true,
           emailVerified: true,
           emailCiphertext: true,
+          createdAt: true,
         },
       },
       enterprise: { select: { name: true } },
@@ -238,10 +241,12 @@ export async function resolveEnterpriseTeamInvite(
     decryptUserEmail(membership.user.emailCiphertext);
 
   const hasPassword = Boolean(membership.user.password?.trim());
-  // Invite stubs (never verified) always get the create-account form, even if a
-  // prior incomplete attempt left a password hash. Established advisors who
-  // already verified their email sign in on the join page instead.
-  const needsRegistration = !hasPassword || !membership.user.emailVerified;
+  const needsRegistration = inviteeNeedsRegistration({
+    hasPassword,
+    emailVerified: membership.user.emailVerified,
+    userCreatedAt: membership.user.createdAt,
+    invitedAt: membership.invitedAt ?? membership.createdAt,
+  });
 
   return {
     ok: true,
@@ -250,6 +255,28 @@ export async function resolveEnterpriseTeamInvite(
     inviteeEmail,
     needsRegistration,
   };
+}
+
+/** Users created as part of the invite (within 2 minutes of the invite row). */
+const INVITE_STUB_USER_WINDOW_MS = 2 * 60 * 1000;
+
+/**
+ * Pending invitees who were provisioned by the invite (or never verified) always
+ * get create-account — even if an earlier incomplete attempt left a password.
+ * Pre-existing advisors with verified credentials sign in instead.
+ */
+export function inviteeNeedsRegistration(input: {
+  hasPassword: boolean;
+  emailVerified: Date | null;
+  userCreatedAt: Date;
+  invitedAt: Date;
+}): boolean {
+  if (!input.hasPassword || !input.emailVerified) return true;
+
+  const deltaMs = Math.abs(
+    input.userCreatedAt.getTime() - input.invitedAt.getTime()
+  );
+  return deltaMs <= INVITE_STUB_USER_WINDOW_MS;
 }
 
 /**
