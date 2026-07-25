@@ -12,7 +12,6 @@ vi.mock("@/lib/auth/user-email-crypto", () => ({
 import { createEnterpriseTeamInviteToken } from "./team-invite-token";
 import {
   inviteeNeedsRegistration,
-  isInviteProvisionedUser,
   resolveEnterpriseTeamInvite,
 } from "./team-invite";
 
@@ -25,31 +24,24 @@ describe("inviteeNeedsRegistration", () => {
       inviteeNeedsRegistration({
         hasPassword: false,
         emailVerified: null,
-        userCreatedAt: INVITED_AT,
-        invitedAt: INVITED_AT,
       })
     ).toBe(true);
   });
 
-  it("requires create-account for invite stubs even after a verified password was set", () => {
+  it("requires create-account when email is not verified", () => {
+    expect(
+      inviteeNeedsRegistration({
+        hasPassword: true,
+        emailVerified: null,
+      })
+    ).toBe(true);
+  });
+
+  it("allows sign-in when user has password and verified email", () => {
     expect(
       inviteeNeedsRegistration({
         hasPassword: true,
         emailVerified: new Date("2026-07-25T03:00:30.000Z"),
-        userCreatedAt: INVITED_AT,
-        invitedAt: INVITED_AT,
-      })
-    ).toBe(true);
-    expect(isInviteProvisionedUser(INVITED_AT, INVITED_AT)).toBe(true);
-  });
-
-  it("requires sign-in for pre-existing verified advisors", () => {
-    expect(
-      inviteeNeedsRegistration({
-        hasPassword: true,
-        emailVerified: new Date("2026-01-01T00:00:00.000Z"),
-        userCreatedAt: new Date("2025-12-01T00:00:00.000Z"),
-        invitedAt: INVITED_AT,
       })
     ).toBe(false);
   });
@@ -61,7 +53,7 @@ describe("resolveEnterpriseTeamInvite", () => {
     process.env.AUTH_SECRET = "test-auth-secret-for-enterprise-team-invites";
   });
 
-  it("returns invite context for a pending invite without credentials", async () => {
+  it("returns invite context for a legacy invite without credentials", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
@@ -88,15 +80,15 @@ describe("resolveEnterpriseTeamInvite", () => {
     });
   });
 
-  it("keeps invite stubs on create-account after a failed earlier signup", async () => {
+  it("allows sign-in when user has temp password (new invite flow)", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",
       invitedAt: INVITED_AT,
       createdAt: INVITED_AT,
       user: {
-        password: "partial-hash",
-        emailVerified: new Date("2026-07-25T03:00:20.000Z"),
+        password: "hashed-temp-password",
+        emailVerified: new Date("2026-07-25T03:00:00.000Z"),
         emailCiphertext: "cipher",
         createdAt: INVITED_AT,
       },
@@ -108,11 +100,11 @@ describe("resolveEnterpriseTeamInvite", () => {
 
     expect(result).toMatchObject({
       ok: true,
-      needsRegistration: true,
+      needsRegistration: false,
     });
   });
 
-  it("requires sign-in when a pre-existing verified advisor is invited", async () => {
+  it("allows sign-in for pre-existing verified advisor", async () => {
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
       invitedEmail: "member@firm.com",

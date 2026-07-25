@@ -108,8 +108,6 @@ export async function registerEnterpriseTeamInvitee(
       const canSetPassword = inviteeNeedsRegistration({
         hasPassword: Boolean(user.password?.trim()),
         emailVerified: user.emailVerified,
-        userCreatedAt: user.createdAt,
-        invitedAt: membership.invitedAt ?? membership.createdAt,
       });
       // Pre-existing verified advisors sign in. Invite-provisioned stubs may
       // set or replace a password until they accept the invite.

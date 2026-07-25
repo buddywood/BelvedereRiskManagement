@@ -270,8 +270,6 @@ export async function resolveEnterpriseTeamInvite(
   const needsRegistration = inviteeNeedsRegistration({
     hasPassword,
     emailVerified: membership.user.emailVerified,
-    userCreatedAt: membership.user.createdAt,
-    invitedAt: membership.invitedAt ?? membership.createdAt,
   });
 
   return {
@@ -280,83 +278,6 @@ export async function resolveEnterpriseTeamInvite(
     enterpriseName: membership.enterprise.name,
     inviteeEmail,
     needsRegistration,
-  };
-}
-
-export type ResolvedEnterpriseTeamInviteDetailed =
-  | {
-      ok: true;
-      membershipId: string;
-      enterpriseName: string;
-      inviteeEmail: string;
-      needsRegistration: boolean;
-      hasPassword: boolean;
-      emailVerified: boolean;
-    }
-  | { ok: false; error: string };
-
-/**
- * Like resolveEnterpriseTeamInvite but also returns password and emailVerified
- * status. Used by the join page to redirect users who already have a temp
- * password set to the sign-in page instead of showing the signup form.
- */
-export async function resolveEnterpriseTeamInviteDetailed(
-  token: string
-): Promise<ResolvedEnterpriseTeamInviteDetailed> {
-  const trimmed = token.trim();
-  if (!trimmed) {
-    return { ok: false, error: "This team invitation link is missing a token." };
-  }
-
-  const membershipId = verifyEnterpriseTeamInviteToken(trimmed);
-  if (!membershipId) {
-    return { ok: false, error: "This team invitation link is invalid or has expired." };
-  }
-
-  const membership = await prisma.enterpriseMembership.findUnique({
-    where: { id: membershipId },
-    select: {
-      status: true,
-      invitedEmail: true,
-      invitedAt: true,
-      createdAt: true,
-      user: {
-        select: {
-          password: true,
-          emailVerified: true,
-          emailCiphertext: true,
-          createdAt: true,
-        },
-      },
-      enterprise: { select: { name: true } },
-    },
-  });
-
-  if (!membership || membership.status !== "INVITED") {
-    return { ok: false, error: "This team invitation is no longer valid." };
-  }
-
-  const inviteeEmail =
-    membership.invitedEmail?.trim().toLowerCase() ??
-    decryptUserEmail(membership.user.emailCiphertext);
-
-  const hasPassword = Boolean(membership.user.password?.trim());
-  const emailVerified = Boolean(membership.user.emailVerified);
-  const needsRegistration = inviteeNeedsRegistration({
-    hasPassword,
-    emailVerified: membership.user.emailVerified,
-    userCreatedAt: membership.user.createdAt,
-    invitedAt: membership.invitedAt ?? membership.createdAt,
-  });
-
-  return {
-    ok: true,
-    membershipId,
-    enterpriseName: membership.enterprise.name,
-    inviteeEmail,
-    needsRegistration,
-    hasPassword,
-    emailVerified,
   };
 }
 
@@ -372,24 +293,26 @@ export function isInviteProvisionedUser(
 }
 
 /**
- * Create-account for passwordless/unverified invitees, and for invite-provisioned
- * stubs that still have not accepted (even if a prior attempt set a password).
- * Pre-existing verified advisors sign in instead.
+ * Check if an invitee needs to create an account (signup form).
+ * With the temp password flow, all invited advisors have passwords set,
+ * so this returns false for them - they sign in directly.
+ * 
+ * Only returns true if the user has no password or unverified email
+ * (legacy invites that predate the temp password flow).
  */
 export function inviteeNeedsRegistration(input: {
   hasPassword: boolean;
   emailVerified: Date | null;
-  userCreatedAt: Date;
-  invitedAt: Date;
 }): boolean {
-  if (!input.hasPassword || !input.emailVerified) return true;
-  return isInviteProvisionedUser(input.userCreatedAt, input.invitedAt);
+  return !input.hasPassword || !input.emailVerified;
 }
 
 /**
- * Passwordless team invitees must not sit on the credentials sign-in hub.
- * When a sign-in URL carries an `/enterprise/join` callback for an invite that
- * still needs registration, send them back to the join page (signup form).
+ * Legacy redirect for passwordless team invitees.
+ * 
+ * With the temp password flow, all invited advisors have passwords,
+ * so this function is effectively a no-op for new invites.
+ * Kept for backward compatibility with any legacy invites.
  */
 export async function redirectIfEnterpriseTeamJoinNeedsRegistration(
   callbackUrl: string | null | undefined
