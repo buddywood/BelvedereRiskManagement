@@ -38,6 +38,7 @@ import { redirectIfPendingConsent } from "@/lib/advisor/require-consent-resolved
 import { getClientPageHeaderConfig } from "@/components/layout/client-page-header-config";
 import { SessionSync } from "@/components/auth/SessionSync";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { resolveAdvisorWorkspaceBranding } from "@/lib/advisor/workspace-branding";
 
 /** Shown above the workspace title when the client portal is advisor-branded (not the advisor tagline field). */
 const BRANDED_CLIENT_HEADER_KICKER = "Brought to you by AKILI Risk Intelligence";
@@ -121,6 +122,9 @@ export default async function ProtectedLayout({
   let clientAdvisorBranding: Awaited<
     ReturnType<typeof resolveClientPortalBrandingForUser>
   > = null;
+  let advisorWorkspaceBranding: Awaited<
+    ReturnType<typeof resolveAdvisorWorkspaceBranding>
+  > = null;
   let clientPortalSubdomain: string | null = null;
   let requiresBrandedPortal = false;
   let clientPortalSignedInLabel: string | null = null;
@@ -165,6 +169,18 @@ export default async function ProtectedLayout({
     hideIntakeNav = gate.intakeWaived;
   }
 
+  // Resolve advisor workspace branding when on subdomain
+  if (showAdvisor && session.user.id) {
+    const [onTenant, tenantSubdomain] = await Promise.all([
+      isTenantBrandedRequest(),
+      getTenantSubdomainFromHeaders(),
+    ]);
+    if (onTenant) {
+      advisorWorkspaceBranding = await resolveAdvisorWorkspaceBranding(session.user.id);
+      clientPortalSubdomain = tenantSubdomain;
+    }
+  }
+
   if (role === "USER" && requiresBrandedPortal && !clientAdvisorBranding) {
     return (
       <div className="min-h-screen py-3 sm:py-6">
@@ -175,29 +191,34 @@ export default async function ProtectedLayout({
     );
   }
 
-  const brandTitle = clientAdvisorBranding
-    ? clientPortalBrandingDisplayTitle(clientAdvisorBranding)
+  // Determine active branding (client portal or advisor workspace)
+  const activeBranding = clientAdvisorBranding ?? advisorWorkspaceBranding;
+  const brandTitle = activeBranding
+    ? clientPortalBrandingDisplayTitle(activeBranding)
     : "Partner portal";
-  const previewHex = clientAdvisorBranding
-    ? getPreviewBrandHex(clientAdvisorBranding)
+  const previewHex = activeBranding
+    ? getPreviewBrandHex(activeBranding)
     : null;
 
-  const compactWorkspaceHeader = showAdvisor && !clientAdvisorBranding;
+  const compactWorkspaceHeader = showAdvisor && !activeBranding;
 
   const pathname = (await headers()).get("x-akili-pathname") ?? "";
   const tenantPathPrefix = await getTenantPathPrefixFromHeaders();
   const onTenantHost = await isTenantBrandedRequest();
-  const isWhiteLabeledPortal = onTenantHost || Boolean(clientAdvisorBranding);
+  const isWhiteLabeledPortal = onTenantHost || Boolean(activeBranding);
   const isAdvisorWorkspaceRoute =
     showAdvisor && !clientAdvisorBranding && pathname.startsWith("/advisor");
   const isAdminWorkspaceRoute = showAdmin && pathname.startsWith("/admin");
-  const isWorkspaceSlimHeaderRoute = isAdvisorWorkspaceRoute || isAdminWorkspaceRoute;
+  // Advisor workspace uses slim header unless branded
+  const isWorkspaceSlimHeaderRoute = (isAdvisorWorkspaceRoute && !advisorWorkspaceBranding) || isAdminWorkspaceRoute;
+  const isAdvisorBrandedWorkspace = isAdvisorWorkspaceRoute && !!advisorWorkspaceBranding;
 
   const advisorFeatureFlags = showAdvisor ? await getPlatformFeatureFlags() : null;
   const clientSignedInIdentity =
     role === "USER" ? (clientPortalSignedInLabel ?? session.user.email ?? "") : null;
-  const showClientBrandedFooter =
-    role === "USER" && !!clientAdvisorBranding && !isWorkspaceSlimHeaderRoute;
+  const showBrandedFooter =
+    (role === "USER" && !!clientAdvisorBranding && !isWorkspaceSlimHeaderRoute) ||
+    isAdvisorBrandedWorkspace;
 
   const shell = (
     <>
@@ -247,10 +268,10 @@ export default async function ProtectedLayout({
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
                     <div className="min-w-0">
-                      {clientAdvisorBranding ? (
+                      {activeBranding ? (
                         <ClientPortalBrandedHeaderMark
                           brandTitle={brandTitle}
-                          logoSrc={clientPortalLogoImgSrc(clientAdvisorBranding)}
+                          logoSrc={clientPortalLogoImgSrc(activeBranding)}
                           primaryHex={previewHex?.primary}
                         />
                       ) : (
@@ -278,14 +299,14 @@ export default async function ProtectedLayout({
                               className="font-semibold break-all"
                               style={{ color: previewHex.primary }}
                             >
-                              {clientSignedInIdentity}
+                              {isAdvisorBrandedWorkspace ? session.user.email : clientSignedInIdentity}
                             </span>
                           </p>
                         ) : (
                           <p className="text-sm text-muted-foreground">
                             Signed in as{" "}
                             <span className="font-semibold text-foreground break-all">
-                              {clientSignedInIdentity}
+                              {isAdvisorBrandedWorkspace ? session.user.email : clientSignedInIdentity}
                             </span>
                           </p>
                         )}
@@ -329,7 +350,9 @@ export default async function ProtectedLayout({
                           previewHex ? { color: previewHex.primary } : undefined
                         }
                       >
-                        {clientAdvisorBranding
+                        {isAdvisorBrandedWorkspace
+                          ? "Advisor Workspace"
+                          : clientAdvisorBranding
                           ? BRANDED_CLIENT_HEADER_KICKER
                           : "AKILI Risk Intelligence"}
                       </p>
@@ -343,7 +366,7 @@ export default async function ProtectedLayout({
                           previewHex ? { color: previewHex.primary } : undefined
                         }
                       >
-                        Client Workspace
+                        {isAdvisorBrandedWorkspace ? brandTitle : "Client Workspace"}
                       </h1>
                     </div>
                   </div>
@@ -365,6 +388,7 @@ export default async function ProtectedLayout({
                       hideDocumentsNav={hideDocumentsNav}
                       hideIntakeNav={hideIntakeNav}
                       clientBrandHex={previewHex}
+                      advisorBrandedWorkspace={isAdvisorBrandedWorkspace}
                       advisorFeatureFlags={advisorFeatureFlags}
                     />
                   </div>
@@ -393,7 +417,7 @@ export default async function ProtectedLayout({
             </div>
           </main>
 
-          {showClientBrandedFooter && clientAdvisorBranding ? (
+          {showBrandedFooter && activeBranding ? (
             <div
               className={cn(
                 "px-4 lg:px-10",
@@ -401,10 +425,10 @@ export default async function ProtectedLayout({
                   ? "py-3 sm:px-6 sm:py-4"
                   : "pb-5 sm:px-8 sm:pb-8 lg:pb-10",
               )}
-              data-testid="client-portal-footer"
+              data-testid="branded-portal-footer"
             >
               <BrandedPortalFooter
-                branding={clientAdvisorBranding}
+                branding={activeBranding}
                 tenantPathPrefix={tenantPathPrefix}
                 className="mt-0"
               />
@@ -416,13 +440,13 @@ export default async function ProtectedLayout({
     </>
   );
 
-  if (clientAdvisorBranding) {
+  if (activeBranding) {
     return (
       <BrandingProvider
-        branding={clientAdvisorBranding}
+        branding={activeBranding}
         subdomain={clientPortalSubdomain}
       >
-        <ClientPortalRootTheme branding={clientAdvisorBranding} />
+        <ClientPortalRootTheme branding={activeBranding} />
         {shell}
       </BrandingProvider>
     );

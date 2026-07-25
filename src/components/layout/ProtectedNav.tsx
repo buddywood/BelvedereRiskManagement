@@ -69,6 +69,8 @@ interface ProtectedNavProps {
   hideIntakeNav?: boolean;
   /** Client portal + assigned advisor: match `BrandingPreview` nav (primary text, light active pill) */
   clientBrandHex?: PreviewBrandHex | null;
+  /** When true, apply branding colors to advisor nav (for white-labeled advisor workspace) */
+  advisorBrandedWorkspace?: boolean;
   /** When omitted for advisors, both features are shown (backward compatible). */
   advisorFeatureFlags?: AdvisorPlatformFeatureFlags | null;
 }
@@ -82,6 +84,7 @@ export function ProtectedNav({
   hideDocumentsNav = false,
   hideIntakeNav = false,
   clientBrandHex = null,
+  advisorBrandedWorkspace = false,
   advisorFeatureFlags = null,
 }: ProtectedNavProps) {
   const pathname = usePathname();
@@ -143,8 +146,10 @@ export function ProtectedNav({
       ({ href }) => pathname === href || pathname.startsWith(href + "/"),
     )?.href;
 
-  const clientPreviewNav =
-    !!clientBrandHex && !showAdvisor && !showAdmin;
+  // Apply branded nav styling for client portal or advisor branded workspace
+  const useBrandedNavStyle =
+    (!!clientBrandHex && !showAdvisor && !showAdmin) ||
+    (!!clientBrandHex && advisorBrandedWorkspace);
 
   return (
     <nav
@@ -167,10 +172,10 @@ export function ProtectedNav({
             title={disabledTitle}
             className={cn(
               "inline-flex h-9 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium",
-              !clientPreviewNav && "text-muted-foreground/60 opacity-70",
+              !useBrandedNavStyle && "text-muted-foreground/60 opacity-70",
             )}
             style={
-              clientPreviewNav
+              useBrandedNavStyle
                 ? {
                     color: isPreviewHexDark(clientBrandHex!.secondary)
                       ? "rgba(255, 255, 255, 0.72)"
@@ -184,7 +189,7 @@ export function ProtectedNav({
           >
             {label}
           </span>
-        ) : clientPreviewNav ? (
+        ) : useBrandedNavStyle ? (
           <Link
             key={href}
             href={href}
