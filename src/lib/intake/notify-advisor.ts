@@ -59,9 +59,21 @@ export async function notifyAdvisorsOfIntake(
           piiPolicy: true,
           firmName: true,
           clientEmailFromAddress: true,
+          primaryColor: true,
+          secondaryColor: true,
+          tagline: true,
+          logoUrl: true,
           user: { select: { id: true, name: true, emailCiphertext: true } },
           enterprise: {
-            select: { name: true, clientEmailFromAddress: true },
+            select: {
+              name: true,
+              clientEmailFromAddress: true,
+              brandName: true,
+              primaryColor: true,
+              secondaryColor: true,
+              tagline: true,
+              logoUrl: true,
+            },
           },
         },
       },
@@ -112,11 +124,17 @@ export async function notifyAdvisorsOfIntake(
 
       if (baseUrl) {
         const reviewUrl = `${baseUrl}/advisor/review/${interviewId}`;
+        const hasEnterpriseBranding = advisor.enterprise?.brandName || advisor.enterprise?.primaryColor;
+        const hasAdvisorBranding = advisor.firmName || advisor.primaryColor;
         const branding: AdvisorNotificationBranding | null =
-          advisor.enterprise?.clientEmailFromAddress || advisor.clientEmailFromAddress
+          hasEnterpriseBranding || hasAdvisorBranding || advisor.enterprise?.clientEmailFromAddress || advisor.clientEmailFromAddress
             ? {
                 clientEmailFromAddress: advisor.enterprise?.clientEmailFromAddress ?? advisor.clientEmailFromAddress,
-                firmName: advisor.enterprise?.name ?? advisor.firmName,
+                firmName: advisor.enterprise?.brandName ?? advisor.enterprise?.name ?? advisor.firmName,
+                primaryColor: advisor.enterprise?.primaryColor ?? advisor.primaryColor,
+                secondaryColor: advisor.enterprise?.secondaryColor ?? advisor.secondaryColor,
+                tagline: advisor.enterprise?.tagline ?? advisor.tagline,
+                logoUrl: advisor.enterprise?.logoUrl ?? advisor.logoUrl,
               }
             : null;
         await sendAdvisorIntakeNotification(

@@ -67,6 +67,7 @@ export async function inviteEnterpriseTeamMemberAction(input: unknown) {
       roleLabel: enterpriseTeamInviteRoleLabel(result.role),
       inviteUrl: result.inviteUrl,
       clientEmailFromAddress: team.clientEmailFromAddress,
+      branding: team.branding,
     });
 
     revalidatePath("/advisor/settings/team");
@@ -126,6 +127,7 @@ export async function resendEnterpriseTeamInviteAction(input: unknown) {
       roleLabel: enterpriseTeamInviteRoleLabel(result.role),
       inviteUrl: result.inviteUrl,
       clientEmailFromAddress: team.clientEmailFromAddress,
+      branding: team.branding,
     });
     if (!emailResult.success) {
       return { success: false as const, error: emailResult.error ?? "Failed to send invitation email" };
