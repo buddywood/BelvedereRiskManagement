@@ -2,6 +2,7 @@
 
 import type { SubscriptionTier } from "@prisma/client";
 import { Briefcase, PanelLeft, PanelLeftClose } from "lucide-react";
+import Image from "next/image";
 
 import type { ClientLimitSnapshot } from "@/lib/billing/client-limit";
 import { ClientLimitUsageMeter } from "@/components/advisor/billing/ClientLimitGate";
@@ -25,6 +26,8 @@ interface AdvisorSidebarProps {
   clientLimitStatus: ClientLimitSnapshot | null;
   unreadNotificationCount: number;
   workspaceTitle: string;
+  /** Logo URL for branded workspace sidebar. When provided, shows logo instead of briefcase icon. */
+  workspaceLogoUrl?: string | null;
   enterpriseTeamEnabled?: boolean;
   billingNavEnabled?: boolean;
   brandingNavEnabled?: boolean;
@@ -38,6 +41,7 @@ export function AdvisorSidebar({
   clientLimitStatus,
   unreadNotificationCount,
   workspaceTitle,
+  workspaceLogoUrl,
   enterpriseTeamEnabled = false,
   billingNavEnabled = true,
   brandingNavEnabled = false,
@@ -91,11 +95,25 @@ export function AdvisorSidebar({
               <TooltipTrigger asChild>
                 <div
                   className={cn(
-                    "flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary",
+                    "flex shrink-0 items-center justify-center overflow-hidden",
+                    workspaceLogoUrl
+                      ? "rounded-md bg-background"
+                      : "rounded-lg bg-primary/10 text-primary",
                     collapsed ? "size-9" : "size-10",
                   )}
                 >
-                  <Briefcase className={collapsed ? "size-4" : "size-5"} />
+                  {workspaceLogoUrl ? (
+                    <Image
+                      src={workspaceLogoUrl}
+                      alt={workspaceTitle}
+                      width={collapsed ? 36 : 40}
+                      height={collapsed ? 36 : 40}
+                      className="object-contain"
+                      unoptimized
+                    />
+                  ) : (
+                    <Briefcase className={collapsed ? "size-4" : "size-5"} />
+                  )}
                 </div>
               </TooltipTrigger>
               {collapsed ? (
