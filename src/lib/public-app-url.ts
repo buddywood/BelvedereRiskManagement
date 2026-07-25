@@ -37,27 +37,54 @@ function normalizeOrigin(raw: string | undefined): string | null {
   }
 }
 
+function isLocalhostOrigin(origin: string): boolean {
+  try {
+    const host = new URL(origin).hostname.toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
+function vercelDeploymentOrigin(): string | null {
+  const vercel = sanitizeUrlEnv(process.env.VERCEL_URL);
+  if (!vercel) return null;
+  const host = vercel.replace(/^https?:\/\//i, "").split("/")[0]?.trim();
+  if (!host) return null;
+  return normalizeOrigin(host);
+}
+
+/**
+ * Env / deployment origin candidates for outbound links.
+ * Prefer non-localhost values so a local `.env` NEXT_PUBLIC_URL does not
+ * poison Preview/Production invite emails when AUTH_URL or VERCEL_URL is set.
+ */
+function publicAppOriginCandidates(): string[] {
+  const candidates = [
+    normalizeOrigin(process.env.AUTH_URL),
+    normalizeOrigin(process.env.NEXT_PUBLIC_URL),
+    normalizeOrigin(process.env.NEXTAUTH_URL),
+    vercelDeploymentOrigin(),
+  ].filter((value): value is string => Boolean(value));
+
+  const seen = new Set<string>();
+  return candidates.filter((origin) => {
+    if (seen.has(origin)) return false;
+    seen.add(origin);
+    return true;
+  });
+}
+
+function pickPublicAppOrigin(candidates: string[]): string | null {
+  return candidates.find((origin) => !isLocalhostOrigin(origin)) ?? candidates[0] ?? null;
+}
+
 /**
  * Fallback when no request is available: env vars + VERCEL_URL + localhost.
+ * Skips localhost when any deployed/public origin is configured.
  */
 export function getPublicAppUrlFromEnv(): string {
-  const fromEnv =
-    normalizeOrigin(process.env.AUTH_URL) ??
-    normalizeOrigin(process.env.NEXT_PUBLIC_URL) ??
-    normalizeOrigin(process.env.NEXTAUTH_URL);
-
-  if (fromEnv) return fromEnv;
-
-  const vercel = sanitizeUrlEnv(process.env.VERCEL_URL);
-  if (vercel) {
-    const host = vercel.replace(/^https?:\/\//i, "").split("/")[0]?.trim();
-    if (host) {
-      const origin = normalizeOrigin(host);
-      if (origin) return origin;
-    }
-  }
-
-  return "http://localhost:3000";
+  return pickPublicAppOrigin(publicAppOriginCandidates()) ?? "http://localhost:3000";
 }
 
 /**
@@ -78,7 +105,10 @@ export async function resolvePublicAppUrl(): Promise<string> {
       const scheme =
         protoHeader === "http" || protoHeader === "https" ? protoHeader : "https";
       const origin = normalizeOrigin(`${scheme}://${hostRaw}`);
-      if (origin) {
+      // Request host wins when it is a real public host. If the request is
+      // localhost (local tooling against a remote DB), fall through to env so
+      // invite emails do not embed http://localhost:3000.
+      if (origin && !isLocalhostOrigin(origin)) {
         return origin;
       }
     }
@@ -96,29 +126,19 @@ export function getPublicAppUrl(): string {
 
 /**
  * Strict env-only resolver for emails / outbound notifications where we
- * compose a URL with no incoming request to lean on. In production we
- * refuse the localhost fallback — a wrong link in a recovery email or
- * advisor notification is worse than no link at all. Caller decides what
- * to do with `null` (typically: log and skip the send).
+ * compose a URL with no incoming request to lean on. Prefers non-localhost
+ * origins. In production / on Vercel we refuse localhost — a wrong link in a
+ * recovery email or advisor notification is worse than no link at all.
+ * Caller decides what to do with `null` (typically: log and skip the send).
  */
 export function getPublicAppUrlStrict(): string | null {
-  const fromEnv =
-    normalizeOrigin(process.env.AUTH_URL) ??
-    normalizeOrigin(process.env.NEXT_PUBLIC_URL) ??
-    normalizeOrigin(process.env.NEXTAUTH_URL);
-  if (fromEnv) return fromEnv;
+  const candidates = publicAppOriginCandidates();
+  const nonLocal = candidates.find((origin) => !isLocalhostOrigin(origin));
+  if (nonLocal) return nonLocal;
 
-  const vercel = sanitizeUrlEnv(process.env.VERCEL_URL);
-  if (vercel) {
-    const host = vercel.replace(/^https?:\/\//i, "").split("/")[0]?.trim();
-    if (host) {
-      const origin = normalizeOrigin(host);
-      if (origin) return origin;
-    }
-  }
-
-  if (process.env.NODE_ENV === "production") {
+  const onVercel = Boolean(sanitizeUrlEnv(process.env.VERCEL) || sanitizeUrlEnv(process.env.VERCEL_URL));
+  if (process.env.NODE_ENV === "production" || onVercel) {
     return null;
   }
-  return "http://localhost:3000";
+  return candidates[0] ?? "http://localhost:3000";
 }

@@ -24,6 +24,9 @@ vi.mock("@/lib/auth/user-email", () => ({
 vi.mock("@/lib/auth/user-email-crypto", () => ({
   decryptUserEmail: vi.fn(() => "advisor@firm.com"),
 }));
+vi.mock("@/lib/public-app-url", () => ({
+  resolvePublicAppUrl: vi.fn(async () => "https://preview.akilirisk.com"),
+}));
 
 import {
   changeEnterpriseMemberRole,
@@ -40,7 +43,6 @@ describe("enterprise team invite roles", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.AUTH_SECRET = "test-auth-secret-for-enterprise-team-invites";
-    process.env.NEXT_PUBLIC_URL = "http://localhost:3000";
   });
 
   it("invites a firm administrator when role is ADMIN", async () => {
@@ -61,6 +63,9 @@ describe("enterprise team invite roles", () => {
     });
 
     expect(result.role).toBe("ADMIN");
+    expect(result.inviteUrl).toContain(
+      "https://preview.akilirisk.com/enterprise/join?token="
+    );
     expect(prismaSpies.enterpriseMembership.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         enterpriseId: ENTERPRISE_ID,

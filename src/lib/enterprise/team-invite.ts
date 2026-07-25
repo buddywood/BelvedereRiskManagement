@@ -21,6 +21,7 @@ import {
   verifyEnterpriseTeamInviteToken,
 } from "@/lib/enterprise/team-invite-token";
 import { requireEnterpriseTeamManager, resolveEnterpriseTeamContext } from "@/lib/enterprise/team-access";
+import { resolvePublicAppUrl } from "@/lib/public-app-url";
 
 export class EnterpriseTeamInviteError extends Error {
   constructor(message: string) {
@@ -86,13 +87,27 @@ export async function listEnterpriseTeamMembers(
   }));
 }
 
-function resolveInviteOrigin(): string {
-  const configured = process.env.NEXT_PUBLIC_URL?.trim();
-  if (configured) return configured;
-  if (process.env.NODE_ENV === "production") {
-    throw new EnterpriseTeamInviteError("NEXT_PUBLIC_URL is not configured");
+async function resolveInviteOrigin(): Promise<string> {
+  const origin = (await resolvePublicAppUrl()).replace(/\/$/, "");
+  let hostname = "";
+  try {
+    hostname = new URL(origin).hostname.toLowerCase();
+  } catch {
+    throw new EnterpriseTeamInviteError(
+      "Public app URL is not configured. Set AUTH_URL or NEXT_PUBLIC_URL."
+    );
   }
-  return "http://localhost:3000";
+
+  const isLocal =
+    hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  const onVercel = Boolean(process.env.VERCEL || process.env.VERCEL_URL);
+  if (isLocal && (process.env.NODE_ENV === "production" || onVercel)) {
+    throw new EnterpriseTeamInviteError(
+      "Public app URL resolves to localhost. Set AUTH_URL or NEXT_PUBLIC_URL to the staging/production host before sending team invitations."
+    );
+  }
+
+  return origin;
 }
 
 export async function inviteEnterpriseMember(
@@ -165,7 +180,7 @@ export async function inviteEnterpriseMember(
   });
 
   const token = createEnterpriseTeamInviteToken(membership.id);
-  const inviteUrl = buildEnterpriseTeamInviteUrl(resolveInviteOrigin(), token);
+  const inviteUrl = buildEnterpriseTeamInviteUrl(await resolveInviteOrigin(), token);
 
   return {
     membershipId: membership.id,
@@ -329,7 +344,7 @@ export async function resendEnterpriseTeamInvite(
   });
 
   const token = createEnterpriseTeamInviteToken(pending.membershipId);
-  const inviteUrl = buildEnterpriseTeamInviteUrl(resolveInviteOrigin(), token);
+  const inviteUrl = buildEnterpriseTeamInviteUrl(await resolveInviteOrigin(), token);
 
   return {
     inviteUrl,

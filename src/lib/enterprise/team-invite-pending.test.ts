@@ -17,6 +17,9 @@ vi.mock("@/lib/enterprise/team-access", () => teamAccess);
 vi.mock("@/lib/auth/user-email-crypto", () => ({
   decryptUserEmail: vi.fn(() => "advisor@firm.com"),
 }));
+vi.mock("@/lib/public-app-url", () => ({
+  resolvePublicAppUrl: vi.fn(async () => "https://preview.akilirisk.com"),
+}));
 
 import {
   resendEnterpriseTeamInvite,
@@ -57,7 +60,9 @@ describe("pending enterprise team invites", () => {
 
     expect(result.inviteeEmail).toBe("advisor@firm.com");
     expect(result.role).toBe("ADVISOR");
-    expect(result.inviteUrl).toContain("/enterprise/join?token=");
+    expect(result.inviteUrl).toContain(
+      "https://preview.akilirisk.com/enterprise/join?token="
+    );
     expect(prismaSpies.enterpriseMembership.update).toHaveBeenCalledWith({
       where: { id: MEMBERSHIP_ID },
       data: { invitedAt: expect.any(Date) },
