@@ -269,7 +269,7 @@ export function FacilitatedAssessmentHub({
         pillars={progressPillars}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {pillarStats.map((stat) => (
           <PillarCard
             key={stat.pillar.slug}
