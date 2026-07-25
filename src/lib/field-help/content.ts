@@ -428,6 +428,11 @@ export const FIELD_HELP = {
     title: "Invite email",
     description: "The team member receives an invitation to join your firm workspace at this address.",
   },
+  "team-invite-role": {
+    title: "Invite role",
+    description:
+      "Team members work their assigned clients. Firm administrators can manage the team, firm settings, and firm-wide portfolio view. Billing remains owner-only.",
+  },
 
   // Advisor — assessment lifecycle (stale scores vs reassessment)
   "pipeline-assignment-workflow": {

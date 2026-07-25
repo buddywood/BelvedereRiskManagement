@@ -56,6 +56,7 @@ describe("pending enterprise team invites", () => {
     const result = await resendEnterpriseTeamInvite(ACTOR_USER_ID, MEMBERSHIP_ID);
 
     expect(result.inviteeEmail).toBe("advisor@firm.com");
+    expect(result.role).toBe("ADVISOR");
     expect(result.inviteUrl).toContain("/enterprise/join?token=");
     expect(prismaSpies.enterpriseMembership.update).toHaveBeenCalledWith({
       where: { id: MEMBERSHIP_ID },
