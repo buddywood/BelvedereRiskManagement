@@ -83,10 +83,10 @@ export default async function AdminClientsPage({
             <span className="font-normal text-muted-foreground">({totalCount.toLocaleString()})</span>
           </h1>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Button variant={scope === "active" ? "default" : "outline"} size="sm" className="h-8" asChild>
+            <Button variant={scope === "active" ? "default" : "outline"} size="sm" className="h-10" asChild>
               <Link href={clientsPageHref("active", 1, query, advisorId)}>Active</Link>
             </Button>
-            <Button variant={scope === "all" ? "default" : "outline"} size="sm" className="h-8" asChild>
+            <Button variant={scope === "all" ? "default" : "outline"} size="sm" className="h-10" asChild>
               <Link href={clientsPageHref("all", 1, query, advisorId)}>All</Link>
             </Button>
           </div>

@@ -34,20 +34,28 @@ export default function PipelineLoading() {
         </div>
       </div>
 
-      {/* Table skeleton */}
-      <div className="rounded-md border">
-        {/* Table header */}
-        <div className="grid grid-cols-6 gap-4 p-4 border-b">
-          {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-4" />
-          ))}
-        </div>
-        {/* Table rows */}
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="grid grid-cols-6 gap-4 p-4 border-b last:border-b-0">
-            {[...Array(6)].map((_, j) => (
-              <Skeleton key={j} className="h-6" />
-            ))}
+      {/* Card-based client list skeleton (matches PipelineClientCard layout) */}
+      <div className="space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="rounded-xl border p-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+              <div className="flex min-w-0 flex-1 items-start gap-3">
+                <Skeleton className="size-10 shrink-0 rounded-full" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Skeleton className="h-5 w-32" />
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </div>
+              <div className="hidden lg:block lg:flex-[1.4]">
+                <Skeleton className="h-9 w-full" />
+              </div>
+              <div className="flex min-w-[7.5rem] flex-col gap-1.5">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-1.5 w-full" />
+                <Skeleton className="h-5 w-10" />
+              </div>
+            </div>
           </div>
         ))}
       </div>

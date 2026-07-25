@@ -97,7 +97,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "active" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors">Active</Link>
@@ -105,7 +105,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "attention" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors?filter=attention">
@@ -116,7 +116,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "enterprise" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors?filter=enterprise">
@@ -127,7 +127,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "all" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors?filter=all">All</Link>

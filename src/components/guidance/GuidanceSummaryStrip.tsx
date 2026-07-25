@@ -34,7 +34,7 @@ export function GuidanceSummaryStrip({
 }) {
   return (
     <div
-      className="grid grid-cols-3 gap-2 sm:grid-cols-6"
+      className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6"
       aria-label="Guidance package summary"
     >
       <Stat value={summary.totalItems} label="Total" />
