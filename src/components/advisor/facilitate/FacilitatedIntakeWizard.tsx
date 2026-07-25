@@ -145,9 +145,11 @@ export function FacilitatedIntakeWizard({
     ? getResponseForQuestion(currentQuestion.id)
     : undefined;
 
+  // Only re-seed the draft when the question changes — not whenever the
+  // responses map identity updates, which would wipe in-progress multi-select.
   useEffect(() => {
     if (!currentQuestion) return;
-    const r = getResponseForQuestion(currentQuestion.id);
+    const r = useIntakeStore.getState().responses[currentQuestion.id];
     setResponseTab(
       r?.skipped || r?.transcription?.trim()
         ? "type"
@@ -156,7 +158,7 @@ export function FacilitatedIntakeWizard({
           : "type",
     );
     setTypedDraft(r?.skipped ? "" : (r?.transcription ?? ""));
-  }, [currentQuestion?.id, getResponseForQuestion]);
+  }, [currentQuestion?.id]);
 
   const saveCurrentTypedAnswer = useCallback(async (): Promise<boolean> => {
     if (!currentQuestion) return true;

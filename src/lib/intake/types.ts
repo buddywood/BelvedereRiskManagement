@@ -17,7 +17,7 @@ export interface IntakeQuestion {
   answer1?: string | null;
   answer2?: string | null;
   answer3?: string | null;
-  /** Custom multiple-choice options when answerType is choice_list. */
+  /** Custom multiple-choice options when answerType is choice_list or multi_select. */
   options?: IntakeChoiceListOption[] | null;
   /** Pillar “why this matters” / risk relevance — staff review only; never shown to clients. */
   whyThisMatters?: string;

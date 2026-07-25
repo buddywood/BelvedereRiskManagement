@@ -84,7 +84,13 @@ export function IntakeStructuredAnswer({
     );
   }
 
-  if (question.answerType === "multi_select") {
+  // Custom multiple-choice types (choice_list + multi_select) both allow
+  // selecting any combination of authored options. Stored as a JSON array of
+  // option values in the encrypted transcription column.
+  if (
+    question.answerType === "multi_select" ||
+    question.answerType === "choice_list"
+  ) {
     const selected = new Set(parseMultiSelectValue(value));
     const toggle = (choiceValue: string) => {
       const next = new Set(selected);

@@ -61,4 +61,20 @@ describe("intake answer behavior", () => {
       ),
     ).toBe("Employed");
   });
+
+  it("formats choice_list multi-select JSON arrays as labels", () => {
+    expect(
+      formatIntakeStructuredAnswerForDisplay(
+        {
+          answerType: "choice_list",
+          options: [
+            { value: "0", label: "Retired" },
+            { value: "1", label: "Employed" },
+            { value: "2", label: "Student" },
+          ],
+        },
+        JSON.stringify(["0", "2"]),
+      ),
+    ).toBe("Retired, Student");
+  });
 });

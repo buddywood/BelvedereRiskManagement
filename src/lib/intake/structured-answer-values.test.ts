@@ -31,6 +31,10 @@ describe("multi-select values", () => {
     expect(parseMultiSelectValue("2")).toEqual(["2"]);
   });
 
+  it("coerces numeric JSON array entries to strings", () => {
+    expect(parseMultiSelectValue("[0,2]")).toEqual(["0", "2"]);
+  });
+
   it("formats selected values to their labels", () => {
     const options = [
       { value: "0", label: "Boating" },

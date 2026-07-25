@@ -9,6 +9,7 @@ import {
   isIsoDateAnswer,
   isIsoMonthYearAnswer,
 } from "@/lib/assessment/question-date";
+import { coerceMultiChoiceAnswer } from "@/lib/assessment/multi-choice-answer";
 
 /** Read-only label for admin answer review (does not affect scoring). */
 export function formatAssessmentAnswerForDisplay(
@@ -40,9 +41,10 @@ export function formatAssessmentAnswerForDisplay(
     return formatMonthYearAnswerForDisplay(answer);
   }
 
-  if (question?.type === "multi-choice" && Array.isArray(answer)) {
-    if (answer.length === 0) return "No answer recorded";
-    return answer
+  if (question?.type === "multi-choice") {
+    const selectedValues = coerceMultiChoiceAnswer(answer);
+    if (selectedValues.length === 0) return "No answer recorded";
+    return selectedValues
       .map((selected) => {
         const match = question.options?.find(
           (o) => o.value === selected || String(o.value) === String(selected)
