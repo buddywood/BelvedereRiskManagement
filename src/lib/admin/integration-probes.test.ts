@@ -31,6 +31,7 @@ vi.mock("stripe", () => {
 import {
   integrationProbesToDependencies,
   probeOpenAI,
+  probeOpenAINarratives,
   probeResend,
   probeS3,
   probeStripe,
@@ -95,6 +96,44 @@ describe("probeOpenAI", () => {
     );
     const result = await probeOpenAI();
     expect(result.status).toBe("down");
+  });
+
+  it("returns degraded on HTTP 429 (rate limit / quota)", async () => {
+    process.env.OPENAI_API_KEY = "sk-test";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 429 })
+    );
+    const result = await probeOpenAI();
+    expect(result.status).toBe("degraded");
+    expect(result.message).toContain("429");
+    expect(result.message).toContain("rate limit");
+  });
+});
+
+describe("probeOpenAINarratives", () => {
+  it("returns not_configured when LLM_NARRATIVES_ENABLED is not set", async () => {
+    delete process.env.LLM_NARRATIVES_ENABLED;
+    process.env.OPENAI_API_KEY = "sk-test";
+    const result = await probeOpenAINarratives();
+    expect(result.status).toBe("not_configured");
+    expect(result.message).toContain("disabled");
+  });
+
+  it("returns degraded when enabled but OPENAI_API_KEY is missing", async () => {
+    process.env.LLM_NARRATIVES_ENABLED = "true";
+    delete process.env.OPENAI_API_KEY;
+    const result = await probeOpenAINarratives();
+    expect(result.status).toBe("degraded");
+    expect(result.message).toContain("OPENAI_API_KEY is missing");
+  });
+
+  it("returns healthy when enabled and key is configured", async () => {
+    process.env.LLM_NARRATIVES_ENABLED = "true";
+    process.env.OPENAI_API_KEY = "sk-test";
+    const result = await probeOpenAINarratives();
+    expect(result.status).toBe("healthy");
+    expect(result.message).toContain("ready");
   });
 });
 
@@ -266,10 +305,11 @@ describe("runIntegrationProbes", () => {
     delete process.env.UPSTASH_REDIS_REST_TOKEN;
 
     const results = await runIntegrationProbes();
-    expect(results).toHaveLength(6);
+    expect(results).toHaveLength(7);
     expect(results.map((r) => r.id)).toEqual([
       "stripe",
       "openai",
+      "openai-narratives",
       "resend",
       "s3",
       "upstash-redis",
