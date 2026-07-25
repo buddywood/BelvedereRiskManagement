@@ -79,12 +79,17 @@ function pickPublicAppOrigin(candidates: string[]): string | null {
   return candidates.find((origin) => !isLocalhostOrigin(origin)) ?? candidates[0] ?? null;
 }
 
+function localDevOrigin(): string {
+  const port = sanitizeUrlEnv(process.env.PORT) || "3000";
+  return `http://localhost:${port}`;
+}
+
 /**
  * Fallback when no request is available: env vars + VERCEL_URL + localhost.
  * Skips localhost when any deployed/public origin is configured.
  */
 export function getPublicAppUrlFromEnv(): string {
-  return pickPublicAppOrigin(publicAppOriginCandidates()) ?? "http://localhost:3000";
+  return pickPublicAppOrigin(publicAppOriginCandidates()) ?? localDevOrigin();
 }
 
 /**
@@ -102,13 +107,23 @@ export async function resolvePublicAppUrl(): Promise<string> {
     const hostRaw = hostCombined.split(",")[0]?.trim();
     if (hostRaw) {
       const protoHeader = h.get("x-forwarded-proto")?.split(",")[0]?.trim().toLowerCase() ?? "";
+      // Local hosts default to http when the proxy omits x-forwarded-proto so
+      // invite links keep the correct port (e.g. http://localhost:3001).
+      const hostLower = hostRaw.toLowerCase();
+      const isLocalHost =
+        hostLower.startsWith("localhost") ||
+        hostLower.startsWith("127.0.0.1") ||
+        hostLower.startsWith("[::1]");
       const scheme =
-        protoHeader === "http" || protoHeader === "https" ? protoHeader : "https";
+        protoHeader === "http" || protoHeader === "https"
+          ? protoHeader
+          : isLocalHost
+            ? "http"
+            : "https";
       const origin = normalizeOrigin(`${scheme}://${hostRaw}`);
-      // Request host wins when it is a real public host. If the request is
-      // localhost (local tooling against a remote DB), fall through to env so
-      // invite emails do not embed http://localhost:3000.
-      if (origin && !isLocalhostOrigin(origin)) {
+      // Always prefer the incoming request origin (including localhost:PORT)
+      // so local invite emails match the port you're actually testing on.
+      if (origin) {
         return origin;
       }
     }
@@ -140,5 +155,5 @@ export function getPublicAppUrlStrict(): string | null {
   if (process.env.NODE_ENV === "production" || onVercel) {
     return null;
   }
-  return candidates[0] ?? "http://localhost:3000";
+  return candidates[0] ?? localDevOrigin();
 }
