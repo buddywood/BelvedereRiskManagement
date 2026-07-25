@@ -75,20 +75,20 @@ export function FunnelSummary({ funnel }: { funnel: OnboardingFunnel }) {
                 key={step.label}
                 className={cn(
                   "rounded-xl border border-border/70 bg-card/60 p-4",
-                  "flex flex-col gap-1"
+                  "flex flex-col gap-1.5"
                 )}
               >
-                <p className="editorial-kicker text-[0.65rem]">{step.label}</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{step.label}</p>
                 <p className="text-2xl font-semibold tabular-nums leading-tight">
                   {formatCount(step.count)}
                 </p>
                 {step.sub ? (
-                  <p className="text-[0.7rem] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {step.sub}
                   </p>
                 ) : null}
                 {idx > 0 ? (
-                  <p className="mt-1 text-[0.65rem] text-muted-foreground">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {conversion === null
                       ? "— vs previous"
                       : `${formatPercent(conversion, 0)} of previous`}
