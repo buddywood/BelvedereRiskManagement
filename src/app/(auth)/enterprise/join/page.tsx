@@ -1,10 +1,12 @@
+import { redirect } from "next/navigation";
+
 import { EnterpriseTeamJoinConfirmPanel } from "@/components/auth/EnterpriseTeamJoinConfirmPanel";
 import { EnterpriseTeamJoinWrongAccount } from "@/components/auth/EnterpriseTeamJoinWrongAccount";
 import { EnterpriseTeamInviteSignInForm } from "@/components/auth/EnterpriseTeamInviteSignInForm";
 import { EnterpriseTeamInviteSignupForm } from "@/components/auth/EnterpriseTeamInviteSignupForm";
 import { InviteAcceptFailure } from "@/components/auth/InviteAcceptFailure";
 import { auth } from "@/lib/auth";
-import { resolveEnterpriseTeamInvite } from "@/lib/enterprise/team-invite";
+import { resolveEnterpriseTeamInvite, resolveEnterpriseTeamInviteDetailed } from "@/lib/enterprise/team-invite";
 import { buildEnterpriseTeamJoinPath } from "@/lib/enterprise/team-invite-token";
 
 export default async function EnterpriseJoinPage({
@@ -19,6 +21,17 @@ export default async function EnterpriseJoinPage({
 
   if (!invite.ok) {
     return <InviteAcceptFailure message={invite.error} />;
+  }
+
+  // Check if the user already has a password (new temp password flow).
+  // If so, redirect them to sign in instead of showing the join page.
+  // The enterprise invite will be auto-accepted on sign-in.
+  const detailed = await resolveEnterpriseTeamInviteDetailed(token);
+  if (detailed.ok && detailed.hasPassword && detailed.emailVerified) {
+    const params = new URLSearchParams({
+      callbackUrl: "/advisor",
+    });
+    redirect(`/signin?${params.toString()}`);
   }
 
   const joinPath = buildEnterpriseTeamJoinPath(token);

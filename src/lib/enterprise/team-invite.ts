@@ -6,6 +6,9 @@ import { redirect } from "next/navigation";
 import { findUserByEmail, userEmailWriteData } from "@/lib/auth/user-email";
 import { decryptUserEmail } from "@/lib/auth/user-email-crypto";
 import { enterpriseTeamJoinTokenFromCallback } from "@/lib/auth/sign-in-routes";
+import { hashPasswordForStorage } from "@/lib/auth/password-update";
+import { generateTempPassword } from "@/lib/auth/temp-password";
+import { getPasswordPolicy } from "@/lib/platform/password-policy-settings";
 import { prisma } from "@/lib/db";
 import { cancelSoloSubscriptionForEnterprise } from "@/lib/enterprise/cancel-solo-subscription";
 import { cancelStripeSubscriptionBestEffort } from "@/lib/billing/cancel-stripe-subscription";
@@ -116,8 +119,10 @@ export async function inviteEnterpriseMember(
 ): Promise<{
   membershipId: string;
   status: "INVITED";
-  inviteUrl: string;
+  loginUrl: string;
+  tempPassword: string;
   role: EnterpriseInviteRole;
+  isExistingUser: boolean;
 }> {
   const team = await requireEnterpriseTeamManager(inviterUserId);
   const normalizedEmail = input.email.trim().toLowerCase();
@@ -155,17 +160,36 @@ export async function inviteEnterpriseMember(
     throw new EnterpriseTeamInviteError("This email cannot be invited as a team member.");
   }
 
-  const inviteeUser =
-    existingByEmail ??
-    (await prisma.user.create({
+  const isExistingUser = Boolean(existingByEmail);
+  const policy = await getPasswordPolicy();
+  const tempPassword = generateTempPassword(policy);
+  const hashedPassword = await hashPasswordForStorage(tempPassword);
+
+  let inviteeUser: { id: string };
+  if (existingByEmail) {
+    await prisma.user.update({
+      where: { id: existingByEmail.id },
+      data: {
+        password: hashedPassword,
+        passwordChangeRequired: true,
+        passwordPolicyRevision: policy.revision,
+        emailVerified: new Date(),
+      },
+    });
+    inviteeUser = existingByEmail;
+  } else {
+    inviteeUser = await prisma.user.create({
       data: {
         ...userEmailWriteData(normalizedEmail),
         role: "ADVISOR",
-        password: null,
-        emailVerified: null,
+        password: hashedPassword,
+        passwordChangeRequired: true,
+        passwordPolicyRevision: policy.revision,
+        emailVerified: new Date(),
       },
       select: { id: true },
-    }));
+    });
+  }
 
   const membership = await prisma.enterpriseMembership.create({
     data: {
@@ -179,14 +203,16 @@ export async function inviteEnterpriseMember(
     },
   });
 
-  const token = createEnterpriseTeamInviteToken(membership.id);
-  const inviteUrl = buildEnterpriseTeamInviteUrl(await resolveInviteOrigin(), token);
+  const origin = await resolveInviteOrigin();
+  const loginUrl = `${origin}/signin`;
 
   return {
     membershipId: membership.id,
     status: "INVITED",
-    inviteUrl,
+    loginUrl,
+    tempPassword,
     role: inviteRole,
+    isExistingUser,
   };
 }
 
@@ -254,6 +280,83 @@ export async function resolveEnterpriseTeamInvite(
     enterpriseName: membership.enterprise.name,
     inviteeEmail,
     needsRegistration,
+  };
+}
+
+export type ResolvedEnterpriseTeamInviteDetailed =
+  | {
+      ok: true;
+      membershipId: string;
+      enterpriseName: string;
+      inviteeEmail: string;
+      needsRegistration: boolean;
+      hasPassword: boolean;
+      emailVerified: boolean;
+    }
+  | { ok: false; error: string };
+
+/**
+ * Like resolveEnterpriseTeamInvite but also returns password and emailVerified
+ * status. Used by the join page to redirect users who already have a temp
+ * password set to the sign-in page instead of showing the signup form.
+ */
+export async function resolveEnterpriseTeamInviteDetailed(
+  token: string
+): Promise<ResolvedEnterpriseTeamInviteDetailed> {
+  const trimmed = token.trim();
+  if (!trimmed) {
+    return { ok: false, error: "This team invitation link is missing a token." };
+  }
+
+  const membershipId = verifyEnterpriseTeamInviteToken(trimmed);
+  if (!membershipId) {
+    return { ok: false, error: "This team invitation link is invalid or has expired." };
+  }
+
+  const membership = await prisma.enterpriseMembership.findUnique({
+    where: { id: membershipId },
+    select: {
+      status: true,
+      invitedEmail: true,
+      invitedAt: true,
+      createdAt: true,
+      user: {
+        select: {
+          password: true,
+          emailVerified: true,
+          emailCiphertext: true,
+          createdAt: true,
+        },
+      },
+      enterprise: { select: { name: true } },
+    },
+  });
+
+  if (!membership || membership.status !== "INVITED") {
+    return { ok: false, error: "This team invitation is no longer valid." };
+  }
+
+  const inviteeEmail =
+    membership.invitedEmail?.trim().toLowerCase() ??
+    decryptUserEmail(membership.user.emailCiphertext);
+
+  const hasPassword = Boolean(membership.user.password?.trim());
+  const emailVerified = Boolean(membership.user.emailVerified);
+  const needsRegistration = inviteeNeedsRegistration({
+    hasPassword,
+    emailVerified: membership.user.emailVerified,
+    userCreatedAt: membership.user.createdAt,
+    invitedAt: membership.invitedAt ?? membership.createdAt,
+  });
+
+  return {
+    ok: true,
+    membershipId,
+    enterpriseName: membership.enterprise.name,
+    inviteeEmail,
+    needsRegistration,
+    hasPassword,
+    emailVerified,
   };
 }
 
@@ -372,19 +475,44 @@ async function requirePendingInviteMembership(
 export async function resendEnterpriseTeamInvite(
   actorUserId: string,
   membershipId: string
-): Promise<{ inviteUrl: string; inviteeEmail: string; role: EnterpriseInviteRole }> {
+): Promise<{ loginUrl: string; tempPassword: string; inviteeEmail: string; role: EnterpriseInviteRole }> {
   const pending = await requirePendingInviteMembership(actorUserId, membershipId);
 
-  await prisma.enterpriseMembership.update({
+  const policy = await getPasswordPolicy();
+  const tempPassword = generateTempPassword(policy);
+  const hashedPassword = await hashPasswordForStorage(tempPassword);
+
+  const membership = await prisma.enterpriseMembership.findUnique({
     where: { id: pending.membershipId },
-    data: { invitedAt: new Date() },
+    select: { userId: true },
   });
 
-  const token = createEnterpriseTeamInviteToken(pending.membershipId);
-  const inviteUrl = buildEnterpriseTeamInviteUrl(await resolveInviteOrigin(), token);
+  if (!membership) {
+    throw new EnterpriseTeamInviteError("Team member not found.");
+  }
+
+  await prisma.$transaction([
+    prisma.enterpriseMembership.update({
+      where: { id: pending.membershipId },
+      data: { invitedAt: new Date() },
+    }),
+    prisma.user.update({
+      where: { id: membership.userId },
+      data: {
+        password: hashedPassword,
+        passwordChangeRequired: true,
+        passwordPolicyRevision: policy.revision,
+        emailVerified: new Date(),
+      },
+    }),
+  ]);
+
+  const origin = await resolveInviteOrigin();
+  const loginUrl = `${origin}/signin`;
 
   return {
-    inviteUrl,
+    loginUrl,
+    tempPassword,
     inviteeEmail: pending.inviteeEmail,
     role: pending.role,
   };
