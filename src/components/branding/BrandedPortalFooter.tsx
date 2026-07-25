@@ -11,12 +11,15 @@ type BrandedPortalFooterProps = {
   branding: AdvisorBrandingData;
   className?: string;
   tenantPathPrefix?: string | null;
+  /** Hide public “Sign in” (e.g. already authenticated advisor workspace). */
+  hideSignIn?: boolean;
 };
 
 export function BrandedPortalFooter({
   branding,
   className,
   tenantPathPrefix = null,
+  hideSignIn = false,
 }: BrandedPortalFooterProps) {
   const brandTitle = clientPortalBrandingDisplayTitle(branding);
   const year = new Date().getFullYear();
@@ -95,12 +98,14 @@ export function BrandedPortalFooter({
           className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-end"
           aria-label="Portal footer links"
         >
-          <Link
-            href={buildTenantScopedPublicPath("/signin", tenantPathPrefix)}
-            className="font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Sign in
-          </Link>
+          {!hideSignIn ? (
+            <Link
+              href={buildTenantScopedPublicPath("/signin", tenantPathPrefix)}
+              className="font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Sign in
+            </Link>
+          ) : null}
           <Link
             href={buildTenantScopedPublicPath("/privacy", tenantPathPrefix)}
             className="font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
