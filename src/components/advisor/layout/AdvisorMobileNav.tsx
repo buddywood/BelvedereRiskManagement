@@ -126,38 +126,35 @@ export function AdvisorMobileNav({
           >
             <div className="flex items-start justify-between gap-3 border-b border-border/60 p-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className={cn(
-                    "flex size-9 shrink-0 items-center justify-center overflow-hidden",
-                    workspaceLogoUrl ? "rounded-md bg-background" : "rounded-lg bg-primary/10 text-primary",
-                  )}
-                >
-                  {workspaceLogoUrl ? (
-                    <Image
-                      src={workspaceLogoUrl}
-                      alt={workspaceTitle}
-                      width={36}
-                      height={36}
-                      className="object-contain"
-                      unoptimized
-                    />
-                  ) : (
-                    <Briefcase className="size-4" />
-                  )}
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Briefcase className="size-4" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p
-                    className={cn(
-                      "text-pretty font-semibold leading-snug text-foreground break-words",
-                      workspaceTitle.length > 32
-                        ? "text-sm"
-                        : workspaceTitle.length > 20
-                          ? "text-base"
-                          : "text-lg",
-                    )}
-                  >
-                    {workspaceTitle}
-                  </p>
+                  {workspaceLogoUrl ? (
+                    <div className="py-1">
+                      <Image
+                        src={workspaceLogoUrl}
+                        alt={workspaceTitle}
+                        width={120}
+                        height={40}
+                        className="max-h-10 w-auto object-contain object-left"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <p
+                      className={cn(
+                        "text-pretty font-semibold leading-snug text-foreground break-words",
+                        workspaceTitle.length > 32
+                          ? "text-sm"
+                          : workspaceTitle.length > 20
+                            ? "text-base"
+                            : "text-lg",
+                      )}
+                    >
+                      {workspaceTitle}
+                    </p>
+                  )}
                   <div className="mt-1 flex flex-wrap items-center gap-2">
                     <p className="text-xs text-muted-foreground">Practice operations</p>
                     <AdvisorSubscriptionPlanBadge subscriptionTier={subscriptionTier} />
