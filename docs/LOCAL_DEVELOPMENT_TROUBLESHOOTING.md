@@ -139,9 +139,9 @@ Do **not** run `rm -rf /` or delete paths outside the project root.
 
 ## Advisor signup: `Invalid value for argument tier`. Expected SubscriptionTier
 
-**Symptom:** `POST /api/auth/advisor-signup` returns 500; Prisma error on `subscription.create` with tier `ESSENTIALS`, `BUSINESS`, or `PLATINUM`.
+**Symptom:** `POST /api/auth/advisor-signup` returns 500; Prisma error on `subscription.create` with tier `ESSENTIALS`, `BUSINESS`, or `INTELLIGENCE`.
 
-**Cause:** The Neon database enum still has legacy values (`STARTER`, `GROWTH`, …) while the app expects the modular tier rename (`ESSENTIALS`, `PROFESSIONAL`, `BUSINESS`, `PLATINUM`).
+**Cause:** The Neon database enum still has legacy values (`STARTER`, `GROWTH`, …) while the app expects the modular tier rename (`ESSENTIALS`, `PROFESSIONAL`, `BUSINESS`, `INTELLIGENCE`).
 
 **Fix:**
 

@@ -38,9 +38,9 @@ describe("isVisibilityOptionAtModuleTier", () => {
     expect(isVisibilityOptionAtModuleTier("engagements", "BUSINESS")).toBe(true);
   });
 
-  it("blocks reassessment below Platinum", () => {
+  it("blocks reassessment below Intelligence", () => {
     expect(isVisibilityOptionAtModuleTier("reassessment", "BUSINESS")).toBe(false);
-    expect(isVisibilityOptionAtModuleTier("reassessment", "PLATINUM")).toBe(true);
+    expect(isVisibilityOptionAtModuleTier("reassessment", "INTELLIGENCE")).toBe(true);
   });
 });
 
@@ -50,8 +50,8 @@ describe("describePortfolioAtTier", () => {
     expect(describePortfolioAtTier("ESSENTIALS", flags)).not.toContain("risk analytics");
   });
 
-  it("lists platinum portfolio modules", () => {
-    const summary = describePortfolioAtTier("PLATINUM", flags);
+  it("lists intelligence portfolio modules", () => {
+    const summary = describePortfolioAtTier("INTELLIGENCE", flags);
     expect(summary).toContain("risk intelligence");
     expect(summary).toContain("risk analytics");
     expect(summary).toContain("signals");
@@ -62,7 +62,7 @@ describe("getVisibilityOptionTierState", () => {
   it("marks locked options with required tier", () => {
     const state = getVisibilityOptionTierState("reassessment", "BUSINESS", flags);
     expect(state.available).toBe(false);
-    expect(state.requiredTierLabel).toBe("Platinum");
+    expect(state.requiredTierLabel).toBe("Intelligence");
   });
 
   it("marks included options on current tier", () => {
@@ -91,15 +91,15 @@ describe("getVisibilityOptionTierState", () => {
     });
     expect(state.available).toBe(false);
     expect(state.lockBadge).toBeNull();
-    expect(state.requiredTierLabel).toBe("Platinum");
+    expect(state.requiredTierLabel).toBe("Intelligence");
     expect(state.includedSummary).toBe(
-      "Requires Platinum or higher (your firm is on Professional).",
+      "Requires Intelligence or higher (your firm is on Professional).",
     );
     expect(minimumTierForPortfolioConfiguration({
       ...flags,
       riskIntelligenceEnabled: false,
       governanceDashboardEnabled: true,
-    })).toBe("PLATINUM");
+    })).toBe("INTELLIGENCE");
   });
 });
 

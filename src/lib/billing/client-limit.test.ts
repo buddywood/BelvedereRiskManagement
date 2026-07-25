@@ -18,8 +18,8 @@ describe("suggestedTierForMoreClients", () => {
     expect(suggestedTierForMoreClients("PROFESSIONAL")).toBe("BUSINESS");
   });
 
-  it("returns null when already on Platinum", () => {
-    expect(suggestedTierForMoreClients("PLATINUM")).toBeNull();
+  it("returns null when already on Intelligence", () => {
+    expect(suggestedTierForMoreClients("INTELLIGENCE")).toBeNull();
   });
 });
 

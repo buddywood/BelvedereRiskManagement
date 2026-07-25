@@ -118,7 +118,7 @@ enum SubscriptionTier {
   ESSENTIALS
   PROFESSIONAL
   BUSINESS
-  PLATINUM
+  INTELLIGENCE
 }
 
 enum SubscriptionStatus {

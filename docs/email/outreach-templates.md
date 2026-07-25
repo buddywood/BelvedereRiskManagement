@@ -45,7 +45,7 @@ Professional firms use AKILI to:
 
 **Traction:** Live in production. First enterprise client (Belvedere) on white-label. Full lifecycle shipped — assessment through action plans, optional implementation tracking, and reassessment with score deltas. Stripe billing; enterprise multi-seat architecture live.
 
-**Business model:** SaaS — firms subscribe; client households included. Essentials through Platinum self-serve; enterprise contracts for multi-seat firms.
+**Business model:** SaaS — firms subscribe; client households included. Essentials through Intelligence self-serve; enterprise contracts for multi-seat firms.
 
 **The ask:** We're raising **$3.5M Seed** to scale enterprise distribution and establish AKILI as the governance intelligence layer for modern family wealth.
 

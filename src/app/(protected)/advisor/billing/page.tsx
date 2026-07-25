@@ -28,7 +28,7 @@ export default async function AdvisorBillingPage({
     sp.checkout_plan === "ESSENTIALS" ||
     sp.checkout_plan === "PROFESSIONAL" ||
     sp.checkout_plan === "BUSINESS" ||
-    sp.checkout_plan === "PLATINUM"
+    sp.checkout_plan === "INTELLIGENCE"
       ? sp.checkout_plan
       : null;
   const checkoutCycle =

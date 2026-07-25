@@ -58,7 +58,7 @@ describe("pricing-tier-actions", () => {
 
   it("returns the next tier in the self-serve ladder", () => {
     expect(nextSelfServeTier("PROFESSIONAL")).toBe("BUSINESS");
-    expect(nextSelfServeTier("PLATINUM")).toBeNull();
+    expect(nextSelfServeTier("INTELLIGENCE")).toBeNull();
   });
 
   it("blocks downgrades when active clients exceed the target tier cap", () => {

@@ -859,7 +859,7 @@ export async function setUserTestAccountBySuperAdmin(input: unknown) {
   }
 }
 
-const moduleTierSchema = z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "PLATINUM"]);
+const moduleTierSchema = z.enum(["ESSENTIALS", "PROFESSIONAL", "BUSINESS", "INTELLIGENCE"]);
 
 const createEnterpriseSchema = z.object({
   name: z.string().min(1, "Name is required").max(200),

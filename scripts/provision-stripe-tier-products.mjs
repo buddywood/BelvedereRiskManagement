@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Create (or reuse) Stripe Products + recurring Prices for AKILI modular tiers:
- * Essentials, Professional, Business, Platinum — monthly and annual.
+ * Essentials, Professional, Business, Intelligence — monthly and annual.
  *
  * Annual prices apply a 2-month discount vs 12× monthly (pay for 10 months).
  *
@@ -35,8 +35,8 @@ const TIERS = [
     monthlyCents: 49900,
   },
   {
-    key: "PLATINUM",
-    productName: "Platinum",
+    key: "INTELLIGENCE",
+    productName: "Intelligence",
     description: "Continuous monitoring + reassessments + analytics",
     monthlyCents: 79900,
   },

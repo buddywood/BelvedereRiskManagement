@@ -29,7 +29,7 @@ const TIER_CLIENT_LIMITS = {
   ESSENTIALS: 25,
   PROFESSIONAL: 50,
   BUSINESS: 100,
-  PLATINUM: 150,
+  INTELLIGENCE: 150,
 } as const;
 
 function graceSubscriptionPayload(tier: "ESSENTIALS" | "PROFESSIONAL") {

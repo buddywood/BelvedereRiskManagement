@@ -10,7 +10,7 @@ describe("tierIncludesFeature", () => {
   it("allows Professional+ for methodology customization", () => {
     expect(tierIncludesFeature("ESSENTIALS", "METHODOLOGY_CUSTOMIZATION")).toBe(false);
     expect(tierIncludesFeature("PROFESSIONAL", "METHODOLOGY_CUSTOMIZATION")).toBe(true);
-    expect(tierIncludesFeature("PLATINUM", "METHODOLOGY_CUSTOMIZATION")).toBe(true);
+    expect(tierIncludesFeature("INTELLIGENCE", "METHODOLOGY_CUSTOMIZATION")).toBe(true);
   });
 
   it("allows Business+ for implementation engagements", () => {
@@ -18,9 +18,9 @@ describe("tierIncludesFeature", () => {
     expect(tierIncludesFeature("BUSINESS", "IMPLEMENTATION_ENGAGEMENTS")).toBe(true);
   });
 
-  it("allows Platinum+ for portfolio analytics", () => {
+  it("allows Intelligence+ for portfolio analytics", () => {
     expect(tierIncludesFeature("BUSINESS", "PORTFOLIO_ANALYTICS")).toBe(false);
-    expect(tierIncludesFeature("PLATINUM", "PORTFOLIO_ANALYTICS")).toBe(true);
+    expect(tierIncludesFeature("INTELLIGENCE", "PORTFOLIO_ANALYTICS")).toBe(true);
   });
 });
 

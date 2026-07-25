@@ -211,7 +211,7 @@ Built on **Next.js**, **PostgreSQL**, **Prisma**, and **AWS** — designed for f
 | **Essentials** | 25 | Solo practitioner / small practice |
 | **Professional** | 50 | Established firm + methodology customization |
 | **Business** | 100 | Growing firm + white-label branding |
-| **Platinum** | 250 | High-volume firm + advanced analytics |
+| **Intelligence** | 250 | High-volume firm + advanced analytics |
 | **Enterprise** | Negotiated (e.g. 100 firm clients, 25 seats) | Multi-seat firms — sales-assisted |
 
 - Monthly and annual billing (Stripe live in production)

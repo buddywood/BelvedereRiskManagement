@@ -14,10 +14,10 @@ export const ADVISOR_TIER_FEATURES = {
   ADVANCED_BRANDING: "PROFESSIONAL",
   CUSTOM_SUBDOMAIN: "PROFESSIONAL",
   IMPLEMENTATION_ENGAGEMENTS: "BUSINESS",
-  PORTFOLIO_ANALYTICS: "PLATINUM",
-  RISK_INTELLIGENCE: "PLATINUM",
-  CONTINUOUS_MONITORING: "PLATINUM",
-  REASSESSMENT_WORKFLOW: "PLATINUM",
+  PORTFOLIO_ANALYTICS: "INTELLIGENCE",
+  RISK_INTELLIGENCE: "INTELLIGENCE",
+  CONTINUOUS_MONITORING: "INTELLIGENCE",
+  REASSESSMENT_WORKFLOW: "INTELLIGENCE",
 } as const satisfies Record<string, SelfServeTier>;
 
 export type AdvisorTierFeatureKey = keyof typeof ADVISOR_TIER_FEATURES;
@@ -51,7 +51,7 @@ export const TIER_FEATURE_COPY: Record<
       "Portfolio-level governance dashboard with risk metrics and family-level visibility across your book.",
   },
   RISK_INTELLIGENCE: {
-    title: "Risk intelligence",
+    title: "Risk heat maps & drill-down",
     description:
       "Unified portfolio intelligence with heat maps, risk domain shortcuts, and family-level risk drill-down.",
   },

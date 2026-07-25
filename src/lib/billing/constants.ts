@@ -16,7 +16,7 @@ export const TIER_LIMITS: Record<SelfServeTier, number> = {
   ESSENTIALS: 25,
   PROFESSIONAL: 50,
   BUSINESS: 100,
-  PLATINUM: 150,
+  INTELLIGENCE: 150,
 };
 
 /** Effective client cap for a subscription tier (authoritative at read time). */
