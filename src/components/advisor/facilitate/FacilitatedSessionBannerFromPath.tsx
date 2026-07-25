@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 
 import { FacilitatedSessionBanner } from "./FacilitatedSessionBanner";
+import { useFacilitatedBranding } from "./FacilitatedSessionContext";
 
 const STEP_LABELS: Record<string, string> = {
   intake: "Completing intake",
@@ -25,10 +26,12 @@ export function FacilitatedSessionBannerFromPath({
   clientName: string | null;
 }) {
   const pathname = usePathname();
+  const branding = useFacilitatedBranding();
   return (
     <FacilitatedSessionBanner
       clientName={clientName}
       stepLabel={labelForPath(pathname)}
+      branding={branding}
     />
   );
 }
