@@ -250,6 +250,7 @@ export function mapResolvedBrandingToInvitationProfile(
   emailFooterText: string | null;
   supportEmail: string | null;
   supportPhone: string | null;
+  clientEmailFromAddress: string | null;
   brandingEnabled: boolean;
 } {
   return {
@@ -269,6 +270,7 @@ export function mapResolvedBrandingToInvitationProfile(
     emailFooterText: branding.emailFooterText ?? null,
     supportEmail: branding.supportEmail ?? null,
     supportPhone: branding.supportPhone ?? null,
+    clientEmailFromAddress: branding.clientEmailFromAddress ?? null,
     brandingEnabled: branding.brandingEnabled ?? true,
   };
 }

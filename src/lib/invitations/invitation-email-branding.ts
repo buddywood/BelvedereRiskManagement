@@ -13,6 +13,8 @@ export type InvitationAdvisorProfile = {
   emailFooterText: string | null;
   supportEmail: string | null;
   supportPhone: string | null;
+  /** Custom "from" email address for white-label client emails. */
+  clientEmailFromAddress: string | null;
   brandingEnabled: boolean;
 };
 
@@ -43,6 +45,7 @@ export function buildInvitationEmailBranding(
     emailFooterText: profile.emailFooterText,
     supportEmail: profile.supportEmail || contact.advisorEmail,
     supportPhone: profile.supportPhone || contact.advisorPhone,
+    clientEmailFromAddress: profile.clientEmailFromAddress,
     brandingEnabled: profile.brandingEnabled,
     customDomainEnabled: false,
     advisorName: contact.advisorName,

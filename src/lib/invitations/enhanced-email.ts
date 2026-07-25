@@ -5,7 +5,7 @@ import { AdvisorBrandingData } from '@/lib/validation/branding';
 import { escapeHtml } from '@/lib/escape-html';
 import { clientPortalBrandingDisplayTitle } from '@/lib/client/client-portal-branding';
 import type { SendEmailResult } from '@/lib/invitations/email';
-import { resolveFromEmailWithName } from "@/lib/email/resolve-from-email";
+import { resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
 import { formatEmailSubject } from "@/lib/email/format-email-subject";
 
 /**
@@ -494,7 +494,7 @@ export async function sendEnhancedAdvisorInvitationEmail(
       advisorName;
     
     const result = await resend.emails.send({
-      from: resolveFromEmailWithName(senderName),
+      from: resolveWhiteLabelFromEmail(data.branding, senderName),
       to: data.clientEmail,
       subject: formatEmailSubject(
         `Invitation from ${advisorName} - Personal Risk Profile`,

@@ -90,6 +90,7 @@ async function resolveInvitationBrandingForAdvisor(
       emailFooterText: null,
       supportEmail: null,
       supportPhone: null,
+      clientEmailFromAddress: null,
       brandingEnabled: false,
     };
   }
