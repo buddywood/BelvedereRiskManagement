@@ -229,6 +229,16 @@ export default async function ProtectedLayout({
   const isWorkspaceSlimHeaderRoute = (isAdvisorWorkspaceRoute && !advisorWorkspaceBranding) || isAdminWorkspaceRoute;
   const isAdvisorBrandedWorkspace = isAdvisorWorkspaceRoute && !!advisorWorkspaceBranding;
 
+  // Use different logo endpoints for client vs advisor workspace
+  const getLogoSrc = (branding: typeof activeBranding) => {
+    if (!branding) return null;
+    // Advisors use their own logo endpoint (client endpoint requires USER role)
+    if (isAdvisorBrandedWorkspace && branding.logoS3Key) {
+      return "/api/advisor/logo";
+    }
+    return clientPortalLogoImgSrc(branding);
+  };
+
   const advisorFeatureFlags = showAdvisor ? await getPlatformFeatureFlags() : null;
   const clientSignedInIdentity =
     role === "USER" ? (clientPortalSignedInLabel ?? session.user.email ?? "") : null;
@@ -287,7 +297,7 @@ export default async function ProtectedLayout({
                       {activeBranding ? (
                         <ClientPortalBrandedHeaderMark
                           brandTitle={brandTitle}
-                          logoSrc={clientPortalLogoImgSrc(activeBranding)}
+                          logoSrc={getLogoSrc(activeBranding)}
                           primaryHex={previewHex?.primary}
                         />
                       ) : (
