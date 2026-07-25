@@ -73,7 +73,7 @@ describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
     expect(redirect).not.toHaveBeenCalled();
   });
 
-  it("redirects invite stubs that already set a password back to create-account", async () => {
+  it("does not redirect users with temp password (new flow)", async () => {
     const invitedAt = new Date("2026-07-25T03:00:00.000Z");
     prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
       status: "INVITED",
@@ -81,8 +81,8 @@ describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
       invitedAt,
       createdAt: invitedAt,
       user: {
-        password: "hashed",
-        emailVerified: new Date("2026-07-25T03:00:20.000Z"),
+        password: "hashed-temp-password",
+        emailVerified: new Date("2026-07-25T03:00:00.000Z"),
         emailCiphertext: "cipher",
         createdAt: invitedAt,
       },
@@ -94,9 +94,8 @@ describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
       `/enterprise/join?token=${encodeURIComponent(token)}`
     );
 
-    expect(redirect).toHaveBeenCalledWith(
-      `/enterprise/join?token=${encodeURIComponent(token)}`
-    );
+    // With temp password flow, users can sign in directly - no redirect needed
+    expect(redirect).not.toHaveBeenCalled();
   });
 
   it("ignores non-invite sign-in callbacks", async () => {

@@ -905,7 +905,8 @@ export function EnhancedBrandingForm({
               </TabsContent>
               </div>
 
-              {!readOnly ? (
+              {/* Domain tab actions apply immediately via SubdomainManager; hide branding Save/Reset there. */}
+              {!readOnly && activeSection !== 'domain' ? (
               <div className="sticky bottom-0 z-10 space-y-3 border-t border-border/60 bg-card/95 px-4 py-4 backdrop-blur-sm sm:px-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-3">
                   <Button

@@ -447,6 +447,7 @@ export default async function ProtectedLayout({
                 branding={activeBranding}
                 tenantPathPrefix={tenantPathPrefix}
                 className="mt-0"
+                hideSignIn={isAdvisorBrandedWorkspace || role === "USER"}
               />
             </div>
           ) : null}

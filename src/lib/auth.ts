@@ -8,6 +8,7 @@ import { verifyAdminEmailOnFirstSignIn } from "@/lib/auth/verify-admin-on-sign-i
 import { recordUserLogin } from "@/lib/auth/record-login";
 import { getUserAuthSnapshot } from "@/lib/auth/user-auth-snapshot";
 import { writeAudit, AUDIT_ACTIONS } from "@/lib/audit/audit-log";
+import { autoAcceptPendingEnterpriseInvite } from "@/lib/enterprise/auto-accept-team-invite";
 
 /** Short, non-reversible identifier for an email so log lines stay
  *  observable without exposing PII. Mirrors `emailHash` in
@@ -92,6 +93,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         await verifyAdminEmailOnFirstSignIn(user.id);
+
+        // Auto-accept pending enterprise team invites for advisors.
+        // This handles the flow where an advisor was invited with a temp password,
+        // completed their password change, and is now signing in for real.
+        if (dbUser?.role === "ADVISOR") {
+          await autoAcceptPendingEnterpriseInvite(user.id);
+        }
       }
       return true;
     },

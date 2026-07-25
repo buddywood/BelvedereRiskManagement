@@ -65,13 +65,14 @@ export async function inviteEnterpriseTeamMemberAction(input: unknown) {
       enterpriseName: team.enterpriseName,
       inviterName,
       roleLabel: enterpriseTeamInviteRoleLabel(result.role),
-      inviteUrl: result.inviteUrl,
+      loginUrl: result.loginUrl,
+      tempPassword: result.tempPassword,
       clientEmailFromAddress: team.clientEmailFromAddress,
       branding: team.branding,
     });
 
     revalidatePath("/advisor/settings/team");
-    return { success: true as const, data: result };
+    return { success: true as const, data: { membershipId: result.membershipId, status: result.status, role: result.role } };
   } catch (error) {
     return { success: false as const, error: actionError(error, "Failed to send team invitation") };
   }
@@ -125,7 +126,8 @@ export async function resendEnterpriseTeamInviteAction(input: unknown) {
       enterpriseName: team.enterpriseName,
       inviterName,
       roleLabel: enterpriseTeamInviteRoleLabel(result.role),
-      inviteUrl: result.inviteUrl,
+      loginUrl: result.loginUrl,
+      tempPassword: result.tempPassword,
       clientEmailFromAddress: team.clientEmailFromAddress,
       branding: team.branding,
     });

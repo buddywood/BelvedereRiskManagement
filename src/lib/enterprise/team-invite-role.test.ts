@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const prismaSpies = vi.hoisted(() => ({
-  user: { create: vi.fn() },
+  user: { create: vi.fn(), update: vi.fn() },
   enterpriseMembership: {
     create: vi.fn(),
     findFirst: vi.fn(),
@@ -26,6 +26,22 @@ vi.mock("@/lib/auth/user-email-crypto", () => ({
 }));
 vi.mock("@/lib/public-app-url", () => ({
   resolvePublicAppUrl: vi.fn(async () => "https://preview.akilirisk.com"),
+}));
+vi.mock("@/lib/auth/password-update", () => ({
+  hashPasswordForStorage: vi.fn(async () => "$2a$12$mockhash"),
+}));
+vi.mock("@/lib/auth/temp-password", () => ({
+  generateTempPassword: vi.fn(() => "TempPass123"),
+}));
+vi.mock("@/lib/platform/password-policy-settings", () => ({
+  getPasswordPolicy: vi.fn(async () => ({
+    minLength: 8,
+    requireUppercase: true,
+    requireNumber: true,
+    requireSpecialCharacter: false,
+    revision: 1,
+    complianceNotice: null,
+  })),
 }));
 
 import {
@@ -63,9 +79,8 @@ describe("enterprise team invite roles", () => {
     });
 
     expect(result.role).toBe("ADMIN");
-    expect(result.inviteUrl).toContain(
-      "https://preview.akilirisk.com/enterprise/join?token="
-    );
+    expect(result.loginUrl).toBe("https://preview.akilirisk.com/signin");
+    expect(result.tempPassword).toBe("TempPass123");
     expect(prismaSpies.enterpriseMembership.create).toHaveBeenCalledWith({
       data: expect.objectContaining({
         enterpriseId: ENTERPRISE_ID,

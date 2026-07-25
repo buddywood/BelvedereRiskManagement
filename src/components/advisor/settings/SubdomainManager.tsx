@@ -197,20 +197,22 @@ export function SubdomainManager({
     value: subdomain,
     onChange: (e: ChangeEvent<HTMLInputElement>) => handleSubdomainInput(e.target.value),
     placeholder: 'yourname',
-    className: 'rounded-r-none font-mono',
+    className: useTenantPathPortals ? 'font-mono' : 'rounded-r-none font-mono',
     maxLength: SUBDOMAIN_SLUG_MAX_LENGTH,
     pattern: SUBDOMAIN_SLUG_INPUT_PATTERN,
-    title: SUBDOMAIN_SLUG_VALIDATION_MESSAGE,
     spellCheck: false,
     autoComplete: 'off',
     autoCapitalize: 'off',
     inputMode: 'url' as const,
   };
 
+  const previewSlug = subdomain.length >= 3 ? subdomain : 'yourname';
+  const livePortalPreview = portalHost(previewSlug);
+
   const getStatusBadge = (data: AdvisorSubdomainSettings) => {
     if (data.status === 'active' || (data.dnsVerified && data.sslProvisioned)) {
       return (
-        <Badge variant="default" className="bg-green-600">
+        <Badge variant="default" className="bg-green-600 shrink-0">
           <Check className="h-3 w-3 mr-1" />
           Active
         </Badge>
@@ -218,25 +220,88 @@ export function SubdomainManager({
     }
     if (data.dnsVerified && !data.sslProvisioned) {
       return (
-        <Badge variant="secondary">
+        <Badge variant="secondary" className="shrink-0">
           <Clock className="h-3 w-3 mr-1" />
           SSL Pending
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary">
+      <Badge variant="secondary" className="shrink-0">
         <Clock className="h-3 w-3 mr-1" />
         Pending
       </Badge>
     );
   };
 
+  const renderSlugField = (inputId: string) => (
+    <div className="space-y-2">
+      <Label htmlFor={inputId}>
+        {currentSubdomain ? 'New subdomain' : 'Choose your subdomain'}
+      </Label>
+      {useTenantPathPortals ? (
+        <Input id={inputId} {...subdomainInputProps} />
+      ) : (
+        <div className="flex min-w-0">
+          <Input id={inputId} {...subdomainInputProps} />
+          <div className="flex shrink-0 items-center rounded-r-md border border-l-0 bg-muted px-3 py-2 font-mono text-sm text-muted-foreground">
+            {domainSuffix}
+          </div>
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">{SUBDOMAIN_SLUG_VALIDATION_MESSAGE}</p>
+      <p className="text-sm text-muted-foreground">
+        Portal URL:{' '}
+        <span className="break-all font-mono text-foreground">{livePortalPreview}</span>
+      </p>
+    </div>
+  );
+
+  const renderAvailability = () =>
+    subdomain ? (
+      <div className="flex items-center gap-2">
+        {isChecking ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : checkResult?.available ? (
+          <Check className="h-4 w-4 text-green-600" />
+        ) : (
+          <X className="h-4 w-4 text-red-600" />
+        )}
+        <span className="text-sm">
+          {isChecking
+            ? 'Checking availability…'
+            : checkResult?.available
+              ? 'Available'
+              : checkResult?.error || 'Not available'}
+        </span>
+      </div>
+    ) : null;
+
+  const renderSuggestions = (heading: string) =>
+    checkResult?.suggestions?.length ? (
+      <div className="space-y-2">
+        <p className="text-sm text-muted-foreground">{heading}</p>
+        <div className="flex flex-wrap gap-2">
+          {checkResult.suggestions.map((suggestion) => (
+            <Button
+              key={suggestion}
+              variant="outline"
+              size="sm"
+              onClick={() => handleSubdomainInput(suggestion)}
+              className="text-xs"
+            >
+              {suggestion}
+            </Button>
+          ))}
+        </div>
+      </div>
+    ) : null;
+
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Globe className="h-5 w-5" />
+          <Globe className="h-5 w-5 shrink-0" />
           Custom Subdomain
           {!features.customSubdomainEnabled && (
             <TierFeatureLockIcon className="h-4 w-4" />
@@ -246,7 +311,7 @@ export function SubdomainManager({
           Claim your custom subdomain for a fully branded client experience
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 overflow-hidden">
         {readOnly ? (
           <Alert>
             <Lock className="h-4 w-4" aria-hidden />
@@ -264,19 +329,16 @@ export function SubdomainManager({
             </AlertDescription>
           </Alert>
         ) : currentSubdomain ? (
-          // Show current subdomain management
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{portalHost(currentSubdomain.subdomain)}</span>
-                  {getStatusBadge(currentSubdomain)}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Your branded client portal URL
-                </p>
+            <div className="space-y-3 rounded-lg border p-4">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <span className="min-w-0 break-all font-medium font-mono text-sm sm:text-base">
+                  {portalHost(currentSubdomain.subdomain)}
+                </span>
+                {getStatusBadge(currentSubdomain)}
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex flex-wrap gap-2">
                 {currentSubdomain.dnsVerified ? (
                   <BrandedLandingTestButton
                     currentSubdomain={currentSubdomain}
@@ -289,10 +351,18 @@ export function SubdomainManager({
                   size="sm"
                   onClick={() => copyToClipboard(portalHost(currentSubdomain.subdomain))}
                 >
-                  <Copy className="h-4 w-4 mr-1" />
+                  <Copy className="mr-1 h-4 w-4" />
                   Copy
                 </Button>
               </div>
+
+              {platformSubdomainsAutoActivate && currentSubdomain.dnsVerified ? (
+                <p className="text-sm text-muted-foreground">
+                  Your portal is active on our platform domain. Share this URL with clients.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">Your branded client portal URL</p>
+              )}
             </div>
 
             {!platformSubdomainsAutoActivate &&
@@ -309,115 +379,52 @@ export function SubdomainManager({
                 </Alert>
               )}
 
-            {platformSubdomainsAutoActivate && currentSubdomain.dnsVerified && (
-              <p className="text-sm text-muted-foreground">
-                Your portal is active on our platform domain. Share{' '}
-                <span className="font-mono">{portalHost(currentSubdomain.subdomain)}</span>{' '}
-                with clients.
-              </p>
-            )}
-
             <Separator />
 
             {!readOnly ? (
-            <>
-            {/* Change subdomain */}
-            <div className="space-y-4">
-              <h4 className="font-medium">Change Subdomain</h4>
-              <div className="space-y-3">
-                <div className="space-y-2">
-                  <Label htmlFor="new-subdomain">New Subdomain</Label>
-                  <div className="flex">
-                    <Input id="new-subdomain" {...subdomainInputProps} />
-                    <div className="px-3 py-2 bg-muted text-sm rounded-r-md border border-l-0 flex items-center">
-                      {useTenantPathPortals ? `/t…` : `.${productionDomain}`}
-                    </div>
+              <>
+                <div className="space-y-4">
+                  <h4 className="font-medium">Change subdomain</h4>
+                  <div className="space-y-3">
+                    {renderSlugField('new-subdomain')}
+                    {renderAvailability()}
+                    {renderSuggestions('Suggestions:')}
+                    <Button
+                      onClick={handleClaim}
+                      disabled={!subdomain || !checkResult?.available || isClaiming}
+                    >
+                      {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      Change subdomain
+                    </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">{SUBDOMAIN_SLUG_VALIDATION_MESSAGE}</p>
                 </div>
 
-                {subdomain && (
-                  <div className="flex items-center gap-2">
-                    {isChecking ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : checkResult?.available ? (
-                      <Check className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <X className="h-4 w-4 text-red-600" />
-                    )}
-                    <span className="text-sm">
-                      {isChecking ? 'Checking...' :
-                       checkResult?.available ? 'Available!' :
-                       checkResult?.error || 'Not available'}
-                    </span>
-                  </div>
-                )}
+                <Separator />
 
-                {checkResult?.suggestions && (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Suggestions:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {checkResult.suggestions.map((suggestion, index) => (
-                        <Button
-                          key={index}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSubdomainInput(suggestion)}
-                          className="text-xs"
-                        >
-                          {suggestion}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex gap-2">
+                <div className="space-y-2">
+                  <h4 className="font-medium text-destructive">Release subdomain</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Permanently release your custom subdomain. This action cannot be undone.
+                  </p>
                   <Button
-                    onClick={handleClaim}
-                    disabled={!subdomain || !checkResult?.available || isClaiming}
-                    className="flex-1"
+                    variant="destructive"
+                    onClick={handleRelease}
+                    disabled={isReleasing}
                   >
-                    {isClaiming && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                    Change Subdomain
+                    {isReleasing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Release subdomain
                   </Button>
                 </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Release subdomain */}
-            <div className="space-y-2">
-              <h4 className="font-medium text-destructive">Release Subdomain</h4>
-              <p className="text-sm text-muted-foreground">
-                Permanently release your custom subdomain. This action cannot be undone.
-              </p>
-              <Button
-                variant="destructive"
-                onClick={handleRelease}
-                disabled={isReleasing}
-              >
-                {isReleasing && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Release Subdomain
-              </Button>
-            </div>
-            </>
+              </>
             ) : null}
           </div>
         ) : !readOnly ? (
-          // Claim new subdomain
           <div className="space-y-4">
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                Claim your custom subdomain to provide clients with a fully branded portal experience.
-                Your subdomain will be:{' '}
-                <strong>
-                  {useTenantPathPortals
-                    ? `${buildTenantPortalHost("yourname", portalConfig)}`
-                    : `yourname${tenantSubdomainSuffix}${domainSuffix}`}
-                </strong>
+                Claim your custom subdomain to provide clients with a fully branded portal
+                experience.
                 {platformSubdomainsAutoActivate && (
                   <> It will be active immediately after you claim it.</>
                 )}
@@ -425,60 +432,15 @@ export function SubdomainManager({
             </Alert>
 
             <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="subdomain">Choose Your Subdomain</Label>
-                <div className="flex">
-                  <Input id="subdomain" {...subdomainInputProps} />
-                  <div className="px-3 py-2 bg-muted text-sm rounded-r-md border border-l-0 flex items-center">
-                    {useTenantPathPortals ? `/t…` : domainSuffix}
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">{SUBDOMAIN_SLUG_VALIDATION_MESSAGE}</p>
-              </div>
-
-              {subdomain && (
-                <div className="flex items-center gap-2">
-                  {isChecking ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : checkResult?.available ? (
-                    <Check className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <X className="h-4 w-4 text-red-600" />
-                  )}
-                  <span className="text-sm">
-                    {isChecking ? 'Checking availability...' :
-                     checkResult?.available ? 'Available!' :
-                     checkResult?.error || 'Not available'}
-                  </span>
-                </div>
-              )}
-
-              {checkResult?.suggestions && (
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Try these instead:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {checkResult.suggestions.map((suggestion, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSubdomainInput(suggestion)}
-                        className="text-xs"
-                      >
-                        {suggestion}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              {renderSlugField('subdomain')}
+              {renderAvailability()}
+              {renderSuggestions('Try these instead:')}
               <Button
                 onClick={handleClaim}
                 disabled={!subdomain || !checkResult?.available || isClaiming}
-                className="w-full"
               >
-                {isClaiming && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                Claim Subdomain
+                {isClaiming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Claim subdomain
               </Button>
             </div>
           </div>
