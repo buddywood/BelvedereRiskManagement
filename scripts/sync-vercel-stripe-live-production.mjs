@@ -48,12 +48,14 @@ function resolveTierFromProductName(rawName) {
   return null;
 }
 
-/** Pre–modular-tier-rename Stripe price env vars; app no longer reads these. */
+/** Pre-rename Stripe price env vars (Starter/Growth/Platinum); app no longer reads these. */
 const LEGACY_STRIPE_ENV_KEYS = [
   "STRIPE_PRICE_STARTER_MONTHLY",
   "STRIPE_PRICE_STARTER_ANNUAL",
   "STRIPE_PRICE_GROWTH_MONTHLY",
   "STRIPE_PRICE_GROWTH_ANNUAL",
+  "STRIPE_PRICE_PLATINUM_MONTHLY",
+  "STRIPE_PRICE_PLATINUM_ANNUAL",
 ];
 
 function usage() {
@@ -310,7 +312,7 @@ for (const [key, value] of Object.entries(toPush)) {
 
 if (LEGACY_STRIPE_ENV_KEYS.length) {
   console.log(
-    `Removing ${LEGACY_STRIPE_ENV_KEYS.length} legacy Starter/Growth key(s) from Production…`
+    `Removing ${LEGACY_STRIPE_ENV_KEYS.length} legacy tier price key(s) from Production…`
   );
   for (const key of LEGACY_STRIPE_ENV_KEYS) {
     removeProduction({ key, dryRun: opts.dryRun, cwd });

@@ -36,12 +36,14 @@ const DEFAULT_KEYS = [
   "ENABLE_BILLING_FEATURES",
 ];
 
-/** Pre–modular-tier-rename Stripe price env vars (Starter/Growth); app no longer reads these. */
+/** Pre-rename Stripe price env vars (Starter/Growth/Platinum); app no longer reads these. */
 const LEGACY_STRIPE_ENV_KEYS = [
   "STRIPE_PRICE_STARTER_MONTHLY",
   "STRIPE_PRICE_STARTER_ANNUAL",
   "STRIPE_PRICE_GROWTH_MONTHLY",
   "STRIPE_PRICE_GROWTH_ANNUAL",
+  "STRIPE_PRICE_PLATINUM_MONTHLY",
+  "STRIPE_PRICE_PLATINUM_ANNUAL",
 ];
 
 function usage() {
@@ -57,8 +59,8 @@ Options:
 Does not modify Production. STRIPE_WEBHOOK_SECRET is omitted by default (local stripe listen
 secret ≠ Dashboard signing secret for https://your-preview…/api/webhooks/stripe).
 
-After upserting, removes legacy STRIPE_PRICE_STARTER_* / STRIPE_PRICE_GROWTH_* from Preview
-(staging branch) and Development if still present.`);
+After upserting, removes legacy STRIPE_PRICE_STARTER_* / STRIPE_PRICE_GROWTH_* /
+STRIPE_PRICE_PLATINUM_* from Preview (staging branch) and Development if still present.`);
 }
 
 function parseArgs(argv) {
@@ -225,7 +227,7 @@ for (const key of keys) {
 
 if (LEGACY_STRIPE_ENV_KEYS.length) {
   console.log(
-    `Removing ${LEGACY_STRIPE_ENV_KEYS.length} legacy Starter/Growth key(s) from Preview (${opts.previewBranch}) + Development…`
+    `Removing ${LEGACY_STRIPE_ENV_KEYS.length} legacy tier price key(s) from Preview (${opts.previewBranch}) + Development…`
   );
   for (const key of LEGACY_STRIPE_ENV_KEYS) {
     removeEnv({
