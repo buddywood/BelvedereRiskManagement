@@ -82,7 +82,7 @@ export default async function AdminRiskSignalsPage() {
                     No indicators yet.
                   </p>
                 ) : (
-                  <ul className="grid grid-cols-3 gap-3 text-center text-sm">
+                  <ul className="grid grid-cols-1 gap-3 text-center text-sm min-[400px]:grid-cols-3">
                     <li className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
                       <p className="text-xs uppercase tracking-wide text-muted-foreground">
                         Critical

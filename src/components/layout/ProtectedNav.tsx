@@ -153,7 +153,7 @@ export function ProtectedNav({
 
   return (
     <nav
-      className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+      className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 scrollbar-thin sm:flex-wrap sm:overflow-visible sm:pb-0"
       aria-label="Main navigation"
     >
       {items.map(({ href, label }) => {
@@ -166,12 +166,14 @@ export function ProtectedNav({
           ? "Assessment unlocks after your advisor reviews and approves your intake."
           : "Complete your intake interview to unlock. Assessment and other areas become available after your advisor reviews and assigns your assessment.";
         return isDisabled ? (
-          <span
+          <button
             key={href}
+            type="button"
+            disabled
             aria-disabled="true"
             title={disabledTitle}
             className={cn(
-              "inline-flex h-9 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium",
+              "inline-flex h-10 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/40",
               !useBrandedNavStyle && "text-muted-foreground/60 opacity-70",
             )}
             style={
@@ -188,14 +190,14 @@ export function ProtectedNav({
             }
           >
             {label}
-          </span>
+          </button>
         ) : useBrandedNavStyle ? (
           <Link
             key={href}
             href={href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "inline-flex h-9 shrink-0 items-center rounded-md px-3 text-sm font-medium transition-colors",
+              "inline-flex h-10 shrink-0 items-center rounded-md px-3 text-sm font-medium transition-colors",
               "hover:bg-white/50",
             )}
             style={{
@@ -216,7 +218,7 @@ export function ProtectedNav({
             variant="ghost"
             size="sm"
             className={cn(
-              "h-9 shrink-0 px-3",
+              "h-10 shrink-0 px-3",
               isActive &&
                 "bg-secondary text-foreground font-semibold hover:bg-secondary hover:text-foreground",
             )}

@@ -145,7 +145,7 @@ async function CyberRiskContent() {
                     <td className="p-2 font-medium">
                       {client.name || 'Unnamed Client'}
                     </td>
-                    <td className="p-2 text-muted-foreground">
+                    <td className="max-w-[200px] truncate p-2 text-muted-foreground">
                       {client.email}
                     </td>
                     <td className="p-2">

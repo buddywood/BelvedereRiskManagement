@@ -36,12 +36,12 @@ export function ClientPortalBrandedHeaderMark({
       aria-label={`${brandTitle} home`}
       style={primaryHex ? { color: primaryHex } : undefined}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         {logoSrc ? (
           <img
             src={logoSrc}
             alt={logoOnly ? brandTitle : ""}
-            className="h-12 w-auto max-w-[240px] object-contain object-left"
+            className="h-10 w-auto max-w-[180px] object-contain object-left sm:h-12 sm:max-w-[240px]"
             onError={(e) => {
               e.currentTarget.style.display = "none";
             }}
@@ -49,7 +49,7 @@ export function ClientPortalBrandedHeaderMark({
         ) : null}
         {showTitle ? (
           <TitleTag
-            className="text-xl font-semibold tracking-tight sm:text-2xl"
+            className="text-lg font-semibold tracking-tight sm:text-xl md:text-2xl"
             style={primaryHex ? { color: primaryHex } : undefined}
           >
             {brandTitle}
