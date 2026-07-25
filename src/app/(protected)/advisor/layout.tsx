@@ -8,7 +8,7 @@ import { getAdvisorClientLimitStatus } from "@/lib/advisor/client-limit-status.s
 import { getAdvisorSubscriptionTier } from "@/lib/advisor/subscription-tier.server";
 import { canAccessEnterpriseTeamSettings } from "@/lib/enterprise/team-access";
 import { canAccessAdvisorBilling } from "@/lib/enterprise/billing-details";
-import { resolveAdvisorWorkspaceSidebarBranding } from "@/lib/advisor/advisor-workspace-label.server";
+import { resolveAdvisorWorkspaceTitleForUserId } from "@/lib/advisor/advisor-workspace-label.server";
 import { getAdvisorDashboardData } from "@/lib/actions/advisor-actions";
 import { isImplementationTrackingEnabledForUser } from "@/lib/engagement/feature-flags";
 import { isAdvisorBrandingNavEnabled } from "@/lib/advisor/branding-settings-page";
@@ -60,7 +60,7 @@ export default async function AdvisorLayout({
     }
   }
 
-  const [featureFlags, dash, enterpriseTeamEnabled, billingNavEnabled, brandingNavEnabled, implementationTrackingEnabled, memberVisibilityContext, workspaceSidebarBranding, subscriptionTier, clientLimitStatus] =
+  const [featureFlags, dash, enterpriseTeamEnabled, billingNavEnabled, brandingNavEnabled, implementationTrackingEnabled, memberVisibilityContext, workspaceTitle, subscriptionTier, clientLimitStatus] =
     await Promise.all([
     getPlatformFeatureFlags(),
     onBillingPage
@@ -94,12 +94,10 @@ export default async function AdvisorLayout({
           enterpriseId: null,
           role: null,
         }),
-    resolveAdvisorWorkspaceSidebarBranding(userId),
+    resolveAdvisorWorkspaceTitleForUserId(userId),
     userId ? getAdvisorSubscriptionTier(userId) : Promise.resolve("ESSENTIALS" as const),
     userId ? getAdvisorClientLimitStatus(userId) : Promise.resolve(null),
   ]);
-
-  const { title: workspaceTitle, logoUrl: workspaceLogoUrl } = workspaceSidebarBranding;
 
   const unreadNotificationCount = dash.success
     ? dash.data!.unreadNotificationCount
@@ -122,7 +120,6 @@ export default async function AdvisorLayout({
       clientLimitStatus={clientLimitStatus}
       unreadNotificationCount={unreadNotificationCount}
       workspaceTitle={workspaceTitle}
-      workspaceLogoUrl={workspaceLogoUrl}
       enterpriseTeamEnabled={enterpriseTeamEnabled}
       billingNavEnabled={billingNavEnabled}
       brandingNavEnabled={brandingNavEnabled}
