@@ -1,0 +1,65 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const prismaSpies = vi.hoisted(() => ({
+  enterpriseMembership: { findUnique: vi.fn() },
+}));
+
+const redirect = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/db", () => ({ prisma: prismaSpies }));
+vi.mock("@/lib/auth/user-email-crypto", () => ({
+  decryptUserEmail: vi.fn(() => "member@firm.com"),
+}));
+vi.mock("next/navigation", () => ({ redirect }));
+
+import { createEnterpriseTeamInviteToken } from "./team-invite-token";
+import { redirectIfEnterpriseTeamJoinNeedsRegistration } from "./team-invite";
+
+const MEMBERSHIP_ID = "membership-invited";
+
+describe("redirectIfEnterpriseTeamJoinNeedsRegistration", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.AUTH_SECRET = "test-auth-secret-for-enterprise-team-invites";
+  });
+
+  it("redirects passwordless invitees back to the join signup page", async () => {
+    prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
+      status: "INVITED",
+      invitedEmail: "member@firm.com",
+      user: { password: null, emailCiphertext: "cipher" },
+      enterprise: { name: "Northbridge Elite" },
+    });
+
+    const token = createEnterpriseTeamInviteToken(MEMBERSHIP_ID);
+    await redirectIfEnterpriseTeamJoinNeedsRegistration(
+      `/enterprise/join?token=${encodeURIComponent(token)}`
+    );
+
+    expect(redirect).toHaveBeenCalledWith(
+      `/enterprise/join?token=${encodeURIComponent(token)}`
+    );
+  });
+
+  it("does not redirect invitees who already have credentials", async () => {
+    prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
+      status: "INVITED",
+      invitedEmail: "member@firm.com",
+      user: { password: "hashed", emailCiphertext: "cipher" },
+      enterprise: { name: "Northbridge Elite" },
+    });
+
+    const token = createEnterpriseTeamInviteToken(MEMBERSHIP_ID);
+    await redirectIfEnterpriseTeamJoinNeedsRegistration(
+      `/enterprise/join?token=${encodeURIComponent(token)}`
+    );
+
+    expect(redirect).not.toHaveBeenCalled();
+  });
+
+  it("ignores non-invite sign-in callbacks", async () => {
+    await redirectIfEnterpriseTeamJoinNeedsRegistration("/advisor");
+    expect(redirect).not.toHaveBeenCalled();
+    expect(prismaSpies.enterpriseMembership.findUnique).not.toHaveBeenCalled();
+  });
+});
