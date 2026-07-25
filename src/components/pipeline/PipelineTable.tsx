@@ -89,8 +89,8 @@ export function PipelineTable({
               key={id}
               type="button"
               className={cn(
-                "text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground",
-                sorted && "text-foreground",
+                "min-h-[44px] rounded-md px-2 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                sorted && "bg-muted/50 text-foreground",
               )}
               onClick={column.getToggleSortingHandler()}
             >

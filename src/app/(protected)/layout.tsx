@@ -222,8 +222,10 @@ export default async function ProtectedLayout({
   const tenantPathPrefix = await getTenantPathPrefixFromHeaders();
   const onTenantHost = await isTenantBrandedRequest();
   const isWhiteLabeledPortal = onTenantHost || Boolean(activeBranding);
+  // Advisor workspace includes /advisor/* plus shared routes like /support and /docs
+  const advisorWorkspaceRoutes = ["/advisor", "/support", "/docs"];
   const isAdvisorWorkspaceRoute =
-    showAdvisor && !clientAdvisorBranding && pathname.startsWith("/advisor");
+    showAdvisor && !clientAdvisorBranding && advisorWorkspaceRoutes.some(r => pathname.startsWith(r));
   const isAdminWorkspaceRoute = showAdmin && pathname.startsWith("/admin");
   // Advisor workspace uses slim header unless branded
   const isWorkspaceSlimHeaderRoute = (isAdvisorWorkspaceRoute && !advisorWorkspaceBranding) || isAdminWorkspaceRoute;
@@ -381,7 +383,7 @@ export default async function ProtectedLayout({
                     </div>
                     <div className="min-w-0 xl:max-w-[560px] xl:text-right">
                       <p className="editorial-kicker mb-1">AKILI Risk Intelligence</p>
-                      <h1 className="text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]">
+                      <h1 className="text-xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-2xl md:text-3xl lg:text-[3.25rem]">
                         Client Workspace
                       </h1>
                     </div>

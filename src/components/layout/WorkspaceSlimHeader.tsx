@@ -25,12 +25,12 @@ export function WorkspaceSlimHeader({
       </Link>
       <div className="flex min-w-0 items-center gap-2 sm:gap-3">
         {userEmail ? (
-          <p className="hidden max-w-[min(100%,14rem)] truncate text-xs text-muted-foreground sm:block">
+          <p className="max-w-[8rem] truncate text-[10px] text-muted-foreground sm:max-w-[14rem] sm:text-xs">
             {userEmail}
           </p>
         ) : null}
         <ThemeToggle className="shrink-0" />
-        <SignOutButton variant="outline" size="sm" className="min-w-[96px]" />
+        <SignOutButton variant="outline" size="sm" className="min-w-[80px] sm:min-w-[96px]" />
       </div>
     </div>
   );

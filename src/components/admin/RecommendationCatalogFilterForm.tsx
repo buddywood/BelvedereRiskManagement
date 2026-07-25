@@ -45,7 +45,7 @@ export function RecommendationCatalogFilterForm({
     <form
       method="GET"
       action="/admin/recommendations"
-      className="mb-4 grid grid-cols-2 gap-2 text-sm md:grid-cols-6"
+      className="mb-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"
     >
       <input type="hidden" name="category" value={category} />
       <input type="hidden" name="tier" value={tier} />
