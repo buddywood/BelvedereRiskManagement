@@ -15,7 +15,7 @@ import {
   wrapPlatformEmailContent,
 } from "@/lib/email/platform-email-layout";
 import { withPlatformLogoAttachment } from "@/lib/email/platform-email-logo";
-import { resolveFromEmail } from "@/lib/email/resolve-from-email";
+import { resolveFromEmail, resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
 import { logResendResult } from "@/lib/email/log-resend-result";
 import { formatEmailSubject } from "@/lib/email/format-email-subject";
 
@@ -390,12 +390,18 @@ function sanitizeSubjectFragment(value: string): string {
   return stripped.length > 80 ? stripped.slice(0, 80) : stripped;
 }
 
+export type AdvisorNotificationBranding = {
+  clientEmailFromAddress?: string | null;
+  firmName?: string | null;
+};
+
 export async function sendAdvisorIntakeNotification(
   advisorEmail: string,
   advisorName: string,
   clientName: string,
   clientEmail: string | null,
-  reviewUrl: string
+  reviewUrl: string,
+  branding?: AdvisorNotificationBranding | null,
 ): Promise<void> {
   try {
     // Initialize Resend client at runtime (not module load time)
@@ -406,10 +412,17 @@ export async function sendAdvisorIntakeNotification(
       return;
     }
 
+    const fromAddress = branding?.clientEmailFromAddress
+      ? resolveWhiteLabelFromEmail(
+          { clientEmailFromAddress: branding.clientEmailFromAddress, brandName: branding.firmName },
+          branding.firmName ?? undefined,
+        )
+      : resolveFromEmail();
+
     const resend = new Resend(apiKey);
     const result = await resend.emails.send(
       withPlatformLogoAttachment({
-        from: resolveFromEmail(),
+        from: fromAddress,
         to: advisorEmail,
         subject: formatEmailSubject(
           `New Intake Ready for Review - ${sanitizeSubjectFragment(clientName)}`,

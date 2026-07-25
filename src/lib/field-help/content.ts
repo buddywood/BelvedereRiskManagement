@@ -414,8 +414,8 @@ export const FIELD_HELP = {
     description: "Custom disclaimer or contact block appended to client-facing emails.",
   },
   "branding-client-email-from": {
-    title: "Client email sender address",
-    description: "Custom 'from' address for white-label emails to your clients (e.g. no-reply@yourfirm.com). The domain must be verified in your email provider. When not set, emails are sent from the platform's default address.",
+    title: "Email sender address",
+    description: "Custom 'from' address for white-label emails (e.g. no-reply@yourfirm.com). This applies to client invitations, client notifications, team member invites, and advisor notifications. The domain must be verified in your email provider. When not set, emails are sent from the platform's default address.",
   },
   "branding-colors": {
     title: "Brand colors",

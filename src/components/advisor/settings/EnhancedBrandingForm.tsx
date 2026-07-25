@@ -869,7 +869,7 @@ export function EnhancedBrandingForm({
                   </div>
                   <div className="space-y-2">
                     <LabelWithHelp htmlFor="clientEmailFromAddress" helpKey="branding-client-email-from">
-                      Client email sender address
+                      Email sender address
                     </LabelWithHelp>
                     <Input
                       id="clientEmailFromAddress"
@@ -881,7 +881,7 @@ export function EnhancedBrandingForm({
                       className={readOnly ? 'bg-muted/40' : undefined}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Custom &quot;from&quot; address for white-label emails to your clients. Must be a verified domain in your email provider.
+                      Custom &quot;from&quot; address for white-label emails (client invitations, team invites, and advisor notifications). Must be a verified domain in your email provider.
                     </p>
                     {errors.clientEmailFromAddress && (
                       <p className="text-sm text-destructive">{errors.clientEmailFromAddress.message}</p>

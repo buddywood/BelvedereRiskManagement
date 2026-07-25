@@ -11,6 +11,8 @@ export type EnterpriseTeamContext = {
   enterpriseName: string;
   role: EnterpriseRole;
   advisorProfileId: string;
+  /** Custom "from" email address for white-label emails (e.g. no-reply@firmname.com). */
+  clientEmailFromAddress: string | null;
 };
 
 export async function resolveEnterpriseTeamContext(
@@ -22,7 +24,7 @@ export async function resolveEnterpriseTeamContext(
 
   const enterprise = await prisma.advisorEnterprise.findUnique({
     where: { id: ctx.enterpriseId },
-    select: { name: true },
+    select: { name: true, clientEmailFromAddress: true },
   });
   if (!enterprise) return null;
 
@@ -31,6 +33,7 @@ export async function resolveEnterpriseTeamContext(
     enterpriseName: enterprise.name,
     role: ctx.role,
     advisorProfileId: ctx.advisorProfileId,
+    clientEmailFromAddress: enterprise.clientEmailFromAddress,
   };
 }
 

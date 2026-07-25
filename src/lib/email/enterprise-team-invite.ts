@@ -2,7 +2,7 @@ import "server-only";
 
 import { Resend } from "resend";
 
-import { resolveFromEmail } from "@/lib/email/resolve-from-email";
+import { resolveFromEmail, resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
 import { formatEmailSubject } from "@/lib/email/format-email-subject";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -13,6 +13,8 @@ export type SendEnterpriseTeamInviteEmailInput = {
   inviterName: string;
   roleLabel: string;
   inviteUrl: string;
+  /** Optional custom "from" email address from enterprise branding. */
+  clientEmailFromAddress?: string | null;
 };
 
 export async function sendEnterpriseTeamInviteEmail(
@@ -34,9 +36,16 @@ export async function sendEnterpriseTeamInviteEmail(
     <p>This link expires in 7 days.</p>
   `;
 
+  const fromAddress = input.clientEmailFromAddress
+    ? resolveWhiteLabelFromEmail(
+        { clientEmailFromAddress: input.clientEmailFromAddress, brandName: input.enterpriseName },
+        input.enterpriseName,
+      )
+    : resolveFromEmail();
+
   try {
     await resend.emails.send({
-      from: resolveFromEmail(),
+      from: fromAddress,
       to: input.inviteeEmail,
       subject,
       html,

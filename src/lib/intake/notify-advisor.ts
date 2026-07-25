@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/db";
-import { sendAdvisorIntakeNotification } from "@/lib/email";
+import { sendAdvisorIntakeNotification, type AdvisorNotificationBranding } from "@/lib/email";
 import { createNotification } from "@/lib/data/advisor";
 import { triggerMilestoneNotification } from "@/lib/notifications/triggers";
 import { getPublicAppUrlStrict } from "@/lib/public-app-url";
@@ -57,7 +57,12 @@ export async function notifyAdvisorsOfIntake(
         select: {
           id: true,
           piiPolicy: true,
+          firmName: true,
+          clientEmailFromAddress: true,
           user: { select: { id: true, name: true, emailCiphertext: true } },
+          enterprise: {
+            select: { name: true, clientEmailFromAddress: true },
+          },
         },
       },
     },
@@ -107,12 +112,20 @@ export async function notifyAdvisorsOfIntake(
 
       if (baseUrl) {
         const reviewUrl = `${baseUrl}/advisor/review/${interviewId}`;
+        const branding: AdvisorNotificationBranding | null =
+          advisor.enterprise?.clientEmailFromAddress || advisor.clientEmailFromAddress
+            ? {
+                clientEmailFromAddress: advisor.enterprise?.clientEmailFromAddress ?? advisor.clientEmailFromAddress,
+                firmName: advisor.enterprise?.name ?? advisor.firmName,
+              }
+            : null;
         await sendAdvisorIntakeNotification(
           decryptUserEmail(advisorUser.emailCiphertext),
           advisorUser.name || "Advisor",
           clientDisplayName,
           includeClientEmailInNotification ? clientEmail : null,
-          reviewUrl
+          reviewUrl,
+          branding,
         );
       }
 
