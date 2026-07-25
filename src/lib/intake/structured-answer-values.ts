@@ -27,8 +27,13 @@ export function parseMultiSelectValue(
     const parsed = JSON.parse(value);
     if (Array.isArray(parsed)) {
       return parsed
-        .filter((entry): entry is string => typeof entry === "string")
-        .map((entry) => entry.trim())
+        .map((entry) => {
+          if (typeof entry === "string") return entry.trim();
+          if (typeof entry === "number" && Number.isFinite(entry)) {
+            return String(entry);
+          }
+          return "";
+        })
         .filter(Boolean);
     }
   } catch {

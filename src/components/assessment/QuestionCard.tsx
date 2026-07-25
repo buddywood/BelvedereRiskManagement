@@ -26,6 +26,7 @@ import {
   MAX_ASSESSMENT_QUESTION_UPLOADS,
   type AssessmentDocumentUploadAnswer,
 } from "@/lib/assessment/question-upload";
+import { coerceMultiChoiceAnswer } from "@/lib/assessment/multi-choice-answer";
 
 /**
  * QuestionCard Component
@@ -225,7 +226,7 @@ export function QuestionCard({
           <MultiChoiceCards
             options={question.options || []}
             {...base}
-            value={Array.isArray(currentAnswer) ? (currentAnswer as Array<string | number>) : []}
+            value={coerceMultiChoiceAnswer(currentAnswer)}
           />
         );
 
