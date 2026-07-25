@@ -11,6 +11,11 @@ const prismaMock = vi.hoisted(() => ({
   recommendationRule: {
     findMany: vi.fn(),
   },
+  advisorRecommendationRule: {
+    findMany: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+  },
   pillar: {
     findMany: vi.fn(),
   },
@@ -24,6 +29,7 @@ vi.mock("@/lib/db", () => ({
 import {
   backfillEnterpriseRecommendationRulePillarIds,
   cloneEnterpriseDefaultsIfNeeded,
+  syncEnterpriseRulesToAdvisor,
 } from "@/lib/methodology/clone-enterprise-defaults";
 
 describe("cloneEnterpriseDefaultsIfNeeded", () => {
@@ -106,6 +112,59 @@ describe("backfillEnterpriseRecommendationRulePillarIds", () => {
     expect(prismaMock.enterpriseRecommendationRule.update).toHaveBeenCalledWith({
       where: { id: "ent-rule-1" },
       data: { pillarId: "pillar-geo" },
+    });
+  });
+});
+
+describe("syncEnterpriseRulesToAdvisor", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    prismaMock.pillar.findMany.mockResolvedValue([]);
+    prismaMock.$transaction.mockImplementation(async (fn: (tx: typeof prismaMock) => unknown) =>
+      fn(prismaMock),
+    );
+  });
+
+  it("adopts an existing platform rule instead of inserting a duplicate", async () => {
+    prismaMock.enterpriseRecommendationRule.findMany.mockResolvedValue([
+      {
+        id: "enterprise-rule-1",
+        pillarId: "pillar-1",
+        sourceKind: AdvisorQuestionSource.PLATFORM,
+        platformSourceId: "platform-rule-1",
+        name: "Firm rule",
+        triggerConditions: { riskLevel: "high" },
+        servicePayload: { serviceId: "service-1" },
+        priority: 10,
+        isActive: true,
+        pillar: null,
+      },
+    ]);
+    prismaMock.advisorRecommendationRule.findMany.mockResolvedValue([
+      {
+        id: "advisor-rule-1",
+        enterpriseSourceId: null,
+        platformSourceId: "platform-rule-1",
+        isActive: true,
+      },
+    ]);
+    prismaMock.advisorRecommendationRule.update.mockResolvedValue({
+      id: "advisor-rule-1",
+    });
+
+    const result = await syncEnterpriseRulesToAdvisor("enterprise-1", "advisor-1");
+
+    expect(result).toEqual({ added: 1, deactivated: 0 });
+    expect(prismaMock.advisorRecommendationRule.create).not.toHaveBeenCalled();
+    expect(prismaMock.advisorRecommendationRule.update).toHaveBeenCalledWith({
+      where: { id: "advisor-rule-1" },
+      data: expect.objectContaining({
+        enterpriseSourceId: "enterprise-rule-1",
+        platformSourceId: "platform-rule-1",
+        name: "Firm rule",
+        priority: 10,
+        isActive: true,
+      }),
     });
   });
 });

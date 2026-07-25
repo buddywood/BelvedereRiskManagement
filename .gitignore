@@ -24,6 +24,7 @@
 /playwright-run.log
 /playwright-run.stderr
 .playwright-mcp
+.tmp-smoke-screenshots/
 
 # next.js
 /.next/

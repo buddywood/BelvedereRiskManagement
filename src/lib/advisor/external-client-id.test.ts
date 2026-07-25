@@ -10,10 +10,10 @@ const { prismaSpies } = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ prisma: prismaSpies }));
 
 import {
-  assertExternalClientIdAvailable,
   DUPLICATE_EXTERNAL_CLIENT_ID_MESSAGE,
   parseExternalClientId,
 } from "./external-client-id";
+import { assertExternalClientIdAvailable } from "./external-client-id.server";
 
 describe("parseExternalClientId", () => {
   it("trims and accepts CRM-style IDs", () => {

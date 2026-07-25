@@ -165,7 +165,7 @@ export async function createAdvisorInvitation(
     const externalClientId = input.externalClientId?.trim() || null;
     if (externalClientId) {
       const { assertExternalClientIdAvailable } = await import(
-        "@/lib/advisor/external-client-id"
+        "@/lib/advisor/external-client-id.server"
       );
       await assertExternalClientIdAvailable(advisorId, externalClientId, { db: tx });
     }

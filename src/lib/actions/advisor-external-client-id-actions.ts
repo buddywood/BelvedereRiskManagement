@@ -11,10 +11,10 @@ import { Prisma, type UserRole } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { requireAdvisorRole } from "@/lib/advisor/auth";
 import {
-  assertExternalClientIdAvailable,
   DUPLICATE_EXTERNAL_CLIENT_ID_MESSAGE,
   externalClientIdSchema,
 } from "@/lib/advisor/external-client-id";
+import { assertExternalClientIdAvailable } from "@/lib/advisor/external-client-id.server";
 import { writeAudit, AUDIT_ACTIONS } from "@/lib/audit/audit-log";
 import {
   findPortfolioAssignmentForClient,

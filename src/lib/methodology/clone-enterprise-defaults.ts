@@ -131,11 +131,29 @@ export async function syncEnterpriseRulesToAdvisor(
     });
 
     const advisorRules = await tx.advisorRecommendationRule.findMany({
-      where: { advisorProfileId, enterpriseSourceId: { not: null } },
-      select: { id: true, enterpriseSourceId: true, isActive: true },
+      where: {
+        advisorProfileId,
+        OR: [
+          { enterpriseSourceId: { not: null } },
+          { platformSourceId: { not: null } },
+        ],
+      },
+      select: {
+        id: true,
+        enterpriseSourceId: true,
+        platformSourceId: true,
+        isActive: true,
+      },
     });
     const advisorByEntSource = new Map(
-      advisorRules.map((r) => [r.enterpriseSourceId!, r]),
+      advisorRules
+        .filter((rule) => rule.enterpriseSourceId)
+        .map((rule) => [rule.enterpriseSourceId!, rule]),
+    );
+    const advisorByPlatformSource = new Map(
+      advisorRules
+        .filter((rule) => rule.platformSourceId)
+        .map((rule) => [rule.platformSourceId!, rule]),
     );
 
     let added = 0;
@@ -157,6 +175,26 @@ export async function syncEnterpriseRulesToAdvisor(
 
       // Only clone active enterprise rules
       if (!entRule.isActive) continue;
+
+      // Solo advisors may already have the platform rule that backs this
+      // enterprise rule. Adopt and update that row instead of violating the
+      // profile/platform-source unique index with a duplicate clone.
+      const existingPlatformRule = entRule.platformSourceId
+        ? advisorByPlatformSource.get(entRule.platformSourceId)
+        : undefined;
+      if (existingPlatformRule) {
+        await tx.advisorRecommendationRule.update({
+          where: { id: existingPlatformRule.id },
+          data: enterpriseRecommendationCloneData(entRule),
+        });
+        advisorByEntSource.set(entRule.id, {
+          ...existingPlatformRule,
+          enterpriseSourceId: entRule.id,
+          isActive: true,
+        });
+        added++;
+        continue;
+      }
 
       await createEnterpriseRecommendationClone(
         tx,
@@ -317,23 +355,38 @@ async function createEnterpriseRecommendationClone(
   },
   _slugToPillarId: Map<string, string>,
 ): Promise<void> {
+  await tx.advisorRecommendationRule.create({
+    data: {
+      advisorProfileId,
+      ...enterpriseRecommendationCloneData(entRule),
+    },
+  });
+}
+
+function enterpriseRecommendationCloneData(entRule: {
+  id: string;
+  pillarId: string | null;
+  sourceKind: AdvisorQuestionSource;
+  platformSourceId: string | null;
+  name: string;
+  triggerConditions: unknown;
+  servicePayload: unknown;
+  priority: number;
+}) {
   const sourceKind =
     entRule.sourceKind === AdvisorQuestionSource.PLATFORM
       ? AdvisorQuestionSource.PLATFORM
       : AdvisorQuestionSource.ENTERPRISE;
 
-  await tx.advisorRecommendationRule.create({
-    data: {
-      advisorProfileId,
-      pillarId: entRule.pillarId,
-      sourceKind,
-      platformSourceId: entRule.platformSourceId,
-      enterpriseSourceId: entRule.id,
-      name: entRule.name,
-      triggerConditions: entRule.triggerConditions as Prisma.InputJsonValue,
-      servicePayload: entRule.servicePayload as Prisma.InputJsonValue,
-      priority: entRule.priority,
-      isActive: true,
-    },
-  });
+  return {
+    pillarId: entRule.pillarId,
+    sourceKind,
+    platformSourceId: entRule.platformSourceId,
+    enterpriseSourceId: entRule.id,
+    name: entRule.name,
+    triggerConditions: entRule.triggerConditions as Prisma.InputJsonValue,
+    servicePayload: entRule.servicePayload as Prisma.InputJsonValue,
+    priority: entRule.priority,
+    isActive: true,
+  };
 }

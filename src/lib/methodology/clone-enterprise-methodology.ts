@@ -622,13 +622,29 @@ export async function syncEnterpriseMethodologyToAdvisorInTx(
         .filter((q) => q.enterpriseSourceId)
         .map((q) => [q.enterpriseSourceId!, q.id]),
     );
+    const advisorByPlatformSource = new Map(
+      advisorAssess
+        .filter((q) => q.platformSourceId)
+        .map((q) => [q.platformSourceId!, q.id]),
+    );
 
     for (const ent of entAssess) {
-      const existingId = advisorByEntSource.get(ent.id);
+      const existingId =
+        advisorByEntSource.get(ent.id) ??
+        (ent.platformSourceId
+          ? advisorByPlatformSource.get(ent.platformSourceId)
+          : undefined);
       if (existingId) {
         await tx.advisorPillarQuestion.update({
           where: { id: existingId },
-          data: buildAdvisorAssessmentCloneUpdate(ent),
+          data: {
+            ...buildAdvisorAssessmentCloneUpdate(ent),
+            enterpriseSource: { connect: { id: ent.id } },
+            sourceKind: advisorQuestionSourceFromEnterprise(ent.sourceKind),
+            platformSource: ent.platformSourceId
+              ? { connect: { id: ent.platformSourceId } }
+              : { disconnect: true },
+          },
         });
         changed = true;
         continue;
@@ -645,20 +661,36 @@ export async function syncEnterpriseMethodologyToAdvisorInTx(
     });
     const advisorIntake = await tx.advisorIntakeQuestion.findMany({
       where: { advisorProfileId },
-      select: { id: true, enterpriseSourceId: true },
+      select: { id: true, enterpriseSourceId: true, platformSourceId: true },
     });
     const advisorIntakeByEnt = new Map(
       advisorIntake
         .filter((q) => q.enterpriseSourceId)
         .map((q) => [q.enterpriseSourceId!, q.id]),
     );
+    const advisorIntakeByPlatform = new Map(
+      advisorIntake
+        .filter((q) => q.platformSourceId)
+        .map((q) => [q.platformSourceId!, q.id]),
+    );
 
     for (const ent of entIntake) {
-      const existingId = advisorIntakeByEnt.get(ent.id);
+      const existingId =
+        advisorIntakeByEnt.get(ent.id) ??
+        (ent.platformSourceId
+          ? advisorIntakeByPlatform.get(ent.platformSourceId)
+          : undefined);
       if (existingId) {
         await tx.advisorIntakeQuestion.update({
           where: { id: existingId },
-          data: buildAdvisorIntakeCloneUpdate(ent),
+          data: {
+            ...buildAdvisorIntakeCloneUpdate(ent),
+            enterpriseSource: { connect: { id: ent.id } },
+            sourceKind: advisorQuestionSourceFromEnterprise(ent.sourceKind),
+            platformSource: ent.platformSourceId
+              ? { connect: { id: ent.platformSourceId } }
+              : { disconnect: true },
+          },
         });
         changed = true;
         continue;
