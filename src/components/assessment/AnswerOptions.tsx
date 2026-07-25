@@ -275,10 +275,11 @@ export function LikertScale({
 
   return (
     <div className="space-y-3">
+      {/* Mobile: horizontal scroll with snap for 5 options */}
       <div
         role="radiogroup"
         aria-label="Likert scale"
-        className="grid grid-cols-5 gap-2 sm:gap-3"
+        className="flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-5 sm:gap-3 sm:overflow-visible sm:pb-0"
       >
         {points.map((point) => {
           const isSelected = value === point.value;
@@ -297,28 +298,28 @@ export function LikertScale({
                 }
               }}
               className={cn(
-                "cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40",
+                "min-w-[72px] shrink-0 snap-center cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:border-brand/40 sm:min-w-0 sm:shrink",
                 isSelected && "border-brand/50 bg-brand/10"
               )}
             >
               <CardContent className="flex flex-col items-center justify-center gap-2 p-3 sm:p-4">
                 <div
                   className={cn(
-                    "flex h-7 w-7 items-center justify-center rounded-full border-2",
+                    "flex size-8 items-center justify-center rounded-full border-2 sm:size-7",
                     isSelected
                       ? "border-primary bg-primary"
                       : "border-border"
                   )}
                 >
                   {isSelected ? (
-                    <Check className="h-4 w-4 text-primary-foreground" />
+                    <Check className="size-4 text-primary-foreground" />
                   ) : (
                     <span className="text-sm font-semibold text-muted-foreground">
                       {point.value}
                     </span>
                   )}
                 </div>
-                <span className="text-center text-[11px] font-medium leading-tight text-foreground sm:text-xs">
+                <span className="text-center text-xs font-medium leading-tight text-foreground">
                   {point.label}
                 </span>
               </CardContent>
@@ -327,7 +328,12 @@ export function LikertScale({
         })}
       </div>
       {/* End-anchor strip for at-a-glance orientation on narrow screens. */}
-      <div className="flex justify-between text-xs text-muted-foreground">
+      <div className="flex justify-between text-xs text-muted-foreground sm:hidden">
+        <span>{lowAnchor}</span>
+        <span className="text-muted-foreground/60">← swipe →</span>
+        <span>{highAnchor}</span>
+      </div>
+      <div className="hidden justify-between text-xs text-muted-foreground sm:flex">
         <span>{lowAnchor}</span>
         <span>{highAnchor}</span>
       </div>

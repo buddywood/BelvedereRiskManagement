@@ -8,7 +8,7 @@ import {
   type ColumnDef,
   type SortingState,
 } from "@tanstack/react-table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import Link from "next/link";
 import type { DashboardClient } from "@/lib/dashboard/types";
@@ -33,6 +33,19 @@ export function GovernanceTable({ clients }: GovernanceTableProps) {
     }
     return { assessments: true, lastAssessment: true };
   });
+
+  // Update column visibility on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const isNarrow = window.innerWidth < 1024;
+      setColumnVisibility({
+        assessments: !isNarrow,
+        lastAssessment: !isNarrow,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const getRiskSeverityOrder = (riskLevel: string | null) => {
     switch (riskLevel) {
@@ -176,8 +189,8 @@ export function GovernanceTable({ clients }: GovernanceTableProps) {
 
   return (
     <div className="w-full">
-      <div className="rounded-md border">
-        <table className="w-full">
+      <div className="overflow-x-auto rounded-md border">
+        <table className="w-full min-w-[500px]">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b">
