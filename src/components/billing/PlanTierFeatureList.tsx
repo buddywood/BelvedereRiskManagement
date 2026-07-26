@@ -11,21 +11,30 @@ type PlanTierFeatureListProps = {
   /** minimal: homepage preview; compact: billing + pricing cards; full: legacy long list. */
   variant?: "minimal" | "compact" | "full";
   className?: string;
+  /** Optional marketing-audience overrides (e.g. Organizations framing). */
+  cardIncludesOverride?: readonly string[];
+  cardExcludesOverride?: readonly string[];
 };
 
 export function PlanTierFeatureList({
   tier,
   variant = "compact",
   className,
+  cardIncludesOverride,
+  cardExcludesOverride,
 }: PlanTierFeatureListProps) {
   const catalog = TIER_CATALOG[tier];
+  const baseIncludes = cardIncludesOverride ?? catalog.cardIncludes;
   const includes =
     variant === "full"
       ? catalog.highlights
       : variant === "minimal"
-        ? catalog.cardIncludes.slice(0, 2)
-        : catalog.cardIncludes;
-  const excludes = variant === "compact" ? catalog.cardExcludes : undefined;
+        ? baseIncludes.slice(0, 2)
+        : baseIncludes;
+  const excludes =
+    variant === "compact"
+      ? (cardExcludesOverride ?? catalog.cardExcludes)
+      : undefined;
 
   return (
     <div className={cn("space-y-3", className)}>

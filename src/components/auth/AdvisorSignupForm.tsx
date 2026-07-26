@@ -22,6 +22,14 @@ import type { BillingCycle } from "@prisma/client";
 type AdvisorSignupFormProps = {
   checkoutPlan: SelfServeTier | null;
   checkoutCycle: BillingCycle | null;
+  /** Optional audience-flavored panel copy (organization / practitioner aliases). */
+  copy?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+    organizationLabel?: string;
+    organizationPlaceholder?: string;
+  };
 };
 
 type FieldErrors = Record<string, string[]>;
@@ -29,6 +37,7 @@ type FieldErrors = Record<string, string[]>;
 export function AdvisorSignupForm({
   checkoutPlan,
   checkoutCycle,
+  copy,
 }: AdvisorSignupFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -104,9 +113,12 @@ export function AdvisorSignupForm({
 
   return (
     <AuthPanel
-      eyebrow="Advisor's Workspace"
-      title="Create your advisor account"
-      description="Register to subscribe to AKILI modular plans. We'll email you a confirmation link before checkout."
+      eyebrow={copy?.eyebrow ?? "Advisor's Workspace"}
+      title={copy?.title ?? "Create your advisor account"}
+      description={
+        copy?.description ??
+        "Register to subscribe to AKILI modular plans. We'll email you a confirmation link before checkout."
+      }
       footer={
         <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
@@ -143,14 +155,14 @@ export function AdvisorSignupForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="firmName">Firm name</Label>
+          <Label htmlFor="firmName">{copy?.organizationLabel ?? "Firm name"}</Label>
           <Input
             id="firmName"
             value={firmName}
             onChange={(e) => setFirmName(e.target.value)}
             required
             autoComplete="organization"
-            placeholder="Northbridge Wealth"
+            placeholder={copy?.organizationPlaceholder ?? "Northbridge Wealth"}
           />
           {fieldError("firmName") ? (
             <p className="text-xs text-destructive">{fieldError("firmName")}</p>

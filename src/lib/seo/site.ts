@@ -19,6 +19,8 @@ export const PUBLIC_SITEMAP_ENTRIES: PublicSitemapEntry[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
   { path: "/families", changeFrequency: "monthly", priority: 0.85 },
   { path: "/firms", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/organizations", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/practitioners", changeFrequency: "monthly", priority: 0.85 },
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.85 },
   { path: "/docs", changeFrequency: "weekly", priority: 0.85 },
   { path: "/docs/quickstart-families", changeFrequency: "monthly", priority: 0.7 },
@@ -38,6 +40,8 @@ export const PUBLIC_SITEMAP_ENTRIES: PublicSitemapEntry[] = [
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   { path: "/signup/advisor", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/signup/organization", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/signup/practitioner", changeFrequency: "monthly", priority: 0.7 },
 ];
 
 /** Paths that should not be indexed or crawled beyond marketing pages. */

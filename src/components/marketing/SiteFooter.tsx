@@ -4,22 +4,24 @@ import { SiteBusinessContact } from "@/components/marketing/SiteBusinessContact"
 import { SiteSocialLinks } from "@/components/marketing/SiteSocialLinks";
 import { LEGAL_ENTITY_NAME } from "@/lib/legal/documents";
 import {
-  SITE_AUDIENCE_NAV,
+  filterAudienceNavForHost,
   SITE_PRIMARY_NAV_LINKS,
   SITE_SECONDARY_NAV_LINKS,
-  audienceNavHref,
 } from "@/lib/marketing/site-nav";
 import { cn } from "@/lib/utils";
 
 interface SiteFooterProps {
   className?: string;
+  /** When false, hide Akili-apex-only audience links (Organizations / Practitioners). */
+  isAkiliApex?: boolean;
 }
 
 const linkClassName =
   "font-medium text-foreground/90 underline-offset-4 transition-colors duration-200 hover:text-foreground hover:underline";
 
-export function SiteFooter({ className }: SiteFooterProps) {
+export function SiteFooter({ className, isAkiliApex = true }: SiteFooterProps) {
   const year = new Date().getFullYear();
+  const audienceItems = filterAudienceNavForHost(isAkiliApex);
 
   return (
     <footer
@@ -44,8 +46,8 @@ export function SiteFooter({ className }: SiteFooterProps) {
           <div className="space-y-2.5 sm:space-y-3">
             <p className="editorial-kicker">Platform</p>
             <nav className="flex flex-col gap-1.5 sm:gap-2" aria-label="Platform links">
-              {SITE_AUDIENCE_NAV.map(({ id, label }) => (
-                <Link key={id} href={audienceNavHref(id)} className={linkClassName}>
+              {audienceItems.map(({ id, label, href }) => (
+                <Link key={id} href={href} className={linkClassName}>
                   {label}
                 </Link>
               ))}

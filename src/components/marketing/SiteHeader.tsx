@@ -14,9 +14,15 @@ import { cn } from "@/lib/utils";
 type SiteHeaderProps = {
   className?: string;
   showLogo?: boolean;
+  /** When false, hide Akili-apex-only audience links (Organizations / Practitioners). */
+  isAkiliApex?: boolean;
 };
 
-export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
+export function SiteHeader({
+  className,
+  showLogo = true,
+  isAkiliApex = true,
+}: SiteHeaderProps) {
   const pathname = usePathname();
   const isHomepage = isMarketingHomePath(pathname);
   const heroAudience = useOptionalHeroAudience();
@@ -50,6 +56,7 @@ export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
         <SiteHeaderNav
           pathname={pathname}
           isHomepage={isHomepage}
+          isAkiliApex={isAkiliApex}
           activeAudience={heroAudience?.audience}
           onAudienceChange={heroAudience?.setAudience}
         />
@@ -61,6 +68,7 @@ export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
         <MobileNavMenu
           className="lg:hidden"
           isHomepage={isHomepage}
+          isAkiliApex={isAkiliApex}
           activeAudience={heroAudience?.audience satisfies HeroAudience | undefined}
           onAudienceChange={heroAudience?.setAudience}
         />

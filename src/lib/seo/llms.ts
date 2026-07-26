@@ -25,6 +25,18 @@ const CORE_PAGES: LlmsLink[] = [
     description: "Advisor workspace overview for wealth advisors, CPAs, estate attorneys, and family offices.",
   },
   {
+    title: "For Organizations",
+    path: "/organizations",
+    description:
+      "Self-serve risk assessment for small businesses, non-profits, and NGOs assessing themselves without a dedicated risk team.",
+  },
+  {
+    title: "For Practitioners",
+    path: "/practitioners",
+    description:
+      "Productized risk assessments for consultants, fractional executives, and client-serving professionals under their own brand.",
+  },
+  {
     title: "How It Works",
     path: "/how-it-works",
     description: "Assess, analyze, and act — the AKILI engagement workflow across modular risk domains.",
@@ -72,6 +84,17 @@ const PRODUCT_PAGES: LlmsLink[] = [
     title: "Advisor signup",
     path: "/signup/advisor",
     description: "Self-serve registration for professional firms subscribing to the advisor platform.",
+  },
+  {
+    title: "Organization signup",
+    path: "/signup/organization",
+    description: "Self-serve registration for organizations assessing their own risk posture.",
+  },
+  {
+    title: "Practitioner signup",
+    path: "/signup/practitioner",
+    description:
+      "Self-serve registration for consultants and fractional executives running client assessments.",
   },
   {
     title: "Client sign in",

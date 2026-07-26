@@ -7,8 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { HeroAudience } from "@/components/home/hero/hero-audience-content";
 import { MarketingNavAuthActions } from "@/components/marketing/MarketingNavAuthActions";
 import {
-  audienceNavHref,
-  SITE_AUDIENCE_NAV,
+  filterAudienceNavForHost,
   SITE_PRIMARY_NAV_LINKS,
   SITE_SECONDARY_NAV_LINKS,
 } from "@/lib/marketing/site-nav";
@@ -17,6 +16,7 @@ import { cn } from "@/lib/utils";
 type MobileNavMenuProps = {
   className?: string;
   isHomepage?: boolean;
+  isAkiliApex?: boolean;
   activeAudience?: HeroAudience;
   onAudienceChange?: (audience: HeroAudience) => void;
 };
@@ -24,6 +24,7 @@ type MobileNavMenuProps = {
 export function MobileNavMenu({
   className,
   isHomepage = false,
+  isAkiliApex = true,
   activeAudience,
   onAudienceChange,
 }: MobileNavMenuProps) {
@@ -59,6 +60,8 @@ export function MobileNavMenu({
   const transition = prefersReducedMotion
     ? { duration: 0 }
     : { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
+
+  const audienceItems = filterAudienceNavForHost(isAkiliApex);
 
   return (
     <div className={cn("relative", className)}>
@@ -128,17 +131,16 @@ export function MobileNavMenu({
                     Choose your path
                   </p>
                   <div className="flex flex-col gap-1">
-                    {SITE_AUDIENCE_NAV.map(({ id, label, testId }, index) => {
-                      const isActive = isHomepage && activeAudience === id;
-
-                      if (isHomepage && onAudienceChange) {
+                    {audienceItems.map((item, index) => {
+                      if (item.kind === "tab" && isHomepage && onAudienceChange) {
+                        const isActive = activeAudience === item.id;
                         return (
                           <button
-                            key={id}
+                            key={item.id}
                             type="button"
-                            data-testid={testId}
+                            data-testid={item.testId}
                             onClick={() => {
-                              onAudienceChange(id);
+                              onAudienceChange(item.id);
                               close();
                             }}
                             className={cn(
@@ -149,25 +151,32 @@ export function MobileNavMenu({
                                 : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
                             )}
                           >
-                            {label}
+                            {item.label}
                           </button>
                         );
                       }
 
+                      const isActive =
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`);
+
                       return (
                         <Link
-                          key={id}
+                          key={item.id}
                           ref={index === 0 ? firstLinkRef : undefined}
-                          href={audienceNavHref(id)}
-                          data-testid={testId}
+                          href={item.href}
+                          data-testid={item.testId}
                           onClick={close}
+                          aria-current={isActive ? "page" : undefined}
                           className={cn(
                             "flex min-h-12 items-center rounded-xl px-3 text-lg font-medium tracking-tight transition-colors duration-200",
                             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
-                            "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                            isActive
+                              ? "bg-muted/60 text-foreground"
+                              : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
                           )}
                         >
-                          {label}
+                          {item.label}
                         </Link>
                       );
                     })}
