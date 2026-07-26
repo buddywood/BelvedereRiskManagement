@@ -533,6 +533,15 @@ export type AdminEnterpriseListRow = {
   seatOverage: number;
   subscriptionStatus: string | null;
   moduleTier: string | null;
+  billingCycle: string | null;
+  whiteLabel: boolean;
+  brandName: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  accentColor: string | null;
+  logoUrl: string | null;
+  logoS3Key: string | null;
+  brandingEnabled: boolean;
   ownerName: string | null;
   ownerEmail: string | null;
 };
@@ -549,7 +558,16 @@ export async function getEnterprisesForAdmin(): Promise<AdminEnterpriseListRow[]
       clientLimit: true,
       paymentMethod: true,
       createdAt: true,
-      subscription: { select: { status: true, tier: true } },
+      brandName: true,
+      primaryColor: true,
+      secondaryColor: true,
+      accentColor: true,
+      logoUrl: true,
+      logoS3Key: true,
+      brandingEnabled: true,
+      subscription: {
+        select: { status: true, tier: true, billingCycle: true, whiteLabel: true },
+      },
       memberships: {
         where: { role: "OWNER", status: "ACTIVE" },
         take: 1,
@@ -581,6 +599,15 @@ export async function getEnterprisesForAdmin(): Promise<AdminEnterpriseListRow[]
       seatOverage: Math.max(0, enterprise._count.memberships - enterprise.seatLimit),
       subscriptionStatus: enterprise.subscription?.status ?? null,
       moduleTier: enterprise.subscription?.tier ?? null,
+      billingCycle: enterprise.subscription?.billingCycle ?? null,
+      whiteLabel: Boolean(enterprise.subscription?.whiteLabel),
+      brandName: enterprise.brandName,
+      primaryColor: enterprise.primaryColor,
+      secondaryColor: enterprise.secondaryColor,
+      accentColor: enterprise.accentColor,
+      logoUrl: enterprise.logoUrl,
+      logoS3Key: enterprise.logoS3Key,
+      brandingEnabled: enterprise.brandingEnabled,
       ownerName: owner?.name ?? null,
       ownerEmail: owner
         ? safeDecryptUserEmail(owner.emailCiphertext, { rowId: owner.id })

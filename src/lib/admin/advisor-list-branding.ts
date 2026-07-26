@@ -44,3 +44,14 @@ export function resolveAdminAdvisorListBranding(
 export function isAllowedAdminBrandingLogoS3Key(key: string): boolean {
   return /^advisors\/[^/]+\/logos\//.test(key.trim());
 }
+
+/** Enterprise logos may live under enterprises/{id}/… or a transferred advisors/…/logos/ key. */
+export function isAllowedAdminEnterpriseLogoS3Key(
+  key: string,
+  enterpriseId: string,
+): boolean {
+  const trimmed = key.trim();
+  if (!trimmed || !enterpriseId.trim()) return false;
+  if (trimmed.startsWith(`enterprises/${enterpriseId.trim()}/`)) return true;
+  return isAllowedAdminBrandingLogoS3Key(trimmed);
+}
