@@ -8,7 +8,7 @@ import type { HeroAudience } from "@/components/home/hero/hero-audience-content"
 import { MarketingNavAuthActions } from "@/components/marketing/MarketingNavAuthActions";
 import {
   filterAudienceNavForHost,
-  SITE_PRIMARY_NAV_LINKS,
+  filterPrimaryNavForHost,
   SITE_SECONDARY_NAV_LINKS,
 } from "@/lib/marketing/site-nav";
 import { cn } from "@/lib/utils";
@@ -62,6 +62,7 @@ export function MobileNavMenu({
     : { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const };
 
   const audienceItems = filterAudienceNavForHost(isAkiliApex);
+  const primaryItems = filterPrimaryNavForHost(isAkiliApex);
 
   return (
     <div className={cn("relative", className)}>
@@ -183,12 +184,15 @@ export function MobileNavMenu({
                   </div>
                 </div>
 
+                {/* Omit the whole section on tenant hosts — every platform
+                    link is Akili-apex-only, so the heading would stand alone. */}
+                {primaryItems.length > 0 ? (
                 <div className="space-y-3">
                   <p className="editorial-kicker !text-[0.625rem] !tracking-[0.14em]">
                     Platform
                   </p>
                   <div className="flex flex-col gap-1">
-                    {SITE_PRIMARY_NAV_LINKS.map(({ href, label }) => {
+                    {primaryItems.map(({ href, label }) => {
                       const isActive =
                         href === "/docs"
                           ? pathname === "/docs" || pathname.startsWith("/docs/")
@@ -213,6 +217,7 @@ export function MobileNavMenu({
                     })}
                   </div>
                 </div>
+                ) : null}
 
                 <div className="space-y-3">
                   <p className="editorial-kicker !text-[0.625rem] !tracking-[0.14em]">

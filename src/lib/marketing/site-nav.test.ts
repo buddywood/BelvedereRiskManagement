@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import {
   filterAudienceNavForHost,
+  filterPrimaryNavForHost,
   SITE_AUDIENCE_NAV,
+  SITE_PRIMARY_NAV_LINKS,
 } from "@/lib/marketing/site-nav";
 
 describe("filterAudienceNavForHost", () => {
@@ -40,5 +42,24 @@ describe("filterAudienceNavForHost", () => {
 
   it("does not expose a separate Families audience tab", () => {
     expect(SITE_AUDIENCE_NAV.some((item) => item.id === "families")).toBe(false);
+  });
+});
+
+describe("filterPrimaryNavForHost", () => {
+  it("surfaces the interactive demo ahead of pricing on Akili apex", () => {
+    const hrefs = filterPrimaryNavForHost(true).map((link) => link.href);
+    expect(hrefs).toEqual(["/demo", "/pricing", "/docs", "/about"]);
+  });
+
+  it("drops every platform link on tenant hosts", () => {
+    // Demo, Pricing, Docs, and About all describe AKILI itself — none of them
+    // belong in the chrome of an advisor's white-labeled portal.
+    expect(filterPrimaryNavForHost(false)).toEqual([]);
+  });
+
+  it("marks all primary links akiliApexOnly", () => {
+    expect(
+      SITE_PRIMARY_NAV_LINKS.every((link) => link.akiliApexOnly === true),
+    ).toBe(true);
   });
 });

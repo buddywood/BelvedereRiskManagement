@@ -1,7 +1,4 @@
-import {
-  contactIntentPath,
-  signInRolePath,
-} from "@/lib/marketing/friendly-urls";
+import { signInRolePath } from "@/lib/marketing/friendly-urls";
 
 /** Marketing homepage audiences — professional buyers + workflow overview. */
 export type HeroAudience = "advisors" | "overview";
@@ -50,9 +47,9 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
       title: "Sign in to your advisor workspace",
     },
     secondaryCta: {
-      label: "Request Demo",
-      href: contactIntentPath("demo"),
-      title: "Request a platform demonstration",
+      label: "Try the Demo",
+      href: "/demo",
+      title: "Try the interactive demo — no signup required",
     },
     helperLinks: [
       {
@@ -109,9 +106,9 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
       title: "Sign in to your advisor workspace",
     },
     secondaryCta: {
-      label: "Request Demo",
-      href: contactIntentPath("demo"),
-      title: "Request a platform demonstration",
+      label: "Try the Demo",
+      href: "/demo",
+      title: "Try the interactive demo — no signup required",
     },
     helperLinks: [
       {
@@ -124,9 +121,9 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
       {
         id: "demo",
         content: "link",
-        text: "Want a walkthrough?",
-        linkLabel: "Request a demo",
-        href: contactIntentPath("demo"),
+        text: "Want to see it first?",
+        linkLabel: "Try the demo",
+        href: "/demo",
       },
     ],
   },

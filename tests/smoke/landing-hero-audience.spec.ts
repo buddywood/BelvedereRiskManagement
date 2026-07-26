@@ -18,8 +18,8 @@ test.describe("landing hero audience paths", () => {
     await expect(primary).toHaveAttribute("href", "/signin/advisor");
 
     const secondary = page.getByTestId("landing-hero-secondary-cta");
-    await expect(secondary).toHaveText(/Request Demo/i);
-    await expect(secondary).toHaveAttribute("href", "/contact/demo");
+    await expect(secondary).toHaveText(/Try the Demo/i);
+    await expect(secondary).toHaveAttribute("href", "/demo");
 
     await expect(page.getByTestId("landing-hero-feature-cards")).toBeVisible();
     await expect(page.getByText("Multi-household pipeline")).toBeVisible();
@@ -58,8 +58,8 @@ test.describe("landing hero audience paths", () => {
     await expect(primary).toHaveAttribute("href", "/signin/advisor");
 
     const secondary = page.getByTestId("landing-hero-secondary-cta");
-    await expect(secondary).toHaveText(/Request Demo/i);
-    await expect(secondary).toHaveAttribute("href", "/contact/demo");
+    await expect(secondary).toHaveText(/Try the Demo/i);
+    await expect(secondary).toHaveAttribute("href", "/demo");
 
     await expect(page.getByTestId("landing-hero-workflow-link")).toHaveAttribute(
       "href",
@@ -112,17 +112,27 @@ test.describe("landing hero audience paths", () => {
     );
   });
 
-  test("request demo pre-fills the contact form", async ({ page }) => {
+  test("hero demo CTA opens the self-serve interactive demo", async ({ page }) => {
     await page.goto("/?audience=advisors");
     await expect(page.getByTestId("landing-hero-panel")).toHaveAttribute(
       "data-audience",
       "advisors"
     );
     const demoCta = page.getByTestId("landing-hero-secondary-cta");
-    await expect(demoCta).toHaveText(/Request Demo/i);
+    await expect(demoCta).toHaveText(/Try the Demo/i);
     await demoCta.click();
 
-    await expect(page).toHaveURL(/\/contact\/demo/);
+    await expect(page).toHaveURL(/\/demo$/);
+    await expect(page.getByTestId("interactive-demo")).toBeVisible();
+  });
+
+  test("the walkthrough form still pre-fills for sales enquiries", async ({
+    page,
+  }) => {
+    // The lead form moved off the hero CTA, but it remains the sales path —
+    // reached from the demo's own "Talk to our team" button and /contact.
+    await page.goto("/contact/demo");
+
     const subject = page.getByTestId("contact-form-subject");
     await expect(subject).toHaveValue(/demonstration request/i);
   });

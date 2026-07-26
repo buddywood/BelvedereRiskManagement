@@ -9,7 +9,7 @@ import {
 } from "@/components/marketing/MarketingNavLink";
 import {
   filterAudienceNavForHost,
-  SITE_PRIMARY_NAV_LINKS,
+  filterPrimaryNavForHost,
   type SiteAudienceNavTab,
 } from "@/lib/marketing/site-nav";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,7 @@ export function SiteHeaderNav({
   onAudienceChange,
 }: SiteHeaderNavProps) {
   const audienceItems = filterAudienceNavForHost(isAkiliApex);
+  const primaryItems = filterPrimaryNavForHost(isAkiliApex);
 
   return (
     <nav
@@ -103,13 +104,13 @@ export function SiteHeaderNav({
         })}
       </ul>
 
-      <span
-        className="mx-3 h-4 w-px shrink-0 bg-border/60"
-        aria-hidden
-      />
+      {/* Tenant hosts drop every platform link, so the divider goes too. */}
+      {primaryItems.length > 0 ? (
+        <span className="mx-3 h-4 w-px shrink-0 bg-border/60" aria-hidden />
+      ) : null}
 
       <ul className="flex items-center gap-0.5">
-        {SITE_PRIMARY_NAV_LINKS.map(({ href, label }) => {
+        {primaryItems.map(({ href, label }) => {
           const isActive =
             href === "/docs"
               ? pathname === "/docs" || pathname.startsWith("/docs/")

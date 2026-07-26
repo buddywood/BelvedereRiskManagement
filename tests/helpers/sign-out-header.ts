@@ -8,14 +8,14 @@ export async function expectMarketingHeaderAuthenticated(page: Page) {
   ).toBeVisible();
 }
 
-/** Marketing site header shows the public Sign In / Request Demo pair. */
+/** Marketing site header shows the public Sign In / Try the Demo pair. */
 export async function expectMarketingHeaderSignedOut(page: Page) {
   await expect(page.getByRole("link", { name: /go to dashboard/i })).toBeHidden();
   await expect(
     page.getByRole("link", { name: /^sign in$/i }).first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /request demo/i }).first(),
+    page.getByRole("link", { name: /try the demo/i }).first(),
   ).toBeVisible();
 }
 

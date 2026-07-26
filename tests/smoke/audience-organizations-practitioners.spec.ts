@@ -135,4 +135,21 @@ test.describe("organizations and practitioners audience pages", () => {
     await expect(page.getByTestId("site-nav-audience-organizations")).toHaveCount(0);
     await expect(page.getByTestId("site-nav-audience-practitioners")).toHaveCount(0);
   });
+
+  test("tenant pass-through page hides every AKILI platform link", async ({
+    page,
+  }) => {
+    // Demo / Pricing / Docs / About describe AKILI itself, so they must not
+    // appear in the chrome of a white-labeled advisor portal.
+    const response = await page.goto(
+      `${tenantHostOrigin(ADVISOR2_TENANT_SLUG)}/about`,
+    );
+    expect(response?.status()).toBe(200);
+
+    for (const label of ["Demo", "Pricing", "Docs"]) {
+      await expect(
+        page.getByRole("link", { name: label, exact: true }),
+      ).toHaveCount(0);
+    }
+  });
 });

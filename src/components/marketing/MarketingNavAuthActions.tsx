@@ -89,8 +89,8 @@ export function MarketingNavAuthActions({
             : "h-9 rounded-full px-4 text-[13px] font-semibold shadow-none",
         )}
       >
-        <Link href="/contact/demo">
-          Request Demo
+        <Link href="/demo">
+          Try the Demo
           <ArrowRight className="size-3.5" aria-hidden />
         </Link>
       </Button>

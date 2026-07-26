@@ -5,14 +5,18 @@ import { SiteSocialLinks } from "@/components/marketing/SiteSocialLinks";
 import { LEGAL_ENTITY_NAME } from "@/lib/legal/documents";
 import {
   filterAudienceNavForHost,
-  SITE_PRIMARY_NAV_LINKS,
+  filterPrimaryNavForHost,
   SITE_SECONDARY_NAV_LINKS,
 } from "@/lib/marketing/site-nav";
 import { cn } from "@/lib/utils";
 
 interface SiteFooterProps {
   className?: string;
-  /** When false, hide Akili-apex-only audience links (Organizations / Practitioners). */
+  /**
+   * When false (white-label tenant host), hide Akili-apex-only links — the
+   * Organizations / Practitioners audience pages and every platform link
+   * (Demo, Pricing, Docs, About).
+   */
   isAkiliApex?: boolean;
 }
 
@@ -22,6 +26,7 @@ const linkClassName =
 export function SiteFooter({ className, isAkiliApex = true }: SiteFooterProps) {
   const year = new Date().getFullYear();
   const audienceItems = filterAudienceNavForHost(isAkiliApex);
+  const primaryItems = filterPrimaryNavForHost(isAkiliApex);
 
   return (
     <footer
@@ -51,7 +56,7 @@ export function SiteFooter({ className, isAkiliApex = true }: SiteFooterProps) {
                   {label}
                 </Link>
               ))}
-              {SITE_PRIMARY_NAV_LINKS.map(({ href, label }) => (
+              {primaryItems.map(({ href, label }) => (
                 <Link key={href} href={href} className={linkClassName}>
                   {label}
                 </Link>

@@ -54,11 +54,25 @@ export const SITE_AUDIENCE_NAV: ReadonlyArray<SiteAudienceNavItem> = [
   },
 ] as const;
 
-/** Product / company links — secondary to audience destinations. */
-export const SITE_PRIMARY_NAV_LINKS = [
-  { href: "/pricing", label: "Pricing" },
-  { href: "/docs", label: "Docs" },
-  { href: "/about", label: "About" },
+export type SitePrimaryNavLink = {
+  href: string;
+  label: string;
+  /** Platform-level destination — hidden on white-label tenant hosts. */
+  akiliApexOnly?: boolean;
+};
+
+/**
+ * Product / company links — secondary to audience destinations.
+ *
+ * All four describe the AKILI platform itself (its demo, its subscription
+ * pricing, its docs, its company page), so none of them belong in the chrome
+ * of an advisor's white-labeled portal.
+ */
+export const SITE_PRIMARY_NAV_LINKS: ReadonlyArray<SitePrimaryNavLink> = [
+  { href: "/demo", label: "Demo", akiliApexOnly: true },
+  { href: "/pricing", label: "Pricing", akiliApexOnly: true },
+  { href: "/docs", label: "Docs", akiliApexOnly: true },
+  { href: "/about", label: "About", akiliApexOnly: true },
 ] as const;
 
 export const SITE_SECONDARY_NAV_LINKS = [
@@ -70,6 +84,14 @@ export function filterAudienceNavForHost(
   isAkiliApex: boolean,
   items: ReadonlyArray<SiteAudienceNavItem> = SITE_AUDIENCE_NAV,
 ): SiteAudienceNavItem[] {
+  return items.filter((item) => (isAkiliApex ? true : !item.akiliApexOnly));
+}
+
+/** Product / company links visible for the current host surface. */
+export function filterPrimaryNavForHost(
+  isAkiliApex: boolean,
+  items: ReadonlyArray<SitePrimaryNavLink> = SITE_PRIMARY_NAV_LINKS,
+): SitePrimaryNavLink[] {
   return items.filter((item) => (isAkiliApex ? true : !item.akiliApexOnly));
 }
 

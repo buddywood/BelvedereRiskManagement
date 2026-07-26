@@ -202,8 +202,14 @@ Re-run locally: `PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npm run test:e2
 | `tests/smoke/landing-hero-audience.spec.ts` | advisors tab shows advisor workspace copy and CTAs | Marketing | Implemented |
 | `tests/smoke/landing-hero-audience.spec.ts` | ?audience=advisors deep-links the advisor tab | Marketing | Implemented |
 | `tests/smoke/landing-hero-audience.spec.ts` | #advisors hash deep-links the advisor tab | Marketing | Implemented |
-| `tests/smoke/landing-hero-audience.spec.ts` | request demo pre-fills the contact form | Marketing | Implemented |
+| `tests/smoke/landing-hero-audience.spec.ts` | hero demo CTA opens the self-serve interactive demo | Marketing | Implemented |
+| `tests/smoke/landing-hero-audience.spec.ts` | the walkthrough form still pre-fills for sales enquiries | Marketing | Implemented |
 | `tests/smoke/landing-hero-audience.spec.ts` | remembers last audience in session storage | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | scores answers live and reaches the snapshot | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | live preview updates as answers are given | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | start over clears answers | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | audience variants render their own questions | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | /demo/families redirects to the canonical demo URL | Marketing | Implemented |
 | `tests/smoke/magic-link-test-helper.spec.ts` | POST /api/test/magic-link/issue returns rawToken + verifyUrl | Infra | Implemented |
 | `tests/smoke/magic-link-test-helper.spec.ts` | issue → verify URL → dashboard signs the client in | Infra | Implemented |
 | `tests/smoke/magic-link-test-helper.spec.ts` | malformed email returns 400, not 500 | Infra | Implemented |

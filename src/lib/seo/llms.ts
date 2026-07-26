@@ -38,6 +38,12 @@ const CORE_PAGES: LlmsLink[] = [
     description: "Assess, analyze, and act — the AKILI engagement workflow across modular risk domains.",
   },
   {
+    title: "Interactive Demo",
+    path: "/demo",
+    description:
+      "Self-serve six-question sample of the household assessment, scored live on the platform maturity rubric — no signup, nothing saved. Organization and practitioner variants at /demo/organizations and /demo/practitioners.",
+  },
+  {
     title: "Docs",
     path: "/docs",
     description:
@@ -67,9 +73,10 @@ const PRODUCT_PAGES: LlmsLink[] = [
     description: "Client entry point to begin a personal risk profile with an invite code.",
   },
   {
-    title: "Request a demo",
+    title: "Book a walkthrough",
     path: "/contact/demo",
-    description: "Schedule a walkthrough of the AKILI advisor workspace.",
+    description:
+      "Schedule a guided walkthrough of the AKILI advisor workspace with the team. For the self-serve interactive demo, see /demo.",
   },
   {
     title: "Enterprise contact",
