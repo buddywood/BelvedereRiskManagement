@@ -9,7 +9,7 @@ import { withCanonical } from "@/lib/seo/site";
 export const metadata: Metadata = withCanonical("/", {
   title: "AKILI Risk Intelligence",
   description:
-    "Governance intelligence platform for modern family wealth — structured assessments, prioritized risks, and actionable recommendations for professional firms and families.",
+    "Governance intelligence for family offices, RIAs, and broker-dealers — structured household risk profiles, prioritized risks, and actionable recommendations.",
 });
 
 type HomePageProps = {
@@ -23,5 +23,5 @@ export default async function Home({ searchParams }: HomePageProps) {
     redirect(heroAudiencePath(legacyAudience));
   }
 
-  return <HomePageContent initialAudience="families" />;
+  return <HomePageContent initialAudience="advisors" />;
 }

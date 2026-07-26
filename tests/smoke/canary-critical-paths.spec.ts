@@ -40,7 +40,7 @@ test.describe("public pages canary", () => {
       await expect(page.getByTestId("landing-hero-panel")).toBeVisible();
       const primary = page.getByTestId("landing-hero-primary-cta");
       await expect(primary).toBeVisible();
-      await expect(primary).toHaveText(/Start Assessment/i);
+      await expect(primary).toHaveText(/Advisor Sign In/i);
     }
   );
 

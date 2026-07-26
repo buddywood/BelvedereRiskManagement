@@ -11,7 +11,7 @@ import {
 } from "@/components/home/hero/hero-audience-persistence";
 import { heroAudiencePath } from "@/lib/marketing/friendly-urls";
 
-export function useHeroAudience(initialAudience: HeroAudience = "families") {
+export function useHeroAudience(initialAudience: HeroAudience = "advisors") {
   const [audience, setAudienceState] = useState<HeroAudience>(initialAudience);
   const [isHydrated, setIsHydrated] = useState(false);
 

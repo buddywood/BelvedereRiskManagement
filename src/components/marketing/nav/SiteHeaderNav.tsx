@@ -10,7 +10,6 @@ import {
 import {
   filterAudienceNavForHost,
   SITE_PRIMARY_NAV_LINKS,
-  type SiteAudienceNavItem,
   type SiteAudienceNavTab,
 } from "@/lib/marketing/site-nav";
 import { cn } from "@/lib/utils";
@@ -23,68 +22,11 @@ type SiteHeaderNavProps = {
   onAudienceChange?: (audience: HeroAudience) => void;
 };
 
-function AudienceTabItem({
-  id,
-  label,
-  testId,
-  href,
-  isHomepage,
-  isActive,
-  onAudienceChange,
-}: {
-  id: HeroAudience;
-  label: string;
-  testId: string;
-  href: string;
-  isHomepage: boolean;
-  isActive: boolean;
-  onAudienceChange?: (audience: HeroAudience) => void;
-}) {
-  if (isHomepage && onAudienceChange) {
-    return (
-      <button
-        type="button"
-        role="tab"
-        id={`site-nav-tab-${id}`}
-        aria-selected={isActive}
-        aria-controls="landing-hero-panel"
-        tabIndex={isActive ? 0 : -1}
-        data-testid={testId}
-        onClick={() => onAudienceChange(id)}
-        className={cn(
-          marketingNavLinkClassName,
-          isActive && navLinkActiveClassName,
-        )}
-      >
-        {label}
-        {isActive ? <NavActiveIndicator /> : null}
-      </button>
-    );
-  }
-
-  return (
-    <MarketingNavLink href={href} data-testid={testId}>
-      {label}
-    </MarketingNavLink>
-  );
-}
-
-/** Group consecutive same-kind items so tablists never contain link children. */
-function groupAudienceNavItems(
-  items: ReadonlyArray<SiteAudienceNavItem>,
-): Array<{ kind: "tab" | "link"; items: SiteAudienceNavItem[] }> {
-  const groups: Array<{ kind: "tab" | "link"; items: SiteAudienceNavItem[] }> = [];
-  for (const item of items) {
-    const last = groups[groups.length - 1];
-    if (last && last.kind === item.kind) {
-      last.items.push(item);
-    } else {
-      groups.push({ kind: item.kind, items: [item] });
-    }
-  }
-  return groups;
-}
-
+/**
+ * Flat SaaS header nav (B2B fintech pattern):
+ * Audience destinations → product links → never overlap via shrink/overflow.
+ * Desktop chrome starts at xl so logo + links + CTA have room.
+ */
 export function SiteHeaderNav({
   pathname,
   isHomepage,
@@ -93,76 +35,99 @@ export function SiteHeaderNav({
   onAudienceChange,
 }: SiteHeaderNavProps) {
   const audienceItems = filterAudienceNavForHost(isAkiliApex);
-  const groups = groupAudienceNavItems(audienceItems);
 
   return (
     <nav
-      className="hidden min-w-0 flex-1 items-center justify-center gap-0.5 lg:flex"
+      className="hidden min-w-0 items-center justify-center xl:flex"
       aria-label="Main navigation"
     >
-      <div className="flex items-center gap-0.5">
-        {groups.map((group, groupIndex) => {
-          if (group.kind === "tab") {
-            const tabs = group.items as SiteAudienceNavTab[];
+      <ul className="flex items-center gap-0.5">
+        {audienceItems.map((item) => {
+          if (item.kind === "tab") {
+            const tab = item as SiteAudienceNavTab;
+            const pathActive =
+              !isHomepage &&
+              (pathname === tab.href || pathname.startsWith(`${tab.href}/`));
+            const isActive =
+              (isHomepage && activeAudience === tab.id) || pathActive;
+
+            if (isHomepage && onAudienceChange) {
+              return (
+                <li key={tab.id}>
+                  <button
+                    type="button"
+                    id={`site-nav-tab-${tab.id}`}
+                    aria-pressed={isActive}
+                    data-testid={tab.testId}
+                    onClick={() => onAudienceChange(tab.id)}
+                    className={cn(
+                      marketingNavLinkClassName,
+                      isActive && navLinkActiveClassName,
+                    )}
+                  >
+                    {tab.label}
+                    {isActive ? <NavActiveIndicator /> : null}
+                  </button>
+                </li>
+              );
+            }
+
             return (
-              <div
-                key={`tab-group-${groupIndex}`}
-                className="flex items-center gap-0.5"
-                role={isHomepage ? "tablist" : undefined}
-                aria-label={isHomepage ? "Choose your path" : undefined}
-              >
-                {tabs.map(({ id, label, testId, href }) => (
-                  <AudienceTabItem
-                    key={id}
-                    id={id}
-                    label={label}
-                    testId={testId}
-                    href={href}
-                    isHomepage={isHomepage}
-                    isActive={isHomepage && activeAudience === id}
-                    onAudienceChange={onAudienceChange}
-                  />
-                ))}
-              </div>
+              <li key={tab.id}>
+                <MarketingNavLink
+                  href={tab.href}
+                  data-testid={tab.testId}
+                  isActive={isActive}
+                  aria-current={isActive ? "page" : undefined}
+                >
+                  {tab.label}
+                </MarketingNavLink>
+              </li>
             );
           }
 
-          return group.items.map(({ id, label, testId, href }) => {
-            const isActive =
-              pathname === href || pathname.startsWith(`${href}/`);
-            return (
+          const isActive =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
+          return (
+            <li key={item.id}>
               <MarketingNavLink
-                key={id}
-                href={href}
-                data-testid={testId}
+                href={item.href}
+                data-testid={item.testId}
                 isActive={isActive}
                 aria-current={isActive ? "page" : undefined}
               >
+                {item.label}
+              </MarketingNavLink>
+            </li>
+          );
+        })}
+      </ul>
+
+      <span
+        className="mx-3 h-4 w-px shrink-0 bg-border/60"
+        aria-hidden
+      />
+
+      <ul className="flex items-center gap-0.5">
+        {SITE_PRIMARY_NAV_LINKS.map(({ href, label }) => {
+          const isActive =
+            href === "/docs"
+              ? pathname === "/docs" || pathname.startsWith("/docs/")
+              : pathname === href;
+          return (
+            <li key={href}>
+              <MarketingNavLink
+                href={href}
+                isActive={isActive}
+                aria-current={isActive ? "page" : undefined}
+                className="text-muted-foreground/90"
+              >
                 {label}
               </MarketingNavLink>
-            );
-          });
+            </li>
+          );
         })}
-      </div>
-
-      <span className="mx-2 h-4 w-px bg-border/50" aria-hidden />
-
-      {SITE_PRIMARY_NAV_LINKS.map(({ href, label }) => {
-        const isActive =
-          href === "/docs"
-            ? pathname === "/docs" || pathname.startsWith("/docs/")
-            : pathname === href;
-        return (
-          <MarketingNavLink
-            key={href}
-            href={href}
-            isActive={isActive}
-            aria-current={isActive ? "page" : undefined}
-          >
-            {label}
-          </MarketingNavLink>
-        );
-      })}
+      </ul>
     </nav>
   );
 }

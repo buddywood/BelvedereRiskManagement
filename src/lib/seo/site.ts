@@ -6,7 +6,7 @@ import { getConfiguredSocialProfileUrls } from "@/lib/marketing/social-profiles"
 import { getPublicAppUrlFromEnv } from "@/lib/public-app-url";
 
 export const DEFAULT_PUBLIC_DESCRIPTION =
-  "Governance intelligence platform for modern family wealth — structured assessments, prioritized risks, and actionable recommendations for professional firms and families.";
+  "Governance intelligence for family offices, RIAs, and broker-dealers — structured household assessments, prioritized risks, and actionable recommendations.";
 
 export type PublicSitemapEntry = {
   path: string;
@@ -17,8 +17,7 @@ export type PublicSitemapEntry = {
 /** Public marketing routes included in sitemap.xml and allowed in robots.txt. */
 export const PUBLIC_SITEMAP_ENTRIES: PublicSitemapEntry[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
-  { path: "/families", changeFrequency: "monthly", priority: 0.85 },
-  { path: "/firms", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/advisors", changeFrequency: "monthly", priority: 0.85 },
   { path: "/organizations", changeFrequency: "monthly", priority: 0.85 },
   { path: "/practitioners", changeFrequency: "monthly", priority: 0.85 },
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.85 },

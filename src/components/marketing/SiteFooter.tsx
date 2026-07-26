@@ -36,8 +36,8 @@ export function SiteFooter({ className, isAkiliApex = true }: SiteFooterProps) {
             <AkiliLogoLockup className="h-auto w-full max-w-[140px] sm:max-w-[160px]" />
           </Link>
           <p className="max-w-sm text-pretty text-sm leading-6">
-            Governance intelligence for modern family wealth — a shared system of record for
-            professional firms and the households they serve.
+            Governance intelligence for family offices, RIAs, and broker-dealers — a shared
+            system of record for wealth practices and the households they serve.
           </p>
           <SiteSocialLinks />
         </div>

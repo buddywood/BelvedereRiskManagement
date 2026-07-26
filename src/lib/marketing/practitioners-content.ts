@@ -15,6 +15,24 @@ export const practitionersHero = {
   },
 } as const;
 
+export const practitionersHeroFeatures = [
+  {
+    title: "Productized methodology",
+    description:
+      "Stop rebuilding frameworks from a blank Google Doc — run every engagement on one defensible assessment.",
+  },
+  {
+    title: "Your brand, your portal",
+    description:
+      "White-label reports and a client portal under your subdomain so Akili stays invisible.",
+  },
+  {
+    title: "Per-client pipeline",
+    description:
+      "Invite, facilitate, score, and deliver across your book with comparable maturity scores.",
+  },
+] as const;
+
 export const practitionersProseSections: LegalSection[] = [
   {
     id: "the-problem",

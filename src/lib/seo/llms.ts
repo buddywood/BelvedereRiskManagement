@@ -12,17 +12,13 @@ const CORE_PAGES: LlmsLink[] = [
     title: "Home",
     path: "/",
     description:
-      "Platform overview for families and professional firms — governance intelligence, sample report output, and pricing preview.",
+      "Platform overview for family offices, RIAs, and broker-dealers — governance intelligence, sample report output, and pricing preview.",
   },
   {
-    title: "For Families",
-    path: "/families",
-    description: "Family-facing overview of the personal risk profile and structured governance assessment.",
-  },
-  {
-    title: "For Firms",
-    path: "/firms",
-    description: "Advisor workspace overview for wealth advisors, CPAs, estate attorneys, and family offices.",
+    title: "For Advisors",
+    path: "/advisors",
+    description:
+      "Governance intelligence workspace for family offices, RIAs, and broker-dealer teams serving affluent households.",
   },
   {
     title: "For Organizations",

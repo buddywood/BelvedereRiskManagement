@@ -58,24 +58,43 @@ test.describe("organizations and practitioners audience pages", () => {
     ).toBeVisible();
   });
 
-  test("apex header shows five audience entries in order", async ({ page }) => {
+  test("apex header shows four audience entries in order", async ({ page }) => {
     await page.goto("/");
 
     const nav = page.getByRole("navigation", { name: "Main navigation" });
-    await expect(nav.getByTestId("site-nav-audience-families")).toBeVisible();
     await expect(nav.getByTestId("site-nav-audience-advisors")).toBeVisible();
     await expect(nav.getByTestId("site-nav-audience-organizations")).toBeVisible();
     await expect(nav.getByTestId("site-nav-audience-practitioners")).toBeVisible();
     await expect(nav.getByTestId("site-nav-audience-overview")).toBeVisible();
+    await expect(nav.getByTestId("site-nav-audience-families")).toHaveCount(0);
 
     const labels = await nav.locator("[data-testid^='site-nav-audience-']").allTextContents();
     expect(labels.map((label) => label.trim())).toEqual([
-      "Families",
-      "Firms",
+      "Advisors",
       "Organizations",
       "Practitioners",
-      "How It Works",
+      "How it works",
     ]);
+  });
+
+  test("organizations and practitioners pages include platform output samples", async ({
+    page,
+  }) => {
+    await page.goto("/organizations");
+    await expect(page.getByTestId("landing-product-preview")).toHaveAttribute(
+      "data-audience",
+      "organizations",
+    );
+    await expect(page.getByText(/Riverbend Community Foundation/i).first()).toBeVisible();
+
+    await page.goto("/practitioners");
+    await expect(page.getByTestId("landing-product-preview")).toHaveAttribute(
+      "data-audience",
+      "practitioners",
+    );
+    await expect(
+      page.getByText(/Northline Architecture · Kessler Fractional Security/i).first(),
+    ).toBeVisible();
   });
 
   test("organizations and practitioners nav items navigate to dedicated pages", async ({
@@ -109,10 +128,10 @@ test.describe("organizations and practitioners audience pages", () => {
     const response = await page.goto(aboutUrl);
     expect(response?.status()).toBe(200);
 
-    await expect(page.getByTestId("site-nav-audience-families")).toBeVisible();
     await expect(page.getByTestId("site-nav-audience-advisors")).toBeVisible();
     await expect(page.getByTestId("site-nav-audience-overview")).toBeVisible();
 
+    await expect(page.getByTestId("site-nav-audience-families")).toHaveCount(0);
     await expect(page.getByTestId("site-nav-audience-organizations")).toHaveCount(0);
     await expect(page.getByTestId("site-nav-audience-practitioners")).toHaveCount(0);
   });

@@ -86,13 +86,23 @@ const nextConfig: NextConfig = {
       {
         source: "/",
         has: [{ type: "query", key: "audience", value: "families" }],
-        destination: "/families",
+        destination: "/advisors",
         permanent: true,
       },
       {
         source: "/",
         has: [{ type: "query", key: "audience", value: "advisors" }],
-        destination: "/firms",
+        destination: "/advisors",
+        permanent: true,
+      },
+      {
+        source: "/firms",
+        destination: "/advisors",
+        permanent: true,
+      },
+      {
+        source: "/families",
+        destination: "/advisors",
         permanent: true,
       },
       {

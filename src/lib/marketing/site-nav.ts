@@ -24,15 +24,8 @@ export type SiteAudienceNavItem = SiteAudienceNavTab | SiteAudienceNavLink;
 export const SITE_AUDIENCE_NAV: ReadonlyArray<SiteAudienceNavItem> = [
   {
     kind: "tab",
-    id: "families",
-    label: "Families",
-    testId: "site-nav-audience-families",
-    href: heroAudiencePath("families"),
-  },
-  {
-    kind: "tab",
     id: "advisors",
-    label: "Firms",
+    label: "Advisors",
     testId: "site-nav-audience-advisors",
     href: heroAudiencePath("advisors"),
   },
@@ -55,15 +48,16 @@ export const SITE_AUDIENCE_NAV: ReadonlyArray<SiteAudienceNavItem> = [
   {
     kind: "tab",
     id: "overview",
-    label: "How It Works",
+    label: "How it works",
     testId: "site-nav-audience-overview",
     href: heroAudiencePath("overview"),
   },
 ] as const;
 
+/** Product / company links — secondary to audience destinations. */
 export const SITE_PRIMARY_NAV_LINKS = [
-  { href: "/docs", label: "Docs" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/docs", label: "Docs" },
   { href: "/about", label: "About" },
 ] as const;
 

@@ -6,10 +6,9 @@ import {
 } from "@/lib/marketing/site-nav";
 
 describe("filterAudienceNavForHost", () => {
-  it("returns all five audience entries on Akili apex", () => {
+  it("returns four audience entries on Akili apex", () => {
     const items = filterAudienceNavForHost(true);
     expect(items.map((item) => item.id)).toEqual([
-      "families",
       "advisors",
       "organizations",
       "practitioners",
@@ -20,11 +19,7 @@ describe("filterAudienceNavForHost", () => {
 
   it("omits akiliApexOnly entries on tenant hosts", () => {
     const items = filterAudienceNavForHost(false);
-    expect(items.map((item) => item.id)).toEqual([
-      "families",
-      "advisors",
-      "overview",
-    ]);
+    expect(items.map((item) => item.id)).toEqual(["advisors", "overview"]);
     expect(items.every((item) => !item.akiliApexOnly)).toBe(true);
   });
 
@@ -41,5 +36,9 @@ describe("filterAudienceNavForHost", () => {
       href: "/practitioners",
       akiliApexOnly: true,
     });
+  });
+
+  it("does not expose a separate Families audience tab", () => {
+    expect(SITE_AUDIENCE_NAV.some((item) => item.id === "families")).toBe(false);
   });
 });

@@ -16,6 +16,24 @@ export const organizationsHero = {
   },
 } as const;
 
+export const organizationsHeroFeatures = [
+  {
+    title: "Board-ready in an afternoon",
+    description:
+      "A guided walkthrough that produces a risk register your board or funders can read without translation.",
+  },
+  {
+    title: "One coherent picture",
+    description:
+      "Comparable scores across operational, strategic, and governance risk — not a stack of disconnected checklists.",
+  },
+  {
+    title: "Prioritized next steps",
+    description:
+      "Recommendations ranked by impact and effort so the highest-return fix is clear.",
+  },
+] as const;
+
 export const organizationsProseSections: LegalSection[] = [
   {
     id: "the-problem",

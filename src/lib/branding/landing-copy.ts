@@ -1,4 +1,3 @@
-import { HERO_AUDIENCE_CONTENT } from "@/components/home/hero/hero-audience-content";
 import { HOME_HERO_FEATURES } from "@/components/home/hero/home-hero-features";
 import type {
   AdvisorBrandingData,
@@ -17,15 +16,17 @@ export type BrandedLandingCopy = {
   subtext: string;
 };
 
-const FAMILY_DEFAULTS = HERO_AUDIENCE_CONTENT.families;
+/** Client-facing defaults for white-label tenant portals (invitees, not public GTM). */
+const CLIENT_PORTAL_DEFAULTS: BrandedLandingCopy = {
+  kicker: "For families",
+  headline: "The governance intelligence platform for modern family wealth.",
+  subheadline:
+    "A discreet personal risk profile that surfaces structural gaps and gives your professional team clear, actionable guidance.",
+  subtext: "12–15 minute structured assessment",
+};
 
 export function defaultBrandedLandingCopy(): BrandedLandingCopy {
-  return {
-    kicker: FAMILY_DEFAULTS.kicker,
-    headline: FAMILY_DEFAULTS.headline,
-    subheadline: FAMILY_DEFAULTS.supporting,
-    subtext: FAMILY_DEFAULTS.subtext ?? "",
-  };
+  return { ...CLIENT_PORTAL_DEFAULTS };
 }
 
 /** Platform default feature cards (title + description), all shown. Icons are

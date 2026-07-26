@@ -5,7 +5,7 @@ import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 const navLinkBase =
-  "relative inline-flex h-10 items-center overflow-visible rounded-lg px-3 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground transition-[color,background-color] duration-200 ease-out hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
+  "relative inline-flex h-9 shrink-0 cursor-pointer items-center whitespace-nowrap rounded-md px-2.5 text-[13px] font-medium tracking-[-0.01em] text-muted-foreground transition-[color,background-color] duration-200 ease-out hover:bg-muted/40 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
 /** Real element — more reliable than ::after across Safari/Chrome. */
 export function NavActiveIndicator({ className }: { className?: string }) {
@@ -13,7 +13,7 @@ export function NavActiveIndicator({ className }: { className?: string }) {
     <span
       aria-hidden
       className={cn(
-        "pointer-events-none absolute inset-x-3 bottom-1.5 h-px rounded-full bg-foreground/75",
+        "pointer-events-none absolute inset-x-2 bottom-1 h-px rounded-full bg-foreground/75",
         className,
       )}
     />

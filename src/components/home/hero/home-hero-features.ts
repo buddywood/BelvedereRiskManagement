@@ -1,10 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
+  Building2,
   ListChecks,
   MessagesSquare,
   ScanSearch,
-  UserRound,
   Users,
 } from "lucide-react";
 
@@ -14,7 +14,10 @@ export type HomeHeroFeature = {
   icon: LucideIcon;
 };
 
-/** Bottom-left feature cards — Families homepage tab only. */
+/**
+ * Client-facing feature cards — used on white-label tenant portals where
+ * households land after an advisor invite (not a public marketing audience).
+ */
 export const HOME_HERO_FEATURES: ReadonlyArray<HomeHeroFeature> = [
   {
     title: "Advisor Led",
@@ -35,24 +38,24 @@ export const HOME_HERO_FEATURES: ReadonlyArray<HomeHeroFeature> = [
   },
 ];
 
-/** Bottom-left feature cards — Advisors homepage tab only. */
+/** Marketing feature cards — family offices, RIAs, and broker-dealers. */
 export const ADVISOR_HERO_FEATURES: ReadonlyArray<HomeHeroFeature> = [
   {
-    title: "Client Governance Profiles",
+    title: "Multi-household pipeline",
     description:
-      "Centralize household governance context, intake, and assessment progress.",
+      "Invite principals and clients, track intake, and manage engagements across the book or family enterprise.",
     icon: Users,
   },
   {
-    title: "Risk Scoring & Recommendations",
+    title: "Practice-ready scoring",
     description:
-      "Translate assessment outcomes into structured, advisor-ready guidance.",
+      "Turn structured profiles into maturity scores and prioritized remediations for client and board reviews.",
     icon: BarChart3,
   },
   {
-    title: "Family Continuity Planning",
+    title: "Built for offices & RIAs",
     description:
-      "Support succession frameworks and long-horizon continuity decisions.",
-    icon: UserRound,
+      "One methodology for single-/multi-family offices and broker-dealer / RIA teams delivering private-client risk reviews.",
+    icon: Building2,
   },
 ];

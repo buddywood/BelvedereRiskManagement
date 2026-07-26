@@ -4,14 +4,17 @@ import type { SignInRole } from "@/lib/auth/sign-in-roles";
 
 /** Human-readable marketing paths for homepage audience tabs. */
 export const HERO_AUDIENCE_PATHS: Record<HeroAudience, string> = {
-  families: "/families",
-  advisors: "/firms",
+  advisors: "/advisors",
   overview: "/how-it-works",
 };
 
 export const HERO_AUDIENCE_LANDING_PATHS = Object.values(
   HERO_AUDIENCE_PATHS,
 ) as ReadonlyArray<(typeof HERO_AUDIENCE_PATHS)[HeroAudience]>;
+
+/** Legacy consumer path — redirected to Advisors; still treated as a marketing home path. */
+export const LEGACY_FAMILIES_PATH = "/families";
+export const LEGACY_FIRMS_PATH = "/firms";
 
 export const CONTACT_INTENT_PATHS: Record<ContactFormIntent, string> = {
   demo: "/contact/demo",
@@ -42,6 +45,12 @@ export function parseHeroAudiencePath(
     pathname.length > 1 && pathname.endsWith("/")
       ? pathname.slice(0, -1)
       : pathname;
+  if (
+    normalized === LEGACY_FAMILIES_PATH ||
+    normalized === LEGACY_FIRMS_PATH
+  ) {
+    return "advisors";
+  }
   return HERO_PATH_TO_AUDIENCE[normalized] ?? null;
 }
 
