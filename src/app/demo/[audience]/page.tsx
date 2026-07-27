@@ -14,7 +14,7 @@ const METADATA_DESCRIPTIONS: Record<(typeof NESTED_AUDIENCES)[number], string> =
   organizations:
     "Answer six questions a board would recognize and watch your organization's risk profile score in real time — no signup, nothing saved.",
   practitioners:
-    "Score your own practice on the methodology you would deliver to clients — six questions, real-time scoring, no signup.",
+    "Walk a client engagement as a contract CISO — six questions scored live on the client risk posture, no signup, nothing saved.",
 };
 
 export function generateStaticParams() {

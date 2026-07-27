@@ -321,103 +321,108 @@ const PRACTITIONER_QUESTIONS: ReadonlyArray<DemoQuestion> = [
   {
     id: "practitioners-controls",
     domainSlug: "governance-controls",
-    prompt: "How consistent is your assessment methodology across clients?",
-    helper: "Whether two engagements produce comparable, defensible output.",
+    prompt: "How does this client's leadership oversee information security?",
+    helper:
+      "As contract CISO: named owner, exec reporting cadence, and documented decisions.",
     levelDescriptions: [
-      "Each engagement is built from scratch",
-      "A rough template exists, adapted heavily per client",
-      "A documented methodology applied consistently",
-      "Documented, versioned, and reviewed as engagements reveal gaps",
+      "No named owner — security sits with whoever is free",
+      "An informal owner, but no regular reporting",
+      "A named owner with documented reporting to leadership",
+      "Named owner, board- or exec-level review, and decision log",
     ],
     gap: {
-      title: "Methodology is not repeatable",
+      title: "No named security owner at the client",
       detail:
-        "Bespoke-per-client work is hard to price, hard to delegate, and produces deliverables you cannot benchmark across your book.",
+        "Information security has no accountable owner or reporting cadence — leadership cannot show oversight when a customer, insurer, or auditor asks.",
     },
   },
   {
     id: "practitioners-cyber",
     domainSlug: "cyber-access",
-    prompt: "Could you pass an institutional client's security questionnaire today?",
-    helper: "MFA coverage, vendor access review, and incident playbooks.",
+    prompt: "How is privileged access controlled at this client?",
+    helper: "Admin accounts, MFA coverage, and periodic access reviews.",
     levelDescriptions: [
-      "No — we have not looked at one",
-      "Partially; several sections would need work",
-      "Yes, with documented controls behind each answer",
-      "Yes, with controls tested and evidence maintained continuously",
+      "Shared admin credentials, no MFA",
+      "MFA on some accounts; access reviews are ad hoc",
+      "MFA on privileged accounts with scheduled access reviews",
+      "MFA, least privilege, and continuous review with retained evidence",
     ],
     gap: {
-      title: "Institutional client questionnaire gaps",
+      title: "Privileged access without MFA or review",
       detail:
-        "A controls attestation requested by a new institutional client would fail on MFA coverage, vendor access reviews, and incident playbooks.",
+        "Admin and privileged accounts lack consistent MFA and access review — the first finding a customer security questionnaire or incident postmortem would surface.",
     },
   },
   {
     id: "practitioners-insurance",
     domainSlug: "insurance-adequacy",
-    prompt: "How current is the risk profile behind your professional coverage?",
-    helper: "E&O, cyber, and the questionnaire filed at last renewal.",
+    prompt:
+      "How current is the cyber insurance profile behind this client's coverage?",
+    helper: "Controls attested at last renewal versus what you observe today.",
     levelDescriptions: [
-      "We are not sure what was filed",
+      "Nobody knows what was attested at renewal",
       "Last renewal's answers, not revisited since",
-      "Reviewed against current services and client mix",
-      "Reviewed annually with the broker briefed on changes",
+      "Reviewed against controls you can evidence today",
+      "Reviewed with the broker and updated when controls change",
     ],
     gap: {
-      title: "Cyber policy underwritten on a stale profile",
+      title: "Cyber policy underwritten on a stale client profile",
       detail:
-        "The renewal questionnaire still reflects last year's controls — a premium and coverage risk at next renewal, and a potential claims problem.",
+        "The renewal questionnaire still reflects last year's controls — a premium and coverage risk at next renewal, and a potential claims problem after an incident.",
     },
   },
   {
     id: "practitioners-trust",
     domainSlug: "client-trust",
-    prompt: "How is client confidentiality handled across your engagements?",
-    helper: "Document handling, subcontractors, and deliverable storage.",
+    prompt:
+      "How prepared is this client for a customer-facing security incident?",
+    helper: "Notification plan, customer comms, and reputation response.",
     levelDescriptions: [
-      "Ad hoc — files live wherever is convenient",
-      "General practices, not written or applied consistently",
-      "Written handling standards applied to every engagement",
-      "Written, applied, and audited, including subcontractors",
+      "No plan — we would improvise under pressure",
+      "A draft plan that has never been walked through",
+      "A written plan with named owners and customer notification steps",
+      "Written, rehearsed, and aligned with legal and customer contracts",
     ],
     gap: {
-      title: "Confidentiality practice is inconsistent",
+      title: "No customer-incident response plan",
       detail:
-        "Client material handled ad hoc across tools and subcontractors is the exposure most likely to end a referral relationship.",
+        "A breach affecting customer data would have no rehearsed notification path — the exposure most likely to end a client relationship or trigger contractual notice failures.",
     },
   },
   {
     id: "practitioners-financial",
     domainSlug: "financial-resilience",
-    prompt: "How concentrated is your revenue across clients?",
-    helper: "Consider the share from your largest client this year.",
+    prompt:
+      "How would a prolonged security incident affect this client's operations?",
+    helper: "Delivery continuity, cash runway, and recovery funding.",
     levelDescriptions: [
-      "One client dominates, with no pipeline plan",
-      "Concentrated; business development is opportunistic",
-      "Concentration tracked against a deliberate pipeline plan",
-      "Tracked, planned, and stress-tested against losing the largest client",
+      "Operations would stall with no recovery plan",
+      "Informal continuity ideas; not funded or tested",
+      "Documented continuity with known cost and owners",
+      "Documented, funded, and stress-tested against a multi-week outage",
     ],
     gap: {
-      title: "Revenue concentration unmanaged",
+      title: "Incident continuity unfunded",
       detail:
-        "A single client carries a large share of revenue with no tested plan for replacing it, which constrains pricing and engagement decisions.",
+        "A multi-week ransomware or outage event has no funded continuity plan — client delivery and cash runway would degrade without a rehearsed recovery path.",
     },
   },
   {
     id: "practitioners-key-person",
     domainSlug: "key-person",
-    prompt: "What happens to active engagements if a principal is unavailable?",
-    helper: "Prolonged absence, illness, or departure mid-engagement.",
+    prompt:
+      "What happens if this client's sole IT or security contact is unavailable?",
+    helper: "Prolonged absence, illness, or departure mid-incident.",
     levelDescriptions: [
-      "Engagements would stall",
-      "Informal coverage understanding between principals",
-      "A written coverage plan clients are aware of",
-      "Written, rehearsed, and reflected in engagement agreements",
+      "Response and operations would stall",
+      "Informal coverage understanding with a vendor or peer",
+      "A written coverage plan leadership is aware of",
+      "Written, rehearsed, and reflected in vendor and employment agreements",
     ],
     gap: {
-      title: "Key-person continuity undocumented",
+      title: "Client key-person continuity undocumented",
       detail:
-        "Practice operations depend on a small number of principals with no written coverage plan for prolonged absence or departure.",
+        "Day-to-day IT and security depend on one contact with no written coverage plan — an absence mid-incident leaves you as contract CISO without an internal counterpart.",
     },
   },
 ];
@@ -472,18 +477,18 @@ const EXPERIENCES: Record<DemoAudience, DemoExperience> = {
     audience: "practitioners",
     path: "/demo/practitioners",
     navLabel: "Practitioners",
-    kicker: "Interactive demo",
-    title: "Score your own practice before you score a client's",
+    kicker: "Interactive demo · Contract CISO",
+    title: "Walk a client engagement as a contract CISO",
     description:
-      "Six questions from a practitioner engagement, scored on the methodology you would deliver under your own brand. Your answers stay in your browser — nothing is saved or sent.",
-    subjectLabel: "Your practice",
+      "Six questions you'd ask while assessing a client — scored the way a fractional CISO engagement scores them under your brand. Your answers stay in your browser — nothing is saved or sent.",
+    subjectLabel: "Northline Architecture",
     inProgressNote:
-      "Your profile updates with each answer, exactly as a client's does in a live engagement.",
-    resultHeadline: "Your practice risk snapshot",
+      "The client's profile updates with each answer, exactly as it does in a live engagement.",
+    resultHeadline: "Client risk snapshot",
     nextStep:
-      "A full engagement scores every domain you enable, then produces the branded remediation pack you walk clients through.",
+      "A full engagement scores every domain you enable for this client, then produces the branded remediation pack you walk leadership through.",
     footerNote:
-      "Illustrative snapshot for consultants and fractional executives. Live product domains may differ as practitioner methodology expands.",
+      "Illustrative fractional CISO engagement (Kessler Fractional Security → Northline Architecture). Live product domains may differ as practitioner methodology expands.",
     selfServeCta: {
       label: "Start your practice trial",
       href: "/signup/practitioner",

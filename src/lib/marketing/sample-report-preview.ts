@@ -344,21 +344,21 @@ const PRACTITIONER_SAMPLE: SampleReportPreview = {
     {
       level: "high",
       pillar: "Cyber & Access Controls",
-      title: "Institutional client questionnaire gaps",
+      title: "Privileged access without MFA or review",
       detail:
-        "Controls attestation requested by a new institutional client would fail on MFA coverage, vendor access reviews, and incident playbooks.",
+        "Admin and privileged accounts lack consistent MFA and access review — the first finding a customer security questionnaire or incident postmortem would surface.",
     },
     {
       level: "high",
       pillar: "Key-Person Continuity",
-      title: "Key-person continuity undocumented",
+      title: "Client key-person continuity undocumented",
       detail:
-        "Practice operations depend on two principals with no written coverage plan for prolonged absence or departure.",
+        "Day-to-day IT and security depend on one contact with no written coverage plan — an absence mid-incident leaves the contract CISO without an internal counterpart.",
     },
     {
       level: "medium",
       pillar: "Insurance Adequacy",
-      title: "Cyber policy underwritten on stale profile",
+      title: "Cyber policy underwritten on a stale client profile",
       detail:
         "Renewal questionnaire still reflects last year's controls — broker has flagged premium and coverage risk at next renewal.",
     },

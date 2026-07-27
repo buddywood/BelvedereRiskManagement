@@ -91,11 +91,11 @@ test.describe("interactive demo", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: /Score your own practice before you score a client's/i,
+        name: /Walk a client engagement as a contract CISO/i,
       }),
     ).toBeVisible();
     await expect(page.getByTestId("demo-question-prompt")).toHaveText(
-      /How consistent is your assessment methodology across clients\?/i,
+      /How does this client's leadership oversee information security\?/i,
     );
   });
 
