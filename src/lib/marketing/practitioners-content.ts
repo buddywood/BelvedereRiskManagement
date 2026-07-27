@@ -10,8 +10,8 @@ export const practitionersHero = {
     href: "/signup/practitioner",
   },
   secondaryCta: {
-    label: "See pricing",
-    href: "#pricing",
+    label: "Try the demo",
+    href: "/demo/practitioners",
   },
 } as const;
 

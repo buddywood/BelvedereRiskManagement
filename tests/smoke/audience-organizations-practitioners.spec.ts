@@ -23,7 +23,8 @@ test.describe("organizations and practitioners audience pages", () => {
     await expect(primary).toHaveText(/Start your assessment/i);
 
     const secondary = page.getByTestId("organizations-secondary-cta");
-    await expect(secondary).toHaveAttribute("href", "#pricing");
+    await expect(secondary).toHaveAttribute("href", "/demo/organizations");
+    await expect(secondary).toHaveText(/Try the demo/i);
 
     await expect(page.getByText(/^Illustrative$/i)).toBeVisible();
     await expect(
@@ -48,7 +49,8 @@ test.describe("organizations and practitioners audience pages", () => {
     await expect(primary).toHaveText(/Create your practitioner workspace/i);
 
     const secondary = page.getByTestId("practitioners-secondary-cta");
-    await expect(secondary).toHaveAttribute("href", "#pricing");
+    await expect(secondary).toHaveAttribute("href", "/demo/practitioners");
+    await expect(secondary).toHaveText(/Try the demo/i);
 
     await expect(page.getByText(/^Illustrative$/i)).toBeVisible();
     await expect(

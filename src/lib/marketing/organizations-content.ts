@@ -11,8 +11,8 @@ export const organizationsHero = {
     href: "/signup/organization",
   },
   secondaryCta: {
-    label: "See pricing",
-    href: "#pricing",
+    label: "Try the demo",
+    href: "/demo/organizations",
   },
 } as const;
 
