@@ -29,7 +29,7 @@ const FULL_ASSESSMENT_STEPS: Array<{
     icon: LineChart,
     title: "Scored on your methodology",
     description:
-      "Domain selection, weighting, and risk thresholds are configurable — the score reflects how your firm defines risk, not a generic benchmark.",
+      "Customize domains and questions, then set weighting and risk thresholds — the score reflects how your firm defines risk, not a generic benchmark.",
   },
   {
     icon: ListChecks,

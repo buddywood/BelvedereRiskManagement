@@ -4,7 +4,7 @@ export const practitionersHero = {
   kicker: "For consultants, fractional executives, and client-serving professionals",
   title: "Add a productized risk assessment to your practice.",
   description:
-    "One methodology, your branding, a per-client pipeline. Assessments that go out under your name and deliverables you can produce for the whole book instead of hand-building per engagement.",
+    "One methodology you control, your branding, a per-client pipeline. Assessments that go out under your name and deliverables you can produce for the whole book instead of hand-building per engagement.",
   primaryCta: {
     label: "Create your practitioner workspace",
     href: "/signup/practitioner",
@@ -17,9 +17,9 @@ export const practitionersHero = {
 
 export const practitionersHeroFeatures = [
   {
-    title: "Productized methodology",
+    title: "Your pillars, your questions",
     description:
-      "Stop rebuilding frameworks from a blank Google Doc — run every engagement on one defensible assessment.",
+      "Map a differentiated framework into Akili — custom pillars and questions, same per-client pipeline.",
   },
   {
     title: "Your brand, your portal",

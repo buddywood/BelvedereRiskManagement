@@ -13,7 +13,7 @@ const STEPS: ReadonlyArray<{
     step: "1",
     title: "Assess",
     description:
-      "Clients complete a guided profile. Family offices and RIAs manage intake and progress from one workspace.",
+      "Clients complete a guided profile. Family offices and RIAs choose which domains are in scope — and can customize domains and questions to their methodology — then manage intake from one workspace.",
     icon: ClipboardCheck,
   },
   {

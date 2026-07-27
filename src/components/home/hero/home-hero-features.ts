@@ -53,9 +53,9 @@ export const ADVISOR_HERO_FEATURES: ReadonlyArray<HomeHeroFeature> = [
     icon: BarChart3,
   },
   {
-    title: "Built for offices & RIAs",
+    title: "Custom domains & questions",
     description:
-      "One methodology for single-/multi-family offices and broker-dealer / RIA teams delivering private-client risk reviews.",
+      "Start from Akili's catalog, then tailor risk domains and questions to your firm's methodology — scoped and weighted per engagement.",
     icon: Building2,
   },
 ];

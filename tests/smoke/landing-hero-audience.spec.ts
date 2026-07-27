@@ -24,7 +24,7 @@ test.describe("landing hero audience paths", () => {
     await expect(page.getByTestId("landing-hero-feature-cards")).toBeVisible();
     await expect(page.getByText("Multi-household pipeline")).toBeVisible();
     await expect(page.getByText("Practice-ready scoring")).toBeVisible();
-    await expect(page.getByText("Built for offices & RIAs")).toBeVisible();
+    await expect(page.getByText("Custom domains & questions")).toBeVisible();
   });
 
   test("advisors nav shows wealth-practice workspace copy and CTAs", async ({ page }) => {

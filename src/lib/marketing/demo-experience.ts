@@ -443,7 +443,7 @@ const EXPERIENCES: Record<DemoAudience, DemoExperience> = {
     nextStep:
       "A full engagement scores every domain in the catalog, then turns the gaps below into a sequenced remediation plan with your advisor.",
     footerNote:
-      "Illustrative snapshot from a six-question sample. A live engagement covers the full domain catalog and reflects your firm's methodology settings.",
+      "Illustrative snapshot from a six-question sample. A live engagement covers the full domain catalog and reflects your firm's custom questions and methodology settings.",
     selfServeCta: { label: "Create your workspace", href: "/signup/advisor" },
     salesCta: { label: "Talk to our team", href: "/contact/demo" },
     pricingLink: { label: "Compare plans", href: "/pricing" },

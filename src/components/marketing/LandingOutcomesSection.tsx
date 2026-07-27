@@ -38,9 +38,9 @@ const TRUST_POINTS = [
     icon: Briefcase,
   },
   {
-    title: "White-label & customizable",
+    title: "Your domains, your questions",
     description:
-      "Your branding, subdomain, intake, and methodology — clients experience your practice.",
+      "Customize risk domains and assessment questions to match how your practice defines risk — not a one-size survey.",
     icon: Palette,
   },
   {

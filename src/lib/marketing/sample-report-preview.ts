@@ -250,7 +250,7 @@ const FAMILY_SAMPLE: SampleReportPreview = {
   domainBreakdownNote:
     "risk domains selected for this engagement from the platform catalog.",
   footerNote:
-    "Illustrative sample. Actual output reflects each household's responses, firm risk domain selection, and methodology settings.",
+    "Illustrative sample. Actual output reflects each household's responses, your firm's domain selection, custom questions, and methodology settings.",
   nextStep:
     "Facilitate a succession planning workshop with the family council — prioritize trigger definitions and authority documentation.",
   domains: familyDomains(),

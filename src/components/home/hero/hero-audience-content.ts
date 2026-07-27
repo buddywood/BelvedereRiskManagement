@@ -40,7 +40,7 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
     headline:
       "Governance intelligence for family offices, RIAs, and broker-dealers.",
     supporting:
-      "Run structured personal risk profiles across households from one workspace — invite clients, score modular risk domains, and deliver prioritized recommendations. Built for single- and multi-family offices and wealth practices that need more than portfolio planning alone.",
+      "Run structured personal risk profiles across households from one workspace — invite clients, customize domains and questions to your methodology, score each household, and deliver prioritized recommendations. Built for single- and multi-family offices and wealth practices that need more than portfolio planning alone.",
     primaryCta: {
       label: "Advisor Sign In",
       href: signInRolePath("advisor"),
@@ -85,7 +85,7 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
         step: "1",
         title: "Assess",
         description:
-          "Clients complete a guided profile. Family offices and RIAs choose which risk domains are in scope and manage intake from one workspace.",
+          "Clients complete a guided profile. Family offices and RIAs choose which domains are in scope — and can customize domains and questions to their methodology — then manage intake from one workspace.",
       },
       {
         step: "2",
