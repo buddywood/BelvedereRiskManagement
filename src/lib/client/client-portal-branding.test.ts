@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   CLIENT_ADVISOR_LOGO_PATH,
+  clientPortalBrandingDisplayTitle,
   clientPortalLogoImgSrc,
 } from "./client-portal-branding";
 import type { AdvisorBrandingData } from "@/lib/validation/branding";
@@ -42,5 +43,29 @@ describe("clientPortalLogoImgSrc", () => {
 
   it("returns null for empty branding", () => {
     expect(clientPortalLogoImgSrc(branding({}))).toBeNull();
+  });
+});
+
+describe("clientPortalBrandingDisplayTitle", () => {
+  it("prefers public brandName over stale firmName", () => {
+    expect(
+      clientPortalBrandingDisplayTitle(
+        branding({
+          brandName: "eBilly Wealth",
+          advisorFirmName: "Test Advisor Firm",
+        }),
+      ),
+    ).toBe("eBilly Wealth");
+  });
+
+  it("falls back to firmName when brandName is empty", () => {
+    expect(
+      clientPortalBrandingDisplayTitle(
+        branding({
+          brandName: null,
+          advisorFirmName: "Solo Practice",
+        }),
+      ),
+    ).toBe("Solo Practice");
   });
 });

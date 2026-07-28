@@ -1,3 +1,4 @@
+import { clientPortalBrandingDisplayTitle } from "@/lib/client/client-portal-branding";
 import type { AdvisorBrandingData } from "@/lib/validation/branding";
 
 export type InvitationAdvisorProfile = {
@@ -27,11 +28,29 @@ export type InvitationAdvisorContact = {
   advisorLicenseNumber: string;
 };
 
+/** Client-facing firm label for invitation form + email copy. */
+export function invitationFirmDisplayName(
+  profile: Pick<InvitationAdvisorProfile, "firmName" | "brandName">,
+  branding?: Pick<AdvisorBrandingData, "brandName" | "advisorFirmName"> | null,
+): string | null {
+  if (branding) {
+    const title = clientPortalBrandingDisplayTitle({
+      ...branding,
+      brandingEnabled: true,
+    } as AdvisorBrandingData);
+    return title === "Partner portal" ? null : title;
+  }
+  return profile.brandName?.trim() || profile.firmName?.trim() || null;
+}
+
 export function buildInvitationEmailBranding(
   profile: InvitationAdvisorProfile,
   contact: InvitationAdvisorContact
 ): AdvisorBrandingData & InvitationAdvisorContact {
-  const firm = profile.firmName?.trim() || contact.advisorFirmName;
+  const firm =
+    profile.brandName?.trim() ||
+    profile.firmName?.trim() ||
+    contact.advisorFirmName;
   return {
     brandName: profile.brandName?.trim() || firm,
     advisorFirmName: firm,

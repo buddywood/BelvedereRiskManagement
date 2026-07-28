@@ -253,8 +253,16 @@ export function mapResolvedBrandingToInvitationProfile(
   clientEmailFromAddress: string | null;
   brandingEnabled: boolean;
 } {
+  // Client-facing invitation copy must use the public brand name when set;
+  // advisorFirmName/firmName is often a stale seed (e.g. "Test Advisor Firm").
+  const displayFirm =
+    branding.brandName?.trim() ||
+    branding.advisorFirmName?.trim() ||
+    fallbackFirmName?.trim() ||
+    null;
+
   return {
-    firmName: branding.advisorFirmName ?? fallbackFirmName,
+    firmName: displayFirm,
     brandName: branding.brandName ?? null,
     tagline: branding.tagline ?? null,
     landingKicker: branding.landingKicker ?? null,

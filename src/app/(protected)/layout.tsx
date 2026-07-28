@@ -307,7 +307,6 @@ export default async function ProtectedLayout({
                       brandTitle={brandTitle}
                       logoSrc={getLogoSrc(activeBranding)}
                       primaryHex={previewHex?.primary}
-                      logoOnly={!!getLogoSrc(activeBranding)}
                     />
                     <div className="flex flex-wrap items-center gap-3">
                       <p

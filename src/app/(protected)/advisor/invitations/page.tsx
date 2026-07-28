@@ -8,6 +8,7 @@ import { InvitationListFilters } from "@/components/advisor/invitations/Invitati
 import { InvitationListPagination } from "@/components/advisor/invitations/InvitationListPagination";
 import { getInvitationsAction } from "@/lib/actions/invitations";
 import { parseInvitationListParams } from "@/lib/invitations/parse-invitation-list-params";
+import { invitationFirmDisplayName } from "@/lib/invitations/invitation-email-branding";
 import { loadAdvisorAssessmentDomainPickerData } from "@/lib/methodology/advisor-assessment-domains";
 import { requireAdvisorRole, getAdvisorProfileOrThrow } from "@/lib/advisor/auth";
 import { getAdvisorClientLimitStatus } from "@/lib/advisor/client-limit-status.server";
@@ -15,6 +16,7 @@ import {
   isEnterpriseSkipIntakeWorkspaceEnabled,
   resolveEnterpriseMemberVisibilityContext,
 } from "@/lib/enterprise/advisor-member-visibility";
+import { resolveAdvisorBrandingForProfile } from "@/lib/enterprise/branding";
 import { getAdvisorClientDataPolicyContext } from "@/lib/enterprise/enterprise-client-data-policy";
 
 export default async function InvitationsPage({
@@ -40,6 +42,13 @@ export default async function InvitationsPage({
     resolveEnterpriseMemberVisibilityContext(userId),
     getAdvisorClientDataPolicyContext(userId),
   ]);
+  const branding = await resolveAdvisorBrandingForProfile(profile.id, {
+    scope: "client",
+  });
+  const invitationFirmName = invitationFirmDisplayName(
+    { firmName: profile.firmName, brandName: profile.brandName },
+    branding,
+  );
   const pseudonymousWorkspaceLabeling =
     policyContext.effective.pseudonymousWorkspaceLabeling;
   const assessmentDomainPicker = await loadAdvisorAssessmentDomainPickerData(profile.id);
@@ -69,7 +78,7 @@ export default async function InvitationsPage({
       />
       {clientLimitStatus ? <ClientLimitBanner status={clientLimitStatus} /> : null}
       <InviteClientForm
-        firmName={profile.firmName}
+        firmName={invitationFirmName}
         assessmentDomainPicker={assessmentDomainPicker}
         clientLimitStatus={clientLimitStatus}
         skipIntakeEnabled={skipIntakeEnabled}

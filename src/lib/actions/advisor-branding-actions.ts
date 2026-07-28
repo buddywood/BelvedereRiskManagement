@@ -232,7 +232,13 @@ export async function updateAdvisorBrandingAction(formData: FormData): Promise<A
       validatedData,
     );
 
-    if (!isEnterpriseManage && settingsContext.mode === 'solo' && updateData.brandName !== undefined) {
+    // Keep profile.firmName aligned with public brandName for solo and
+    // enterprise-personal branding (invitation copy + portal titles read both).
+    if (
+      !isEnterpriseManage &&
+      (settingsContext.mode === 'solo' || settingsContext.mode === 'enterprise-personal') &&
+      updateData.brandName !== undefined
+    ) {
       const currentAdvisor = currentBranding as {
         firmName: string | null;
       };
