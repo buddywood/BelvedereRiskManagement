@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import {
+  isS3ObjectNotFound,
+  resolveBrandingLogoS3Key,
+} from "@/lib/branding/advisor-logo-display";
 import { prisma } from "@/lib/db";
 import { getBrandingLogoObjectBytes } from "@/lib/s3/branding-uploads";
 
@@ -24,12 +28,14 @@ export async function GET() {
       select: {
         id: true,
         logoS3Key: true,
+        logoUrl: true,
         logoContentType: true,
         brandingEnabled: true,
         enterprise: {
           select: {
             id: true,
             logoS3Key: true,
+            logoUrl: true,
             logoContentType: true,
             brandingEnabled: true,
           },
@@ -41,35 +47,45 @@ export async function GET() {
       return new NextResponse(null, { status: 404 });
     }
 
-    // Enterprise branding takes priority
-    const entLogoKey = profile.enterprise?.logoS3Key;
-    if (profile.enterprise?.brandingEnabled && entLogoKey) {
-      const ent = profile.enterprise;
-      const prefix = `enterprises/${ent.id}/`;
-      if (!entLogoKey.startsWith(prefix)) {
-        return new NextResponse(null, { status: 404 });
+    // Enterprise branding takes priority when it has a resolvable logo key
+    const ent = profile.enterprise;
+    if (ent?.brandingEnabled) {
+      const entLogoKey = resolveBrandingLogoS3Key(ent);
+      if (entLogoKey) {
+        const prefix = `enterprises/${ent.id}/`;
+        if (entLogoKey.startsWith(prefix)) {
+          try {
+            const { data, contentType } = await getBrandingLogoObjectBytes(entLogoKey);
+            return new NextResponse(Buffer.from(data), {
+              headers: {
+                "Content-Type": ent.logoContentType || contentType,
+                "Cache-Control": "private, no-store",
+              },
+            });
+          } catch (error) {
+            if (!isS3ObjectNotFound(error)) throw error;
+            // Fall through to personal branding when firm object is missing
+          }
+        }
       }
-
-      const { data, contentType } = await getBrandingLogoObjectBytes(entLogoKey);
-      return new NextResponse(Buffer.from(data), {
-        headers: {
-          "Content-Type": ent.logoContentType || contentType,
-          "Cache-Control": "private, no-store",
-        },
-      });
     }
 
     // Fall back to advisor's own branding
-    if (!profile.brandingEnabled || !profile.logoS3Key) {
+    if (!profile.brandingEnabled) {
+      return new NextResponse(null, { status: 404 });
+    }
+
+    const advisorLogoKey = resolveBrandingLogoS3Key(profile);
+    if (!advisorLogoKey) {
       return new NextResponse(null, { status: 404 });
     }
 
     const prefix = `advisors/${profile.id}/`;
-    if (!profile.logoS3Key.startsWith(prefix)) {
+    if (!advisorLogoKey.startsWith(prefix)) {
       return new NextResponse(null, { status: 404 });
     }
 
-    const { data, contentType } = await getBrandingLogoObjectBytes(profile.logoS3Key);
+    const { data, contentType } = await getBrandingLogoObjectBytes(advisorLogoKey);
     return new NextResponse(Buffer.from(data), {
       headers: {
         "Content-Type": profile.logoContentType || contentType,
@@ -77,6 +93,9 @@ export async function GET() {
       },
     });
   } catch (error) {
+    if (isS3ObjectNotFound(error)) {
+      return new NextResponse(null, { status: 404 });
+    }
     console.error("Advisor logo error:", error);
     return new NextResponse(null, { status: 500 });
   }

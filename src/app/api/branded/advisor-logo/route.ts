@@ -6,6 +6,7 @@ import {
   isS3ObjectNotFound,
   resolveBrandingLogoS3Key,
 } from '@/lib/branding/advisor-logo-display';
+import { prisma } from '@/lib/db';
 import { getBrandingLogoObjectBytes } from '@/lib/s3/branding-uploads';
 
 export const runtime = 'nodejs';
@@ -45,8 +46,29 @@ export async function GET(request: NextRequest) {
       return new NextResponse(null, { status: 404 });
     }
 
-    const prefix = `advisors/${advisorSubdomain.advisorId}/`;
-    if (!logoS3Key.startsWith(prefix)) {
+    const advisorPrefix = `advisors/${advisorSubdomain.advisorId}/`;
+    let allowed = logoS3Key.startsWith(advisorPrefix);
+
+    if (!allowed) {
+      // Firm branding stores logos under enterprises/{id}/…
+      const subdomainRow = await prisma.advisorSubdomain.findUnique({
+        where: { subdomain: canonicalSlug },
+        select: { enterpriseId: true },
+      });
+      const enterpriseId =
+        subdomainRow?.enterpriseId ??
+        (
+          await prisma.advisorProfile.findUnique({
+            where: { id: advisorSubdomain.advisorId },
+            select: { enterpriseId: true },
+          })
+        )?.enterpriseId;
+      if (enterpriseId && logoS3Key.startsWith(`enterprises/${enterpriseId}/`)) {
+        allowed = true;
+      }
+    }
+
+    if (!allowed) {
       return new NextResponse(null, { status: 404 });
     }
 

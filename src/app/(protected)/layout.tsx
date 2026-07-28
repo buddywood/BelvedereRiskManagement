@@ -12,6 +12,8 @@ import { AkiliHeaderLockup } from "@/components/home/AkiliLogoLockup";
 import { BrandingUnavailable } from "@/components/branding/BrandingUnavailable";
 import { BrandedPortalFooter } from "@/components/branding/BrandedPortalFooter";
 import { ClientPortalRootTheme } from "@/components/branding/ClientPortalRootTheme";
+import { brandedPortalLogoImgSrc } from "@/lib/branding/branded-portal-logo";
+import { resolveBrandingLogoS3Key } from "@/lib/branding/advisor-logo-display";
 import { clientPortalBrandingDisplayTitle, clientPortalLogoImgSrc } from "@/lib/client/client-portal-branding";
 import { buildClientPortalMetadata } from "@/lib/client/client-portal-metadata";
 import { resolveClientPortalBrandingForUser } from "@/lib/client/resolve-client-portal-branding";
@@ -231,11 +233,16 @@ export default async function ProtectedLayout({
   const isWorkspaceSlimHeaderRoute = (isAdvisorWorkspaceRoute && !advisorWorkspaceBranding) || isAdminWorkspaceRoute;
   const isAdvisorBrandedWorkspace = isAdvisorWorkspaceRoute && !!advisorWorkspaceBranding;
 
-  // Use different logo endpoints for client vs advisor workspace
+  // Logo src must never be a private S3 URL (browsers get AccessDenied).
+  // Tenant hosts: same unauthenticated proxy as the public landing page.
+  // Advisor workspace off-tenant: session-backed /api/advisor/logo (client
+  // endpoint requires USER and 403s for advisors).
   const getLogoSrc = (branding: typeof activeBranding) => {
     if (!branding) return null;
-    // Advisors use their own logo endpoint (client endpoint requires USER role)
-    if (isAdvisorBrandedWorkspace && branding.logoS3Key) {
+    if (onTenantHost) {
+      return brandedPortalLogoImgSrc(branding);
+    }
+    if (isAdvisorBrandedWorkspace && resolveBrandingLogoS3Key(branding)) {
       return "/api/advisor/logo";
     }
     return clientPortalLogoImgSrc(branding);

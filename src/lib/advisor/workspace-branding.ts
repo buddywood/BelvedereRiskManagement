@@ -1,5 +1,6 @@
 import "server-only";
 
+import { resolveBrandingLogoS3Key } from "@/lib/branding/advisor-logo-display";
 import { prisma } from "@/lib/db";
 import type { AdvisorBrandingData } from "@/lib/validation/branding";
 import {
@@ -76,6 +77,29 @@ export async function resolveAdvisorWorkspaceBranding(
   // Enterprise branding takes priority if enabled
   if (profile.enterprise?.brandingEnabled) {
     const ent = profile.enterprise;
+    const firmHasLogo = Boolean(resolveBrandingLogoS3Key(ent));
+    const personalHasLogo =
+      profile.brandingEnabled && Boolean(resolveBrandingLogoS3Key(profile));
+    // Prefer firm logo; if firm colors/copy are set but logo lives only on the
+    // advisor profile (common after subdomain claim), keep the personal logo
+    // so the workspace header matches the public landing page.
+    const logoSource =
+      firmHasLogo || !personalHasLogo
+        ? {
+            logoUrl: ent.logoUrl,
+            logoS3Key: ent.logoS3Key,
+            logoContentType: ent.logoContentType,
+            logoFileSize: ent.logoFileSize,
+            logoUploadedAt: ent.logoUploadedAt,
+          }
+        : {
+            logoUrl: profile.logoUrl,
+            logoS3Key: profile.logoS3Key,
+            logoContentType: profile.logoContentType,
+            logoFileSize: profile.logoFileSize,
+            logoUploadedAt: profile.logoUploadedAt,
+          };
+
     return {
       brandName: ent.brandName ?? ent.name,
       advisorFirmName: ent.name,
@@ -88,11 +112,7 @@ export async function resolveAdvisorWorkspaceBranding(
       primaryColor: ent.primaryColor,
       secondaryColor: ent.secondaryColor,
       accentColor: ent.accentColor,
-      logoUrl: ent.logoUrl,
-      logoS3Key: ent.logoS3Key,
-      logoContentType: ent.logoContentType,
-      logoFileSize: ent.logoFileSize,
-      logoUploadedAt: ent.logoUploadedAt,
+      ...logoSource,
       websiteUrl: ent.websiteUrl,
       emailFooterText: ent.emailFooterText,
       supportEmail: ent.supportEmail,

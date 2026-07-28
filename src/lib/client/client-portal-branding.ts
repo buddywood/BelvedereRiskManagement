@@ -1,17 +1,23 @@
+import {
+  looksLikeAdvisorBrandingS3Url,
+  resolveBrandingLogoS3Key,
+} from "@/lib/branding/advisor-logo-display";
 import type { AdvisorBrandingData } from "@/lib/validation/branding";
 
 export const CLIENT_ADVISOR_LOGO_PATH = "/api/client/advisor-logo";
 
 /** Logo URL for `<img src>` in the client portal (S3 proxy or public HTTPS). */
 export function clientPortalLogoImgSrc(branding: AdvisorBrandingData): string | null {
-  if (branding.logoS3Key) {
+  // Private S3 objects cannot load in the browser — always proxy when we have a key
+  // (including keys parsed from legacy logoUrl-only rows).
+  if (resolveBrandingLogoS3Key(branding)) {
     return CLIENT_ADVISOR_LOGO_PATH;
   }
   const url = branding.logoUrl?.trim();
-  if (url?.startsWith("https://")) {
-    return url;
+  if (!url?.startsWith("https://") || looksLikeAdvisorBrandingS3Url(url)) {
+    return null;
   }
-  return null;
+  return url;
 }
 
 /**
