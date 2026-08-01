@@ -644,3 +644,150 @@ export async function moveEnterpriseIntakeQuestionOrder(
     };
   }
 }
+
+export async function reorderEnterpriseIntakeQuestionToPosition(
+  questionId: string,
+  newIndex: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const team = await requireEnterpriseTeamManager(userId);
+
+    const customRows = await prisma.enterpriseIntakeQuestion.findMany({
+      where: { enterpriseId: team.enterpriseId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, displayOrder: true },
+      orderBy: { displayOrder: "asc" },
+    });
+
+    const currentIndex = customRows.findIndex((q) => q.id === questionId);
+    if (currentIndex === -1) {
+      return { success: false, error: "Question not found" };
+    }
+
+    if (currentIndex === newIndex || newIndex < 0 || newIndex >= customRows.length) {
+      return { success: true };
+    }
+
+    const direction = newIndex > currentIndex ? "down" : "up";
+    const steps = Math.abs(newIndex - currentIndex);
+
+    for (let i = 0; i < steps; i++) {
+      const result = await moveEnterpriseIntakeQuestionOrder(questionId, direction);
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+    }
+
+    revalidatePath("/advisor/enterprise/methodology/intake");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: advisorHubActionErrorMessage(error, "Failed to reorder firm intake question"),
+    };
+  }
+}
+
+export async function moveEnterprisePillarQuestionOrder(
+  questionId: string,
+  direction: "up" | "down",
+) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const team = await requireEnterpriseTeamManager(userId);
+
+    const question = await prisma.enterprisePillarQuestion.findFirst({
+      where: { id: questionId, enterpriseId: team.enterpriseId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, pillarId: true, displayOrder: true },
+    });
+    if (!question) {
+      return { success: false as const, error: "Question not found or not reorderable" };
+    }
+
+    const customRows = await prisma.enterprisePillarQuestion.findMany({
+      where: { enterpriseId: team.enterpriseId, pillarId: question.pillarId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, displayOrder: true },
+      orderBy: { displayOrder: "asc" },
+    });
+
+    const plan = planCustomIntakeReorder(customRows, questionId, direction);
+    if (!plan.ok) {
+      if (plan.reason === "boundary") return { success: true as const };
+      return { success: false as const, error: "Question not found" };
+    }
+
+    await prisma.$transaction([
+      prisma.enterprisePillarQuestion.update({
+        where: { id: plan.move.id },
+        data: { displayOrder: plan.swapWith.displayOrder },
+      }),
+      prisma.enterprisePillarQuestion.update({
+        where: { id: plan.swapWith.id },
+        data: { displayOrder: plan.move.displayOrder },
+      }),
+    ]);
+
+    const pillar = await prisma.pillar.findUnique({ where: { id: question.pillarId }, select: { slug: true } });
+    await syncAfterEnterpriseMethodologyChange(team.enterpriseId, pillar?.slug);
+    return { success: true as const };
+  } catch (error) {
+    return {
+      success: false as const,
+      error: advisorHubActionErrorMessage(error, "Failed to reorder firm assessment question"),
+    };
+  }
+}
+
+export async function reorderEnterprisePillarQuestionToPosition(
+  questionId: string,
+  newIndex: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const team = await requireEnterpriseTeamManager(userId);
+
+    const question = await prisma.enterprisePillarQuestion.findFirst({
+      where: { id: questionId, enterpriseId: team.enterpriseId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, pillarId: true },
+    });
+    if (!question) {
+      return { success: false, error: "Question not found or not reorderable" };
+    }
+
+    const customRows = await prisma.enterprisePillarQuestion.findMany({
+      where: { enterpriseId: team.enterpriseId, pillarId: question.pillarId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, displayOrder: true },
+      orderBy: { displayOrder: "asc" },
+    });
+
+    const currentIndex = customRows.findIndex((q) => q.id === questionId);
+    if (currentIndex === -1) {
+      return { success: false, error: "Question not found" };
+    }
+
+    if (currentIndex === newIndex || newIndex < 0 || newIndex >= customRows.length) {
+      return { success: true };
+    }
+
+    const direction = newIndex > currentIndex ? "down" : "up";
+    const steps = Math.abs(newIndex - currentIndex);
+
+    for (let i = 0; i < steps; i++) {
+      const result = await moveEnterprisePillarQuestionOrder(questionId, direction);
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+    }
+
+    const pillar = await prisma.pillar.findUnique({ where: { id: question.pillarId }, select: { slug: true } });
+    if (pillar) {
+      revalidatePath(`/advisor/enterprise/methodology/questions/${pillar.slug}`);
+    }
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: advisorHubActionErrorMessage(error, "Failed to reorder firm assessment question"),
+    };
+  }
+}

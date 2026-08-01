@@ -16,6 +16,8 @@ export type ClientEngagementScope = {
   approvalId: string | null;
   assignmentId: string | null;
   intakeWaived: boolean;
+  /** When set, assessment was waived — client skips directly to reporting. */
+  assessmentWaived: boolean;
 };
 
 /** Normalize scope writes; emphasis defaults to all included. */
@@ -38,6 +40,50 @@ export async function normalizeEngagementScopeInput(input: {
   return { includedPillars, focusAreas };
 }
 
+/**
+ * Resolve hub/completion scope. Advisor engagement included pillars are the
+ * source of truth when present. A wider Assessment.included_pillars (stale
+ * migration/auto-approve) must not override a narrower advisor selection.
+ */
+export function pickResolvedIncludedPillars(
+  input: {
+    assessmentIncludedPillars?: string[] | null;
+    engagementIncludedPillars?: string[] | null;
+    hasAssessmentRow: boolean;
+  },
+  catalog: PillarCatalogEntry[],
+): string[] {
+  const engagement = input.engagementIncludedPillars?.length
+    ? resolveIncludedPillars(input.engagementIncludedPillars, catalog)
+    : [];
+  const assessment = input.assessmentIncludedPillars?.length
+    ? resolveIncludedPillars(input.assessmentIncludedPillars, catalog)
+    : [];
+
+  if (engagement.length > 0) {
+    if (assessment.length === 0) return engagement;
+
+    const engagementSet = new Set(engagement);
+    const assessmentIsSubsetOrEqual =
+      assessment.every((id) => engagementSet.has(id)) &&
+      assessment.length <= engagement.length;
+
+    // Assessment may freeze a narrower in-flight subset; never keep a wider
+    // stale assessment over the advisor's engagement selection.
+    return assessmentIsSubsetOrEqual ? assessment : engagement;
+  }
+
+  if (assessment.length > 0) {
+    return assessment;
+  }
+
+  if (input.hasAssessmentRow) {
+    return resolveIncludedPillars([], catalog);
+  }
+
+  return [];
+}
+
 async function resolveClientAssessmentIncludedPillars(
   input: {
     assessmentIncludedPillars?: string[] | null;
@@ -46,24 +92,20 @@ async function resolveClientAssessmentIncludedPillars(
   },
   catalog: PillarCatalogEntry[],
 ): Promise<string[]> {
-  if (input.assessmentIncludedPillars && input.assessmentIncludedPillars.length > 0) {
-    return resolveIncludedPillars(input.assessmentIncludedPillars, catalog);
-  }
-  if (
-    input.approvedScopeIncludedPillars &&
-    input.approvedScopeIncludedPillars.length > 0
-  ) {
-    return resolveIncludedPillars(input.approvedScopeIncludedPillars, catalog);
-  }
-  if (input.hasAssessmentRow) {
-    return resolveIncludedPillars([], catalog);
-  }
-  return [];
+  return pickResolvedIncludedPillars(
+    {
+      assessmentIncludedPillars: input.assessmentIncludedPillars,
+      engagementIncludedPillars: input.approvedScopeIncludedPillars,
+      hasAssessmentRow: input.hasAssessmentRow,
+    },
+    catalog,
+  );
 }
 
 type ActiveAssignment = {
   id: string;
   intakeWaivedAt: Date | null;
+  assessmentWaivedAt: Date | null;
   includedPillars: string[];
   focusAreas: string[];
 };
@@ -77,6 +119,7 @@ async function loadActiveAssignment(
     select: {
       id: true,
       intakeWaivedAt: true,
+      assessmentWaivedAt: true,
       includedPillars: true,
       focusAreas: true,
     },
@@ -94,6 +137,23 @@ async function writeAssignmentScope(
       focusAreas: scope.focusAreas,
     },
   });
+}
+
+/**
+ * When Assessment.included_pillars is a strict superset of engagement included,
+ * return the engagement scope so callers can narrow the assessment row.
+ */
+export function narrowAssessmentScopeFromEngagement(
+  engagementIncluded: readonly string[],
+  assessmentIncluded: readonly string[] | null | undefined,
+): string[] | null {
+  if (!engagementIncluded.length || !assessmentIncluded?.length) return null;
+  if (assessmentIncluded.length <= engagementIncluded.length) return null;
+
+  const assessmentSet = new Set(assessmentIncluded);
+  if (!engagementIncluded.every((id) => assessmentSet.has(id))) return null;
+
+  return [...engagementIncluded];
 }
 
 export async function persistClientEngagementScope(input: {
@@ -131,6 +191,27 @@ export async function getClientEngagementScope(
   const intakeWaived = assignment?.intakeWaivedAt != null;
 
   if (assignment && assignment.includedPillars.length > 0) {
+    // Narrow a stale wider Assessment.included_pillars down to the advisor
+    // selection so hub progress cannot show domains the advisor excluded.
+    if (reconcile) {
+      const assessment = await prisma.assessment.findFirst({
+        where: {
+          userId: clientUserId,
+          status: { in: ["IN_PROGRESS", "COMPLETED"] },
+        },
+        orderBy: { updatedAt: "desc" },
+        select: { includedPillars: true },
+      });
+
+      const narrowed = narrowAssessmentScopeFromEngagement(
+        assignment.includedPillars,
+        assessment?.includedPillars,
+      );
+      if (narrowed) {
+        await syncInProgressAssessmentScope(clientUserId, narrowed, null);
+      }
+    }
+
     return {
       includedPillars: assignment.includedPillars,
       focusAreas: assignment.focusAreas,
@@ -138,8 +219,11 @@ export async function getClientEngagementScope(
       approvalId: null,
       assignmentId: assignment.id,
       intakeWaived,
+      assessmentWaived: assignment.assessmentWaivedAt != null,
     };
   }
+
+  const assessmentWaived = assignment?.assessmentWaivedAt != null;
 
   const approval = await prisma.intakeApproval.findFirst({
     where: {
@@ -165,6 +249,11 @@ export async function getClientEngagementScope(
             ? approval.focusAreas
             : approval.includedPillars,
       });
+      await syncInProgressAssessmentScope(
+        clientUserId,
+        approval.includedPillars,
+        approval.id,
+      );
     }
     return {
       includedPillars: approval.includedPillars,
@@ -176,6 +265,7 @@ export async function getClientEngagementScope(
       approvalId: approval.id,
       assignmentId: assignment?.id ?? null,
       intakeWaived,
+      assessmentWaived,
     };
   }
 
@@ -210,6 +300,7 @@ export async function getClientEngagementScope(
       approvalId: null,
       assignmentId: assignment?.id ?? null,
       intakeWaived,
+      assessmentWaived,
     };
   }
 
@@ -220,6 +311,7 @@ export async function getClientEngagementScope(
     approvalId: null,
     assignmentId: assignment?.id ?? null,
     intakeWaived,
+    assessmentWaived,
   };
 }
 

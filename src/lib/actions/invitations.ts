@@ -31,7 +31,10 @@ import {
   mapResolvedBrandingToInvitationProfile,
   resolveAdvisorBrandingForProfile,
 } from "@/lib/enterprise/branding";
-import type { InvitationAdvisorProfile } from "@/lib/invitations/invitation-email-branding";
+import {
+  invitationFirmDisplayName,
+  type InvitationAdvisorProfile,
+} from "@/lib/invitations/invitation-email-branding";
 
 type ActionResult<T> =
   | { success: true; data: T }
@@ -90,6 +93,7 @@ async function resolveInvitationBrandingForAdvisor(
       emailFooterText: null,
       supportEmail: null,
       supportPhone: null,
+      clientEmailFromAddress: null,
       brandingEnabled: false,
     };
   }
@@ -125,13 +129,19 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
       })(),
       includedPillars: parseStringArrayField(formData.get("includedPillars")),
       focusAreas: parseStringArrayField(formData.get("focusAreas")),
+      externalClientId: formData.get("externalClientId")?.toString() || undefined,
     };
 
     const validatedInput = createInvitationSchema.parse(rawData);
+    const invitationBranding = await resolveInvitationBrandingForAdvisor(
+      profile.id,
+      profile.firmName,
+    );
+    const displayFirmName = invitationFirmDisplayName(invitationBranding);
     const personalMessage =
       validatedInput.personalMessage ??
       buildDefaultInvitationPersonalMessage(
-        profile.firmName,
+        displayFirmName,
         validatedInput.intakeWaived ? validatedInput.includedPillars : undefined,
       );
     const invitationInput = { ...validatedInput, personalMessage };
@@ -165,10 +175,6 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
     const features =
       (await getSubscriptionFeatures(profile.userId)) ??
       ESSENTIALS_SUBSCRIPTION_FEATURES;
-    const invitationBranding = await resolveInvitationBrandingForAdvisor(
-      profile.id,
-      profile.firmName,
-    );
     const emailTheme = invitationEmailThemeForProfile(
       {
         brandingEnabled: invitationBranding.brandingEnabled,
@@ -189,7 +195,7 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
     const advisorInfo = {
       advisorName: profile.user.name || profile.user.firstName + " " + profile.user.lastName || "Advisor",
       advisorJobTitle: profile.jobTitle || "Financial Advisor",
-      advisorFirmName: profile.firmName || "Advisory Firm",
+      advisorFirmName: displayFirmName || profile.firmName || "Advisory Firm",
       advisorEmail: profile.user.email,
       advisorPhone: profile.phone || "",
       advisorLicenseNumber: profile.licenseNumber || "",
@@ -220,6 +226,7 @@ export async function sendInvitation(formData: FormData): Promise<ActionResult<I
         prefillEmail: validatedInput.clientEmail,
         intakeWaived: validatedInput.intakeWaived,
         includedPillars: validatedInput.includedPillars,
+        externalClientId: validatedInput.externalClientId ?? null,
       },
       metadata: {
         advisorId: profile.id,
@@ -277,6 +284,7 @@ export async function resendInvitationAction(invitationId: string): Promise<Acti
       profile.id,
       profile.firmName,
     );
+    const displayFirmName = invitationFirmDisplayName(invitationBranding);
     const emailTheme = invitationEmailThemeForProfile(
       {
         brandingEnabled: invitationBranding.brandingEnabled,
@@ -291,7 +299,7 @@ export async function resendInvitationAction(invitationId: string): Promise<Acti
     const advisorInfo = {
       advisorName: profile.user.name || profile.user.firstName + " " + profile.user.lastName || "Advisor",
       advisorJobTitle: profile.jobTitle || "Financial Advisor",
-      advisorFirmName: profile.firmName || "Advisory Firm",
+      advisorFirmName: displayFirmName || profile.firmName || "Advisory Firm",
       advisorEmail: profile.user.email,
       advisorPhone: profile.phone || "",
       advisorLicenseNumber: profile.licenseNumber || "",
@@ -303,8 +311,8 @@ export async function resendInvitationAction(invitationId: string): Promise<Acti
       personalMessage:
         invitation.personalMessage ||
         buildDefaultInvitationPersonalMessage(
-          profile.firmName,
-          invitation.includedPillars?.length ? invitation.includedPillars : undefined,
+          displayFirmName,
+          invitation.intakeWaived ? invitation.includedPillars : undefined,
         ),
       invitationUrl: invitation.url,
       clientName: invitation.clientName || undefined,

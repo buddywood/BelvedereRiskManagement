@@ -14,9 +14,19 @@ import { cn } from "@/lib/utils";
 type SiteHeaderProps = {
   className?: string;
   showLogo?: boolean;
+  /** When false, hide Akili-apex-only audience links (Organizations / Practitioners). */
+  isAkiliApex?: boolean;
 };
 
-export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
+/**
+ * B2B SaaS header: logo | nav | actions on a stable 3-column grid.
+ * Full link row from xl up; hamburger below that — avoids mid-width overlap.
+ */
+export function SiteHeader({
+  className,
+  showLogo = true,
+  isAkiliApex = true,
+}: SiteHeaderProps) {
   const pathname = usePathname();
   const isHomepage = isMarketingHomePath(pathname);
   const heroAudience = useOptionalHeroAudience();
@@ -30,9 +40,9 @@ export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
     >
       <div
         className={cn(
-          "flex items-center justify-between gap-4 rounded-2xl border border-border/35 py-2.5",
-          "bg-background/55 px-4 shadow-[0_8px_32px_-24px_rgba(26,24,20,0.28)] backdrop-blur-2xl backdrop-saturate-150",
-          "sm:gap-6 sm:px-5 lg:px-6",
+          "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-border/40",
+          "bg-background/75 py-2 pl-3 pr-2 shadow-[0_10px_36px_-28px_rgba(26,24,20,0.34)]",
+          "backdrop-blur-2xl backdrop-saturate-150 sm:gap-6 sm:pl-4 sm:pr-3",
         )}
       >
         {showLogo ? (
@@ -41,7 +51,7 @@ export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
             className="inline-flex shrink-0 leading-none text-foreground transition-opacity duration-200 hover:opacity-80"
             aria-label="AKILI home"
           >
-            <AkiliHeaderLockup height={40} />
+            <AkiliHeaderLockup height={36} />
           </Link>
         ) : (
           <div aria-hidden className="w-px" />
@@ -50,20 +60,23 @@ export function SiteHeader({ className, showLogo = true }: SiteHeaderProps) {
         <SiteHeaderNav
           pathname={pathname}
           isHomepage={isHomepage}
+          isAkiliApex={isAkiliApex}
           activeAudience={heroAudience?.audience}
           onAudienceChange={heroAudience?.setAudience}
         />
 
-        <div className="hidden shrink-0 items-center gap-3 lg:flex">
-          <MarketingNavAuthActions />
+        <div className="flex items-center justify-end gap-2">
+          <div className="hidden items-center xl:flex">
+            <MarketingNavAuthActions />
+          </div>
+          <MobileNavMenu
+            className="xl:hidden"
+            isHomepage={isHomepage}
+            isAkiliApex={isAkiliApex}
+            activeAudience={heroAudience?.audience satisfies HeroAudience | undefined}
+            onAudienceChange={heroAudience?.setAudience}
+          />
         </div>
-
-        <MobileNavMenu
-          className="lg:hidden"
-          isHomepage={isHomepage}
-          activeAudience={heroAudience?.audience satisfies HeroAudience | undefined}
-          onAudienceChange={heroAudience?.setAudience}
-        />
       </div>
     </header>
   );

@@ -22,7 +22,7 @@ type HeroAudienceProviderProps = {
 };
 
 export function HeroAudienceProvider({
-  initialAudience = "families",
+  initialAudience = "advisors",
   children,
 }: HeroAudienceProviderProps) {
   const value = useHeroAudience(initialAudience);

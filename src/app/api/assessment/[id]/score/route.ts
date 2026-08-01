@@ -32,10 +32,12 @@ import { triggerMilestoneNotification } from "@/lib/notifications/triggers";
 import { triggerPreviewAvailable } from "@/lib/notifications/deliverable-phase-triggers";
 import { AUDIT_ACTIONS, writeAudit } from "@/lib/audit/audit-log";
 import { RecommendationEngine } from "@/lib/assessment/engines/recommendation-engine";
+import { isNarrativeGenerationEnabled } from "@/lib/assessment/recommendations/llm-narrative/config";
+import { generateAndAttachNarratives } from "@/lib/assessment/recommendations/llm-narrative/generate-narratives";
 import { emitAssessmentSignals } from "@/lib/signals/emit";
 import type { PillarScoreSnapshot } from "@/lib/signals/types";
 import { evaluateClientAssessmentSummaryAccess } from "@/lib/client/assessment-summary-gate";
-import { isPillarInAssessmentScope } from "@/lib/assessment/included-pillars";
+import { isPillarInAssessmentScope, resolveIncludedPillars } from "@/lib/assessment/included-pillars";
 import { getPlatformPillarCatalog } from "@/lib/methodology/cached-pillar-catalog";
 import {
   authorizeAssessmentApiAccess,
@@ -323,6 +325,10 @@ export async function POST(
       customizationMetadata = {
         isCustomized: scoringCustomization.isCustomized,
         focusAreaCount: scoringCustomization.emphasisAreas.length,
+        includedPillarCount: resolveIncludedPillars(
+          assessment.includedPillars,
+          catalog,
+        ).length,
         emphasisMultiplier: scoringCustomization.emphasisMultiplier,
       };
     }
@@ -468,6 +474,12 @@ export async function POST(
       if (facilitatedSessionId) {
         void markFacilitatedSessionPreviewIfComplete(facilitatedSessionId);
       }
+      // Phase 3 (LLM narratives): once every pillar is scored, draft AI rationale
+      // for the selected recommendations. Fire-and-forget, flag-gated, fail-closed
+      // — runs outside the scoring transaction and never blocks the response.
+      if (isNarrativeGenerationEnabled()) {
+        void generateAndAttachNarratives(id).catch(() => {});
+      }
     }
 
     const beforeSnapshots: PillarScoreSnapshot[] = (assessment.scores ?? []).map((s) => ({
@@ -520,7 +532,11 @@ export async function POST(
           includedPillars: updatedAssessment.includedPillars,
           catalog,
         })
-      : { canViewSummary: false, allPillarsComplete: false };
+      : {
+          canViewSummary: false,
+          canViewRiskPreview: false,
+          allPillarsComplete: false,
+        };
 
     const responseData: Record<string, unknown> = {
       score: pillarScore.saved.score,
@@ -530,6 +546,7 @@ export async function POST(
       pillarNarratives,
       completedAt: pillarScore.saved.calculatedAt,
       allPillarsScored: pillarScore.allPillarsScored,
+      canViewRiskPreview: summaryAccess.canViewRiskPreview,
       canViewSummary: summaryAccess.canViewSummary,
     };
 

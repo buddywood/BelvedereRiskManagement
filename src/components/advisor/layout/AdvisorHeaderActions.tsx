@@ -28,11 +28,16 @@ export function AdvisorHeaderActions({
     return null;
   }
 
+  // Firm admins (OWNER/ADMIN) don't see product tour buttons
+  if (!productToursEnabled) {
+    return null;
+  }
+
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
       <ProductTourButton
         tourId={resolvedTourId}
-        autoStart={autoStartTour && productToursEnabled}
+        autoStart={autoStartTour}
       />
     </div>
   );

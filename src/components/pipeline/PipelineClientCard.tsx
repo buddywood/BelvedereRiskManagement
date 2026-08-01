@@ -20,6 +20,8 @@ import {
   formatPipelineClientRowTitle,
   resolveAdvisorClientPipelineLabels,
 } from "@/lib/pipeline/client-display";
+import { resolveAdvisorAssessmentNextStep } from "@/lib/pipeline/advisor-next-step";
+import { isDeliverableProfilePublished } from "@/lib/assessment/plan-depth";
 import type { PipelineClient } from "@/lib/pipeline/types";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +42,14 @@ interface PipelineClientCardProps {
   client: PipelineClient;
   showDocumentsColumn?: boolean;
   monitoringEnabled?: boolean;
+  showAssignedAdvisor?: boolean;
 }
 
 export function PipelineClientCard({
   client,
   showDocumentsColumn = true,
   monitoringEnabled = false,
+  showAssignedAdvisor = false,
 }: PipelineClientCardProps) {
   const { headline, secondary } = resolveAdvisorClientPipelineLabels(client);
   const lastActivityLabel = formatDistanceToNow(client.lastActivity, {
@@ -56,6 +60,17 @@ export function PipelineClientCard({
     client.awaitingIntakeReview && client.intakeReviewInterviewId
       ? `/advisor/review/${client.intakeReviewInterviewId}`
       : null;
+  const assessmentNextStep = resolveAdvisorAssessmentNextStep({
+    clientId: client.id,
+    assessmentId: client.assessment?.id,
+    assessmentStatus: client.assessment?.status,
+    deliverablePhase: client.assessment?.deliverablePhase,
+    documentsNeeded: client.documentsNeeded,
+  });
+  const needsProfilePublish =
+    client.assessment?.status === "COMPLETED" &&
+    client.assessment.deliverablePhase != null &&
+    !isDeliverableProfilePublished(client.assessment.deliverablePhase);
 
   return (
     <article
@@ -84,6 +99,11 @@ export function PipelineClientCard({
             {secondary ? (
               <p className="truncate text-sm text-muted-foreground">{secondary}</p>
             ) : null}
+            {showAssignedAdvisor && client.assignedAdvisorLabel ? (
+              <p className="truncate text-xs text-muted-foreground">
+                Advisor: {client.assignedAdvisorLabel}
+              </p>
+            ) : null}
             <div className="flex flex-wrap items-center gap-1.5">
               <PipelineProcessStateLabel
                 stage={client.stage}
@@ -94,6 +114,14 @@ export function PipelineClientCard({
               {client.staleScores ? (
                 <Badge variant="warning" className="text-[0.65rem]">
                   {STALE_SCORES_COPY.tableBadge}
+                </Badge>
+              ) : null}
+              {needsProfilePublish ? (
+                <Badge
+                  variant="outline"
+                  className="border-brand/30 bg-brand/10 text-[0.65rem] text-foreground"
+                >
+                  Publish profile
                 </Badge>
               ) : null}
             </div>
@@ -137,23 +165,48 @@ export function PipelineClientCard({
         </div>
 
         {/* Actions */}
-        <div className="flex shrink-0 items-center self-start lg:self-center">
+        <div className="flex shrink-0 flex-wrap items-center gap-2 self-start lg:self-center">
+          {needsProfilePublish ? (
+            <Button asChild size="sm">
+              <Link href={`/advisor/pipeline/${client.id}/report`}>
+                Publish profile
+              </Link>
+            </Button>
+          ) : reviewHref ? (
+            <Button asChild size="sm" variant="outline">
+              <Link href={reviewHref}>Review intake</Link>
+            </Button>
+          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="size-8 text-muted-foreground"
+                className="size-10 text-muted-foreground"
                 aria-label={`Actions for ${headline}`}
               >
-                <MoreHorizontal className="size-4" />
+                <MoreHorizontal className="size-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link href={`/advisor/pipeline/${client.id}`}>View client</Link>
               </DropdownMenuItem>
+              {needsProfilePublish ? (
+                <DropdownMenuItem asChild>
+                  <Link href={`/advisor/pipeline/${client.id}/report`}>
+                    Publish Risk Profile
+                  </Link>
+                </DropdownMenuItem>
+              ) : null}
+              {assessmentNextStep &&
+              assessmentNextStep.href !== `/advisor/pipeline/${client.id}` &&
+              !needsProfilePublish ? (
+                <DropdownMenuItem asChild>
+                  <Link href={assessmentNextStep.href}>{assessmentNextStep.ctaLabel}</Link>
+                </DropdownMenuItem>
+              ) : null}
               {reviewHref ? (
                 <DropdownMenuItem asChild>
                   <Link href={reviewHref}>Review intake</Link>

@@ -5,11 +5,31 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import type { AdvisorQuestionSource, IntakeQuestionBankMode } from "@prisma/client";
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ArrowDown, ArrowUp, GripVertical } from "lucide-react";
+import {
   createAdvisorPillarQuestion,
   deleteAdvisorPillarQuestion,
+  moveAdvisorPillarQuestionOrder,
+  reorderAdvisorPillarQuestionToPosition,
   updateAdvisorAssessmentQuestionBankMode,
   updateAdvisorPillarQuestion,
 } from "@/lib/actions/methodology-actions";
+import { cn } from "@/lib/utils";
 import { isEnterpriseAdvisorQuestion } from "@/lib/methodology/advisor-question-policy";
 import {
   customOnlyEmptyBankMessage,
@@ -61,6 +81,8 @@ type AssessmentQuestionActions = {
   createQuestion: typeof createAdvisorPillarQuestion;
   deleteQuestion: typeof deleteAdvisorPillarQuestion;
   updateBankMode: typeof updateAdvisorAssessmentQuestionBankMode;
+  moveQuestion: typeof moveAdvisorPillarQuestionOrder;
+  reorderQuestion: typeof reorderAdvisorPillarQuestionToPosition;
 };
 
 const defaultActions: AssessmentQuestionActions = {
@@ -68,6 +90,8 @@ const defaultActions: AssessmentQuestionActions = {
   createQuestion: createAdvisorPillarQuestion,
   deleteQuestion: deleteAdvisorPillarQuestion,
   updateBankMode: updateAdvisorAssessmentQuestionBankMode,
+  moveQuestion: moveAdvisorPillarQuestionOrder,
+  reorderQuestion: reorderAdvisorPillarQuestionToPosition,
 };
 
 function sourceBadgeLabel(sourceKind: AdvisorQuestionSource): string {
@@ -85,7 +109,7 @@ type MutationHandlers = {
   refreshAfterSuccess: (onSuccess?: () => void) => void;
 };
 
-function QuestionCard({
+function SortableQuestionCard({
   q,
   pending,
   actions,
@@ -93,6 +117,11 @@ function QuestionCard({
   handleMutationResult,
   refreshAfterSuccess,
   canDelete,
+  canReorder,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
 }: {
   q: AssessmentQuestionRow;
   pending: boolean;
@@ -101,53 +130,120 @@ function QuestionCard({
   handleMutationResult: MutationHandlers["handleMutationResult"];
   refreshAfterSuccess: MutationHandlers["refreshAfterSuccess"];
   canDelete: boolean;
+  canReorder: boolean;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }) {
   const isCustom = isCustomIntakeQuestionSource(q.sourceKind);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: q.id, disabled: !canReorder });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <Card className={!q.isVisible ? "opacity-70" : undefined}>
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        !q.isVisible && "opacity-70",
+        isDragging && "opacity-50 shadow-lg z-50"
+      )}
+    >
       <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-        <div className="space-y-1">
-          <CardTitle className="text-base">
-            {q.questionNumber ? `Question ${q.questionNumber}` : "Question"}
-          </CardTitle>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={isCustom ? "secondary" : "outline"}>
-              {sourceBadgeLabel(q.sourceKind)}
-            </Badge>
-            {!isCustom ? (
-              <Badge variant="outline">
-                {labelForAdvisorAssessmentAnswerType(q.answerType)}
+        <div className="flex items-start gap-3">
+          {canReorder && (
+            <button
+              type="button"
+              className="mt-1 cursor-grab touch-none text-muted-foreground hover:text-foreground focus:outline-none active:cursor-grabbing"
+              {...attributes}
+              {...listeners}
+              aria-label="Drag to reorder"
+            >
+              <GripVertical className="size-5" />
+            </button>
+          )}
+          <div className="space-y-1">
+            <CardTitle className="text-base">
+              {q.questionNumber ? `Question ${q.questionNumber}` : "Question"}
+            </CardTitle>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={isCustom ? "secondary" : "outline"}>
+                {sourceBadgeLabel(q.sourceKind)}
               </Badge>
-            ) : null}
+              {!isCustom ? (
+                <Badge variant="outline">
+                  {labelForAdvisorAssessmentAnswerType(q.answerType)}
+                </Badge>
+              ) : null}
+            </div>
           </div>
         </div>
-        {canDelete ? (
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            disabled={pending}
-            onClick={() => {
-              if (!window.confirm("Remove this custom question?")) return;
-              runPending(async () => {
-                const result = await actions.deleteQuestion(q.id);
-                if (!result.success) {
-                  toast.error(result.error ?? "Something went wrong");
-                  return;
-                }
-                if (result.switchedToPlatform) {
-                  toast.success(customOnlyEmptyBankMessage("assessment"));
-                } else {
-                  toast.success("Custom question removed");
-                }
-                refreshAfterSuccess();
-              });
-            }}
-          >
-            Delete
-          </Button>
-        ) : null}
+        <div className="flex shrink-0 items-center gap-1">
+          {canReorder ? (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                disabled={pending || !canMoveUp}
+                aria-label="Move question up"
+                onClick={onMoveUp}
+              >
+                <ArrowUp className="size-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                disabled={pending || !canMoveDown}
+                aria-label="Move question down"
+                onClick={onMoveDown}
+              >
+                <ArrowDown className="size-4" />
+              </Button>
+            </>
+          ) : null}
+          {canDelete ? (
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              disabled={pending}
+              onClick={() => {
+                if (!window.confirm("Remove this custom question?")) return;
+                runPending(async () => {
+                  const result = await actions.deleteQuestion(q.id);
+                  if (!result.success) {
+                    toast.error(result.error ?? "Something went wrong");
+                    return;
+                  }
+                  if (result.switchedToPlatform) {
+                    toast.success(customOnlyEmptyBankMessage("assessment"));
+                  } else {
+                    toast.success("Custom question removed");
+                  }
+                  refreshAfterSuccess();
+                });
+              }}
+            >
+              Delete
+            </Button>
+          ) : null}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2">
@@ -419,6 +515,9 @@ export function AssessmentQuestionsEditor({
   };
 
   const activeQuestions = filterAndOrderQuestionsByBankMode(questions, bankMode);
+  const reorderableIds = activeQuestions
+    .filter((q) => q.sourceKind === "CUSTOM")
+    .map((q) => q.id);
   const isPlatformOnlyMode = bankMode === "PLATFORM";
   const isCustomOnlyMode = bankMode === "CUSTOM";
   const savedCustomQuestionCount =
@@ -447,6 +546,54 @@ export function AssessmentQuestionsEditor({
     }
     setCreateFormKey((key) => key + 1);
     refreshAfterSuccess();
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const reorderableQuestions = activeQuestions.filter((q) => q.sourceKind === "CUSTOM");
+    const oldIndex = reorderableQuestions.findIndex((q) => q.id === active.id);
+    const newIndex = reorderableQuestions.findIndex((q) => q.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) return;
+
+    runPending(async () => {
+      const result = await actions.reorderQuestion(active.id as string, newIndex);
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to reorder question");
+      } else {
+        toast.success("Question order updated");
+        refreshAfterSuccess();
+      }
+    });
+  };
+
+  const handleMoveUp = (questionId: string) => {
+    runPending(async () => {
+      const result = await actions.moveQuestion(questionId, "up");
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to reorder question");
+        return;
+      }
+      refreshAfterSuccess();
+    });
+  };
+
+  const handleMoveDown = (questionId: string) => {
+    runPending(async () => {
+      const result = await actions.moveQuestion(questionId, "down");
+      if (!result.success) {
+        toast.error(result.error ?? "Failed to reorder question");
+        return;
+      }
+      refreshAfterSuccess();
+    });
   };
 
   return (
@@ -512,20 +659,40 @@ export function AssessmentQuestionsEditor({
               : "No assessment questions yet for this bank mode."}
         </p>
       ) : (
-        <div className="space-y-4">
-          {activeQuestions.map((q) => (
-            <QuestionCard
-              key={q.id}
-              q={q}
-              pending={pending}
-              actions={actions}
-              runPending={runPending}
-              handleMutationResult={handleMutationResult}
-              refreshAfterSuccess={refreshAfterSuccess}
-              canDelete={canDeleteCustom && isCustomIntakeQuestionSource(q.sourceKind)}
-            />
-          ))}
-        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={reorderableIds}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className={cn("space-y-4", pending && "opacity-60 pointer-events-none")}>
+              {activeQuestions.map((q) => {
+                const reorderPos = reorderableIds.indexOf(q.id);
+                const canReorder = reorderPos >= 0 && reorderableIds.length > 1;
+                return (
+                  <SortableQuestionCard
+                    key={q.id}
+                    q={q}
+                    pending={pending}
+                    actions={actions}
+                    runPending={runPending}
+                    handleMutationResult={handleMutationResult}
+                    refreshAfterSuccess={refreshAfterSuccess}
+                    canDelete={canDeleteCustom && isCustomIntakeQuestionSource(q.sourceKind)}
+                    canReorder={canReorder}
+                    canMoveUp={canReorder && reorderPos > 0}
+                    canMoveDown={canReorder && reorderPos < reorderableIds.length - 1}
+                    onMoveUp={() => handleMoveUp(q.id)}
+                    onMoveDown={() => handleMoveDown(q.id)}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {canAddCustomQuestions ? (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Mail, Phone, Globe } from "lucide-react";
-import { AkiliLogoLockup } from "@/components/home/AkiliLogoLockup";
+import { AkiliIcon } from "@/components/home/AkiliLogoLockup";
 import { MarketingSurfaceCard } from "@/components/marketing/MarketingSurfaceCard";
 import { clientPortalBrandingDisplayTitle } from "@/lib/client/client-portal-branding";
 import { buildTenantScopedPublicPath } from "@/lib/advisor/tenant-path-portals";
@@ -11,18 +11,72 @@ type BrandedPortalFooterProps = {
   branding: AdvisorBrandingData;
   className?: string;
   tenantPathPrefix?: string | null;
+  /** Hide public "Sign in" (e.g. already authenticated advisor workspace). */
+  hideSignIn?: boolean;
+  /** Compact mode for advisor workspace - single-line minimal footer. */
+  compact?: boolean;
+  /** Hex color for branding accents (used in compact mode). */
+  brandHex?: string | null;
 };
 
 export function BrandedPortalFooter({
   branding,
   className,
   tenantPathPrefix = null,
+  hideSignIn = false,
+  compact = false,
+  brandHex = null,
 }: BrandedPortalFooterProps) {
   const brandTitle = clientPortalBrandingDisplayTitle(branding);
   const year = new Date().getFullYear();
   const hasContact = Boolean(
     branding.supportEmail || branding.supportPhone || branding.websiteUrl,
   );
+
+  if (compact) {
+    return (
+      <footer
+        className={cn(
+          "mt-4 border-t pt-6 text-sm text-muted-foreground",
+          className,
+        )}
+        style={brandHex ? { borderTopColor: `${brandHex}30` } : undefined}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <p style={brandHex ? { color: brandHex, opacity: 0.85 } : undefined}>
+              &copy; {year} {brandTitle}
+            </p>
+            <div className="flex items-center gap-2">
+              <AkiliIcon size={18} className="opacity-60" />
+              <span className="text-xs text-muted-foreground">
+                Powered by AkiliRisk
+              </span>
+            </div>
+          </div>
+          <nav
+            className="flex flex-wrap items-center gap-x-4 gap-y-2"
+            aria-label="Footer links"
+          >
+            <Link
+              href={buildTenantScopedPublicPath("/privacy", tenantPathPrefix)}
+              className="text-xs underline-offset-4 hover:underline"
+              style={brandHex ? { color: brandHex, opacity: 0.75 } : undefined}
+            >
+              Privacy
+            </Link>
+            <Link
+              href={buildTenantScopedPublicPath("/terms", tenantPathPrefix)}
+              className="text-xs underline-offset-4 hover:underline"
+              style={brandHex ? { color: brandHex, opacity: 0.75 } : undefined}
+            >
+              Terms
+            </Link>
+          </nav>
+        </div>
+      </footer>
+    );
+  }
 
   return (
     <footer
@@ -34,13 +88,18 @@ export function BrandedPortalFooter({
       <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-4">
           <p className="font-display text-lg font-semibold text-foreground">{brandTitle}</p>
-          <p className="max-w-md text-sm leading-6">
-            {branding.emailFooterText ||
-              `Structured governance assessments and recommendations delivered through your advisor's AKILI workspace.`}
-          </p>
-          <div className="flex items-center gap-3 pt-1">
-            <AkiliLogoLockup className="h-auto w-full max-w-[120px] opacity-80" />
-            <span className="text-xs leading-5">Powered by AkiliRisk Platform</span>
+          {branding.emailFooterText ? (
+            <p className="max-w-md text-sm leading-6">{branding.emailFooterText}</p>
+          ) : (
+            <p className="max-w-md text-sm leading-6">
+              Comprehensive risk assessment and governance insights, delivered with care.
+            </p>
+          )}
+          <div className="flex items-center gap-2 pt-1">
+            <AkiliIcon size={24} className="opacity-75" />
+            <span className="text-xs leading-5 text-muted-foreground">
+              Powered by AkiliRisk Platform
+            </span>
           </div>
         </div>
 
@@ -90,12 +149,14 @@ export function BrandedPortalFooter({
           className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-end"
           aria-label="Portal footer links"
         >
-          <Link
-            href={buildTenantScopedPublicPath("/signin", tenantPathPrefix)}
-            className="font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Sign in
-          </Link>
+          {!hideSignIn ? (
+            <Link
+              href={buildTenantScopedPublicPath("/signin", tenantPathPrefix)}
+              className="font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Sign in
+            </Link>
+          ) : null}
           <Link
             href={buildTenantScopedPublicPath("/privacy", tenantPathPrefix)}
             className="font-medium text-foreground/90 underline-offset-4 hover:text-foreground hover:underline"

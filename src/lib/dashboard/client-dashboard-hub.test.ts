@@ -15,6 +15,7 @@ const baseInput = {
   assessmentScopePending: false,
   assessmentInProgress: true,
   assessmentComplete: false,
+  assessmentWaived: false,
   canViewRiskPreview: false,
   canViewSummary: false,
   canViewActionPlan: false,
@@ -68,6 +69,29 @@ describe("buildClientDashboardHeadline", () => {
     expect(copy.subheadline).toBe(
       "A tailored governance assessment for your household.",
     );
+  });
+
+  it("explains complete assessments waiting on preview unlock", () => {
+    const copy = buildClientDashboardHeadline({
+      ...baseInput,
+      assessmentInProgress: false,
+      assessmentComplete: true,
+      canViewRiskPreview: false,
+      canViewSummary: false,
+    });
+    expect(copy.headline).toMatch(/assessment is complete/i);
+    expect(copy.subheadline).toMatch(/risk preview/i);
+  });
+
+  it("directs scored clients to open risk preview", () => {
+    const copy = buildClientDashboardHeadline({
+      ...baseInput,
+      assessmentInProgress: false,
+      assessmentComplete: true,
+      canViewRiskPreview: true,
+    });
+    expect(copy.headline).toMatch(/preview is available/i);
+    expect(copy.subheadline).toMatch(/open risk preview/i);
   });
 });
 
@@ -226,5 +250,64 @@ describe("buildClientDashboardDestinations", () => {
     expect(intake?.href).toBe("/assessment");
     expect(intake?.disabled).toBeFalsy();
     expect(intake?.cta).toBe("Open assessment");
+  });
+});
+
+describe("assessment waiver (skip to reporting)", () => {
+  it("shows appropriate headline when assessment is waived", () => {
+    const copy = buildClientDashboardHeadline({
+      ...baseInput,
+      assessmentWaived: true,
+      assessmentInProgress: false,
+      assessmentComplete: false,
+    });
+    expect(copy.headline).toMatch(/recommendations/i);
+    expect(copy.subheadline).toMatch(/skipped/i);
+  });
+
+  it("shows summary available headline when assessment waived and can view summary", () => {
+    const copy = buildClientDashboardHeadline({
+      ...baseInput,
+      assessmentWaived: true,
+      assessmentInProgress: false,
+      assessmentComplete: false,
+      canViewSummary: true,
+    });
+    expect(copy.headline).toMatch(/recommendations are ready/i);
+  });
+
+  it("shows risk preview headline when assessment waived and can view risk preview", () => {
+    const copy = buildClientDashboardHeadline({
+      ...baseInput,
+      assessmentWaived: true,
+      assessmentInProgress: false,
+      assessmentComplete: false,
+      canViewRiskPreview: true,
+    });
+    expect(copy.headline).toMatch(/preliminary results/i);
+  });
+
+  it("marks assessment journey step as complete when waived", () => {
+    const journey = buildClientDashboardJourney({
+      ...baseInput,
+      assessmentWaived: true,
+      assessmentInProgress: false,
+      assessmentComplete: false,
+    });
+    const assessmentStep = journey.find((s) => s.label.toLowerCase().includes("assessment"));
+    expect(assessmentStep?.state).toBe("complete");
+  });
+
+  it("unlocks results when assessment is waived", () => {
+    const journey = buildClientDashboardJourney({
+      ...baseInput,
+      assessmentWaived: true,
+      assessmentInProgress: false,
+      assessmentComplete: false,
+      canViewRiskPreview: false,
+      canViewSummary: false,
+    });
+    const resultsStep = journey.find((s) => s.label.toLowerCase().includes("results"));
+    expect(resultsStep?.state).toBe("current");
   });
 });

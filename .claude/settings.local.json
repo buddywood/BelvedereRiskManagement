@@ -55,7 +55,30 @@
       "Read(//home/user/AKILIRisk/**)",
       "Bash(perl -0pi -e 's/\\\\] as Awaited<ReturnType<typeof prisma\\\\.user\\\\.findMany>>\\\\\\);/] as unknown as Awaited<ReturnType<typeof prisma.user.findMany>>\\);/g' src/lib/admin/control-center-alerts.test.ts)",
       "Bash(npx playwright *)",
-      "Bash(ls /home/user/AKILIRisk 2>&1 | head; echo \"EXIT:$?\")"
+      "Bash(ls /home/user/AKILIRisk 2>&1 | head; echo \"EXIT:$?\")",
+      "Bash(git worktree *)",
+      "Read(//Users/bwoodtalton/Projects/akili-phase2/**)",
+      "Bash(awk '/function recommendationRulesFromSnapshot/{f=1} f{print} f&&/^}/{exit}' src/lib/methodology/assessment-runtime.ts)",
+      "Bash(ln -s /Users/bwoodtalton/Projects/AkiliRisk/node_modules ./node_modules)",
+      "Bash(timeout 20 npx vercel whoami)",
+      "Bash(npx vercel *)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright test tests/smoke/intake-audio-endpoint.spec.ts --reporter=line)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright test tests/smoke/intake-mixed-mode.spec.ts --reporter=line)",
+      "Bash(PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npx playwright test tests/smoke/intake-audio-endpoint.spec.ts tests/smoke/intake-mixed-mode.spec.ts --reporter=line)",
+      "Bash(node scripts/reset-fresh-client-intake.js)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 npx playwright test tests/smoke/interactive-demo.spec.ts --reporter=list)",
+      "Bash(cd /tmp && npx playwright screenshot --viewport-size=\"1440,1000\" --wait-for-timeout=2500 \"http://localhost:3000/demo\" /tmp/demo-desktop.png 2>&1 | tail -3; npx playwright screenshot --viewport-size=\"390,844\" --full-page --wait-for-timeout=2500 \"http://localhost:3000/demo\" /tmp/demo-mobile.png 2>&1 | tail -3)",
+      "Read(//private/tmp/**)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 npx playwright test tests/smoke/interactive-demo.spec.ts tests/smoke/audience-organizations-practitioners.spec.ts --reporter=list)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 npx playwright test tests/smoke/interactive-demo.spec.ts tests/smoke/landing-hero-audience.spec.ts --reporter=list)",
+      "Bash(npm install *)",
+      "Read(//tmp/**)",
+      "Bash(BUILD_VERIFY_DIST_DIR=.next-verify npx next build)",
+      "Bash(python3 -c ' *)",
+      "Bash(git merge-tree *)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
     ]
   }
 }

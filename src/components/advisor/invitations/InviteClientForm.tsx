@@ -16,6 +16,7 @@ import type { ClientLimitSnapshot } from '@/lib/billing/client-limit';
 import { resolveDefaultAssessmentDomainSelection } from '@/lib/advisor/assessment-domain-option';
 import { sendInvitation } from '@/lib/actions/invitations';
 import { buildDefaultInvitationPersonalMessage } from '@/lib/schemas/invitation';
+import { EXTERNAL_CLIENT_ID_MAX_LENGTH } from '@/lib/advisor/external-client-id';
 import { Loader2 } from 'lucide-react';
 import { ShareableInvitationLinkAlert } from './ShareableInvitationLinkAlert';
 
@@ -24,6 +25,14 @@ const formSchema = z
     clientEmail: z.string().email('Valid email required'),
     clientName: z.string().optional(),
     personalMessage: z.string().max(2000, 'Message too long').optional(),
+    externalClientId: z
+      .string()
+      .max(EXTERNAL_CLIENT_ID_MAX_LENGTH, `Client ID must be at most ${EXTERNAL_CLIENT_ID_MAX_LENGTH} characters`)
+      .regex(
+        /^$|^[A-Za-z0-9][A-Za-z0-9._\-/# ]*$/,
+        'Client ID may use letters, numbers, spaces, and . _ - / #',
+      )
+      .optional(),
     intakeWaived: z.boolean().optional(),
     includedPillars: z.array(z.string()).optional(),
     focusAreas: z.array(z.string()).optional(),
@@ -76,6 +85,7 @@ export function InviteClientForm({
       clientEmail: '',
       clientName: '',
       personalMessage: '',
+      externalClientId: '',
       intakeWaived: false,
       includedPillars: [],
       focusAreas: [],
@@ -160,6 +170,9 @@ export function InviteClientForm({
       const formData = new FormData();
       formData.append('clientEmail', data.clientEmail);
       if (data.clientName) formData.append('clientName', data.clientName);
+      if (data.externalClientId?.trim()) {
+        formData.append('externalClientId', data.externalClientId.trim());
+      }
       if (data.personalMessage?.trim()) {
         formData.append('personalMessage', data.personalMessage.trim());
       }
@@ -263,6 +276,26 @@ export function InviteClientForm({
             />
             {errors.clientName && <p className={errorClassName}>{errors.clientName.message}</p>}
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="externalClientId" className={fieldLabelClassName}>
+            Your client ID
+          </label>
+          <p className={fieldHintClassName}>
+            Optional. Your firm&apos;s CRM or account ID for this client. Unique in your portfolio.
+          </p>
+          <Input
+            id="externalClientId"
+            {...register('externalClientId')}
+            placeholder="e.g. ACME-1042"
+            maxLength={EXTERNAL_CLIENT_ID_MAX_LENGTH}
+            aria-invalid={!!errors.externalClientId}
+            disabled={isSubmitting}
+          />
+          {errors.externalClientId && (
+            <p className={errorClassName}>{errors.externalClientId.message}</p>
+          )}
         </div>
 
         <div className="space-y-2">

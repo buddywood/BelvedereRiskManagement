@@ -26,6 +26,8 @@ export function parsePipelineFiltersFromSearchParams(
     ? (stageRaw as ClientWorkflowStage)
     : undefined;
 
+  const assignedAdvisorId = single("advisor")?.trim() || undefined;
+
   return {
     stage,
     stalled: single("stalled") === "1" ? true : undefined,
@@ -33,6 +35,7 @@ export function parsePipelineFiltersFromSearchParams(
     assessmentInProgress: single("assessmentInProgress") === "1" ? true : undefined,
     documentsNeeded: single("documentsNeeded") === "1" ? true : undefined,
     inactive: single("inactive") === "1" ? true : undefined,
+    assignedAdvisorId,
     search: single("search"),
     sortBy: "lastActivity",
     sortDir: "desc",
@@ -78,6 +81,9 @@ export function buildPipelineHref(
   if (filters.assessmentInProgress) sp.set("assessmentInProgress", "1");
   if (filters.documentsNeeded) sp.set("documentsNeeded", "1");
   if (filters.inactive) sp.set("inactive", "1");
+  if (filters.assignedAdvisorId?.trim()) {
+    sp.set("advisor", filters.assignedAdvisorId.trim());
+  }
   if (filters.search?.trim()) sp.set("search", filters.search.trim());
   if (page > 1) sp.set("page", String(page));
   const query = sp.toString();

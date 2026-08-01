@@ -30,6 +30,7 @@ export const ENTERPRISE_BRANDING_SELECT = {
   emailFooterText: true,
   supportEmail: true,
   supportPhone: true,
+  clientEmailFromAddress: true,
   brandingEnabled: true,
   customDomainEnabled: true,
   advisorMemberPersonalBrandingEnabled: true,
@@ -56,6 +57,7 @@ type EnterpriseBrandingRow = {
   emailFooterText: string | null;
   supportEmail: string | null;
   supportPhone: string | null;
+  clientEmailFromAddress: string | null;
   brandingEnabled: boolean;
   customDomainEnabled: boolean;
   advisorMemberPersonalBrandingEnabled?: boolean;
@@ -128,6 +130,7 @@ export function mapEnterpriseToBrandingData(
     emailFooterText: enterprise.emailFooterText,
     supportEmail: enterprise.supportEmail,
     supportPhone: enterprise.supportPhone,
+    clientEmailFromAddress: enterprise.clientEmailFromAddress,
     brandingEnabled: enterprise.brandingEnabled,
     customDomainEnabled: enterprise.customDomainEnabled ?? false,
   };
@@ -180,6 +183,7 @@ export async function resolveAdvisorBrandingForProfile(
       emailFooterText: true,
       supportEmail: true,
       supportPhone: true,
+      clientEmailFromAddress: true,
       customDomainEnabled: true,
     },
   });
@@ -246,10 +250,19 @@ export function mapResolvedBrandingToInvitationProfile(
   emailFooterText: string | null;
   supportEmail: string | null;
   supportPhone: string | null;
+  clientEmailFromAddress: string | null;
   brandingEnabled: boolean;
 } {
+  // Client-facing invitation copy must use the public brand name when set;
+  // advisorFirmName/firmName is often a stale seed (e.g. "Test Advisor Firm").
+  const displayFirm =
+    branding.brandName?.trim() ||
+    branding.advisorFirmName?.trim() ||
+    fallbackFirmName?.trim() ||
+    null;
+
   return {
-    firmName: branding.advisorFirmName ?? fallbackFirmName,
+    firmName: displayFirm,
     brandName: branding.brandName ?? null,
     tagline: branding.tagline ?? null,
     landingKicker: branding.landingKicker ?? null,
@@ -265,6 +278,7 @@ export function mapResolvedBrandingToInvitationProfile(
     emailFooterText: branding.emailFooterText ?? null,
     supportEmail: branding.supportEmail ?? null,
     supportPhone: branding.supportPhone ?? null,
+    clientEmailFromAddress: branding.clientEmailFromAddress ?? null,
     brandingEnabled: branding.brandingEnabled ?? true,
   };
 }

@@ -1,39 +1,53 @@
-import { Briefcase, Building2, Landmark, Palette, Scale, Sparkles, UsersRound } from "lucide-react";
+import { Briefcase, Building2, Landmark, Palette, Scale, Sparkles } from "lucide-react";
 import { MarketingSection } from "@/components/marketing/MarketingSection";
 
 const AUDIENCES = [
   {
-    title: "Wealth advisors & RIAs",
-    description: "Governance intelligence beyond portfolio planning.",
-    icon: Building2,
-  },
-  {
-    title: "CPAs & tax advisors",
-    description: "Tax, liquidity, and continuity visibility in one profile.",
-    icon: Briefcase,
-  },
-  {
-    title: "Estate attorneys & succession planners",
-    description: "Evidence-based succession and governance assessment.",
-    icon: Scale,
-  },
-  {
     title: "Family offices",
-    description: "Standardized governance across multi-generational clients.",
+    description:
+      "Standardize governance and continuity risk across the family enterprise and its principals.",
     icon: Landmark,
   },
   {
-    title: "Family leadership",
-    description: "Clear frameworks for succession and decision-making.",
-    icon: UsersRound,
+    title: "RIAs & wealth managers",
+    description: "Productize personal risk reviews beyond portfolio planning.",
+    icon: Building2,
+  },
+  {
+    title: "Broker-dealers",
+    description:
+      "Deliver a consistent risk methodology across private-client teams and branches.",
+    icon: Briefcase,
+  },
+  {
+    title: "Estate & succession partners",
+    description: "Evidence-based succession and authority assessment alongside the advisory team.",
+    icon: Scale,
   },
 ] as const;
 
 const TRUST_POINTS = [
-  { title: "Private by design", description: "Encrypted responses, firm-controlled visibility.", icon: Scale },
-  { title: "Structured methodology", description: "Governed risk domains — not a generic survey.", icon: Briefcase },
-  { title: "White-label & customizable", description: "Your branding, subdomain, intake, and methodology — clients experience your firm.", icon: Palette },
-  { title: "Action-oriented", description: "Prioritized risks and tailored recommendations.", icon: Sparkles },
+  {
+    title: "Private by design",
+    description: "Encrypted responses, practice-controlled visibility.",
+    icon: Scale,
+  },
+  {
+    title: "Structured methodology",
+    description: "Governed risk domains — not a generic survey.",
+    icon: Briefcase,
+  },
+  {
+    title: "Your domains, your questions",
+    description:
+      "Customize risk domains and assessment questions to match how your practice defines risk — not a one-size survey.",
+    icon: Palette,
+  },
+  {
+    title: "Action-oriented",
+    description: "Prioritized risks and tailored recommendations.",
+    icon: Sparkles,
+  },
 ] as const;
 
 export function LandingOutcomesSection() {
@@ -41,8 +55,8 @@ export function LandingOutcomesSection() {
     <MarketingSection
       id="who-its-for"
       kicker="Who it's for"
-      title="One platform. Multiple professional front doors."
-      description="AKILI gives affluent families and the firms that serve them a shared system of record for governance risk — discreet for clients, structured for professional delivery."
+      title="One platform for offices and wealth practices."
+      description="AKILI gives family offices, RIAs, and broker-dealers a shared system of record for household governance risk — discreet for clients, structured for professional delivery."
       className="!space-y-10"
     >
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
@@ -67,7 +81,7 @@ export function LandingOutcomesSection() {
 
         <div className="space-y-5 border-t border-border/60 pt-8 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-16">
           <p className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Why firms trust AKILI
+            Why practices trust AKILI
           </p>
           <ul className="space-y-4">
             {TRUST_POINTS.map(({ title, description, icon: Icon }) => (

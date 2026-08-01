@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   isAllowedAdminBrandingLogoS3Key,
+  isAllowedAdminEnterpriseLogoS3Key,
   resolveAdminAdvisorListBranding,
 } from "./advisor-list-branding";
 
@@ -54,5 +55,28 @@ describe("isAllowedAdminBrandingLogoS3Key", () => {
       isAllowedAdminBrandingLogoS3Key("advisors/profile-1/logos/123-logo.png"),
     ).toBe(true);
     expect(isAllowedAdminBrandingLogoS3Key("other/path.png")).toBe(false);
+  });
+});
+
+describe("isAllowedAdminEnterpriseLogoS3Key", () => {
+  it("allows enterprise-scoped and transferred advisor logo keys", () => {
+    expect(
+      isAllowedAdminEnterpriseLogoS3Key(
+        "enterprises/ent-1/logos/logo.png",
+        "ent-1",
+      ),
+    ).toBe(true);
+    expect(
+      isAllowedAdminEnterpriseLogoS3Key(
+        "advisors/profile-1/logos/logo.png",
+        "ent-1",
+      ),
+    ).toBe(true);
+    expect(
+      isAllowedAdminEnterpriseLogoS3Key(
+        "enterprises/other-ent/logos/logo.png",
+        "ent-1",
+      ),
+    ).toBe(false);
   });
 });

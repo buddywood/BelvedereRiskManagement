@@ -121,26 +121,32 @@ function JourneyTracker({ steps }: { steps: JourneyStep[] }) {
 
         if (step.disabled) {
           return (
-            <li
-              key={step.id}
-              className={className}
-              data-journey-step={step.id}
-              data-journey-state={step.state}
-              aria-disabled="true"
-              title={step.disabledReason ?? "This step is not available yet."}
-            >
-              {inner}
+            <li key={step.id} className="h-full">
+              <button
+                type="button"
+                disabled
+                className={cn(
+                  className,
+                  "block h-full w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                )}
+                data-journey-step={step.id}
+                data-journey-state={step.state}
+                aria-disabled="true"
+                title={step.disabledReason ?? "This step is not available yet."}
+              >
+                {inner}
+              </button>
             </li>
           );
         }
 
         return (
-          <li key={step.id}>
+          <li key={step.id} className="h-full">
             <Link
               href={step.href}
               className={cn(
                 className,
-                "block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               )}
               data-journey-step={step.id}
               data-journey-state={step.state}

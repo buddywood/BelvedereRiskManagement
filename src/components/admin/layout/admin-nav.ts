@@ -10,6 +10,8 @@ import {
   FileText,
   Gauge,
   Home,
+  Library,
+  LifeBuoy,
   ListChecks,
   Mic,
   Puzzle,
@@ -112,6 +114,8 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         icon: Database,
         superAdminOnly: true,
       },
+      { href: "/support", label: "Support", icon: LifeBuoy },
+      { href: "/docs", label: "Docs", icon: Library },
     ],
   },
 ];

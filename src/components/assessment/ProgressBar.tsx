@@ -114,7 +114,7 @@ export function OverallProgress({
           Assessment Progress
         </h3>
         <span className="text-sm text-muted-foreground">
-          {completedPillars.length} of {totalPillars} completed
+          {completedPillars.length} of {pillars.length || totalPillars} completed
         </span>
       </div>
       <div className="flex gap-2">
@@ -137,15 +137,10 @@ export function OverallProgress({
         })}
       </div>
       <div
-        className={cn(
-          "grid gap-1.5 text-center text-[10px] text-muted-foreground sm:text-xs",
-          pillars.length === 1 && "grid-cols-1",
-          pillars.length === 2 && "grid-cols-2",
-          pillars.length === 3 && "grid-cols-3",
-          pillars.length === 4 && "grid-cols-4",
-          pillars.length === 5 && "grid-cols-5",
-          pillars.length >= 6 && "grid-cols-6",
-        )}
+        className="grid gap-1.5 text-center text-[10px] text-muted-foreground sm:text-xs"
+        style={{
+          gridTemplateColumns: `repeat(${Math.max(pillars.length, 1)}, minmax(0, 1fr))`,
+        }}
       >
         {pillars.map((pillar, idx) => {
           const isCompleted = completedSet.has(pillar.id);
@@ -156,7 +151,7 @@ export function OverallProgress({
               key={pillar.id}
               title={pillar.label}
               className={cn(
-                "truncate",
+                "whitespace-normal break-words leading-tight",
                 isCurrent && !isCompleted && "font-medium text-foreground",
                 isCompleted && "text-emerald-600 dark:text-emerald-400"
               )}

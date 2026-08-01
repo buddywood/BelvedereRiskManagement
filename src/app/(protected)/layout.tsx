@@ -12,6 +12,8 @@ import { AkiliHeaderLockup } from "@/components/home/AkiliLogoLockup";
 import { BrandingUnavailable } from "@/components/branding/BrandingUnavailable";
 import { BrandedPortalFooter } from "@/components/branding/BrandedPortalFooter";
 import { ClientPortalRootTheme } from "@/components/branding/ClientPortalRootTheme";
+import { brandedPortalLogoImgSrc } from "@/lib/branding/branded-portal-logo";
+import { resolveBrandingLogoS3Key } from "@/lib/branding/advisor-logo-display";
 import { clientPortalBrandingDisplayTitle, clientPortalLogoImgSrc } from "@/lib/client/client-portal-branding";
 import { buildClientPortalMetadata } from "@/lib/client/client-portal-metadata";
 import { resolveClientPortalBrandingForUser } from "@/lib/client/resolve-client-portal-branding";
@@ -38,6 +40,11 @@ import { redirectIfPendingConsent } from "@/lib/advisor/require-consent-resolved
 import { getClientPageHeaderConfig } from "@/components/layout/client-page-header-config";
 import { SessionSync } from "@/components/auth/SessionSync";
 import { SignOutButton } from "@/components/auth/SignOutButton";
+import { resolveAdvisorWorkspaceBranding } from "@/lib/advisor/workspace-branding";
+import {
+  extractFacilitatedSessionId,
+  resolveFacilitatedSessionBrandingForLayout,
+} from "@/lib/facilitated/session-branding-for-layout";
 
 /** Shown above the workspace title when the client portal is advisor-branded (not the advisor tagline field). */
 const BRANDED_CLIENT_HEADER_KICKER = "Brought to you by AKILI Risk Intelligence";
@@ -121,6 +128,9 @@ export default async function ProtectedLayout({
   let clientAdvisorBranding: Awaited<
     ReturnType<typeof resolveClientPortalBrandingForUser>
   > = null;
+  let advisorWorkspaceBranding: Awaited<
+    ReturnType<typeof resolveAdvisorWorkspaceBranding>
+  > = null;
   let clientPortalSubdomain: string | null = null;
   let requiresBrandedPortal = false;
   let clientPortalSignedInLabel: string | null = null;
@@ -165,6 +175,30 @@ export default async function ProtectedLayout({
     hideIntakeNav = gate.intakeWaived;
   }
 
+  // Resolve advisor workspace branding when on subdomain or in facilitated session
+  if (showAdvisor && session.user.id) {
+    const [onTenant, tenantSubdomain, advisorPathname] = await Promise.all([
+      isTenantBrandedRequest(),
+      getTenantSubdomainFromHeaders(),
+      headers().then(h => h.get("x-akili-pathname") ?? ""),
+    ]);
+    if (onTenant) {
+      advisorWorkspaceBranding = await resolveAdvisorWorkspaceBranding(session.user.id);
+      clientPortalSubdomain = tenantSubdomain;
+    }
+
+    // Also apply branding for facilitated sessions (even from main domain)
+    if (!advisorWorkspaceBranding) {
+      const facilitatedSessionId = extractFacilitatedSessionId(advisorPathname);
+      if (facilitatedSessionId) {
+        advisorWorkspaceBranding = await resolveFacilitatedSessionBrandingForLayout(
+          facilitatedSessionId,
+          session.user.id,
+        );
+      }
+    }
+  }
+
   if (role === "USER" && requiresBrandedPortal && !clientAdvisorBranding) {
     return (
       <div className="min-h-screen py-3 sm:py-6">
@@ -175,29 +209,51 @@ export default async function ProtectedLayout({
     );
   }
 
-  const brandTitle = clientAdvisorBranding
-    ? clientPortalBrandingDisplayTitle(clientAdvisorBranding)
+  // Determine active branding (client portal or advisor workspace)
+  const activeBranding = clientAdvisorBranding ?? advisorWorkspaceBranding;
+  const brandTitle = activeBranding
+    ? clientPortalBrandingDisplayTitle(activeBranding)
     : "Partner portal";
-  const previewHex = clientAdvisorBranding
-    ? getPreviewBrandHex(clientAdvisorBranding)
+  const previewHex = activeBranding
+    ? getPreviewBrandHex(activeBranding)
     : null;
 
-  const compactWorkspaceHeader = showAdvisor && !clientAdvisorBranding;
+  const compactWorkspaceHeader = showAdvisor && !activeBranding;
 
   const pathname = (await headers()).get("x-akili-pathname") ?? "";
   const tenantPathPrefix = await getTenantPathPrefixFromHeaders();
   const onTenantHost = await isTenantBrandedRequest();
-  const isWhiteLabeledPortal = onTenantHost || Boolean(clientAdvisorBranding);
+  const isWhiteLabeledPortal = onTenantHost || Boolean(activeBranding);
+  // Advisor workspace includes /advisor/* plus shared routes like /support and /docs
+  const advisorWorkspaceRoutes = ["/advisor", "/support", "/docs"];
   const isAdvisorWorkspaceRoute =
-    showAdvisor && !clientAdvisorBranding && pathname.startsWith("/advisor");
+    showAdvisor && !clientAdvisorBranding && advisorWorkspaceRoutes.some(r => pathname.startsWith(r));
   const isAdminWorkspaceRoute = showAdmin && pathname.startsWith("/admin");
-  const isWorkspaceSlimHeaderRoute = isAdvisorWorkspaceRoute || isAdminWorkspaceRoute;
+  // Advisor workspace uses slim header unless branded
+  const isWorkspaceSlimHeaderRoute = (isAdvisorWorkspaceRoute && !advisorWorkspaceBranding) || isAdminWorkspaceRoute;
+  const isAdvisorBrandedWorkspace = isAdvisorWorkspaceRoute && !!advisorWorkspaceBranding;
+
+  // Logo src must never be a private S3 URL (browsers get AccessDenied).
+  // Tenant hosts: same unauthenticated proxy as the public landing page.
+  // Advisor workspace off-tenant: session-backed /api/advisor/logo (client
+  // endpoint requires USER and 403s for advisors).
+  const getLogoSrc = (branding: typeof activeBranding) => {
+    if (!branding) return null;
+    if (onTenantHost) {
+      return brandedPortalLogoImgSrc(branding);
+    }
+    if (isAdvisorBrandedWorkspace && resolveBrandingLogoS3Key(branding)) {
+      return "/api/advisor/logo";
+    }
+    return clientPortalLogoImgSrc(branding);
+  };
 
   const advisorFeatureFlags = showAdvisor ? await getPlatformFeatureFlags() : null;
   const clientSignedInIdentity =
     role === "USER" ? (clientPortalSignedInLabel ?? session.user.email ?? "") : null;
-  const showClientBrandedFooter =
-    role === "USER" && !!clientAdvisorBranding && !isWorkspaceSlimHeaderRoute;
+  const showBrandedFooter =
+    (role === "USER" && !!clientAdvisorBranding && !isWorkspaceSlimHeaderRoute) ||
+    isAdvisorBrandedWorkspace;
 
   const shell = (
     <>
@@ -243,113 +299,49 @@ export default async function ProtectedLayout({
                   }
                   userEmail={session.user.email ?? undefined}
                 />
-              ) : (
-                <div className="flex flex-col gap-6">
-                  <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
-                    <div className="min-w-0">
-                      {clientAdvisorBranding ? (
-                        <ClientPortalBrandedHeaderMark
-                          brandTitle={brandTitle}
-                          logoSrc={clientPortalLogoImgSrc(clientAdvisorBranding)}
-                          primaryHex={previewHex?.primary}
-                        />
-                      ) : (
-                        <Link
-                          href="/"
-                          className="inline-flex shrink-0 leading-none text-foreground transition-opacity duration-200 hover:opacity-80"
-                          aria-label="AKILI home"
-                        >
-                          <AkiliHeaderLockup height={40} />
-                        </Link>
-                      )}
-
-                      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-                        {previewHex ? (
-                          <p className="text-sm">
-                            <span
-                              style={{
-                                color: previewHex.primary,
-                                opacity: 0.72,
-                              }}
-                            >
-                              Signed in as{" "}
-                            </span>
-                            <span
-                              className="font-semibold break-all"
-                              style={{ color: previewHex.primary }}
-                            >
-                              {clientSignedInIdentity}
-                            </span>
-                          </p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            Signed in as{" "}
-                            <span className="font-semibold text-foreground break-all">
-                              {clientSignedInIdentity}
-                            </span>
-                          </p>
-                        )}
-                        <div className="flex flex-wrap items-center gap-3">
-                          <ThemeToggle
-                            className="shrink-0"
-                            style={
-                              previewHex
-                                ? {
-                                    borderColor: `${previewHex.primary}55`,
-                                    color: previewHex.primary,
-                                  }
-                                : undefined
-                            }
-                          />
-                          <SignOutButton
-                            variant="outline"
-                            size="sm"
-                            className="min-w-[110px] px-4"
-                            style={
-                              previewHex
-                                ? {
-                                    borderColor: `${previewHex.primary}55`,
-                                    color: previewHex.primary,
-                                  }
-                                : undefined
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="min-w-0 xl:max-w-[560px] xl:text-right">
+              ) : activeBranding ? (
+                /* Clean white-label header: logo left, user controls right, nav below */
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <ClientPortalBrandedHeaderMark
+                      brandTitle={brandTitle}
+                      logoSrc={getLogoSrc(activeBranding)}
+                      primaryHex={previewHex?.primary}
+                    />
+                    <div className="flex flex-wrap items-center gap-3">
                       <p
-                        className={cn(
-                          "mb-1",
-                          compactWorkspaceHeader
-                            ? "text-xs font-medium uppercase tracking-wide text-muted-foreground"
-                            : "editorial-kicker",
-                        )}
-                        style={
-                          previewHex ? { color: previewHex.primary } : undefined
-                        }
+                        className="text-sm"
+                        style={previewHex ? { color: previewHex.primary, opacity: 0.85 } : undefined}
                       >
-                        {clientAdvisorBranding
-                          ? BRANDED_CLIENT_HEADER_KICKER
-                          : "AKILI Risk Intelligence"}
+                        {isAdvisorBrandedWorkspace ? session.user.email : clientSignedInIdentity}
                       </p>
-                      <h1
-                        className={cn(
-                          compactWorkspaceHeader
-                            ? "text-xl font-semibold tracking-tight sm:text-2xl"
-                            : "text-2xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-3xl lg:text-[3.25rem]",
-                        )}
+                      <ThemeToggle
+                        className="shrink-0"
                         style={
-                          previewHex ? { color: previewHex.primary } : undefined
+                          previewHex
+                            ? {
+                                borderColor: `${previewHex.primary}55`,
+                                color: previewHex.primary,
+                              }
+                            : undefined
                         }
-                      >
-                        Client Workspace
-                      </h1>
+                      />
+                      <SignOutButton
+                        variant="outline"
+                        size="sm"
+                        style={
+                          previewHex
+                            ? {
+                                borderColor: `${previewHex.primary}55`,
+                                color: previewHex.primary,
+                              }
+                            : undefined
+                        }
+                      />
                     </div>
                   </div>
-
                   <div
-                    className="mt-3 border-t border-border/60 pt-4"
+                    className="border-t border-border/60 pt-4"
                     style={
                       previewHex
                         ? { borderTopColor: `${previewHex.primary}30` }
@@ -365,6 +357,54 @@ export default async function ProtectedLayout({
                       hideDocumentsNav={hideDocumentsNav}
                       hideIntakeNav={hideIntakeNav}
                       clientBrandHex={previewHex}
+                      advisorBrandedWorkspace={isAdvisorBrandedWorkspace}
+                      advisorFeatureFlags={advisorFeatureFlags}
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* Non-branded (Akili) header */
+                <div className="flex flex-col gap-6">
+                  <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end xl:gap-8">
+                    <div className="min-w-0">
+                      <Link
+                        href="/"
+                        className="inline-flex shrink-0 leading-none text-foreground transition-opacity duration-200 hover:opacity-80"
+                        aria-label="AKILI home"
+                      >
+                        <AkiliHeaderLockup height={40} />
+                      </Link>
+                      <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                        <p className="text-sm text-muted-foreground">
+                          Signed in as{" "}
+                          <span className="font-semibold text-foreground break-all">
+                            {clientSignedInIdentity}
+                          </span>
+                        </p>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <ThemeToggle className="shrink-0" />
+                          <SignOutButton variant="outline" size="sm" className="min-w-[110px] px-4" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="min-w-0 xl:max-w-[560px] xl:text-right">
+                      <p className="editorial-kicker mb-1">AKILI Risk Intelligence</p>
+                      <h1 className="text-xl font-semibold leading-[0.94] tracking-[-0.05em] sm:text-2xl md:text-3xl lg:text-[3.25rem]">
+                        Client Workspace
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="mt-3 border-t border-border/60 pt-4">
+                    <ProtectedNav
+                      showAdvisor={showAdvisor}
+                      showAdmin={showAdmin}
+                      restrictNavToIntake={restrictNavToIntake}
+                      assessmentUnlockedForClient={assessmentUnlockedForClient}
+                      hideProfilesNav={hideProfilesNav}
+                      hideDocumentsNav={hideDocumentsNav}
+                      hideIntakeNav={hideIntakeNav}
+                      clientBrandHex={null}
+                      advisorBrandedWorkspace={false}
                       advisorFeatureFlags={advisorFeatureFlags}
                     />
                   </div>
@@ -393,7 +433,7 @@ export default async function ProtectedLayout({
             </div>
           </main>
 
-          {showClientBrandedFooter && clientAdvisorBranding ? (
+          {showBrandedFooter && activeBranding ? (
             <div
               className={cn(
                 "px-4 lg:px-10",
@@ -401,12 +441,15 @@ export default async function ProtectedLayout({
                   ? "py-3 sm:px-6 sm:py-4"
                   : "pb-5 sm:px-8 sm:pb-8 lg:pb-10",
               )}
-              data-testid="client-portal-footer"
+              data-testid="branded-portal-footer"
             >
               <BrandedPortalFooter
-                branding={clientAdvisorBranding}
+                branding={activeBranding}
                 tenantPathPrefix={tenantPathPrefix}
                 className="mt-0"
+                hideSignIn={isAdvisorBrandedWorkspace || role === "USER"}
+                compact={isAdvisorBrandedWorkspace}
+                brandHex={previewHex?.primary ?? null}
               />
             </div>
           ) : null}
@@ -416,13 +459,13 @@ export default async function ProtectedLayout({
     </>
   );
 
-  if (clientAdvisorBranding) {
+  if (activeBranding) {
     return (
       <BrandingProvider
-        branding={clientAdvisorBranding}
+        branding={activeBranding}
         subdomain={clientPortalSubdomain}
       >
-        <ClientPortalRootTheme branding={clientAdvisorBranding} />
+        <ClientPortalRootTheme branding={activeBranding} />
         {shell}
       </BrandingProvider>
     );

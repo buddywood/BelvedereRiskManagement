@@ -15,9 +15,16 @@ import {
   wrapPlatformEmailContent,
 } from "@/lib/email/platform-email-layout";
 import { withPlatformLogoAttachment } from "@/lib/email/platform-email-logo";
-import { resolveFromEmail } from "@/lib/email/resolve-from-email";
+import { resolveFromEmail, resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
 import { logResendResult } from "@/lib/email/log-resend-result";
 import { formatEmailSubject } from "@/lib/email/format-email-subject";
+import {
+  wrapWhiteLabelEmailContent,
+  renderWhiteLabelEmailHeadline,
+  renderWhiteLabelEmailCta,
+  renderWhiteLabelEmailUrlFallback,
+  type WhiteLabelEmailBranding,
+} from "@/lib/email/white-label-email-layout";
 
 function appOriginFromUrl(url: string): string | null {
   try {
@@ -353,7 +360,8 @@ export function renderAdvisorIntakeNotificationHtml(
   advisorName: string,
   clientName: string,
   clientEmail: string | null,
-  reviewUrl: string
+  reviewUrl: string,
+  branding?: AdvisorNotificationBranding | null,
 ): string {
   const safeAdvisorName = escapeHtml(advisorName);
   const safeClientName = escapeHtml(clientName);
@@ -362,6 +370,32 @@ export function renderAdvisorIntakeNotificationHtml(
     ? `<strong style="color:#0f172a;">${safeClientName}</strong>
         (<a href="mailto:${safeClientEmail}" style="color:#18181b;text-decoration:none;">${safeClientEmail}</a>)`
     : `<strong style="color:#0f172a;">${safeClientName}</strong>`;
+
+  const isBranded = branding?.firmName || branding?.primaryColor;
+  const brandName = branding?.firmName || "AKILI Risk Intelligence";
+  const footerText = `This is an automated notification from ${escapeHtml(brandName)}.`;
+
+  if (isBranded) {
+    const whiteLabelBranding: WhiteLabelEmailBranding = {
+      brandName: branding?.firmName,
+      primaryColor: branding?.primaryColor,
+      secondaryColor: branding?.secondaryColor,
+      tagline: branding?.tagline,
+      logoUrl: branding?.logoUrl,
+    };
+    return wrapWhiteLabelEmailContent({
+      documentTitle: "New intake ready for review",
+      bodyHtml: `
+        ${renderWhiteLabelEmailHeadline("New intake ready for review", whiteLabelBranding)}
+        <p style="margin:0 0 16px;">Hello ${safeAdvisorName},</p>
+        <p style="margin:0 0 8px;">${clientFragment}
+          has completed their intake interview and is ready for your review.</p>
+        ${renderWhiteLabelEmailCta("Review intake", reviewUrl, whiteLabelBranding)}
+        ${renderWhiteLabelEmailUrlFallback(reviewUrl)}
+        <p style="margin:24px 0 0;font-size:14px;color:#64748b;">${footerText}</p>`,
+      branding: whiteLabelBranding,
+    });
+  }
 
   return wrapPlatformEmailContent({
     documentTitle: "New intake ready for review",
@@ -373,7 +407,7 @@ export function renderAdvisorIntakeNotificationHtml(
         has completed their intake interview and is ready for your review.</p>
       ${renderPlatformEmailCta({ label: "Review intake", href: reviewUrl })}
       ${renderPlatformEmailUrlFallback(reviewUrl)}
-      <p style="margin:24px 0 0;font-size:14px;color:#64748b;">This is an automated notification from AKILI Risk Intelligence.</p>`,
+      <p style="margin:24px 0 0;font-size:14px;color:#64748b;">${footerText}</p>`,
   });
 }
 
@@ -390,12 +424,22 @@ function sanitizeSubjectFragment(value: string): string {
   return stripped.length > 80 ? stripped.slice(0, 80) : stripped;
 }
 
+export type AdvisorNotificationBranding = {
+  clientEmailFromAddress?: string | null;
+  firmName?: string | null;
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
+  tagline?: string | null;
+  logoUrl?: string | null;
+};
+
 export async function sendAdvisorIntakeNotification(
   advisorEmail: string,
   advisorName: string,
   clientName: string,
   clientEmail: string | null,
-  reviewUrl: string
+  reviewUrl: string,
+  branding?: AdvisorNotificationBranding | null,
 ): Promise<void> {
   try {
     // Initialize Resend client at runtime (not module load time)
@@ -406,21 +450,34 @@ export async function sendAdvisorIntakeNotification(
       return;
     }
 
+    const fromAddress = branding?.clientEmailFromAddress
+      ? resolveWhiteLabelFromEmail(
+          { clientEmailFromAddress: branding.clientEmailFromAddress, brandName: branding.firmName },
+          branding.firmName ?? undefined,
+        )
+      : resolveFromEmail();
+
+    const isBranded = branding?.firmName || branding?.primaryColor;
+    const emailHtml = renderAdvisorIntakeNotificationHtml(
+      advisorName,
+      clientName,
+      clientEmail,
+      reviewUrl,
+      branding,
+    );
+
     const resend = new Resend(apiKey);
+    const emailPayload = {
+      from: fromAddress,
+      to: advisorEmail,
+      subject: formatEmailSubject(
+        `New Intake Ready for Review - ${sanitizeSubjectFragment(clientName)}`,
+      ),
+      html: emailHtml,
+    };
+
     const result = await resend.emails.send(
-      withPlatformLogoAttachment({
-        from: resolveFromEmail(),
-        to: advisorEmail,
-        subject: formatEmailSubject(
-          `New Intake Ready for Review - ${sanitizeSubjectFragment(clientName)}`,
-        ),
-        html: renderAdvisorIntakeNotificationHtml(
-          advisorName,
-          clientName,
-          clientEmail,
-          reviewUrl
-        ),
-      })
+      isBranded ? emailPayload : withPlatformLogoAttachment(emailPayload)
     );
     logResendResult("advisor-intake-notification", result);
   } catch (error) {

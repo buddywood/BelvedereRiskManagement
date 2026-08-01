@@ -6,7 +6,7 @@ import { getConfiguredSocialProfileUrls } from "@/lib/marketing/social-profiles"
 import { getPublicAppUrlFromEnv } from "@/lib/public-app-url";
 
 export const DEFAULT_PUBLIC_DESCRIPTION =
-  "Governance intelligence platform for modern family wealth — structured assessments, prioritized risks, and actionable recommendations for professional firms and families.";
+  "Governance intelligence for family offices, RIAs, and broker-dealers — structured household assessments, prioritized risks, and actionable recommendations.";
 
 export type PublicSitemapEntry = {
   path: string;
@@ -17,9 +17,23 @@ export type PublicSitemapEntry = {
 /** Public marketing routes included in sitemap.xml and allowed in robots.txt. */
 export const PUBLIC_SITEMAP_ENTRIES: PublicSitemapEntry[] = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
-  { path: "/families", changeFrequency: "monthly", priority: 0.85 },
-  { path: "/firms", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/advisors", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/organizations", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/practitioners", changeFrequency: "monthly", priority: 0.85 },
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/demo", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/demo/organizations", changeFrequency: "monthly", priority: 0.75 },
+  { path: "/demo/practitioners", changeFrequency: "monthly", priority: 0.75 },
+  { path: "/docs", changeFrequency: "weekly", priority: 0.85 },
+  { path: "/docs/quickstart-families", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/docs/quickstart-firms", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/docs/intake", changeFrequency: "monthly", priority: 0.65 },
+  { path: "/docs/assessment", changeFrequency: "monthly", priority: 0.65 },
+  { path: "/docs/dashboard", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/docs/invitations", changeFrequency: "monthly", priority: 0.65 },
+  { path: "/docs/pipeline", changeFrequency: "monthly", priority: 0.65 },
+  { path: "/docs/branding", changeFrequency: "monthly", priority: 0.6 },
+  { path: "/docs/security", changeFrequency: "monthly", priority: 0.6 },
   { path: "/about", changeFrequency: "monthly", priority: 0.8 },
   { path: "/contact", changeFrequency: "monthly", priority: 0.8 },
   { path: "/contact/demo", changeFrequency: "monthly", priority: 0.75 },
@@ -28,6 +42,8 @@ export const PUBLIC_SITEMAP_ENTRIES: PublicSitemapEntry[] = [
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
   { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
   { path: "/signup/advisor", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/signup/organization", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/signup/practitioner", changeFrequency: "monthly", priority: 0.7 },
 ];
 
 /** Paths that should not be indexed or crawled beyond marketing pages. */

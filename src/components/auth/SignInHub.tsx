@@ -453,15 +453,46 @@ function SignInHubContent({ defaultRole }: { defaultRole?: SignInRole }) {
 
   const panelCopy = rolePanelCopy(activeRole, firmName);
 
+  // Team invite accept: advisor credentials only — no Client/Platform tabs.
+  if (enterpriseTeamJoin) {
+    return (
+      <AuthPanel
+        eyebrow="Sign in"
+        title="Sign in to accept invitation"
+        description="Use the email address that received your team invitation. New invitees should create an account instead of signing in."
+        contentClassName="space-y-6"
+      >
+        {enterpriseJoinSignupHref ? (
+          <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3 text-sm leading-6 text-muted-foreground">
+            <p>
+              New to Akili?{" "}
+              <Link
+                href={scopePostAuthPath(enterpriseJoinSignupHref)}
+                className="font-semibold text-foreground hover:underline"
+              >
+                Create your team member account
+              </Link>{" "}
+              to accept this invitation.
+            </p>
+          </div>
+        ) : null}
+        <StaffCredentialsPanel
+          role="advisor"
+          callbackUrl={callbackUrl}
+          accountDeactivatedNotice={accountDeactivatedNotice}
+          passwordUpdatedNotice={passwordUpdatedNotice}
+          initialEmail={prefilledEmail}
+          enterpriseJoinSignupHref={null}
+        />
+      </AuthPanel>
+    );
+  }
+
   return (
     <AuthPanel
       eyebrow="Sign in"
-      title={enterpriseTeamJoin ? "Sign in to accept invitation" : "Welcome back"}
-      description={
-        enterpriseTeamJoin
-          ? "Use the email address that received your team invitation."
-          : signInHubDescription(firmName)
-      }
+      title="Welcome back"
+      description={signInHubDescription(firmName)}
       contentClassName="space-y-6"
     >
       <Tabs value={activeRole} onValueChange={handleRoleChange} className="gap-6">

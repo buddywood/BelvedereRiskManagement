@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
 import type { HeroAudience } from "@/components/home/hero/hero-audience-content";
 import { HeroAudienceProvider } from "@/components/home/hero/HeroAudienceContext";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
@@ -21,13 +22,16 @@ const MAX_WIDTH_CLASS = {
   wide: "max-w-6xl",
 } as const;
 
-export function PublicPageShell({
+export async function PublicPageShell({
   children,
   maxWidth = "wide",
   className,
   contentClassName,
   heroAudienceInitial,
 }: PublicPageShellProps) {
+  const headersList = await headers();
+  const isAkiliApex = headersList.get("x-branded-mode") !== "true";
+
   const inner = (
     <>
       <a href="#main-content" className="skip-to-content">
@@ -39,7 +43,7 @@ export function PublicPageShell({
         tabIndex={-1}
       >
         <div className="page-shell flex flex-col gap-14 sm:gap-20 lg:gap-24">
-          <SiteHeader />
+          <SiteHeader isAkiliApex={isAkiliApex} />
           <div
             className={cn(
               "mx-auto w-full space-y-12 sm:space-y-14",
@@ -50,7 +54,7 @@ export function PublicPageShell({
           >
             {children}
           </div>
-          <SiteFooter />
+          <SiteFooter isAkiliApex={isAkiliApex} />
         </div>
       </main>
     </>

@@ -9,7 +9,6 @@ export const HERO_AUDIENCE_STORAGE_KEY = "akili:hero-audience";
 export const HERO_AUDIENCE_QUERY_KEY = "audience";
 
 const VALID_AUDIENCES: ReadonlySet<HeroAudience> = new Set([
-  "families",
   "advisors",
   "overview",
 ]);
@@ -23,10 +22,16 @@ export function parseHeroAudienceParam(
 ): HeroAudience | null {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
-  if (normalized === "family" || normalized === "families" || normalized === "consumer") {
-    return "families";
-  }
-  if (normalized === "advisor" || normalized === "advisors") {
+  // Legacy consumer / firms aliases collapse into the merged Advisors surface.
+  if (
+    normalized === "family" ||
+    normalized === "families" ||
+    normalized === "consumer" ||
+    normalized === "advisor" ||
+    normalized === "advisors" ||
+    normalized === "firm" ||
+    normalized === "firms"
+  ) {
     return "advisors";
   }
   return isHeroAudience(normalized) ? normalized : null;
@@ -74,7 +79,7 @@ export function resolveHeroAudience({
   search = "",
   hash = "",
   storage = null,
-  defaultAudience = "families",
+  defaultAudience = "advisors",
 }: ResolveHeroAudienceInput): HeroAudience {
   const fromPath = parseHeroAudiencePath(pathname);
   if (fromPath) return fromPath;

@@ -69,11 +69,11 @@ export function MarketingNavAuthActions({
   }
 
   return (
-    <div className={cn("flex items-center gap-3", stacked && "flex-col", className)}>
+    <div className={cn("flex items-center gap-2", stacked && "flex-col", className)}>
       <Link
         href="/signin"
         className={cn(
-          "inline-flex h-10 items-center rounded-lg px-3 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground",
+          "inline-flex h-9 cursor-pointer items-center rounded-md px-2.5 text-[13px] font-medium text-muted-foreground transition-colors duration-200 hover:text-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
           stacked && "h-12 w-full justify-center text-base",
         )}
@@ -86,11 +86,11 @@ export function MarketingNavAuthActions({
         className={cn(
           stacked
             ? "h-12 w-full text-base"
-            : "h-9 rounded-lg px-4 text-[13px] font-semibold shadow-none",
+            : "h-9 rounded-full px-4 text-[13px] font-semibold shadow-none",
         )}
       >
-        <Link href="/start">
-          Start Assessment
+        <Link href="/demo">
+          Try the Demo
           <ArrowRight className="size-3.5" aria-hidden />
         </Link>
       </Button>

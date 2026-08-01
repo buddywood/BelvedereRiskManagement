@@ -21,6 +21,7 @@ import { requireFacilitatedSessionForAdvisor } from "@/lib/facilitated/session-a
 import {
   ensureScopedAssessmentForClient,
 } from "@/lib/facilitated/bootstrap-assessment-from-approval";
+import { facilitatedSessionStepPath } from "@/lib/facilitated/types";
 
 export async function facilitatedApproveScope(
   facilitatedSessionId: string,
@@ -183,6 +184,111 @@ export async function facilitatedGetPillarSelectContext(facilitatedSessionId: st
     return {
       success: false as const,
       error: error instanceof Error ? error.message : "Failed to load recommendations",
+    };
+  }
+}
+
+/**
+ * Skip assessment and go directly to reporting/recommendations.
+ * This sets the assessment waiver on the client's assignment and completes the session.
+ */
+export async function facilitatedSkipToReporting(facilitatedSessionId: string) {
+  try {
+    const { userId, role, email } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+    const facilitated = await requireFacilitatedSessionForAdvisor(
+      facilitatedSessionId,
+    );
+
+    if (facilitated.status !== "PILLAR_SELECT") {
+      return {
+        success: false as const,
+        error: "Skip to reporting is only available during risk domain selection",
+      };
+    }
+
+    const assignment = await prisma.clientAdvisorAssignment.findFirst({
+      where: {
+        clientId: facilitated.clientId,
+        advisorId: profile.id,
+        status: "ACTIVE",
+      },
+    });
+
+    if (!assignment) {
+      return { success: false as const, error: "Client assignment not found" };
+    }
+
+    const newWaivedAt = new Date();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.clientAdvisorAssignment.update({
+        where: { id: assignment.id },
+        data: {
+          assessmentWaivedAt: newWaivedAt,
+          assessmentWaivedByAdvisorId: profile.id,
+        },
+      });
+
+      await tx.facilitatedSession.update({
+        where: { id: facilitatedSessionId },
+        data: {
+          status: "COMPLETE",
+          completedAt: new Date(),
+        },
+      });
+    });
+
+    await writeAudit({
+      actor: { userId, role: role as UserRole, email: email ?? null },
+      action: AUDIT_ACTIONS.ASSESSMENT_WAIVER_SET,
+      entityType: "ClientAdvisorAssignment",
+      entityId: assignment.id,
+      beforeData: {
+        assessmentWaivedAt: assignment.assessmentWaivedAt?.toISOString() ?? null,
+        assessmentWaivedByAdvisorId: assignment.assessmentWaivedByAdvisorId,
+      },
+      afterData: {
+        assessmentWaivedAt: newWaivedAt.toISOString(),
+        assessmentWaivedByAdvisorId: profile.id,
+      },
+      metadata: {
+        clientId: facilitated.clientId,
+        advisorId: profile.id,
+        facilitatedSessionId,
+        waived: true,
+        source: "facilitated_session",
+      },
+    });
+
+    await writeAudit({
+      actor: { userId, role: role as UserRole, email: email ?? null },
+      action: AUDIT_ACTIONS.FACILITATED_SESSION_COMPLETE,
+      entityType: "FacilitatedSession",
+      entityId: facilitatedSessionId,
+      afterData: {
+        status: "COMPLETE",
+        assessmentSkipped: true,
+      },
+      metadata: {
+        clientId: facilitated.clientId,
+        facilitatedSessionId,
+      },
+    });
+
+    revalidatePath("/advisor/pipeline");
+    revalidatePath(`/advisor/pipeline/${facilitated.clientId}`);
+    revalidatePath("/advisor/facilitate");
+    revalidatePath(`/advisor/facilitate/${facilitatedSessionId}`);
+
+    return {
+      success: true as const,
+      redirectTo: facilitatedSessionStepPath(facilitatedSessionId, "COMPLETE"),
+    };
+  } catch (error) {
+    return {
+      success: false as const,
+      error: error instanceof Error ? error.message : "Failed to skip to reporting",
     };
   }
 }

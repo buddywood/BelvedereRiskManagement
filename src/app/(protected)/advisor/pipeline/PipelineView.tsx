@@ -9,7 +9,12 @@ import { usePipelineUpdates, usePipelineFilters } from "@/lib/pipeline/hooks";
 import { buildPipelineHref } from "@/lib/pipeline/parse-pipeline-filters";
 import { PipelineFilters as PipelineFiltersBar } from "@/components/pipeline/PipelineFilters";
 import { PipelineTable } from "@/components/pipeline/PipelineTable";
-import type { PipelineClient, PipelineFilters, PipelineMetrics } from "@/lib/pipeline/types";
+import type {
+  FirmAdvisorFilterOption,
+  PipelineClient,
+  PipelineFilters,
+  PipelineMetrics,
+} from "@/lib/pipeline/types";
 
 const PAGE_SIZE = 20;
 
@@ -21,6 +26,7 @@ interface PipelineViewProps {
   pseudonymousWorkspaceLabeling: boolean;
   documentRequirementsEnabled: boolean;
   monitoringEnabled: boolean;
+  firmAdvisorOptions?: FirmAdvisorFilterOption[];
 }
 
 export function PipelineView({
@@ -31,6 +37,7 @@ export function PipelineView({
   pseudonymousWorkspaceLabeling,
   documentRequirementsEnabled,
   monitoringEnabled,
+  firmAdvisorOptions = [],
 }: PipelineViewProps) {
   const router = useRouter();
 
@@ -105,6 +112,7 @@ export function PipelineView({
         pageSize={PAGE_SIZE}
         pseudonymousWorkspaceLabeling={pseudonymousWorkspaceLabeling}
         documentRequirementsEnabled={documentRequirementsEnabled}
+        firmAdvisorOptions={firmAdvisorOptions}
       />
 
       {/* Table */}
@@ -113,6 +121,7 @@ export function PipelineView({
           clients={pagedClients}
           showDocumentsColumn={documentRequirementsEnabled}
           monitoringEnabled={monitoringEnabled}
+          showAssignedAdvisor={firmAdvisorOptions.length > 0}
         />
       </div>
 

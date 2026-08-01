@@ -1,4 +1,6 @@
 import { ClientWorkflowStage, InvitationStatus, IntakeStatus, AssessmentStatus } from '@prisma/client';
+import type { DeliverablePhase } from '@prisma/client';
+import { isDeliverableProfilePublished } from '@/lib/assessment/plan-depth';
 
 interface ClientRawData {
   invitation?: {
@@ -17,31 +19,46 @@ interface ClientRawData {
     status: AssessmentStatus;
     completedAt?: Date | null;
     updatedAt: Date;
+    /** When PREVIEW, assessment is scored but Risk Profile is not published yet. */
+    deliverablePhase?: DeliverablePhase | null;
   };
   /** Mandatory (`required: true`) document counts for stage gating */
   documents?: {
     required: number;
     fulfilled: number;
   };
+  /** When set, engagement was manually marked complete by advisor (bypasses workflow). */
+  manuallyCompletedAt?: Date | null;
+  /** When set, advisor waived assessment — client skips directly to reporting after intake. */
+  assessmentWaivedAt?: Date | null;
 }
 
 /**
  * Determines the appropriate ClientWorkflowStage based on raw client data
  */
 export function computeClientStage(data: ClientRawData): ClientWorkflowStage {
-  const { invitation, intake, assessment, documents } = data;
+  const { invitation, intake, assessment, documents, manuallyCompletedAt, assessmentWaivedAt } = data;
+
+  // Manual completion override: advisor explicitly marked engagement as complete
+  if (manuallyCompletedAt) {
+    return 'COMPLETE';
+  }
 
   // Priority: later stages override earlier ones (assessment > intake > invitation)
 
   // Check assessment status first (highest priority)
   if (assessment) {
     if (assessment.status === 'COMPLETED') {
+      // Scored but not yet published → stay on assessment complete, not report.
+      if (!isDeliverableProfilePublished(assessment.deliverablePhase ?? 'PREVIEW')) {
+        return 'ASSESSMENT_COMPLETE';
+      }
       if (documents && documents.required > 0) {
         return documents.fulfilled < documents.required
           ? 'DOCUMENTS_REQUIRED'
           : 'COMPLETE';
       }
-      // Assessment finished and no mandatory documents (or none outstanding)
+      // Profile published and no mandatory documents outstanding
       return 'COMPLETE';
     }
     if (assessment.status === 'IN_PROGRESS') {
@@ -51,14 +68,22 @@ export function computeClientStage(data: ClientRawData): ClientWorkflowStage {
 
   // Check intake status (medium priority)
   if (intake) {
-    if (intake.waived) {
-      return 'INTAKE_COMPLETE';
-    }
-    if (
+    const intakeComplete =
+      intake.waived ||
       intake.submittedAt != null ||
       intake.status === 'COMPLETED' ||
-      intake.status === 'SUBMITTED'
-    ) {
+      intake.status === 'SUBMITTED';
+
+    if (intakeComplete) {
+      // Assessment waiver: skip assessment phase → go directly to report/complete
+      if (assessmentWaivedAt) {
+        if (documents && documents.required > 0) {
+          return documents.fulfilled < documents.required
+            ? 'DOCUMENTS_REQUIRED'
+            : 'COMPLETE';
+        }
+        return 'COMPLETE';
+      }
       return 'INTAKE_COMPLETE';
     }
     if (intake.status === 'IN_PROGRESS') {

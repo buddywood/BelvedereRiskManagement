@@ -4,6 +4,7 @@ import {
   createEnterpriseIntakeQuestion,
   deleteEnterpriseIntakeQuestion,
   moveEnterpriseIntakeQuestionOrder,
+  reorderEnterpriseIntakeQuestionToPosition,
   updateEnterpriseIntakeQuestion,
   updateEnterpriseIntakeQuestionBankMode,
 } from "@/lib/actions/enterprise-methodology-actions";
@@ -38,6 +39,7 @@ export function EnterpriseIntakeScriptEditor({
         deleteQuestion: deleteEnterpriseIntakeQuestion,
         updateBankMode: updateEnterpriseIntakeQuestionBankMode,
         moveQuestion: moveEnterpriseIntakeQuestionOrder,
+        reorderQuestion: reorderEnterpriseIntakeQuestionToPosition,
       }}
     />
   );

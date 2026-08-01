@@ -4,7 +4,11 @@ import { Files, Search } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { isSuperAdmin } from "@/lib/admin/auth";
 import { getClientAssignmentTargetsForAdmin } from "@/lib/admin/client-assignment-queries";
-import { getClientsForAdmin, type ClientsAdminScope } from "@/lib/admin/queries";
+import {
+  getClientAdvisorFilterOptionsForAdmin,
+  getClientsForAdmin,
+  type ClientsAdminScope,
+} from "@/lib/admin/queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,11 +27,17 @@ function toPositiveInt(raw: string | undefined, fallback: number): number {
   return Number.isFinite(value) && value > 0 ? value : fallback;
 }
 
-function clientsPageHref(scope: ClientsAdminScope, page: number, q?: string): string {
+function clientsPageHref(
+  scope: ClientsAdminScope,
+  page: number,
+  q?: string,
+  advisorId?: string,
+): string {
   const sp = new URLSearchParams();
   if (scope === "all") sp.set("filter", "all");
   if (page > 1) sp.set("page", String(page));
   if (q?.trim()) sp.set("q", q.trim());
+  if (advisorId?.trim()) sp.set("advisor", advisorId.trim());
   const query = sp.toString();
   return `/admin/clients${query ? `?${query}` : ""}`;
 }
@@ -35,27 +45,34 @@ function clientsPageHref(scope: ClientsAdminScope, page: number, q?: string): st
 export default async function AdminClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string; page?: string; q?: string }>;
+  searchParams: Promise<{ filter?: string; page?: string; q?: string; advisor?: string }>;
 }) {
   const sp = await searchParams;
   const scope: ClientsAdminScope = sp.filter === "all" ? "all" : "active";
   const requestedPage = toPositiveInt(sp.page, 1);
   const query = sp.q?.trim() ?? "";
+  const advisorId = sp.advisor?.trim() ?? "";
   const session = await auth();
   const superUser = isSuperAdmin(session);
-  const [clientsResult, assignmentTargetGroups] = await Promise.all([
+  const [clientsResult, assignmentTargetGroups, advisorOptions] = await Promise.all([
     getClientsForAdmin({
       scope,
       page: requestedPage,
       pageSize: PAGE_SIZE,
       q: query || undefined,
+      advisorId: advisorId || undefined,
     }),
     superUser ? getClientAssignmentTargetsForAdmin() : Promise.resolve([]),
+    getClientAdvisorFilterOptionsForAdmin(),
   ]);
   const { clients, totalCount, page: currentPage, pageSize } = clientsResult;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const hasNextPage = currentPage * pageSize < totalCount;
   const hasActiveSearch = Boolean(query);
+  const hasActiveAdvisorFilter = Boolean(advisorId);
+  const hasActiveFilters = hasActiveSearch || hasActiveAdvisorFilter;
+  const selectedAdvisorLabel =
+    advisorOptions.find((o) => o.id === advisorId)?.label ?? null;
 
   return (
     <div className="space-y-6">
@@ -66,39 +83,65 @@ export default async function AdminClientsPage({
             <span className="font-normal text-muted-foreground">({totalCount.toLocaleString()})</span>
           </h1>
           <div className="flex flex-wrap gap-2 text-sm">
-            <Button variant={scope === "active" ? "default" : "outline"} size="sm" className="h-8" asChild>
-              <Link href={clientsPageHref("active", 1, query)}>Active</Link>
+            <Button variant={scope === "active" ? "default" : "outline"} size="sm" className="h-10" asChild>
+              <Link href={clientsPageHref("active", 1, query, advisorId)}>Active</Link>
             </Button>
-            <Button variant={scope === "all" ? "default" : "outline"} size="sm" className="h-8" asChild>
-              <Link href={clientsPageHref("all", 1, query)}>All</Link>
+            <Button variant={scope === "all" ? "default" : "outline"} size="sm" className="h-10" asChild>
+              <Link href={clientsPageHref("all", 1, query, advisorId)}>All</Link>
             </Button>
           </div>
         </div>
-        <form method="GET" className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-md">
+        <form method="GET" className="flex w-full flex-col gap-2 sm:max-w-xl lg:max-w-2xl">
           {scope === "all" ? <input type="hidden" name="filter" value="all" /> : null}
-          <div className="relative min-w-0 flex-1">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden
-            />
-            <Input
-              name="q"
-              defaultValue={query}
-              placeholder="Search name, ID, or email"
-              className="h-9 pl-9"
-              aria-label="Search clients by name, ID, or email"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button type="submit" size="sm" className="h-9">
-              Search
-            </Button>
-            {hasActiveSearch ? (
-              <Button variant="ghost" size="sm" className="h-9" asChild>
-                <Link href={clientsPageHref(scope, 1)}>Clear</Link>
-              </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="relative min-w-0 flex-1">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
+              <Input
+                name="q"
+                defaultValue={query}
+                placeholder="Search name, ID, or email"
+                className="h-9 pl-9"
+                aria-label="Search clients by name, ID, or email"
+              />
+            </div>
+            {advisorOptions.length > 0 ? (
+              <select
+                name="advisor"
+                defaultValue={advisorId}
+                aria-label="Filter by assigned advisor"
+                className={cn(
+                  "h-9 w-full min-w-0 rounded-md border border-input bg-background px-3 text-sm shadow-sm",
+                  "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring sm:w-56",
+                )}
+              >
+                <option value="">All advisors</option>
+                {advisorOptions.map((advisor) => (
+                  <option key={advisor.id} value={advisor.id}>
+                    {advisor.label}
+                  </option>
+                ))}
+              </select>
             ) : null}
+            <div className="flex gap-2">
+              <Button type="submit" size="sm" className="h-9">
+                Search
+              </Button>
+              {hasActiveFilters ? (
+                <Button variant="ghost" size="sm" className="h-9" asChild>
+                  <Link href={clientsPageHref(scope, 1)}>Clear</Link>
+                </Button>
+              ) : null}
+            </div>
           </div>
+          {selectedAdvisorLabel ? (
+            <p className="text-xs text-muted-foreground">
+              Showing clients assigned to{" "}
+              <span className="font-medium text-foreground">{selectedAdvisorLabel}</span>
+            </p>
+          ) : null}
         </form>
       </div>
 
@@ -109,7 +152,7 @@ export default async function AdminClientsPage({
         <CardContent>
           {clients.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {hasActiveSearch ? "No clients match your search." : "No clients found."}
+              {hasActiveFilters ? "No clients match your filters." : "No clients found."}
             </p>
           ) : (
             <ul className="divide-y divide-border">
@@ -192,7 +235,7 @@ export default async function AdminClientsPage({
                             accountLabel="client"
                           />
                         ) : null}
-                        <AdminClientAccountActions clientId={c.id} deactivated={isDeactivated} />
+                        <AdminClientAccountActions clientId={c.id} deactivated={isDeactivated} isSuperAdmin={superUser} />
                       </div>
                     </div>
                   </li>
@@ -215,12 +258,16 @@ export default async function AdminClientsPage({
           <div className="flex flex-wrap items-center gap-2">
             {currentPage > 1 ? (
               <Button variant="outline" size="sm" asChild>
-                <Link href={clientsPageHref(scope, currentPage - 1, query)}>← Previous page</Link>
+                <Link href={clientsPageHref(scope, currentPage - 1, query, advisorId)}>
+                  ← Previous page
+                </Link>
               </Button>
             ) : null}
             {hasNextPage ? (
               <Button variant="outline" size="sm" asChild>
-                <Link href={clientsPageHref(scope, currentPage + 1, query)}>Next page →</Link>
+                <Link href={clientsPageHref(scope, currentPage + 1, query, advisorId)}>
+                  Next page →
+                </Link>
               </Button>
             ) : null}
           </div>

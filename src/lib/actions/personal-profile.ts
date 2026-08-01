@@ -61,6 +61,19 @@ export async function updateAdvisorPersonalDetails(data: unknown) {
       .map((part) => part?.trim())
       .filter(Boolean)
       .join(' ');
+    const nextFirmName = brandingReadOnly
+      ? profile.firmName?.trim() || null
+      : trimmedFirmName;
+    // When the advisor edits firm name in personal details, mirror it to
+    // brandName if brandName was empty or still matched the previous firmName
+    // (avoids invitation copy keeping a stale public brand label).
+    const previousFirm = profile.firmName?.trim() || null;
+    const previousBrand = profile.brandName?.trim() || null;
+    const shouldMirrorBrandName =
+      !brandingReadOnly &&
+      nextFirmName !== null &&
+      (!previousBrand || previousBrand === previousFirm);
+
     await prisma.$transaction([
       prisma.user.update({
         where: { id: session.user.id },
@@ -75,7 +88,8 @@ export async function updateAdvisorPersonalDetails(data: unknown) {
         data: {
           phone: phone?.trim() || null,
           jobTitle: jobTitle?.trim() || null,
-          firmName: brandingReadOnly ? profile.firmName?.trim() || null : trimmedFirmName,
+          firmName: nextFirmName,
+          ...(shouldMirrorBrandName ? { brandName: nextFirmName } : {}),
           licenseNumber: licenseNumber?.trim() || null,
         },
       }),
@@ -83,6 +97,7 @@ export async function updateAdvisorPersonalDetails(data: unknown) {
     revalidatePath('/settings');
     revalidatePath('/advisor/settings');
     revalidatePath('/advisor');
+    revalidatePath('/advisor/invitations');
     return { success: true, error: null };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to update advisor profile';

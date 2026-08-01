@@ -19,4 +19,13 @@ describe('resolveBrandingLogoS3Key', () => {
       })
     ).toBe('advisors/id1/logos/a.png');
   });
+
+  it('parses enterprise logo keys from private S3 logoUrl', () => {
+    expect(
+      resolveBrandingLogoS3Key({
+        logoUrl:
+          'https://test-akili-advisor-assets.s3.us-east-2.amazonaws.com/enterprises/ent1/logos/a.png',
+      })
+    ).toBe('enterprises/ent1/logos/a.png');
+  });
 });

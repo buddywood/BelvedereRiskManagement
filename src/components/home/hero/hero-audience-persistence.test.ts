@@ -7,11 +7,12 @@ import {
 
 describe("parseHeroAudienceParam", () => {
   it("accepts canonical and alias values", () => {
-    expect(parseHeroAudienceParam("families")).toBe("families");
-    expect(parseHeroAudienceParam("family")).toBe("families");
-    expect(parseHeroAudienceParam("consumer")).toBe("families");
     expect(parseHeroAudienceParam("advisors")).toBe("advisors");
     expect(parseHeroAudienceParam("advisor")).toBe("advisors");
+    expect(parseHeroAudienceParam("firms")).toBe("advisors");
+    expect(parseHeroAudienceParam("families")).toBe("advisors");
+    expect(parseHeroAudienceParam("family")).toBe("advisors");
+    expect(parseHeroAudienceParam("consumer")).toBe("advisors");
     expect(parseHeroAudienceParam("overview")).toBe("overview");
   });
 
@@ -24,7 +25,7 @@ describe("parseHeroAudienceParam", () => {
 describe("parseHeroAudienceHash", () => {
   it("parses hash fragments", () => {
     expect(parseHeroAudienceHash("#advisors")).toBe("advisors");
-    expect(parseHeroAudienceHash("families")).toBe("families");
+    expect(parseHeroAudienceHash("families")).toBe("advisors");
     expect(parseHeroAudienceHash("#overview")).toBe("overview");
   });
 });
@@ -33,22 +34,33 @@ describe("resolveHeroAudience", () => {
   it("prefers pathname over query, hash, and storage", () => {
     expect(
       resolveHeroAudience({
-        pathname: "/firms",
-        search: "?audience=families",
-        hash: "#advisors",
-        storage: "advisors",
+        pathname: "/advisors",
+        search: "?audience=overview",
+        hash: "#overview",
+        storage: "overview",
       })
+    ).toBe("advisors");
+  });
+
+  it("maps legacy /families pathname to advisors", () => {
+    expect(
+      resolveHeroAudience({
+        pathname: "/families",
+        search: "",
+        hash: "",
+        storage: null,
+      }),
     ).toBe("advisors");
   });
 
   it("prefers query over hash and storage", () => {
     expect(
       resolveHeroAudience({
-        search: "?audience=families",
+        search: "?audience=overview",
         hash: "#advisors",
         storage: "advisors",
       })
-    ).toBe("families");
+    ).toBe("overview");
   });
 
   it("uses hash when query is absent", () => {
@@ -56,7 +68,7 @@ describe("resolveHeroAudience", () => {
       resolveHeroAudience({
         search: "",
         hash: "#advisors",
-        storage: "families",
+        storage: "overview",
       })
     ).toBe("advisors");
   });
@@ -71,9 +83,9 @@ describe("resolveHeroAudience", () => {
     ).toBe("advisors");
   });
 
-  it("defaults to families", () => {
+  it("defaults to advisors", () => {
     expect(resolveHeroAudience({ search: "", hash: "", storage: null })).toBe(
-      "families"
+      "advisors"
     );
   });
 });

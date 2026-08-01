@@ -8,7 +8,6 @@ import { useHeroAudienceNav } from "@/components/home/hero/HeroAudienceContext";
 import { HeroFeatureCard } from "@/components/home/hero/HeroFeatureCard";
 import {
   ADVISOR_HERO_FEATURES,
-  HOME_HERO_FEATURES,
 } from "@/components/home/hero/home-hero-features";
 import {
   HERO_AUDIENCE_CONTENT,
@@ -31,9 +30,8 @@ const contentMotion = {
 };
 
 const HERO_FEATURE_CARDS: Partial<
-  Record<HeroAudience, typeof HOME_HERO_FEATURES>
+  Record<HeroAudience, typeof ADVISOR_HERO_FEATURES>
 > = {
-  families: HOME_HERO_FEATURES,
   advisors: ADVISOR_HERO_FEATURES,
 };
 

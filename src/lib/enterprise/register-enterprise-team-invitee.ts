@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import { getPasswordPolicy } from "@/lib/platform/password-policy-settings";
 import {
   EnterpriseTeamInviteError,
+  inviteeNeedsRegistration,
   resolveEnterpriseTeamInvite,
 } from "@/lib/enterprise/team-invite";
 
@@ -73,6 +74,8 @@ export async function registerEnterpriseTeamInvitee(
       status: true,
       userId: true,
       enterpriseId: true,
+      invitedAt: true,
+      createdAt: true,
       enterprise: { select: { name: true } },
     },
   });
@@ -89,13 +92,26 @@ export async function registerEnterpriseTeamInvitee(
     await prisma.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: membership.userId },
-        select: { id: true, password: true, advisorProfile: { select: { id: true, enterpriseId: true } } },
+        select: {
+          id: true,
+          password: true,
+          emailVerified: true,
+          createdAt: true,
+          advisorProfile: { select: { id: true, enterpriseId: true } },
+        },
       });
 
       if (!user) {
         throw new EnterpriseTeamInviteError("This team invitation is no longer valid.");
       }
-      if (user.password) {
+
+      const canSetPassword = inviteeNeedsRegistration({
+        hasPassword: Boolean(user.password?.trim()),
+        emailVerified: user.emailVerified,
+      });
+      // Pre-existing verified advisors sign in. Invite-provisioned stubs may
+      // set or replace a password until they accept the invite.
+      if (!canSetPassword) {
         throw new EnterpriseTeamInviteError(
           "This invitation already has an account. Sign in to continue."
         );

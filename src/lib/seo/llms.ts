@@ -12,22 +12,42 @@ const CORE_PAGES: LlmsLink[] = [
     title: "Home",
     path: "/",
     description:
-      "Platform overview for families and professional firms — governance intelligence, sample report output, and pricing preview.",
+      "Platform overview for family offices, RIAs, and broker-dealers — governance intelligence, sample report output, and pricing preview.",
   },
   {
-    title: "For Families",
-    path: "/families",
-    description: "Family-facing overview of the personal risk profile and structured governance assessment.",
+    title: "For Advisors",
+    path: "/advisors",
+    description:
+      "Governance intelligence workspace for family offices, RIAs, and broker-dealer teams serving affluent households.",
   },
   {
-    title: "For Firms",
-    path: "/firms",
-    description: "Advisor workspace overview for wealth advisors, CPAs, estate attorneys, and family offices.",
+    title: "For Organizations",
+    path: "/organizations",
+    description:
+      "Self-serve risk assessment for small businesses, non-profits, and NGOs assessing themselves without a dedicated risk team.",
+  },
+  {
+    title: "For Practitioners",
+    path: "/practitioners",
+    description:
+      "Productized risk assessments for consultants, fractional executives, and client-serving professionals under their own brand.",
   },
   {
     title: "How It Works",
     path: "/how-it-works",
     description: "Assess, analyze, and act — the AKILI engagement workflow across modular risk domains.",
+  },
+  {
+    title: "Interactive Demo",
+    path: "/demo",
+    description:
+      "Self-serve six-question sample of the household assessment, scored live on the platform maturity rubric — no signup, nothing saved. Organization and practitioner variants at /demo/organizations and /demo/practitioners.",
+  },
+  {
+    title: "Docs",
+    path: "/docs",
+    description:
+      "Product documentation for families and firms — quickstarts, intake, assessment, pipeline, branding, and sign-in.",
   },
   {
     title: "About",
@@ -53,9 +73,10 @@ const PRODUCT_PAGES: LlmsLink[] = [
     description: "Client entry point to begin a personal risk profile with an invite code.",
   },
   {
-    title: "Request a demo",
+    title: "Book a walkthrough",
     path: "/contact/demo",
-    description: "Schedule a walkthrough of the AKILI advisor workspace.",
+    description:
+      "Schedule a guided walkthrough of the AKILI advisor workspace with the team. For the self-serve interactive demo, see /demo.",
   },
   {
     title: "Enterprise contact",
@@ -66,6 +87,17 @@ const PRODUCT_PAGES: LlmsLink[] = [
     title: "Advisor signup",
     path: "/signup/advisor",
     description: "Self-serve registration for professional firms subscribing to the advisor platform.",
+  },
+  {
+    title: "Organization signup",
+    path: "/signup/organization",
+    description: "Self-serve registration for organizations assessing their own risk posture.",
+  },
+  {
+    title: "Practitioner signup",
+    path: "/signup/practitioner",
+    description:
+      "Self-serve registration for consultants and fractional executives running client assessments.",
   },
   {
     title: "Client sign in",

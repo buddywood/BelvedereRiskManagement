@@ -3,9 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const prismaSpies = vi.hoisted(() => ({
   enterpriseMembership: {
     findFirst: vi.fn(),
+    findUnique: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
   },
+  user: {
+    update: vi.fn(),
+  },
+  $transaction: vi.fn((ops: unknown[]) => Promise.all(ops)),
 }));
 
 const teamAccess = vi.hoisted(() => ({
@@ -17,6 +22,25 @@ vi.mock("@/lib/enterprise/team-access", () => teamAccess);
 vi.mock("@/lib/auth/user-email-crypto", () => ({
   decryptUserEmail: vi.fn(() => "advisor@firm.com"),
 }));
+vi.mock("@/lib/public-app-url", () => ({
+  resolvePublicAppUrl: vi.fn(async () => "https://preview.akilirisk.com"),
+}));
+vi.mock("@/lib/auth/password-update", () => ({
+  hashPasswordForStorage: vi.fn(async () => "$2a$12$mockhash"),
+}));
+vi.mock("@/lib/auth/temp-password", () => ({
+  generateTempPassword: vi.fn(() => "TempPass123"),
+}));
+vi.mock("@/lib/platform/password-policy-settings", () => ({
+  getPasswordPolicy: vi.fn(async () => ({
+    minLength: 8,
+    requireUppercase: true,
+    requireNumber: true,
+    requireSpecialCharacter: false,
+    revision: 1,
+    complianceNotice: null,
+  })),
+}));
 
 import {
   resendEnterpriseTeamInvite,
@@ -26,6 +50,8 @@ import {
 const MEMBERSHIP_ID = "membership-invited";
 const ACTOR_USER_ID = "owner-user";
 const ENTERPRISE_ID = "ent-1";
+
+const INVITEE_USER_ID = "invitee-user-1";
 
 function mockPendingInvite() {
   teamAccess.requireEnterpriseTeamManager.mockResolvedValue({
@@ -41,6 +67,11 @@ function mockPendingInvite() {
     user: { emailCiphertext: "cipher" },
     enterprise: { name: "Northbridge Elite" },
   });
+  prismaSpies.enterpriseMembership.findUnique.mockResolvedValue({
+    userId: INVITEE_USER_ID,
+  });
+  prismaSpies.enterpriseMembership.update.mockResolvedValue({});
+  prismaSpies.user.update.mockResolvedValue({});
 }
 
 describe("pending enterprise team invites", () => {
@@ -49,18 +80,16 @@ describe("pending enterprise team invites", () => {
     process.env.AUTH_SECRET = "test-auth-secret-for-enterprise-team-invites";
   });
 
-  it("resends a pending invite with a fresh link", async () => {
+  it("resends a pending invite with a fresh temp password", async () => {
     mockPendingInvite();
-    prismaSpies.enterpriseMembership.update.mockResolvedValue({});
 
     const result = await resendEnterpriseTeamInvite(ACTOR_USER_ID, MEMBERSHIP_ID);
 
     expect(result.inviteeEmail).toBe("advisor@firm.com");
-    expect(result.inviteUrl).toContain("/enterprise/join?token=");
-    expect(prismaSpies.enterpriseMembership.update).toHaveBeenCalledWith({
-      where: { id: MEMBERSHIP_ID },
-      data: { invitedAt: expect.any(Date) },
-    });
+    expect(result.role).toBe("ADVISOR");
+    expect(result.loginUrl).toBe("https://preview.akilirisk.com/signin");
+    expect(result.tempPassword).toBe("TempPass123");
+    expect(prismaSpies.$transaction).toHaveBeenCalled();
   });
 
   it("removes a pending invite", async () => {

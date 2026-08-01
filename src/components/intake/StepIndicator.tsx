@@ -25,20 +25,69 @@ export function StepIndicator({
     ? completedSteps
     : new Set(completedSteps);
 
-  // On small screens with many steps, show abbreviated version
-  const shouldShowAbbreviated = totalSteps > 8;
+  // On small screens with 5+ steps, show abbreviated version (mobile only)
+  const shouldShowAbbreviated = totalSteps >= 5;
+
+  // Always render both views - CSS handles visibility
+  const abbreviatedView = (
+    <div className={cn("flex items-center justify-center", shouldShowAbbreviated ? "sm:hidden" : "hidden", className)}>
+      <div className="flex items-center gap-2">
+        {/* Current step indicator */}
+        <div className="flex items-center justify-center size-3 rounded-full border-2 border-primary bg-primary/10 ring-2 ring-primary/20 animate-pulse" />
+        <span className="text-sm font-medium text-foreground">
+          {currentIndex + 1} of {totalSteps}
+        </span>
+      </div>
+    </div>
+  );
 
   if (shouldShowAbbreviated) {
+    // Return both abbreviated (mobile) and full (desktop) views
     return (
-      <div className={cn("flex items-center justify-center sm:hidden", className)}>
-        <div className="flex items-center gap-2">
-          {/* Current step indicator */}
-          <div className="flex items-center justify-center size-3 rounded-full border-2 border-primary bg-primary/10 ring-2 ring-primary/20 animate-pulse" />
-          <span className="text-sm font-medium text-foreground">
-            {currentIndex + 1} of {totalSteps}
-          </span>
+      <>
+        {abbreviatedView}
+        <div className={cn("hidden items-center justify-center sm:flex", className)}>
+          <div className="flex items-center gap-2 overflow-x-auto max-w-full px-4 sm:flex-nowrap flex-wrap">
+            {Array.from({ length: totalSteps }, (_, index) => {
+              const isCompleted = completedSet.has(index);
+              const isCurrent = index === currentIndex;
+              const isFuture = index > currentIndex && !isCompleted;
+
+              return (
+                <div key={index} className="flex items-center shrink-0">
+                  <div
+                    className={cn(
+                      "flex items-center justify-center rounded-full border-2 transition-all duration-200",
+                      {
+                        "size-6 bg-primary border-primary text-primary-foreground": isCompleted,
+                        "size-8 border-primary bg-primary/10 ring-2 ring-primary/20 animate-pulse": isCurrent,
+                        "size-4 border-muted-foreground/30 bg-muted/20": isFuture,
+                      }
+                    )}
+                  >
+                    {isCompleted && <Check className="size-3" />}
+                    {isCurrent && (
+                      <div className="size-2 rounded-full bg-primary" />
+                    )}
+                  </div>
+                  {index < totalSteps - 1 && (
+                    <div
+                      className={cn(
+                        "w-4 h-0.5 mx-1 transition-colors duration-200",
+                        {
+                          "bg-primary": isCompleted,
+                          "bg-primary/30": isCurrent,
+                          "bg-muted-foreground/20": isFuture,
+                        }
+                      )}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 

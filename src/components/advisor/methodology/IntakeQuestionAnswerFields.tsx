@@ -118,7 +118,6 @@ export function IntakeQuestionAnswerFields({
   }
 
   const showChoiceListEditor = intakeAnswerTypeCarriesOptions(answerType);
-  const isMultiSelect = answerType === "multi_select";
 
   return (
     <>
@@ -159,10 +158,8 @@ export function IntakeQuestionAnswerFields({
           <div className="space-y-1">
             <Label>Answer options</Label>
             <p className="text-xs text-muted-foreground">
-              {isMultiSelect
-                ? "Clients can select any that apply."
-                : "Clients pick one option."}{" "}
-              Add between {INTAKE_CHOICE_LIST_MIN} and {INTAKE_CHOICE_LIST_MAX} choices.
+              Clients can select any that apply. Add between {INTAKE_CHOICE_LIST_MIN} and{" "}
+              {INTAKE_CHOICE_LIST_MAX} choices.
             </p>
           </div>
           <div className="space-y-2">

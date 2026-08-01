@@ -413,6 +413,10 @@ export const FIELD_HELP = {
     title: "Email footer text",
     description: "Custom disclaimer or contact block appended to client-facing emails.",
   },
+  "branding-client-email-from": {
+    title: "Email sender address",
+    description: "Custom 'from' address for white-label emails (e.g. no-reply@yourfirm.com). This applies to client invitations, client notifications, team member invites, and advisor notifications. The domain must be verified in your email provider. When not set, emails are sent from the platform's default address.",
+  },
   "branding-colors": {
     title: "Brand colors",
     description:
@@ -428,8 +432,18 @@ export const FIELD_HELP = {
     title: "Invite email",
     description: "The team member receives an invitation to join your firm workspace at this address.",
   },
+  "team-invite-role": {
+    title: "Invite role",
+    description:
+      "Team members work their assigned clients. Firm administrators can manage the team, firm settings, and firm-wide portfolio view. Billing remains owner-only.",
+  },
 
   // Advisor — assessment lifecycle (stale scores vs reassessment)
+  "pipeline-assignment-workflow": {
+    title: "Your workflow with this client",
+    description:
+      "ACTIVE / INACTIVE is your assignment to this household — not a global client switch. Ending the workflow removes them from your active pipeline only; their account and history stay, and another advisor may still have an active assignment. Pipeline progress % is stage-based and separate from this status.",
+  },
   "pipeline-stale-scores": {
     title: "Stale scores",
     description:

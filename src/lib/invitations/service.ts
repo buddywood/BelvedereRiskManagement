@@ -162,6 +162,14 @@ export async function createAdvisorInvitation(
     await assertNoBlockingInvitationForEmail(advisorId, normalizedEmail, tx);
     await assertEnterpriseClientNotAlreadyInFirm(advisorId, normalizedEmail, tx);
 
+    const externalClientId = input.externalClientId?.trim() || null;
+    if (externalClientId) {
+      const { assertExternalClientIdAvailable } = await import(
+        "@/lib/advisor/external-client-id.server"
+      );
+      await assertExternalClientIdAvailable(advisorId, externalClientId, { db: tx });
+    }
+
     const code = generateInviteCode();
     const expiresAt = new Date(Date.now() + INVITATION_TTL_SEC * 1000);
 
@@ -186,6 +194,7 @@ export async function createAdvisorInvitation(
         includedPillars: waiverScope?.includedPillars ?? [],
         focusAreas: waiverScope?.focusAreas ?? [],
         clientName: input.clientName,
+        externalClientId,
       },
       include: {
         advisor: {

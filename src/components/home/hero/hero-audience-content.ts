@@ -1,16 +1,13 @@
-import {
-  contactIntentPath,
-  signInRolePath,
-} from "@/lib/marketing/friendly-urls";
+import { signInRolePath } from "@/lib/marketing/friendly-urls";
 
-export type HeroAudience = "families" | "advisors" | "overview";
+/** Marketing homepage audiences — professional buyers + workflow overview. */
+export type HeroAudience = "advisors" | "overview";
 
 export const HERO_AUDIENCE_OPTIONS: ReadonlyArray<{
   id: HeroAudience;
   label: string;
 }> = [
-  { id: "families", label: "For Families" },
-  { id: "advisors", label: "For Firms" },
+  { id: "advisors", label: "For Advisors" },
   { id: "overview", label: "Overview" },
 ] as const;
 
@@ -38,53 +35,21 @@ export type HeroAudienceCopy = {
 };
 
 export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
-  families: {
-    kicker: "For families",
-    headline:
-      "The governance intelligence platform for modern family wealth.",
-    supporting:
-      "A discreet personal risk profile that surfaces structural gaps and gives your professional team clear, actionable guidance.",
-    subtext: "12–15 minute structured assessment",
-    primaryCta: {
-      label: "Start Assessment",
-      href: "/start",
-      title: "Start your personal risk profile",
-    },
-    secondaryCta: {
-      label: "Sign In",
-      href: signInRolePath("client"),
-      title: "Sign in to your client account",
-    },
-    helperLinks: [
-      {
-        id: "advisor-review",
-        content: "link",
-        text: "Don't have an invite code?",
-        linkLabel: "Request a review",
-        href: "/request-review",
-      },
-      {
-        id: "privacy",
-        content: "text",
-        text: "Private and encrypted. Responses visible only to your assigned professional.",
-      },
-    ],
-  },
   advisors: {
-    kicker: "For firms",
+    kicker: "For family offices & wealth advisors",
     headline:
-      "Governance intelligence for modern professional practices.",
+      "Governance intelligence for family offices, RIAs, and broker-dealers.",
     supporting:
-      "One workspace for client profiles, assessment progress, risk scoring, and structured recommendations — for wealth advisors, CPAs, estate attorneys, succession planners, and family offices.",
+      "Run structured personal risk profiles across households from one workspace — invite clients, customize domains and questions to your methodology, score each household, and deliver prioritized recommendations. Built for single- and multi-family offices and wealth practices that need more than portfolio planning alone.",
     primaryCta: {
       label: "Advisor Sign In",
       href: signInRolePath("advisor"),
       title: "Sign in to your advisor workspace",
     },
     secondaryCta: {
-      label: "Request Demo",
-      href: contactIntentPath("demo"),
-      title: "Request a platform demonstration",
+      label: "Try the Demo",
+      href: "/demo",
+      title: "Try the interactive demo — no signup required",
     },
     helperLinks: [
       {
@@ -102,9 +67,9 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
         href: "/signup/advisor",
       },
       {
-        id: "family-path",
+        id: "client-invite",
         content: "link",
-        text: "Assessing as a family?",
+        text: "Been invited to complete a profile?",
         linkLabel: "Start assessment",
         href: "/start",
       },
@@ -114,13 +79,13 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
     kicker: "How it works",
     headline: "Assess. Analyze. Act.",
     supporting:
-      "Structured intake across up to ten modular risk domains — scoped and weighted per engagement — with prioritized recommendations for families and the professional firms that guide them.",
+      "Structured intake across up to ten modular risk domains — scoped and weighted per engagement — with prioritized recommendations for family offices, RIAs, and the households they serve.",
     overviewSteps: [
       {
         step: "1",
         title: "Assess",
         description:
-          "Families complete a guided profile. Firms choose which risk domains are in scope and manage intake from one workspace.",
+          "Clients complete a guided profile. Family offices and RIAs choose which domains are in scope — and can customize domains and questions to their methodology — then manage intake from one workspace.",
       },
       {
         step: "2",
@@ -132,33 +97,33 @@ export const HERO_AUDIENCE_CONTENT: Record<HeroAudience, HeroAudienceCopy> = {
         step: "3",
         title: "Act",
         description:
-          "Structured recommendations help firms and families address risks before they escalate.",
+          "Structured recommendations help practices and families address risks before they escalate.",
       },
     ],
     primaryCta: {
-      label: "Start Assessment",
-      href: "/start",
-      title: "Start your personal risk profile",
-    },
-    secondaryCta: {
       label: "Advisor Sign In",
       href: signInRolePath("advisor"),
       title: "Sign in to your advisor workspace",
+    },
+    secondaryCta: {
+      label: "Try the Demo",
+      href: "/demo",
+      title: "Try the interactive demo — no signup required",
     },
     helperLinks: [
       {
         id: "pricing",
         content: "link",
-        text: "Evaluating for your firm?",
+        text: "Evaluating for your practice?",
         linkLabel: "View pricing",
         href: "/pricing",
       },
       {
         id: "demo",
         content: "link",
-        text: "Want a walkthrough?",
-        linkLabel: "Request a demo",
-        href: contactIntentPath("demo"),
+        text: "Want to see it first?",
+        linkLabel: "Try the demo",
+        href: "/demo",
       },
     ],
   },

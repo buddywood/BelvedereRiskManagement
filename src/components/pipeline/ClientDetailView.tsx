@@ -21,23 +21,31 @@ import { Progress } from "@/components/ui/progress";
 import { WorkflowTimeline } from "./WorkflowTimeline";
 import { DocumentRequirements } from "./DocumentRequirements";
 import { ClientAuthControls } from "./ClientAuthControls";
+import { ClientExternalIdControls } from "./ClientExternalIdControls";
 import { ClientWorkflowStatusControls } from "./ClientWorkflowStatusControls";
 import { RestartIntakeButton } from "./RestartIntakeButton";
+import { ManualCompletionButton } from "./ManualCompletionButton";
+import { AssessmentWaiverButton } from "./AssessmentWaiverButton";
+import { PermanentDeleteClientButton } from "./PermanentDeleteClientButton";
 import { restartIntakeBlockedMessage } from "@/lib/intake/restart-intake-copy";
 import { PipelineProcessStateLabel } from "./PipelineProcessStateLabel";
 import type { ClientDetail } from "@/lib/pipeline/types";
 import { isDeliverableProfilePublished } from "@/lib/assessment/plan-depth";
 import { paletteForRiskLevel } from "@/lib/assessment/risk-color-palette";
 import { resolveAdvisorClientPipelineLabels } from "@/lib/pipeline/client-display";
+import { resolveAdvisorAssessmentNextStep } from "@/lib/pipeline/advisor-next-step";
 import { PSEUDONYMOUS_CLIENT_LABELING_NOTE } from "@/lib/advisor/pii-policy";
 import { RiskHeatMap } from "@/components/assessment/RiskHeatMap";
 import { TemplateList } from "@/components/reports/TemplateList";
+import { SIDEBAR_ACTION_BTN } from "@/components/pipeline/sidebar-action-button";
 
 interface ClientDetailViewProps {
   detail: ClientDetail;
   canSkipIntake?: boolean;
   documentRequirementsEnabled?: boolean;
   actionPlanEnabled?: boolean;
+  /** Enterprise OWNER/ADMIN can permanently delete clients in their firm */
+  canPermanentlyDelete?: boolean;
 }
 
 /**
@@ -67,6 +75,7 @@ export function ClientDetailView({
   canSkipIntake = false,
   documentRequirementsEnabled = true,
   actionPlanEnabled = true,
+  canPermanentlyDelete = false,
 }: ClientDetailViewProps) {
   const { client, timeline, documentRequirements, intakeDetails, assessmentDetails, advisorAssignment, assessmentDomainPicker, restartIntake } = detail;
   const assessmentDomains = assessmentDomainPicker.domains;
@@ -83,6 +92,20 @@ export function ClientDetailView({
   const restartIntakeBlockedReason = restartIntake.blockedReason
     ? restartIntakeBlockedMessage(restartIntake.blockedReason)
     : undefined;
+  const assessmentNextStep = resolveAdvisorAssessmentNextStep({
+    clientId: client.id,
+    assessmentId: assessmentDetails?.id,
+    assessmentStatus: assessmentDetails?.status,
+    deliverablePhase: assessmentDetails?.deliverablePhase,
+    documentsNeeded: client.documentsNeeded,
+    actionPlanEnabled,
+  });
+  const nextStepAlertClass =
+    assessmentNextStep?.tone === "primary"
+      ? "border-brand/30 bg-brand/5"
+      : assessmentNextStep?.tone === "success"
+        ? "border-emerald-500/30 bg-emerald-500/5"
+        : "border-border bg-muted/30";
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
@@ -97,10 +120,39 @@ export function ClientDetailView({
 
       {!assignmentActive ? (
         <Alert className="mb-6 border-muted-foreground/30 bg-muted/40">
-          <AlertTitle>Workflow inactive</AlertTitle>
+          <AlertTitle className="flex items-center gap-2">
+            Your workflow is inactive
+            <FieldHelp helpKey="pipeline-assignment-workflow" />
+          </AlertTitle>
           <AlertDescription>
-            This client is not in your active pipeline. History is read-only until you restore
-            the workflow.
+            This household is not in your active pipeline. Their account and
+            history are kept, and another advisor may still have an active
+            workflow with them. Use Restore to pipeline below to resume your
+            work — history stays read-only until then.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      {assignmentActive && assessmentNextStep ? (
+        <Alert
+          className={cn("mb-6", nextStepAlertClass)}
+          data-tour="pipeline-assessment-next-step"
+        >
+          <AlertTitle className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {assessmentNextStep.kicker}
+            </span>
+            <span>{assessmentNextStep.title}</span>
+          </AlertTitle>
+          <AlertDescription className="mt-2 space-y-3">
+            <p>{assessmentNextStep.detail}</p>
+            <Button
+              asChild
+              variant={assessmentNextStep.tone === "primary" ? "default" : "outline"}
+              className="sm:w-auto"
+            >
+              <Link href={assessmentNextStep.href}>{assessmentNextStep.ctaLabel}</Link>
+            </Button>
           </AlertDescription>
         </Alert>
       ) : null}
@@ -378,11 +430,21 @@ export function ClientDetailView({
                       riskLevel: p.riskLevel,
                     }))}
                     catalog={detail.pillarCatalog}
+                    includedPillarIds={advisorAssignment.includedPillars}
                   />
                 </div>
 
                 {assessmentDetails.completedAt && (
                   <div className="flex flex-col gap-2 border-t border-border pt-4 sm:flex-row sm:flex-wrap">
+                    {assessmentDetails.status === "COMPLETED" &&
+                    !isDeliverableProfilePublished(assessmentDetails.deliverablePhase) ? (
+                      <Button variant="default" className="justify-center sm:w-auto" asChild>
+                        <Link href={`/advisor/pipeline/${client.id}/report`}>
+                          <FileText className="mr-2 h-4 w-4" />
+                          Publish Risk Profile
+                        </Link>
+                      </Button>
+                    ) : null}
                     <Button variant="outline" className="justify-center sm:w-auto" asChild>
                       <Link href={`/advisor/analytics/${client.id}`}>
                         <BarChart3 className="mr-2 h-4 w-4" />
@@ -472,6 +534,11 @@ export function ClientDetailView({
             />
           ) : null}
 
+          <ClientExternalIdControls
+            clientId={client.id}
+            externalClientId={advisorAssignment.externalClientId}
+          />
+
           {/* Document Requirements */}
           {assignmentActive && documentRequirementsEnabled ? (
             <div data-tour="pipeline-documents">
@@ -481,14 +548,30 @@ export function ClientDetailView({
 
           {/* Quick Actions */}
           <Card data-tour="pipeline-quick-actions">
-            <CardHeader>
+            <CardHeader className="px-4 sm:px-5">
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 px-4 sm:px-5">
               <ClientWorkflowStatusControls
                 clientId={client.id}
                 status={advisorAssignment.status}
               />
+
+              {assignmentActive ? (
+                <ManualCompletionButton
+                  clientId={client.id}
+                  manuallyCompletedAt={advisorAssignment.manuallyCompletedAt}
+                />
+              ) : null}
+
+              {assignmentActive ? (
+                <AssessmentWaiverButton
+                  clientId={client.id}
+                  assessmentWaivedAt={advisorAssignment.assessmentWaivedAt}
+                  intakeComplete={intakeSubmitted || intakeWaived}
+                  assessmentStarted={assessmentStarted}
+                />
+              ) : null}
 
               {assignmentActive ? (
                 <RestartIntakeButton
@@ -498,26 +581,26 @@ export function ClientDetailView({
                 />
               ) : null}
 
-              <Button variant="outline" className="w-full justify-start" asChild>
+              <Button variant="outline" className={SIDEBAR_ACTION_BTN} asChild>
                 <Link href={assignmentActive ? "/advisor/pipeline" : "/advisor/pipeline?inactive=1"}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  <ArrowLeft className="h-3.5 w-3.5 shrink-0" />
                   {assignmentActive ? "Back to Pipeline" : "Back to inactive clients"}
                 </Link>
               </Button>
 
               {assessmentDetails?.completedAt && (
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button variant="outline" className={SIDEBAR_ACTION_BTN} asChild>
                   <Link href={`/advisor/analytics/${client.id}`}>
-                    <BarChart3 className="w-4 h-4 mr-2" />
+                    <BarChart3 className="h-3.5 w-3.5 shrink-0" />
                     Client Analytics
                   </Link>
                 </Button>
               )}
 
               {assessmentDetails?.completedAt && actionPlanEnabled ? (
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button variant="outline" className={SIDEBAR_ACTION_BTN} asChild>
                   <Link href={`/advisor/clients/${client.id}/guidance`}>
-                    <ClipboardList className="w-4 h-4 mr-2" />
+                    <ClipboardList className="h-3.5 w-3.5 shrink-0" />
                     Client Guidance
                   </Link>
                 </Button>
@@ -527,13 +610,32 @@ export function ClientDetailView({
                   of inline-downloading the latest published. The list page
                   surfaces every version + the Edit Draft + Publish flow. */}
               {assessmentDetails?.id && assessmentDetails.score !== null && (
-                <Button variant="outline" className="w-full justify-start" asChild>
+                <Button
+                  variant={
+                    assessmentDetails.status === "COMPLETED" &&
+                    !isDeliverableProfilePublished(assessmentDetails.deliverablePhase)
+                      ? "default"
+                      : "outline"
+                  }
+                  className={SIDEBAR_ACTION_BTN}
+                  asChild
+                >
                   <Link href={`/advisor/pipeline/${client.id}/report`}>
-                    <FileText className="w-4 h-4 mr-2" />
-                    Reports
+                    <FileText className="h-3.5 w-3.5 shrink-0" />
+                    {assessmentDetails.status === "COMPLETED" &&
+                    !isDeliverableProfilePublished(assessmentDetails.deliverablePhase)
+                      ? "Publish Risk Profile"
+                      : "Reports"}
                   </Link>
                 </Button>
               )}
+
+              {canPermanentlyDelete ? (
+                <PermanentDeleteClientButton
+                  clientId={client.id}
+                  clientName={clientLabels.headline}
+                />
+              ) : null}
 
             </CardContent>
           </Card>

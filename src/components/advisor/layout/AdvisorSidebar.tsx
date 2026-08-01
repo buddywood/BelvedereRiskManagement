@@ -66,12 +66,12 @@ export function AdvisorSidebar({
             type="button"
             variant="ghost"
             size="icon"
-            className="size-8 text-muted-foreground hover:text-foreground"
+            className="size-10 text-muted-foreground hover:text-foreground"
             onClick={toggle}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-expanded={!collapsed}
           >
-            {collapsed ? <PanelLeft className="size-4" /> : <PanelLeftClose className="size-4" />}
+            {collapsed ? <PanelLeft className="size-5" /> : <PanelLeftClose className="size-5" />}
           </Button>
         </div>
 

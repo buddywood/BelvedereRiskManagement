@@ -85,6 +85,7 @@ interface EnhancedBrandingFormProps {
     emailFooterText?: string | null;
     supportEmail?: string | null;
     supportPhone?: string | null;
+    clientEmailFromAddress?: string | null;
     logoUrl?: string | null;
     logoS3Key?: string | null;
     logoContentType?: string | null;
@@ -211,6 +212,7 @@ export function EnhancedBrandingForm({
     emailFooterText: profile.emailFooterText || '',
     supportEmail: profile.supportEmail || '',
     supportPhone: profile.supportPhone || '',
+    clientEmailFromAddress: profile.clientEmailFromAddress || '',
     logoUrl: profile.logoUrl || '',
   };
 
@@ -865,6 +867,26 @@ export function EnhancedBrandingForm({
                       <p className="text-sm text-destructive">{errors.emailFooterText.message}</p>
                     )}
                   </div>
+                  <div className="space-y-2">
+                    <LabelWithHelp htmlFor="clientEmailFromAddress" helpKey="branding-client-email-from">
+                      Email sender address
+                    </LabelWithHelp>
+                    <Input
+                      id="clientEmailFromAddress"
+                      type="email"
+                      {...register('clientEmailFromAddress')}
+                      placeholder="no-reply@yourcompany.com"
+                      readOnly={readOnly}
+                      disabled={readOnly}
+                      className={readOnly ? 'bg-muted/40' : undefined}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Custom &quot;from&quot; address for white-label emails (client invitations, team invites, and advisor notifications). Must be a verified domain in your email provider.
+                    </p>
+                    {errors.clientEmailFromAddress && (
+                      <p className="text-sm text-destructive">{errors.clientEmailFromAddress.message}</p>
+                    )}
+                  </div>
                 </SettingsSection>
               </TabsContent>
 
@@ -883,7 +905,8 @@ export function EnhancedBrandingForm({
               </TabsContent>
               </div>
 
-              {!readOnly ? (
+              {/* Domain tab actions apply immediately via SubdomainManager; hide branding Save/Reset there. */}
+              {!readOnly && activeSection !== 'domain' ? (
               <div className="sticky bottom-0 z-10 space-y-3 border-t border-border/60 bg-card/95 px-4 py-4 backdrop-blur-sm sm:px-6">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-3">
                   <Button

@@ -20,6 +20,10 @@ export type PipelineClient = {
   /** When true, workspace UI uses Client CL-… references instead of email for clients without a legal name. */
   pseudonymousWorkspaceLabeling: boolean;
   assignedAt: Date;
+  /** AdvisorProfile.id for the ClientAdvisorAssignment behind this row. */
+  assignedAdvisorProfileId: string;
+  /** Display label for the assigned advisor (name or email); firm portfolio only. */
+  assignedAdvisorLabel: string | null;
   stage: ClientWorkflowStage;
   progress: number;        // 0-100 percentage
   lastActivity: Date;      // Most recent status change
@@ -55,6 +59,8 @@ export type PipelineClient = {
     score: number | null;
     version: number | null;
     answersChangedAfterCompleteAt: Date | null;
+    /** Deliverable phase — PREVIEW until advisor publishes PROFILE. */
+    deliverablePhase: DeliverablePhase;
   } | null;
   // Document tracking
   documents: {
@@ -89,9 +95,17 @@ export type PipelineFilters = {
   documentsNeeded?: boolean;
   /** When true, list inactive (ended) client workflows instead of active ones */
   inactive?: boolean;
+  /** Firm portfolio: filter to clients assigned to this AdvisorProfile.id */
+  assignedAdvisorId?: string;
   search?: string;
   sortBy?: 'name' | 'stage' | 'progress' | 'lastActivity';
   sortDir?: 'asc' | 'desc';
+};
+
+/** Firm-scoped pipeline: options for the assigned-advisor filter. */
+export type FirmAdvisorFilterOption = {
+  id: string;
+  label: string;
 };
 
 import type { AdvisorAssessmentDomainPickerData, AssessmentDomainOption } from "@/lib/advisor/assessment-domain-option";
@@ -124,8 +138,14 @@ export type ClientDetail = {
     id: string;
     status: AssignmentStatus;
     intakeWaivedAt: Date | null;
+    /** When set, engagement was manually marked complete by advisor. */
+    manuallyCompletedAt: Date | null;
+    /** When set, assessment was waived — client skips directly to reporting. */
+    assessmentWaivedAt: Date | null;
     includedPillars: string[];
     focusAreas: string[];
+    /** Advisor CRM / external client ID (not system clientReferenceCode). */
+    externalClientId: string | null;
   };
   /** Active methodology pillars for waiver/scope pickers (from DB). */
   assessmentDomains: AssessmentDomainOption[];

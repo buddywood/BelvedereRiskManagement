@@ -49,6 +49,8 @@ export const AUDIT_ACTIONS = {
   USER_UPDATE: "user.update",
   USER_SOFT_DELETE: "user.soft_delete",
   USER_RESTORE: "user.restore",
+  /** Super admin permanently deletes a client account and all related data. */
+  USER_HARD_DELETE: "user.hard_delete",
   USER_PORTAL_ACCESS_TOGGLE: "user.portal_access_toggle",
   /** Super admin marks or clears a client/advisor test account (excluded from dashboards). */
   USER_TEST_ACCOUNT_TOGGLE: "user.test_account_toggle",
@@ -62,6 +64,10 @@ export const AUDIT_ACTIONS = {
    *  the demoted owner becomes ADMIN. Also re-points the tenant subdomain's
    *  advisorId and the firm's billing contact to the new owner. */
   ENTERPRISE_OWNER_CHANGE: "enterprise.owner_change",
+  /** Platform admin promotes or demotes a firm member between ADMIN and ADVISOR.
+   *  beforeData/afterData capture membershipId + previous/next role. OWNER is
+   *  never changed by this action (use ENTERPRISE_OWNER_CHANGE). */
+  ENTERPRISE_ADMIN_ROLE_CHANGE: "enterprise.admin_role_change",
 
   // ── Admin user provisioning actions (super admin only) ────────────────────
   /** Super admin creates a new admin user account. */
@@ -193,6 +199,8 @@ export const AUDIT_ACTIONS = {
    *  client. metadata.email captures the destination (hashed by the
    *  redactor); metadata.tokenId references the new MagicLinkToken row. */
   CLIENT_MAGIC_LINK_REISSUE: "client.magic_link_reissue",
+  /** Advisor sets or clears their CRM / external client ID on an assignment. */
+  CLIENT_EXTERNAL_ID_UPDATE: "client.external_id_update",
 
   // ── Advisor workflow actions (P4) ─────────────────────────────────────────
   INTAKE_REVIEW_STARTED: "intake.review_started",
@@ -202,6 +210,14 @@ export const AUDIT_ACTIONS = {
   INTAKE_REJECT: "intake.reject",
   INTAKE_RESTART: "intake.restart",
   INTAKE_WAIVER_SET: "intake.waiver_set",
+  /** Advisor waived assessment — client skips directly to reporting after intake. */
+  ASSESSMENT_WAIVER_SET: "assessment.waiver_set",
+  /** Advisor removed assessment waiver — client must complete assessment. */
+  ASSESSMENT_WAIVER_UNDO: "assessment.waiver_undo",
+  /** Advisor manually marked engagement complete, skipping remaining workflow steps. */
+  ENGAGEMENT_MANUAL_COMPLETE: "engagement.manual_complete",
+  /** Advisor undid manual completion, returning engagement to workflow-determined state. */
+  ENGAGEMENT_MANUAL_COMPLETE_UNDO: "engagement.manual_complete_undo",
   /** Epic 5.11: advisor-led live session lifecycle. */
   FACILITATED_SESSION_START: "facilitated_session.start",
   FACILITATED_SESSION_RESUME: "facilitated_session.resume",

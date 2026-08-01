@@ -26,6 +26,7 @@ export const ADVISOR_BRANDING_PROFILE_SELECT = {
   emailFooterText: true,
   supportEmail: true,
   supportPhone: true,
+  clientEmailFromAddress: true,
   brandingEnabled: true,
   customDomainEnabled: true,
 } as const;
@@ -51,6 +52,7 @@ type AdvisorBrandingProfileRow = {
   emailFooterText: string | null;
   supportEmail: string | null;
   supportPhone: string | null;
+  clientEmailFromAddress: string | null;
   brandingEnabled: boolean;
   customDomainEnabled: boolean;
 };
@@ -80,6 +82,7 @@ export function mapAdvisorProfileToBrandingData(
     emailFooterText: advisor.emailFooterText,
     supportEmail: advisor.supportEmail,
     supportPhone: advisor.supportPhone,
+    clientEmailFromAddress: advisor.clientEmailFromAddress,
     brandingEnabled: advisor.brandingEnabled,
     customDomainEnabled: advisor.customDomainEnabled ?? false,
   };

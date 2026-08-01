@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   advisorTierFeatureBillingHref,
+  resolveAdvisorDashboardHref,
   tierIncludesFeature,
   tierUpgradeMessage,
 } from "./tier-features";
@@ -37,5 +38,22 @@ describe("advisorTierFeatureBillingHref", () => {
     expect(advisorTierFeatureBillingHref("IMPLEMENTATION_ENGAGEMENTS")).toBe(
       "/advisor/billing?checkout_plan=BUSINESS&checkout_cycle=MONTHLY"
     );
+  });
+});
+
+describe("resolveAdvisorDashboardHref", () => {
+  it("routes Intelligence+ to portfolio analytics", () => {
+    expect(resolveAdvisorDashboardHref("INTELLIGENCE")).toBe("/advisor/dashboard");
+  });
+
+  it("routes lower tiers to Overview", () => {
+    expect(resolveAdvisorDashboardHref("BUSINESS")).toBe("/advisor");
+    expect(resolveAdvisorDashboardHref("ESSENTIALS")).toBe("/advisor");
+  });
+
+  it("falls back to Overview when governance dashboard is disabled", () => {
+    expect(
+      resolveAdvisorDashboardHref("INTELLIGENCE", { governanceDashboardEnabled: false })
+    ).toBe("/advisor");
   });
 });

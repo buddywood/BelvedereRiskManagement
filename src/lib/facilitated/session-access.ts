@@ -11,8 +11,18 @@ import {
   resolvePortfolioScope,
 } from "@/lib/enterprise/portfolio-access";
 
+export type FacilitatedSessionBranding = {
+  brandName: string | null;
+  primaryColor: string | null;
+  secondaryColor: string | null;
+  accentColor: string | null;
+  logoUrl: string | null;
+  tagline: string | null;
+};
+
 export type FacilitatedSessionContext = FacilitatedSession & {
   client: { id: string; name: string | null; emailCiphertext: string };
+  branding: FacilitatedSessionBranding;
 };
 
 /** Load a session only when the advisor has portfolio access to the client. */
@@ -20,7 +30,32 @@ export async function getFacilitatedSessionForAdvisor(
   sessionId: string,
   advisorUserId: string,
 ): Promise<FacilitatedSessionContext | null> {
-  const profile = await getAdvisorProfileOrThrow(advisorUserId);
+  const profile = await prisma.advisorProfile.findUnique({
+    where: { userId: advisorUserId },
+    select: {
+      id: true,
+      brandName: true,
+      primaryColor: true,
+      secondaryColor: true,
+      accentColor: true,
+      logoUrl: true,
+      tagline: true,
+      brandingEnabled: true,
+      enterprise: {
+        select: {
+          brandName: true,
+          primaryColor: true,
+          secondaryColor: true,
+          accentColor: true,
+          logoUrl: true,
+          tagline: true,
+          brandingEnabled: true,
+        },
+      },
+    },
+  });
+  if (!profile) return null;
+
   const scope = await resolvePortfolioScope(advisorUserId);
   if (!scope) return null;
 
@@ -40,7 +75,18 @@ export async function getFacilitatedSessionForAdvisor(
   const access = await findPortfolioAssignmentForClient(scope, session.clientId);
   if (!access) return null;
 
-  return session;
+  const enterpriseBranding = profile.enterprise?.brandingEnabled ? profile.enterprise : null;
+  const advisorBranding = profile.brandingEnabled ? profile : null;
+  const branding: FacilitatedSessionBranding = {
+    brandName: enterpriseBranding?.brandName ?? advisorBranding?.brandName ?? null,
+    primaryColor: enterpriseBranding?.primaryColor ?? advisorBranding?.primaryColor ?? null,
+    secondaryColor: enterpriseBranding?.secondaryColor ?? advisorBranding?.secondaryColor ?? null,
+    accentColor: enterpriseBranding?.accentColor ?? advisorBranding?.accentColor ?? null,
+    logoUrl: enterpriseBranding?.logoUrl ?? advisorBranding?.logoUrl ?? null,
+    tagline: enterpriseBranding?.tagline ?? advisorBranding?.tagline ?? null,
+  };
+
+  return { ...session, branding };
 }
 
 export async function requireFacilitatedSessionForAdvisor(

@@ -59,6 +59,7 @@ describe("provisionClientFromInviteCode", () => {
       intakeWaived: false,
       includedPillars: [],
       focusAreas: [],
+      externalClientId: null,
     });
 
     const result = await provisionClientFromInviteCode("ic-1", "client@example.com");
@@ -82,6 +83,7 @@ describe("provisionClientFromInviteCode", () => {
       intakeWaived: false,
       includedPillars: [],
       focusAreas: [],
+      externalClientId: "ACME-1042",
     });
     vi.mocked(findUserByEmail).mockResolvedValue(null);
     prismaSpies.user.create.mockResolvedValue({ id: "user-1" });
@@ -98,7 +100,15 @@ describe("provisionClientFromInviteCode", () => {
         }),
       }),
     );
-    expect(prismaSpies.clientAdvisorAssignment.create).toHaveBeenCalled();
+    expect(prismaSpies.clientAdvisorAssignment.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          clientId: "user-1",
+          advisorId: "adv-1",
+          externalClientId: "ACME-1042",
+        }),
+      }),
+    );
   });
 
   it("allows an existing client to reuse an exhausted invite", async () => {
@@ -114,12 +124,18 @@ describe("provisionClientFromInviteCode", () => {
       intakeWaived: false,
       includedPillars: [],
       focusAreas: [],
+      externalClientId: null,
     });
     vi.mocked(findUserByEmail).mockResolvedValue({
       id: "user-1",
       role: "USER",
     } as Awaited<ReturnType<typeof findUserByEmail>>);
-    prismaSpies.clientAdvisorAssignment.findFirst.mockResolvedValue({ id: "asg-1" });
+    prismaSpies.clientAdvisorAssignment.findFirst.mockResolvedValue({
+      id: "asg-1",
+      intakeWaivedAt: null,
+      includedPillars: [],
+      externalClientId: null,
+    });
 
     const result = await provisionClientFromInviteCode("ic-1", "client@example.com");
 

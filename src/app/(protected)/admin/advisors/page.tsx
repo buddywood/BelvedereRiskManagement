@@ -97,7 +97,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "active" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors">Active</Link>
@@ -105,7 +105,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "attention" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors?filter=attention">
@@ -116,7 +116,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "enterprise" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors?filter=enterprise">
@@ -127,7 +127,7 @@ export default async function AdminAdvisorsPage({
             <Button
               variant={filter === "all" ? "default" : "outline"}
               size="sm"
-              className="h-8"
+              className="h-10"
               asChild
             >
               <Link href="/admin/advisors?filter=all">All</Link>
@@ -274,8 +274,8 @@ export default async function AdminAdvisorsPage({
                     aria-hidden
                   />
                 ) : null}
-                <CardHeader className="flex flex-col gap-4 space-y-0 pb-4 pt-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex min-w-0 flex-1 gap-4">
+                <CardHeader className="flex flex-col gap-4 space-y-0 pb-4 pt-5 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex min-w-0 gap-4 lg:min-w-[280px] lg:max-w-[50%]">
                     {showPublicLogo ? (
                       // eslint-disable-next-line @next/next/no-img-element -- public CDN URLs only
                       <img
@@ -322,20 +322,21 @@ export default async function AdminAdvisorsPage({
                         {initials}
                       </div>
                     )}
-                    <div className="min-w-0 space-y-1">
+                    <div className="min-w-0 flex-1 space-y-1">
                       <CardTitle
                         className={cn(
-                          "text-base leading-snug",
+                          "truncate text-base leading-snug",
                           isDeactivated && "text-muted-foreground"
                         )}
+                        title={a.name ?? a.email}
                       >
                         {a.name ?? a.email}
                       </CardTitle>
                       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-                        <span>{a.email}</span>
+                        <span className="max-w-full truncate" title={a.email}>{a.email}</span>
                         {a.emailVerified ? (
                           <span
-                            className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-500"
+                            className="inline-flex shrink-0 items-center gap-1 text-xs text-green-600 dark:text-green-500"
                             title={`Verified ${a.emailVerified.toLocaleDateString()}`}
                           >
                             <CheckCircle className="size-3.5 shrink-0" aria-hidden />
@@ -343,7 +344,7 @@ export default async function AdminAdvisorsPage({
                           </span>
                         ) : (
                           <span
-                            className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-500"
+                            className="inline-flex shrink-0 items-center gap-1 text-xs text-amber-600 dark:text-amber-500"
                             title="Email not verified — advisor cannot sign in until they complete first sign-in"
                           >
                             <Clock className="size-3.5 shrink-0" aria-hidden />
@@ -354,22 +355,22 @@ export default async function AdminAdvisorsPage({
                       {profile ? (
                         <p
                           className={cn(
-                            "pt-1 text-sm",
+                            "flex items-baseline gap-1 pt-1 text-sm",
                             isDeactivated && "text-muted-foreground"
                           )}
                         >
                           <span
                             className={cn(
-                              "font-medium",
+                              "min-w-0 truncate font-medium",
                               isDeactivated ? "text-muted-foreground" : "text-foreground"
                             )}
+                            title={brandDisplayName ?? "Practice"}
                           >
                             {brandDisplayName ?? "Practice"}
                           </span>
-                          <span className="text-muted-foreground">
-                            {" "}
-                            · {profile._count.clientAssignments} client
-                            {profile._count.clientAssignments === 1 ? "" : "s"}
+                          <span className="shrink-0 whitespace-nowrap text-muted-foreground">
+                            {" · "}
+                            {profile._count.clientAssignments} client{profile._count.clientAssignments === 1 ? "" : "s"}
                           </span>
                         </p>
                       ) : (

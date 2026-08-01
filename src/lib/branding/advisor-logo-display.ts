@@ -8,7 +8,9 @@ export function looksLikeAdvisorBrandingS3Url(url: string): boolean {
     const host = u.hostname.toLowerCase();
     const path = u.pathname.toLowerCase();
     const s3VirtualHost = host.includes('.s3.') && host.endsWith('.amazonaws.com');
-    const pathOk = path.includes('/advisors/') && path.includes('/logos/');
+    const pathOk =
+      path.includes('/logos/') &&
+      (path.includes('/advisors/') || path.includes('/enterprises/'));
     return s3VirtualHost && pathOk;
   } catch {
     return false;

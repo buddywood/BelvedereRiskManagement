@@ -192,9 +192,9 @@ export function GuidanceCustomization({
   const categories = [...new Set(recommendations.map((r) => r.category))];
 
   return (
-    <div className="flex gap-0 rounded-lg border border-border/70 overflow-hidden min-h-[600px]">
-      {/* Left panel: catalog browse (40%) */}
-      <div className="w-[40%] shrink-0 bg-muted/40 overflow-y-auto border-r border-border/60">
+    <div className="flex flex-col gap-0 rounded-lg border border-border/70 overflow-hidden min-h-[400px] lg:min-h-[600px] lg:flex-row">
+      {/* Left panel: catalog browse */}
+      <div className="max-h-[300px] shrink-0 overflow-y-auto border-b border-border/60 bg-muted/40 lg:max-h-none lg:w-[40%] lg:border-b-0 lg:border-r">
         <div className="p-4 space-y-4">
           {categories.map((category) => (
             <div key={category} className="space-y-2">

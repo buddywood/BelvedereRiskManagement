@@ -19,7 +19,7 @@ describe("resolveSignOutRedirectTo", () => {
   });
 
   it("falls back to pathname", () => {
-    expect(resolveSignOutRedirectTo({ pathname: "/firms" })).toBe("/firms");
+    expect(resolveSignOutRedirectTo({ pathname: "/advisors" })).toBe("/advisors");
   });
 
   it("defaults to home", () => {

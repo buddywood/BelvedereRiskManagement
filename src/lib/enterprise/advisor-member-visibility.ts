@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { EnterpriseRole } from "@prisma/client";
+import type { EnterpriseRole, NotificationType } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 import { prisma } from "@/lib/db";
@@ -153,6 +153,29 @@ export function isEnterpriseMemberVisibilityEnabled(
 }
 
 /**
+ * Product tours are shown to team members but hidden for firm admins (OWNER/ADMIN).
+ * Solo advisors always see product tours.
+ * 
+ * Rationale: Firm admins (OWNER/ADMIN) are experienced users who configure the
+ * platform for their team. They don't need onboarding pop-ups. Team members
+ * benefit from the guided tours when first exploring features.
+ */
+export function isEnterpriseProductToursEnabledForRole(
+  context: EnterpriseMemberVisibilityContext,
+): boolean {
+  // Solo advisors (no enterprise) always see product tours
+  if (!context.enterpriseId) return true;
+  
+  // Firm admins (OWNER/ADMIN) don't see product tours
+  if (context.role === "OWNER" || context.role === "ADMIN") {
+    return false;
+  }
+  
+  // Team members see product tours based on firm settings
+  return context.settings.productTours;
+}
+
+/**
  * Firm-level skip intake flag for invitations and pipeline waiver UI.
  * Applies to owners/admins as well — when disabled, the feature is hidden for the whole firm.
  * Solo advisors are unaffected.
@@ -195,6 +218,24 @@ export async function requireEnterpriseMemberVisibility(
 }
 
 export type EnterpriseAdvisorMemberVisibilityInput = EnterpriseAdvisorMemberVisibility;
+
+/**
+ * Notification types that must be hidden from an advisor because their firm has
+ * turned off the corresponding member-visibility toggle. NEW_LEAD embeds lead
+ * PII (name, email, complexity, asset range), so it has to respect the
+ * assessmentLeads toggle even though it arrives via the notification feed
+ * rather than the guarded /advisor/leads route.
+ */
+export async function resolveHiddenAdvisorNotificationTypes(
+  userId: string,
+): Promise<NotificationType[]> {
+  const context = await resolveEnterpriseMemberVisibilityContext(userId);
+  const hidden: NotificationType[] = [];
+  if (!isEnterpriseMemberVisibilityEnabled(context, "assessmentLeads")) {
+    hidden.push("NEW_LEAD");
+  }
+  return hidden;
+}
 
 export async function assertAdvisorCanSkipIntake(userId: string): Promise<void> {
   const context = await resolveEnterpriseMemberVisibilityContext(userId);

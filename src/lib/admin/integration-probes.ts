@@ -35,7 +35,13 @@ const INTEGRATION_LABELS: Record<
   },
   openai: {
     label: "OpenAI",
-    description: "Intake transcription + question text-to-speech",
+    description:
+      "Intake transcription (Whisper), question text-to-speech (TTS), and recommendation narratives (GPT-4o)",
+  },
+  "openai-narratives": {
+    label: "AI Narratives (GPT-4o)",
+    description:
+      "LLM-generated recommendation narratives for assessment reports",
   },
   resend: {
     label: "Resend (email)",
@@ -184,6 +190,15 @@ export async function probeOpenAI(): Promise<IntegrationProbeResult> {
         checkedAt,
       };
     }
+    if (response.status === 429) {
+      return {
+        id,
+        status: "degraded",
+        message:
+          "OpenAI API returned 429 (rate limit or quota exceeded). TTS, transcription, and narrative generation may fail until quota is replenished.",
+        checkedAt,
+      };
+    }
     if (!response.ok) {
       return {
         id,
@@ -206,6 +221,53 @@ export async function probeOpenAI(): Promise<IntegrationProbeResult> {
       checkedAt,
     };
   }
+}
+
+/**
+ * Probe AI narrative generation feature status.
+ *
+ * Returns:
+ * - healthy: LLM_NARRATIVES_ENABLED=true and OpenAI key is set
+ * - not_configured: Feature flag is off (normal for environments without narratives)
+ * - degraded: Feature enabled but OpenAI key is missing
+ *
+ * This probe does NOT call GPT-4o on every page load — the smoke canary
+ * (`@smoke ai-recommendation-narratives.spec.ts`) tests actual generation
+ * every 6 hours. This probe verifies the feature is ready to generate.
+ */
+export async function probeOpenAINarratives(): Promise<IntegrationProbeResult> {
+  const id = "openai-narratives";
+  const enabled = process.env.LLM_NARRATIVES_ENABLED === "true";
+  const hasKey = Boolean(process.env.OPENAI_API_KEY?.trim());
+  const checkedAt = checkedNow();
+
+  if (!enabled) {
+    return {
+      id,
+      status: "not_configured",
+      message:
+        "LLM_NARRATIVES_ENABLED is not set to 'true'. Narrative generation is disabled.",
+      checkedAt,
+    };
+  }
+
+  if (!hasKey) {
+    return {
+      id,
+      status: "degraded",
+      message:
+        "LLM_NARRATIVES_ENABLED is true but OPENAI_API_KEY is missing. Narrative generation will fail.",
+      checkedAt,
+    };
+  }
+
+  return {
+    id,
+    status: "healthy",
+    message:
+      "LLM_NARRATIVES_ENABLED=true and OPENAI_API_KEY is configured. Narrative generation is ready.",
+    checkedAt,
+  };
 }
 
 type ResendErrorBody = {
@@ -671,6 +733,7 @@ export async function probeUpstashRedis(): Promise<IntegrationProbeResult> {
 const PROBE_RUNNERS: Array<() => Promise<IntegrationProbeResult>> = [
   probeStripe,
   probeOpenAI,
+  probeOpenAINarratives,
   probeResend,
   probeS3,
   probeUpstashRedis,
@@ -690,6 +753,7 @@ export async function runIntegrationProbes(): Promise<IntegrationProbeResult[]> 
     const fallbackId = [
       "stripe",
       "openai",
+      "openai-narratives",
       "resend",
       "s3",
       "upstash-redis",
@@ -746,6 +810,7 @@ export function integrationProbesToDependencies(
   const order = [
     "stripe",
     "openai",
+    "openai-narratives",
     "resend",
     "s3",
     "upstash-redis",

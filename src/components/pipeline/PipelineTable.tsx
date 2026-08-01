@@ -18,6 +18,7 @@ interface PipelineTableProps {
   clients: PipelineClient[];
   showDocumentsColumn?: boolean;
   monitoringEnabled?: boolean;
+  showAssignedAdvisor?: boolean;
 }
 
 const columnHelper = createColumnHelper<PipelineClient>();
@@ -33,6 +34,7 @@ export function PipelineTable({
   clients,
   showDocumentsColumn = true,
   monitoringEnabled = false,
+  showAssignedAdvisor = false,
 }: PipelineTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "lastActivity", desc: true },
@@ -87,8 +89,8 @@ export function PipelineTable({
               key={id}
               type="button"
               className={cn(
-                "text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground",
-                sorted && "text-foreground",
+                "min-h-[44px] rounded-md px-2 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                sorted && "bg-muted/50 text-foreground",
               )}
               onClick={column.getToggleSortingHandler()}
             >
@@ -106,6 +108,7 @@ export function PipelineTable({
             client={row.original}
             showDocumentsColumn={showDocumentsColumn}
             monitoringEnabled={monitoringEnabled}
+            showAssignedAdvisor={showAssignedAdvisor}
           />
         ))}
       </div>

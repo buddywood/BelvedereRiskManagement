@@ -202,8 +202,14 @@ Re-run locally: `PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers npm run test:e2
 | `tests/smoke/landing-hero-audience.spec.ts` | advisors tab shows advisor workspace copy and CTAs | Marketing | Implemented |
 | `tests/smoke/landing-hero-audience.spec.ts` | ?audience=advisors deep-links the advisor tab | Marketing | Implemented |
 | `tests/smoke/landing-hero-audience.spec.ts` | #advisors hash deep-links the advisor tab | Marketing | Implemented |
-| `tests/smoke/landing-hero-audience.spec.ts` | request demo pre-fills the contact form | Marketing | Implemented |
+| `tests/smoke/landing-hero-audience.spec.ts` | hero demo CTA opens the self-serve interactive demo | Marketing | Implemented |
+| `tests/smoke/landing-hero-audience.spec.ts` | the walkthrough form still pre-fills for sales enquiries | Marketing | Implemented |
 | `tests/smoke/landing-hero-audience.spec.ts` | remembers last audience in session storage | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | scores answers live and reaches the snapshot | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | live preview updates as answers are given | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | start over clears answers | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | audience variants render their own questions | Marketing | Implemented |
+| `tests/smoke/interactive-demo.spec.ts` | /demo/families redirects to the canonical demo URL | Marketing | Implemented |
 | `tests/smoke/magic-link-test-helper.spec.ts` | POST /api/test/magic-link/issue returns rawToken + verifyUrl | Infra | Implemented |
 | `tests/smoke/magic-link-test-helper.spec.ts` | issue → verify URL → dashboard signs the client in | Infra | Implemented |
 | `tests/smoke/magic-link-test-helper.spec.ts` | malformed email returns 400, not 500 | Infra | Implemented |
@@ -398,109 +404,84 @@ the user in NOT_STARTED state.
 
 ### Pass 2026-07-02 (enterprise / tenant-routing / visibility churn)
 
-Baseline at start: Vitest **1900 pass / 1 fail / 5 skip**; the single failure was
-stale-copy drift (see Fixed below), now green. Playwright suite not re-run this
-pass (requires live preview target + env; see prior preview run above).
+All five findings from this pass are now fixed — see the Fixed section below
+(`e9f8b98`, `4213183`, `781e42d`, `73fca4e`). Baseline at start was Vitest
+**1900 pass / 1 fail / 5 skip** (single failure was stale-copy drift, also
+fixed). Playwright suite not re-run this pass (requires live preview target +
+env; see prior preview run above).
 
-#### Major (concurrency / data-integrity): concurrent enterprise-provision finalize duplicates firm methodology
+### Minor (drift): `intake-mixed-mode.spec.ts` wizard start→question navigation drift
 
-- **Where:** `src/lib/enterprise/finalize-enterprise-provision.ts:75,88-103`.
-  The `enterprise.status !== "PROVISIONING"` guard is read OUTSIDE the
-  transaction (line 75) while the flip to `ACTIVE` happens INSIDE it
-  (line 97-100). `transferAdvisorAssetsToEnterprise`
-  (`transfer-advisor-assets.ts:196-208`) unconditionally `create`s
-  `enterpriseRecommendationRule` rows and increments advisor-rule versions —
-  idempotent only *sequentially* (it flips `CUSTOM`→`ENTERPRISE`), not
-  *concurrently*.
-- **Reachable via:** the worker route (`api/workers/enterprise-provision`)
-  and cron route (`api/cron/enterprise-provision`) both run
-  `drainEnterpriseProvisionQueue()` **and then unconditionally**
-  `processPendingEnterpriseProvisions()` (the legacy sweep bypasses the
-  BullMQ job lock). A cron drain holding X's BullMQ job (300s tx window) while
-  a separate worker-route request's legacy sweep also picks up X (still
-  PROVISIONING, uncommitted) → both run the transfer. Same race between the
-  admin-create `after()` trigger and the 5-min cron.
-- **Expected vs actual:** second overlapping finalize should be a no-op;
-  actual runs the asset transfer twice → duplicate `EnterpriseRecommendationRule`
-  rows, orphaned `AdvisorRecommendationRule.enterpriseSourceId` links, doubled
-  `version` increments.
-- **Fix sketch:** claim the transition atomically as the FIRST statement inside
-  the transaction — `const { count } = await tx.advisorEnterprise.updateMany({ where: { id, status: "PROVISIONING" }, data: { status: "ACTIVE" } }); if (count === 0) return skipped;` — then run the transfer in the same tx. Also stop
-  running the legacy sweep unconditionally alongside the queue drain.
-- **Probe:** `src/lib/enterprise/finalize-enterprise-provision.idempotency.test.ts`
-  (`it.fixme` — verified red: transfer called 2×; flip to `it` once the atomic
-  claim lands).
-
-#### Minor (firm-policy bypass): NEW_LEAD notifications leak lead PII past the `assessmentLeads` visibility toggle
-
-- **Where:** `src/app/(protected)/advisor/notifications/page.tsx:30` and the
-  header signals source (`src/lib/signals/queries.ts`). The `/advisor/leads`
-  route is gated by `leads/layout.tsx` →
-  `requireAdvisorAssessmentLeadsMemberAccess()`, but NEW_LEAD notifications
-  (which embed lead name/email/complexity/asset range) still render in the
-  member's notification feed and header dropdown regardless of the firm's
-  `advisorMemberAssessmentLeadsVisible=false` setting.
-- **Not cross-tenant:** the lead is assigned to that member's own advisor
-  profile — this is a firm-policy bypass, not tenant leakage.
-- **Fix sketch:** when `resolveEnterpriseMemberVisibilityContext(userId)` reports
-  `assessmentLeads` disabled, filter out `type === "NEW_LEAD"` rows and suppress
-  their header count.
-
-#### Minor (availability / anti-pattern): enterprise recommendations `[slug]` page swallows DB errors into `redirect("/signin")`
-
-- **Where:** `src/app/(protected)/advisor/enterprise/recommendations/[slug]/page.tsx:31-39`.
-  `loadEnterpriseMethodologyPillars(enterpriseId)` sits INSIDE the same
-  `try { requireAdvisorRole(); requireEnterpriseTeamManager(); ... } catch { redirect("/signin") }`
-  block, so a transient DB error bounces an authenticated enterprise manager to
-  the sign-in page (looks logged out) instead of surfacing a 500. The sibling
-  index page (`recommendations/page.tsx:16-26`) already keeps the data load
-  outside the try — this one drifted.
-- **Fix sketch:** move `loadEnterpriseMethodologyPillars` out of the auth
-  try/catch (match the index page); redirect authorization failures to
-  `/advisor`, not `/signin`.
-
-#### Minor/cosmetic (header injection): `x-tenant-force-light` not scrubbed in proxy
-
-- **Where:** `src/proxy.ts` `withAkiliPathname` deletes the branded headers
-  (`x-advisor-id`, `x-subdomain`, `x-branded-mode`, `x-tenant-path-prefix`) but
-  not `x-tenant-force-light`, which the proxy itself sets and the root layout
-  trusts. A client can send `x-tenant-force-light: true` on any request to force
-  tenant-light theme. Same trust boundary as the scrubbed branded headers;
-  impact is cosmetic today. Fix: add `h.delete("x-tenant-force-light")`.
-
-#### Minor (existence oracle): tenant "Not Available" page distinguishes pending-tenant from unknown-slug
-
-- **Where:** `src/proxy.ts` `resolveAdvisorTenantRoute` returns the custom
-  "Subdomain Not Available" 404 for a claimed-but-inactive/unverified tenant vs.
-  a generic 404 for an unknown slug — probing `/t/<guess>` (or the subdomain
-  host) reveals which firm slugs are registered/pending. Low impact. Fix: return
-  an indistinguishable response for both cases.
-
-### Major (env): preview env missing `S3_INTAKE_BUCKET`
-
-- **Where:** `src/lib/s3/intake-audio-uploads.ts:35-39` throws
-  "S3_INTAKE_BUCKET is required for intake voice recordings." whenever
-  the var is unset. `/api/intake/[id]/audio` POST therefore returns
-  500 with body `{"success":false,"error":"Failed to upload audio file"}`
-  for every authenticated owner upload.
-- **Live evidence:** signed in as `client@test.com`, POST to
-  `/api/intake/test-interview-cmp7bp0xz0002slg8a377o48a/audio` with the
-  correct multipart shape (`audio` + `questionId`, valid 28-byte WebM
-  buffer) returns 500.
-- **Severity:** Major if voice intake is supposed to work on preview;
-  Minor otherwise (preview is local-dev convenience, prod has its own
-  bucket). Voice flow is unusable on the preview deployment today.
-- **Action required:** add `S3_INTAKE_BUCKET` (and `S3_INTAKE_REGION`
-  if region differs from `AWS_REGION`) to Vercel Preview env vars for
-  `akili-risk`. Bucket should mirror the production bucket's
-  configuration; uploads write under `intake-audio/<interviewId>/`.
-- **Tests parked:** `intake-audio-endpoint.spec.ts` (5 tests) and
-  `intake-mixed-mode.spec.ts` (1 test) both `test.skip(true, "preview
-  env missing S3_INTAKE_BUCKET")` at the describe level. Remove the
-  skip the moment the var lands.
+- Un-parked from the S3 reason; now fails earlier and unrelated to S3: after
+  clicking "Begin interview" the `page.waitForURL(/\/intake\/interview/)` times
+  out (30s). The intro ("What to Expect") screen renders with the button
+  visible, but the start→question navigation no longer lands on
+  `/intake/interview`. Needs the wizard flow / URL locator refreshed. Parked
+  `test.skip` with the accurate reason (verified 2026-07-02 against preview).
 
 ## Fixed
 
+- **`intake-audio-endpoint.spec.ts` redesigned onto an editable interview —
+  all 6 tests green on preview** (2026-07-21). The spec previously planted its
+  audio fixture by uploading to `client@test.com`'s SUBMITTED intake (409). It
+  now runs entirely on `client-fresh@test.com` (seeded ACTIVE-assigned to
+  `advisor@test.com`): `beforeEach` resets the fresh client, each test
+  `beginFreshInterview()`s a NOT_STARTED interview via `GET /api/intake/script`
+  (the get-or-create the wizard uses — avoids the drifted wizard UI), then
+  uploads + exercises the streaming-read authz (owner 200, assigned advisor 200,
+  admin 200, MIME 200, unassigned advisor 404, unauth 401). Two supporting fixes:
+  (1) `scripts/reset-fresh-client-intake.js` now also deletes the fresh client's
+  `Assessment` rows — otherwise `assertClientIntakeAnswersEditable` 409s uploads
+  even after the interview is wiped; (2) **advisor2 fixture drift**: advisor2 was
+  soft-deleted (`deletedAt` set) AND had `advisorPortalAccessEnabled=false` on
+  preview (a stray deactivation on 2026-07-19), which broke advisor2 credential
+  sign-in **suite-wide** (tenant-isolation, admin-api-authz, etc.). Restored both
+  fields on preview and made `scripts/seed-advisor-test-data.js` self-heal them
+  on re-seed. `client@test.com` was left untouched (other specs depend on its
+  SUBMITTED+Approved state).
+- **Preview env `S3_INTAKE_BUCKET` now set** (confirmed 2026-07-02 via
+  `vercel env ls preview`: `S3_INTAKE_BUCKET` + `S3_INTAKE_REGION` present on
+  Preview). `/api/intake/[id]/audio` uploads no longer 500 with "Failed to
+  upload audio file" — the S3 config path is working end-to-end (uploads now
+  reach the intake-status gate rather than throwing on the missing var). No IAM
+  / bucket-policy asks surfaced. The two parked audio specs remain skipped for
+  unrelated reasons (see Surfaced bugs above), not S3.
+
+- **Concurrent enterprise-provision finalize duplicated firm methodology**
+  (`e9f8b98`, pass 2026-07-02). `finalizeEnterpriseProvision` read the
+  `PROVISIONING` guard outside the transaction while flipping to `ACTIVE`
+  inside it, so two overlapping finalize calls both ran the non-idempotent
+  `transferAdvisorAssetsToEnterprise` — duplicating `EnterpriseRecommendationRule`
+  rows and doubling advisor-rule `version` increments. Now claims the
+  `PROVISIONING → ACTIVE` transition atomically as the first tx statement
+  (`updateMany` with a status filter, bail on `count === 0`); transfer failure
+  rolls back for retry. The worker + cron routes run the legacy DB sweep only
+  when BullMQ isn't configured (the queue's job lock is otherwise the sole
+  concurrency guard). Regression: `finalize-enterprise-provision.idempotency.test.ts`
+  (flipped live — transfer runs once under overlap).
+- **NEW_LEAD notifications bypassed the `assessmentLeads` visibility toggle**
+  (`4213183`, pass 2026-07-02). The `/advisor/leads` route was gated, but
+  NEW_LEAD notifications (lead name/email/complexity/asset range) still rendered
+  in the notifications feed + dashboard unread count for enterprise members whose
+  firm set `advisorMemberAssessmentLeadsVisible=false`. New
+  `resolveHiddenAdvisorNotificationTypes(userId)` returns `[NEW_LEAD]` when the
+  toggle is off; `getAdvisorNotifications` filters it at the query and both
+  callers pass it. (Header signal feed already excluded NEW_LEAD.) Regression:
+  `advisor-member-visibility.test.ts` covers both toggle states + solo advisor.
+- **Enterprise recommendations `[slug]` page swallowed loader DB errors into
+  `redirect("/signin")`** (`781e42d`, pass 2026-07-02). `loadEnterpriseMethodologyPillars`
+  sat inside the auth `try/catch`, so a transient DB error bounced an
+  authenticated manager to sign-in. Moved the load outside the try to match the
+  sibling index page. Regression: `[slug]/page.test.tsx` asserts loader errors
+  propagate and auth failures still redirect.
+- **Tenant "Not Available" existence oracle + `x-tenant-force-light` scrub**
+  (`73fca4e`, pass 2026-07-02). `resolveAdvisorTenantRoute` now returns the same
+  404 "Subdomain Not Available" page for missing, inactive, and unverified
+  subdomains (previously an unknown slug fell through to the main app, letting a
+  prober tell registered-but-pending slugs from unknown ones). `x-tenant-force-light`
+  was already scrubbed in `withAkiliPathname` (landed upstream); added a
+  regression test asserting every proxy-asserted tenant header a client could
+  inject is stripped. Regression: `src/proxy.test.ts`.
 - **Stale email tagline assertion drift** (pass 2026-07-02). `1ac3f06`
   changed `AKILI_TAGLINES.email` to "Intelligent governance for professional
   firms and families" but `src/lib/email/platform-email-layout.test.ts` still

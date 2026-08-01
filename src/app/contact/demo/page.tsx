@@ -5,7 +5,7 @@ import { ContactPageView } from "@/components/marketing/ContactPageView";
 import { withCanonical } from "@/lib/seo/site";
 
 export const metadata: Metadata = withCanonical("/contact/demo", {
-  title: "Request a Demo",
+  title: "Book a Walkthrough",
   description:
     "Schedule a walkthrough of the AKILI advisor workspace for your firm.",
 });

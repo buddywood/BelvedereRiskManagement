@@ -184,6 +184,9 @@ model AdvisorEnterprise {
   emailFooterText       String?
   supportEmail          String?
   supportPhone          String?
+  /// Custom "from" email address for white-label client emails (e.g. no-reply@firmname.com).
+  /// When set, outbound client emails use this address instead of the platform default.
+  clientEmailFromAddress String?
   logoUrl               String?
   logoS3Key             String?
   logoContentType       String?
@@ -1055,6 +1058,8 @@ model InviteCode {
   focusAreas      String[] @default([]) @map("focus_areas")
   clientName  String?
   resendCount Int       @default(0)
+  /// Optional advisor CRM / external client ID staged until provision.
+  externalClientId String? @map("external_client_id")
 
   advisor     AdvisorProfile? @relation(fields: [createdBy], references: [id])
   /// Round-11 commit 2: magic-link tokens issued for this invite (one
@@ -1064,6 +1069,7 @@ model InviteCode {
   @@index([code])
   @@index([createdBy])
   @@index([status])
+  @@index([createdBy, externalClientId])
 }
 
 model AdvisorProfile {
@@ -1096,6 +1102,9 @@ model AdvisorProfile {
   emailFooterText  String?
   supportEmail     String?
   supportPhone     String?
+  /// Custom "from" email address for white-label client emails (e.g. no-reply@firmname.com).
+  /// When set, outbound client emails use this address instead of the platform default.
+  clientEmailFromAddress String?
 
   // S3 Asset Management
   logoS3Key        String?
@@ -1151,6 +1160,8 @@ model AdvisorProfile {
   updatedAt        DateTime                   @updatedAt
   clientAssignments ClientAdvisorAssignment[] @relation("AdvisorAssignments")
   intakeWaiversSet  ClientAdvisorAssignment[] @relation("IntakeWaiverSetBy")
+  manualCompletionsSet ClientAdvisorAssignment[] @relation("ManualCompletionSetBy")
+  assessmentWaiversSet ClientAdvisorAssignment[] @relation("AssessmentWaiverSetBy")
   approvals        IntakeApproval[]
   notifications    AdvisorNotification[]
   signals            AdvisorSignal[]
@@ -1209,6 +1220,12 @@ model ClientAdvisorAssignment {
   /// When set, client may skip submitted/approved intake for nav and /assessment access.
   intakeWaivedAt             DateTime?
   intakeWaivedByAdvisorId    String?
+  /// When set, advisor manually marked engagement as complete (bypasses normal workflow).
+  manuallyCompletedAt        DateTime?
+  manuallyCompletedByAdvisorId String?
+  /// When set, advisor waived assessment phase — client goes directly to reporting after intake.
+  assessmentWaivedAt         DateTime?
+  assessmentWaivedByAdvisorId String?
   /// Epic 5.11: assessment scope when intake is waived (1–6 pillar ids). Required to unlock assessment.
   includedPillars            String[]         @default([]) @map("included_pillars")
   /// Scoring emphasis within included pillars; empty means all included at waiver scope save.
@@ -1225,11 +1242,17 @@ model ClientAdvisorAssignment {
   /// defensively as "fall through to advisor.piiPolicy" for in-flight
   /// assignments created during the migration window.
   fieldVisibility            Json?
+  /// Optional advisor-managed CRM / external client ID (not the system
+  /// User.clientReferenceCode). Unique per advisor when set.
+  externalClientId           String?          @map("external_client_id")
   intakeWaivedBy             AdvisorProfile? @relation("IntakeWaiverSetBy", fields: [intakeWaivedByAdvisorId], references: [id], onDelete: SetNull)
+  manuallyCompletedBy        AdvisorProfile? @relation("ManualCompletionSetBy", fields: [manuallyCompletedByAdvisorId], references: [id], onDelete: SetNull)
+  assessmentWaivedBy         AdvisorProfile? @relation("AssessmentWaiverSetBy", fields: [assessmentWaivedByAdvisorId], references: [id], onDelete: SetNull)
   client     User             @relation("ClientAssignments", fields: [clientId], references: [id], onDelete: Cascade)
   advisor    AdvisorProfile   @relation("AdvisorAssignments", fields: [advisorId], references: [id], onDelete: Cascade)
 
   @@unique([clientId, advisorId])
+  @@unique([advisorId, externalClientId])
   @@index([advisorId])
   @@index([clientId])
 }
@@ -1657,6 +1680,13 @@ model AssessmentRecommendation {
   assignees               Json?
   /// Phase 22: time horizon for SAP grouping: "immediate", "strategic", "ongoing"
   timeHorizon             String?                @db.VarChar(20)
+
+  /// Phase 3 (LLM narratives): audit metadata for AI-drafted recommendation copy.
+  /// Shape: { provider, model, promptHash, validated, generatedAt }. Null when
+  /// generation is disabled or the output was rejected by the grounding validator
+  /// (in which case the client sees the static catalog copy). The narrative text
+  /// itself lives under `customization.aiNarrative`.
+  generationMeta          Json?                  @map("generation_meta")
 
   createdAt               DateTime               @default(now())
   updatedAt               DateTime               @updatedAt

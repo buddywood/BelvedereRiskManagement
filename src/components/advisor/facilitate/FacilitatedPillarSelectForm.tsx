@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { FastForward, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { AssessmentDomainsSelector } from "@/components/advisor/AssessmentDomainsSelector";
@@ -10,7 +10,10 @@ import { EmphasisAreasSelector } from "@/components/advisor/EmphasisAreasSelecto
 import { PillarRecommendationsPanel } from "@/components/advisor/PillarRecommendationsPanel";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { facilitatedApproveScope } from "@/lib/actions/facilitated-pillar-actions";
+import {
+  facilitatedApproveScope,
+  facilitatedSkipToReporting,
+} from "@/lib/actions/facilitated-pillar-actions";
 import type { PillarRecommendation } from "@/lib/intake/pillar-recommendations";
 import type { AdvisorAssessmentDomainPickerData } from "@/lib/advisor/assessment-domain-option";
 import { resolveDefaultAssessmentDomainSelection } from "@/lib/advisor/assessment-domain-option";
@@ -31,6 +34,7 @@ export function FacilitatedPillarSelectForm({
   const assessmentDomains = assessmentDomainPicker.domains;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isSkipping, startSkipTransition] = useTransition();
   const availableDomainIds = useMemo(
     () => assessmentDomains.map((d) => d.id),
     [assessmentDomains],
@@ -83,6 +87,27 @@ export function FacilitatedPillarSelectForm({
     });
   };
 
+  const handleSkipToReporting = () => {
+    if (
+      !window.confirm(
+        "Skip assessment and go directly to reporting? The client will not complete any risk assessment questions. This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+    startSkipTransition(async () => {
+      const result = await facilitatedSkipToReporting(sessionId);
+      if (result.success) {
+        toast.success("Assessment skipped. Session complete.");
+        router.push(result.redirectTo);
+        return;
+      }
+      toast.error(result.error ?? "Could not skip to reporting");
+    });
+  };
+
+  const actionBusy = isPending || isSkipping;
+
   const recommendedForDomains = useMemo(
     () => recommendations.filter((r) => r.strength === "strong").map((r) => r.pillarId),
     [recommendations],
@@ -128,13 +153,31 @@ export function FacilitatedPillarSelectForm({
           />
         </div>
 
-        <Button type="button" size="lg" disabled={isPending} onClick={handleApprove}>
-          {isPending ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            "Start assessment"
-          )}
-        </Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="button" size="lg" disabled={actionBusy} onClick={handleApprove}>
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              "Start assessment"
+            )}
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            disabled={actionBusy}
+            onClick={handleSkipToReporting}
+          >
+            {isSkipping ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <>
+                <FastForward className="size-4" />
+                Skip to Reporting
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       <aside>

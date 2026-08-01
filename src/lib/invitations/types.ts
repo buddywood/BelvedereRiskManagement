@@ -9,6 +9,8 @@ export interface CreateInvitationInput {
   intakeWaived?: boolean;
   includedPillars?: string[];
   focusAreas?: string[];
+  /** Optional advisor CRM / external client ID staged until the client registers. */
+  externalClientId?: string | null;
 }
 
 export interface InvitationWithDetails {
@@ -28,6 +30,7 @@ export interface InvitationWithDetails {
   intakeWaived?: boolean;
   includedPillars?: string[];
   focusAreas?: string[];
+  externalClientId?: string | null;
   advisor: {
     id: string;
     firmName: string | null;

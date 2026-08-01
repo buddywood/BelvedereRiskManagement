@@ -2,6 +2,7 @@ import { z } from "zod";
 import { pillarDisplayName, formatEnglishList } from "@/lib/assessment/included-pillars";
 import { starterPillarCatalog, type PillarCatalogEntry } from "@/lib/methodology/pillar-catalog";
 import { waiverAssessmentScopeSchema } from "@/lib/schemas/advisor";
+import { externalClientIdSchema } from "@/lib/advisor/external-client-id";
 
 const DEFAULT_FIRM_FALLBACK = "Your advisor";
 
@@ -62,6 +63,8 @@ export const createInvitationSchema = z.object({
   intakeWaived: z.boolean().optional().default(false),
   includedPillars: z.array(z.string()).max(6).optional(),
   focusAreas: z.array(z.string()).max(6).optional(),
+  /** Optional advisor CRM / external client ID applied at provision. */
+  externalClientId: externalClientIdSchema.optional(),
 }).superRefine((data, ctx) => {
   if (!data.intakeWaived) return;
 

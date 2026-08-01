@@ -11,6 +11,8 @@ type ClientPortalBrandedHeaderMarkProps = {
   homeHref?: string;
   /** Use h1 on public landing pages for SEO/accessibility */
   titleAsHeading?: boolean;
+  /** Hide text title when logo is present (cleaner white-label look) */
+  logoOnly?: boolean;
 };
 
 /**
@@ -22,8 +24,10 @@ export function ClientPortalBrandedHeaderMark({
   primaryHex,
   homeHref = "/dashboard",
   titleAsHeading = false,
+  logoOnly = false,
 }: ClientPortalBrandedHeaderMarkProps) {
   const TitleTag = titleAsHeading ? "h1" : "span";
+  const showTitle = !logoOnly || !logoSrc;
 
   return (
     <Link
@@ -32,23 +36,25 @@ export function ClientPortalBrandedHeaderMark({
       aria-label={`${brandTitle} home`}
       style={primaryHex ? { color: primaryHex } : undefined}
     >
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
         {logoSrc ? (
           <img
             src={logoSrc}
-            alt=""
-            className="h-10 w-auto max-w-[200px] object-contain object-left"
+            alt={logoOnly ? brandTitle : ""}
+            className="h-10 w-auto max-w-[180px] object-contain object-left sm:h-12 sm:max-w-[240px]"
             onError={(e) => {
               e.currentTarget.style.display = "none";
             }}
           />
         ) : null}
-        <TitleTag
-          className="text-lg font-semibold tracking-tight sm:text-xl"
-          style={primaryHex ? { color: primaryHex } : undefined}
-        >
-          {brandTitle}
-        </TitleTag>
+        {showTitle ? (
+          <TitleTag
+            className="text-lg font-semibold tracking-tight sm:text-xl md:text-2xl"
+            style={primaryHex ? { color: primaryHex } : undefined}
+          >
+            {brandTitle}
+          </TitleTag>
+        ) : null}
       </div>
     </Link>
   );

@@ -28,6 +28,7 @@ import {
 } from "@/lib/auth/password-change-gate";
 import { stripSpuriousCallbackQuery } from "@/lib/auth-callback-path";
 import { buildSignInHref } from "@/lib/auth/sign-in-routes";
+import { clientHomeRedirectTargetForRole } from "@/lib/auth-roles";
 
 /** For server layouts (e.g. advisor) that branch on URL without middleware.
  *
@@ -38,7 +39,7 @@ import { buildSignInHref } from "@/lib/auth/sign-in-routes";
  *  layout would otherwise read them as if the proxy had asserted them —
  *  letting any caller render `/branded/...` for any tenant they name.
  *  Stripping here closes that injection vector. */
-function withAkiliPathname(req: NextRequest): Headers {
+export function withAkiliPathname(req: NextRequest): Headers {
   const h = new Headers(req.headers);
   h.set("x-akili-pathname", req.nextUrl.pathname);
   h.delete("x-advisor-id");
@@ -82,7 +83,19 @@ type TenantRouteResolution =
   | { type: "short-circuit"; response: NextResponse }
   | { type: "pass-through"; headers: Headers };
 
-async function resolveAdvisorTenantRoute(
+/**
+ * Renders the tenant "Not Available" page. Returned identically for a missing,
+ * inactive, or unverified subdomain so the response can't be used as an oracle
+ * to distinguish "no such tenant" from "tenant registered but not yet live".
+ */
+function tenantSubdomainNotAvailableResponse(): NextResponse {
+  return new NextResponse(
+    `<!DOCTYPE html><html><head><title>Subdomain Not Available</title></head><body style="font-family: system-ui; text-align: center; padding: 2rem;"><h1>Subdomain Not Available</h1><p>This subdomain is not currently active.</p></body></html>`,
+    { status: 404, headers: { 'Content-Type': 'text/html' } },
+  );
+}
+
+export async function resolveAdvisorTenantRoute(
   req: NextRequest,
   subdomain: string,
   effectivePathname: string,
@@ -125,15 +138,14 @@ async function resolveAdvisorTenantRoute(
       };
     }
 
-    if (advisorSubdomain) {
-      return {
-        type: "short-circuit",
-        response: new NextResponse(
-          `<!DOCTYPE html><html><head><title>Subdomain Not Available</title></head><body style="font-family: system-ui; text-align: center; padding: 2rem;"><h1>Subdomain Not Available</h1><p>This subdomain is not currently active.</p></body></html>`,
-          { status: 404, headers: { 'Content-Type': 'text/html' } }
-        ),
-      };
-    }
+    // Row missing, inactive, or unverified all render the SAME "Not Available"
+    // page: the response must not reveal whether the slug is a registered but
+    // not-yet-live tenant vs. an unknown slug (existence oracle). Only an actual
+    // resolution error falls through to null (main-app handling).
+    return {
+      type: "short-circuit",
+      response: tenantSubdomainNotAvailableResponse(),
+    };
   } catch (error) {
     console.error('Subdomain resolution error:', error);
   }
@@ -240,6 +252,7 @@ export default async function proxy(req: NextRequest) {
   type JwtClaims = {
     id?: string;
     sub?: string;
+    role?: string;
     mfaEnabled?: boolean;
     mfaVerified?: boolean;
     mfaEnrollmentRequired?: boolean;
@@ -326,6 +339,26 @@ export default async function proxy(req: NextRequest) {
       const mfaVerifyUrl = new URL(scopeTarget("/mfa/verify"), req.url);
       mfaVerifyUrl.searchParams.set("callbackUrl", effectivePathname);
       return NextResponse.redirect(mfaVerifyUrl);
+    }
+  }
+
+  // Role-home gate: `/dashboard` is the client portal home. Advisor-hub and
+  // platform-admin roles must never render its client chrome. Redirect them to
+  // their canonical home HERE — before any layout/skeleton renders — so the
+  // shell can't flash. (`/advisor` and `/admin` enforce their own billing /
+  // access gates, so no behavior is lost by not replicating them.)
+  if (
+    isAuthenticated &&
+    (effectivePathname === "/dashboard" ||
+      effectivePathname.startsWith("/dashboard/"))
+  ) {
+    const home = clientHomeRedirectTargetForRole(jwt?.role);
+    if (home) {
+      const url = new URL(scopeTarget(home), req.url);
+      if (req.nextUrl.searchParams.get("error") === "unauthorized") {
+        url.searchParams.set("error", "unauthorized");
+      }
+      return NextResponse.redirect(url);
     }
   }
 

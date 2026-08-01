@@ -18,6 +18,8 @@ export const CLIENT_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/documents", label: "Documents" },
   { href: "/profiles", label: "Profiles & Roles" },
   { href: "/settings", label: "Settings" },
+  { href: "/support", label: "Support" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export const ADVISOR_NAV_ITEMS: { href: string; label: string }[] = [
@@ -28,6 +30,8 @@ export const ADVISOR_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/advisor/notifications", label: "Notifications" },
   { href: "/advisor/billing", label: "Billing" },
   { href: "/advisor/settings", label: "Settings" },
+  { href: "/support", label: "Support" },
+  { href: "/docs", label: "Docs" },
 ];
 
 const ADMIN_NAV_ITEMS: { href: string; label: string }[] = [
@@ -47,6 +51,8 @@ const ADMIN_NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/admin/intake/questions", label: "Intake question bank" },
   { href: "/admin/assessment", label: "Assessment Management" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/support", label: "Support" },
+  { href: "/docs", label: "Docs" },
 ];
 
 interface ProtectedNavProps {
@@ -63,6 +69,8 @@ interface ProtectedNavProps {
   hideIntakeNav?: boolean;
   /** Client portal + assigned advisor: match `BrandingPreview` nav (primary text, light active pill) */
   clientBrandHex?: PreviewBrandHex | null;
+  /** When true, apply branding colors to advisor nav (for white-labeled advisor workspace) */
+  advisorBrandedWorkspace?: boolean;
   /** When omitted for advisors, both features are shown (backward compatible). */
   advisorFeatureFlags?: AdvisorPlatformFeatureFlags | null;
 }
@@ -76,6 +84,7 @@ export function ProtectedNav({
   hideDocumentsNav = false,
   hideIntakeNav = false,
   clientBrandHex = null,
+  advisorBrandedWorkspace = false,
   advisorFeatureFlags = null,
 }: ProtectedNavProps) {
   const pathname = usePathname();
@@ -117,9 +126,11 @@ export function ProtectedNav({
     return true;
   });
 
-  // When restrictNavToIntake (client, intake not submitted), only Intake is enabled
+  // When restrictNavToIntake (client, intake not submitted), only Intake + Support + Docs
   const isClientRestricted = restrictNavToIntake && !showAdvisor && !showAdmin;
-  const enabledHrefs = isClientRestricted ? new Set(["/intake"]) : null;
+  const enabledHrefs = isClientRestricted
+    ? new Set(["/intake", "/support", "/docs"])
+    : null;
 
   // For clients with submitted but not approved intake: Assessment is disabled
   const isClientAssessmentLocked =
@@ -135,12 +146,14 @@ export function ProtectedNav({
       ({ href }) => pathname === href || pathname.startsWith(href + "/"),
     )?.href;
 
-  const clientPreviewNav =
-    !!clientBrandHex && !showAdvisor && !showAdmin;
+  // Apply branded nav styling for client portal or advisor branded workspace
+  const useBrandedNavStyle =
+    (!!clientBrandHex && !showAdvisor && !showAdmin) ||
+    (!!clientBrandHex && advisorBrandedWorkspace);
 
   return (
     <nav
-      className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+      className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 scrollbar-thin sm:flex-wrap sm:overflow-visible sm:pb-0"
       aria-label="Main navigation"
     >
       {items.map(({ href, label }) => {
@@ -153,16 +166,18 @@ export function ProtectedNav({
           ? "Assessment unlocks after your advisor reviews and approves your intake."
           : "Complete your intake interview to unlock. Assessment and other areas become available after your advisor reviews and assigns your assessment.";
         return isDisabled ? (
-          <span
+          <button
             key={href}
+            type="button"
+            disabled
             aria-disabled="true"
             title={disabledTitle}
             className={cn(
-              "inline-flex h-9 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium",
-              !clientPreviewNav && "text-muted-foreground/60 opacity-70",
+              "inline-flex h-10 shrink-0 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/40",
+              !useBrandedNavStyle && "text-muted-foreground/60 opacity-70",
             )}
             style={
-              clientPreviewNav
+              useBrandedNavStyle
                 ? {
                     color: isPreviewHexDark(clientBrandHex!.secondary)
                       ? "rgba(255, 255, 255, 0.72)"
@@ -175,14 +190,14 @@ export function ProtectedNav({
             }
           >
             {label}
-          </span>
-        ) : clientPreviewNav ? (
+          </button>
+        ) : useBrandedNavStyle ? (
           <Link
             key={href}
             href={href}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "inline-flex h-9 shrink-0 items-center rounded-md px-3 text-sm font-medium transition-colors",
+              "inline-flex h-10 shrink-0 items-center rounded-md px-3 text-sm font-medium transition-colors",
               "hover:bg-white/50",
             )}
             style={{
@@ -203,7 +218,7 @@ export function ProtectedNav({
             variant="ghost"
             size="sm"
             className={cn(
-              "h-9 shrink-0 px-3",
+              "h-10 shrink-0 px-3",
               isActive &&
                 "bg-secondary text-foreground font-semibold hover:bg-secondary hover:text-foreground",
             )}

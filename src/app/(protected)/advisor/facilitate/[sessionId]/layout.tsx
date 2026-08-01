@@ -30,6 +30,7 @@ export default async function FacilitatedSessionLayout({
         sessionId,
         clientName: facilitated.client.name,
         assessmentId: facilitated.assessmentId,
+        branding: facilitated.branding,
       }}
     >
       <AssessmentQuestionBankLoader />

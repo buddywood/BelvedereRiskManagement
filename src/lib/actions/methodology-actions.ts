@@ -804,3 +804,152 @@ export async function deleteAdvisorIntakeQuestion(questionId: string) {
     };
   }
 }
+
+export async function moveAdvisorPillarQuestionOrder(
+  questionId: string,
+  direction: "up" | "down",
+) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const question = await prisma.advisorPillarQuestion.findFirst({
+      where: { id: questionId, advisorProfileId: profile.id, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, pillarId: true, displayOrder: true },
+    });
+    if (!question) {
+      return { success: false as const, error: "Question not found or not reorderable" };
+    }
+
+    const customRows = await prisma.advisorPillarQuestion.findMany({
+      where: { advisorProfileId: profile.id, pillarId: question.pillarId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, displayOrder: true },
+      orderBy: { displayOrder: "asc" },
+    });
+
+    const plan = planCustomIntakeReorder(customRows, questionId, direction);
+    if (!plan.ok) {
+      if (plan.reason === "boundary") return { success: true as const };
+      return { success: false as const, error: "Question not found" };
+    }
+
+    await prisma.$transaction([
+      prisma.advisorPillarQuestion.update({
+        where: { id: plan.move.id },
+        data: { displayOrder: plan.swapWith.displayOrder },
+      }),
+      prisma.advisorPillarQuestion.update({
+        where: { id: plan.swapWith.id },
+        data: { displayOrder: plan.move.displayOrder },
+      }),
+    ]);
+
+    const pillar = await prisma.pillar.findUnique({ where: { id: question.pillarId }, select: { slug: true } });
+    if (pillar) {
+      revalidatePath(`/advisor/methodology/questions/${pillar.slug}`);
+    }
+    return { success: true as const };
+  } catch (error) {
+    return {
+      success: false as const,
+      error: advisorHubActionErrorMessage(error, "Failed to reorder assessment question"),
+    };
+  }
+}
+
+export async function reorderAdvisorIntakeQuestionToPosition(
+  questionId: string,
+  newIndex: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const customRows = await prisma.advisorIntakeQuestion.findMany({
+      where: { advisorProfileId: profile.id, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, displayOrder: true },
+      orderBy: { displayOrder: "asc" },
+    });
+
+    const currentIndex = customRows.findIndex((q) => q.id === questionId);
+    if (currentIndex === -1) {
+      return { success: false, error: "Question not found" };
+    }
+
+    if (currentIndex === newIndex || newIndex < 0 || newIndex >= customRows.length) {
+      return { success: true };
+    }
+
+    const direction = newIndex > currentIndex ? "down" : "up";
+    const steps = Math.abs(newIndex - currentIndex);
+
+    for (let i = 0; i < steps; i++) {
+      const result = await moveAdvisorIntakeQuestionOrder(questionId, direction);
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+    }
+
+    revalidatePath("/advisor/methodology/intake");
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: advisorHubActionErrorMessage(error, "Failed to reorder intake question"),
+    };
+  }
+}
+
+export async function reorderAdvisorPillarQuestionToPosition(
+  questionId: string,
+  newIndex: number,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const profile = await getAdvisorProfileOrThrow(userId);
+
+    const question = await prisma.advisorPillarQuestion.findFirst({
+      where: { id: questionId, advisorProfileId: profile.id, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, pillarId: true },
+    });
+    if (!question) {
+      return { success: false, error: "Question not found or not reorderable" };
+    }
+
+    const customRows = await prisma.advisorPillarQuestion.findMany({
+      where: { advisorProfileId: profile.id, pillarId: question.pillarId, sourceKind: AdvisorQuestionSource.CUSTOM },
+      select: { id: true, displayOrder: true },
+      orderBy: { displayOrder: "asc" },
+    });
+
+    const currentIndex = customRows.findIndex((q) => q.id === questionId);
+    if (currentIndex === -1) {
+      return { success: false, error: "Question not found" };
+    }
+
+    if (currentIndex === newIndex || newIndex < 0 || newIndex >= customRows.length) {
+      return { success: true };
+    }
+
+    const direction = newIndex > currentIndex ? "down" : "up";
+    const steps = Math.abs(newIndex - currentIndex);
+
+    for (let i = 0; i < steps; i++) {
+      const result = await moveAdvisorPillarQuestionOrder(questionId, direction);
+      if (!result.success) {
+        return { success: false, error: result.error };
+      }
+    }
+
+    const pillar = await prisma.pillar.findUnique({ where: { id: question.pillarId }, select: { slug: true } });
+    if (pillar) {
+      revalidatePath(`/advisor/methodology/questions/${pillar.slug}`);
+    }
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      error: advisorHubActionErrorMessage(error, "Failed to reorder assessment question"),
+    };
+  }
+}

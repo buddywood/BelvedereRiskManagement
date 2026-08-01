@@ -13,7 +13,7 @@ const STEPS: ReadonlyArray<{
     step: "1",
     title: "Assess",
     description:
-      "Families complete a guided profile. Professional firms manage intake and progress from one workspace.",
+      "Clients complete a guided profile. Family offices and RIAs choose which domains are in scope — and can customize domains and questions to their methodology — then manage intake from one workspace.",
     icon: ClipboardCheck,
   },
   {
@@ -27,7 +27,7 @@ const STEPS: ReadonlyArray<{
     step: "3",
     title: "Act",
     description:
-      "Structured recommendations help firms and families address risks before they escalate.",
+      "Structured recommendations help practices address household risks before they escalate.",
     icon: ShieldCheck,
   },
 ];
@@ -39,7 +39,7 @@ export function LandingHowItWorks() {
         id="how-it-works"
         kicker="How it works"
         title="Assess. Analyze. Act."
-        description="A straightforward workflow — from structured intake to firm-ready guidance."
+        description="A straightforward workflow — from structured intake to practice-ready guidance."
         className="!space-y-8"
         headerClassName="max-w-2xl"
       >

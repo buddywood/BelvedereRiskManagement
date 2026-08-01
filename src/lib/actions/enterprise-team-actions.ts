@@ -9,6 +9,8 @@ import { resolveEnterpriseTeamContext } from "@/lib/enterprise/team-access";
 import {
   EnterpriseTeamInviteError,
   acceptEnterpriseTeamInvite,
+  changeEnterpriseMemberRole,
+  enterpriseTeamInviteRoleLabel,
   inviteEnterpriseMember,
   reactivateEnterpriseMember,
   resendEnterpriseTeamInvite,
@@ -17,12 +19,20 @@ import {
 } from "@/lib/enterprise/team-invite";
 import { registerEnterpriseTeamInvitee } from "@/lib/enterprise/register-enterprise-team-invitee";
 
+const inviteRoleSchema = z.enum(["ADMIN", "ADVISOR"]);
+
 const inviteSchema = z.object({
   email: z.string().email().max(254),
+  role: inviteRoleSchema.optional().default("ADVISOR"),
 });
 
 const membershipIdSchema = z.object({
   membershipId: z.string().cuid(),
+});
+
+const changeRoleSchema = z.object({
+  membershipId: z.string().cuid(),
+  role: inviteRoleSchema,
 });
 
 function actionError(error: unknown, fallback: string) {
@@ -54,12 +64,15 @@ export async function inviteEnterpriseTeamMemberAction(input: unknown) {
       inviteeEmail: parsed.email.trim().toLowerCase(),
       enterpriseName: team.enterpriseName,
       inviterName,
-      roleLabel: "a team member",
-      inviteUrl: result.inviteUrl,
+      roleLabel: enterpriseTeamInviteRoleLabel(result.role),
+      loginUrl: result.loginUrl,
+      tempPassword: result.tempPassword,
+      clientEmailFromAddress: team.clientEmailFromAddress,
+      branding: team.branding,
     });
 
     revalidatePath("/advisor/settings/team");
-    return { success: true as const, data: result };
+    return { success: true as const, data: { membershipId: result.membershipId, status: result.status, role: result.role } };
   } catch (error) {
     return { success: false as const, error: actionError(error, "Failed to send team invitation") };
   }
@@ -112,8 +125,11 @@ export async function resendEnterpriseTeamInviteAction(input: unknown) {
       inviteeEmail: result.inviteeEmail,
       enterpriseName: team.enterpriseName,
       inviterName,
-      roleLabel: "a team member",
-      inviteUrl: result.inviteUrl,
+      roleLabel: enterpriseTeamInviteRoleLabel(result.role),
+      loginUrl: result.loginUrl,
+      tempPassword: result.tempPassword,
+      clientEmailFromAddress: team.clientEmailFromAddress,
+      branding: team.branding,
     });
     if (!emailResult.success) {
       return { success: false as const, error: emailResult.error ?? "Failed to send invitation email" };
@@ -135,6 +151,18 @@ export async function revokeEnterpriseTeamInviteAction(input: unknown) {
     return { success: true as const };
   } catch (error) {
     return { success: false as const, error: actionError(error, "Failed to remove invitation") };
+  }
+}
+
+export async function changeEnterpriseTeamMemberRoleAction(input: unknown) {
+  try {
+    const { userId } = await requireAdvisorRole();
+    const parsed = changeRoleSchema.parse(input);
+    const result = await changeEnterpriseMemberRole(userId, parsed.membershipId, parsed.role);
+    revalidatePath("/advisor/settings/team");
+    return { success: true as const, data: result };
+  } catch (error) {
+    return { success: false as const, error: actionError(error, "Failed to update team member role") };
   }
 }
 

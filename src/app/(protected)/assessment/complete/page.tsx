@@ -47,11 +47,25 @@ export default function AssessmentCompletePage() {
       const pillar = await resolveScoringPillar(assessmentId, currentPillar);
       const store = useAssessmentStore.getState();
 
+      let includedPillars: string[] | undefined;
+      try {
+        const scopeRes = await fetch("/api/assessment/summary-access");
+        if (scopeRes.ok) {
+          const scope = (await scopeRes.json()) as { includedPillars?: string[] };
+          if (scope.includedPillars?.length) {
+            includedPillars = scope.includedPillars;
+          }
+        }
+      } catch {
+        // Scope filter is best-effort; currentPillar filtering still applies.
+      }
+
       await syncStoreAnswersToServer(assessmentId, {
         answers: store.answers,
         skippedQuestions: store.skippedQuestions,
         questionBank: store.familyGovernanceQuestionBank ?? [],
-        currentPillar: store.currentPillar,
+        currentPillar: store.currentPillar ?? pillar,
+        includedPillars,
       });
 
       const response = await fetch(`/api/assessment/${assessmentId}/score`, {
@@ -63,6 +77,8 @@ export default function AssessmentCompletePage() {
       const data = (await response.json()) as {
         error?: string;
         canViewSummary?: boolean;
+        canViewRiskPreview?: boolean;
+        allPillarsScored?: boolean;
       };
 
       if (!response.ok) {
@@ -72,6 +88,10 @@ export default function AssessmentCompletePage() {
       setTimeout(() => {
         if (data.canViewSummary) {
           router.push(`/assessment/results?pillar=${encodeURIComponent(pillar)}`);
+          return;
+        }
+        if (data.canViewRiskPreview || data.allPillarsScored) {
+          router.push('/assessment/risk-preview');
           return;
         }
         router.push('/assessment');
@@ -192,7 +212,7 @@ export default function AssessmentCompletePage() {
             <p className="text-muted-foreground">
               {isCalculating
                 ? 'Saving your responses and calculating your risk domain score...'
-                : 'This section is complete. Return to the assessment hub to continue other risk domains.'}
+                : 'Taking you to the next step—continue remaining domains, or open your Risk Preview if you are finished.'}
             </p>
           </div>
 
@@ -208,7 +228,7 @@ export default function AssessmentCompletePage() {
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" style={{ animationDelay: '300ms' }} />
-                <span>Preparing summary for advisor review</span>
+                <span>Preparing your next step</span>
               </div>
             </div>
           )}
