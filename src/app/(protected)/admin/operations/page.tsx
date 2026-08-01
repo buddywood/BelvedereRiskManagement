@@ -68,6 +68,7 @@ export default async function AdminOperationsPage() {
         generatedAt={snapshot.generatedAt}
         environment={snapshot.environment}
         build={snapshot.build}
+        integrationCoverage={snapshot.integrationCoverage}
       />
 
       <section aria-labelledby="ops-core" className="space-y-3">
@@ -102,7 +103,7 @@ export default async function AdminOperationsPage() {
           </h2>
           <p className="text-sm text-muted-foreground">
             Third-party integrations probed on each load. Unconfigured rows show
-            as &ldquo;Unknown&rdquo;; Stripe webhook failures also appear below.
+            as Off and do not affect overall platform status.
           </p>
         </header>
         <DependencyStatusList dependencies={snapshot.dependencies} />

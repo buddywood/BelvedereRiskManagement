@@ -20,7 +20,9 @@ export function ServiceHealthCard({ service }: { service: ServiceHealth }) {
       <CardContent className="flex flex-col gap-2 pt-6">
         <div className="flex items-center gap-2">
           <StatusDot status={service.status} className="size-2.5" />
-          <p className="editorial-kicker">{statusBadgeText(service.status)}</p>
+          <p className="editorial-kicker">
+            {service.configured ? statusBadgeText(service.status) : "Off"}
+          </p>
         </div>
         <p className="text-base font-semibold leading-tight">{service.label}</p>
         <p className="text-xs text-muted-foreground">{service.description}</p>

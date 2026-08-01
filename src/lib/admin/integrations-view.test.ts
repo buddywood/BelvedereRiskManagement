@@ -11,6 +11,11 @@ function minimalSnapshot(
     platform: "node",
     build: { shortSha: null, ref: null, committedAt: null },
     overall: "healthy",
+    integrationCoverage: {
+      configured: 2,
+      total: 6,
+      notConfiguredLabels: ["OpenAI", "Resend", "S3", "Upstash Redis"],
+    },
     core: {
       app: {
         id: "app",

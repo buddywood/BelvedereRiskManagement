@@ -26,6 +26,9 @@ import { prisma } from "@/lib/db";
  *   unknown  — not checked: dependency not configured, or check would
  *              require leaking a secret to a 3rd party we don't trust.
  *
+ * Overall (hero) roll-up ignores unconfigured `unknown` rows — those are
+ * coverage, not platform posture. See {@link rollUpPlatformHealth}.
+ *
  * Server-only. Admin-gated at the page layer.
  */
 
@@ -79,8 +82,16 @@ export interface OperationsHealthSnapshot {
     /** Commit timestamp from Vercel env (if set). */
     committedAt: string | null;
   };
-  /** Roll-up across coreServices for the hero tile. */
+  /** Roll-up across core + configured probes for the hero tile.
+   *  Unconfigured integrations are excluded (coverage, not severity). */
   overall: HealthStatus;
+  /** How many external integrations are configured vs total listed. */
+  integrationCoverage: {
+    configured: number;
+    total: number;
+    /** Labels for rows that are intentionally off / not configured. */
+    notConfiguredLabels: string[];
+  };
   /** Application / API runtime — this Next.js process. */
   core: {
     app: ServiceHealth;
@@ -285,13 +296,38 @@ function extractAuditReason(metadata: unknown): string | undefined {
 
 // ── Public aggregator ─────────────────────────────────────────────────────
 
-function rollUpOverall(
-  ...statuses: HealthStatus[]
+/**
+ * Platform posture roll-up for the Operations hero.
+ *
+ * Unconfigured rows (`configured: false` + `unknown`) are coverage gaps,
+ * not outages — they do not pull overall to "unknown". Configured probes
+ * that return unknown (timeout / unexpected error) still do.
+ *
+ * Degraded/down always count, even when `configured` is false (e.g. missing
+ * CRON_SECRET is surfaced as degraded).
+ */
+export function rollUpPlatformHealth(
+  ...services: ServiceHealth[]
 ): HealthStatus {
-  if (statuses.some((s) => s === "down")) return "down";
-  if (statuses.some((s) => s === "degraded")) return "degraded";
-  if (statuses.every((s) => s === "healthy")) return "healthy";
+  const included = services.filter(
+    (s) => s.configured || s.status === "down" || s.status === "degraded"
+  );
+  if (included.length === 0) return "unknown";
+  if (included.some((s) => s.status === "down")) return "down";
+  if (included.some((s) => s.status === "degraded")) return "degraded";
+  if (included.every((s) => s.status === "healthy")) return "healthy";
   return "unknown";
+}
+
+export function summarizeIntegrationCoverage(
+  dependencies: ServiceHealth[]
+): OperationsHealthSnapshot["integrationCoverage"] {
+  const notConfigured = dependencies.filter((d) => !d.configured);
+  return {
+    configured: dependencies.length - notConfigured.length,
+    total: dependencies.length,
+    notConfiguredLabels: notConfigured.map((d) => d.label),
+  };
 }
 
 export async function getOperationsHealthSnapshot(): Promise<OperationsHealthSnapshot> {
@@ -329,15 +365,16 @@ export async function getOperationsHealthSnapshot(): Promise<OperationsHealthSna
     environment: resolveEnvironment(),
     platform: resolvePlatform(),
     build: resolveBuild(),
-    overall: rollUpOverall(
-      app.status,
-      databaseHealth.status,
-      auth.status,
-      backgroundJobs.redis.status,
-      backgroundJobs.cronSecret.status,
-      backgroundJobs.enterpriseProvision.status,
-      ...dependencies.map((d) => d.status)
+    overall: rollUpPlatformHealth(
+      app,
+      databaseHealth,
+      auth,
+      backgroundJobs.redis,
+      backgroundJobs.cronSecret,
+      backgroundJobs.enterpriseProvision,
+      ...dependencies
     ),
+    integrationCoverage: summarizeIntegrationCoverage(dependencies),
     core: { app, database: databaseHealth, auth },
     dependencies,
     backgroundJobs,

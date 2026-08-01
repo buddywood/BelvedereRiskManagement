@@ -24,10 +24,9 @@ export function DependencyStatusList({
           External dependencies
         </CardTitle>
         <p className="text-xs text-muted-foreground">
-          Third-party services this platform integrates with. We do not poll
-          provider APIs from this dashboard — &ldquo;Configured&rdquo; means the
-          credentials are present in this environment; live failure signal is
-          surfaced below.
+          Third-party services probed on each page load. Unconfigured rows are
+          Off (coverage only) and do not pull overall platform status to
+          unknown.
         </p>
       </CardHeader>
       <CardContent>
@@ -64,7 +63,7 @@ export function DependencyStatusList({
               </div>
               <div className="shrink-0 self-start sm:self-center">
                 <Badge variant="outline" className="text-[0.6rem]">
-                  {statusBadgeText(dep.status)}
+                  {dep.configured ? statusBadgeText(dep.status) : "Off"}
                 </Badge>
               </div>
             </li>

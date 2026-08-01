@@ -57,7 +57,7 @@ test.describe("operations health canary", () => {
       ).toHaveCount(0);
       await expect(
         page.getByRole("heading", {
-          name: /all core services healthy|operating with degraded service/i,
+          name: /all systems healthy|operating with degraded service/i,
         }),
       ).toBeVisible();
 
