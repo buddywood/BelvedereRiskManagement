@@ -16,14 +16,21 @@ export function StatusCard({
   generatedAt,
   environment,
   build,
+  integrationCoverage,
 }: {
   status: HealthStatus;
   generatedAt: string;
   environment: "development" | "preview" | "production" | "unknown";
   build: { shortSha: string | null; ref: string | null; committedAt: string | null };
+  integrationCoverage?: {
+    configured: number;
+    total: number;
+    notConfiguredLabels: string[];
+  };
 }) {
   const label = statusLabel(status);
   const message = statusHeroMessage(status);
+  const coverageLine = formatCoverageLine(integrationCoverage);
 
   return (
     <Card
@@ -47,6 +54,14 @@ export function StatusCard({
           <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
             {message}
           </p>
+          {coverageLine ? (
+            <p
+              className="max-w-xl text-xs leading-relaxed text-muted-foreground"
+              data-testid="ops-integration-coverage"
+            >
+              {coverageLine}
+            </p>
+          ) : null}
         </div>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-xs sm:max-w-xs sm:text-right">
           <DTRow term="Build">
@@ -74,6 +89,27 @@ export function StatusCard({
   );
 }
 
+function formatCoverageLine(
+  coverage:
+    | {
+        configured: number;
+        total: number;
+        notConfiguredLabels: string[];
+      }
+    | undefined
+): string | null {
+  if (!coverage || coverage.total === 0) return null;
+  if (coverage.configured === coverage.total) {
+    return `${coverage.configured} of ${coverage.total} integrations configured.`;
+  }
+  const skipped = coverage.notConfiguredLabels.slice(0, 3).join(", ");
+  const more =
+    coverage.notConfiguredLabels.length > 3
+      ? ` (+${coverage.notConfiguredLabels.length - 3} more)`
+      : "";
+  return `${coverage.configured} of ${coverage.total} integrations configured · Off: ${skipped}${more}`;
+}
+
 function DTRow({ term, children }: { term: string; children: React.ReactNode }) {
   return (
     <>
@@ -86,28 +122,28 @@ function DTRow({ term, children }: { term: string; children: React.ReactNode }) 
 function statusLabel(status: HealthStatus): string {
   switch (status) {
     case "healthy":
-      return "All core services healthy";
+      return "All systems healthy";
     case "degraded":
       return "Operating with degraded service";
     case "down":
-      return "One or more core services down";
+      return "One or more services down";
     case "unknown":
     default:
-      return "Health unknown";
+      return "Health signal incomplete";
   }
 }
 
 function statusHeroMessage(status: HealthStatus): string {
   switch (status) {
     case "healthy":
-      return "All core services are responding normally. External dependencies are configured but not actively probed from this dashboard.";
+      return "Configured core services and integrations are responding normally. Unconfigured integrations are listed below as Off and do not affect this status.";
     case "degraded":
-      return "At least one core service is slow or partially impaired. Recent failures are surfaced below — review and check provider dashboards for the affected dependency.";
+      return "At least one configured service is slow or partially impaired. Review the cards below and check provider dashboards for the affected dependency.";
     case "down":
-      return "A core service is not responding. The dashboard below shows which one. Application requests may fail until the dependency recovers.";
+      return "A configured service is not responding. The dashboard below shows which one. Application requests may fail until the dependency recovers.";
     case "unknown":
     default:
-      return "Some checks could not be run. Configured dependencies are listed below; missing signals are shown as Unknown rather than implied healthy.";
+      return "A required probe did not return a clear signal. Unconfigured integrations are shown as Off below and are not treated as outages.";
   }
 }
 
