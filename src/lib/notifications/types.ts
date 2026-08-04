@@ -32,6 +32,8 @@ export interface SendNotificationParams {
   emailSubject?: string;
   /** Email HTML content override (uses templates if not provided) */
   emailHtml?: string;
+  /** Skip the test account filter (default: false) */
+  skipTestAccountFilter?: boolean;
 }
 
 /**

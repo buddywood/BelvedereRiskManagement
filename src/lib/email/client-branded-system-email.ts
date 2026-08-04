@@ -12,6 +12,7 @@ import {
 } from "@/lib/email/platform-email-layout";
 import { withPlatformLogoAttachment } from "@/lib/email/platform-email-logo";
 import { resolveFromEmail, resolveWhiteLabelFromEmail } from "@/lib/email/resolve-from-email";
+import { checkTestAccountFilter } from "@/lib/email/test-account-filter";
 import { renderEnhancedClientSystemTemplate } from "@/lib/invitations/enhanced-email";
 import type { SendEmailResult } from "@/lib/invitations/email";
 
@@ -68,12 +69,33 @@ function renderPlatformClientSystemEmail(
   });
 }
 
+export interface SendClientSystemEmailOptions {
+  /** Optional user ID to check the database isTestAccount flag. */
+  userId?: string;
+  /** Skip the test account filter (default: false). */
+  skipTestAccountFilter?: boolean;
+}
+
 export async function sendClientSystemEmail(
   to: string,
   content: ClientSystemEmailContent,
   context: ClientEmailContext | null,
+  options?: SendClientSystemEmailOptions,
 ): Promise<SendEmailResult> {
   try {
+    if (!options?.skipTestAccountFilter) {
+      const filterResult = await checkTestAccountFilter(to, options?.userId);
+      if (filterResult) {
+        console.log(
+          `Client system email to ${to} skipped: ${filterResult.reason}`,
+        );
+        return {
+          sent: false,
+          reason: `Email skipped: recipient is a test account (${filterResult.reason}).`,
+        };
+      }
+    }
+
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       console.warn(

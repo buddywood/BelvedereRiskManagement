@@ -27,6 +27,7 @@ async function sendBrandedClientMilestoneEmail(
     clientEmail,
     buildContent(context),
     context,
+    { userId },
   );
   if (!result.sent) {
     console.error(
