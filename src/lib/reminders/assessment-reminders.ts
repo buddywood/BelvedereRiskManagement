@@ -43,8 +43,12 @@ export async function processAssessmentReminders(): Promise<ProcessResult> {
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000); // 14 days for assessment
 
     // Find client assignments with stalled intakes or assessments
+    // Exclude test accounts from reminder processing
     const stalledClients = await prisma.clientAdvisorAssignment.findMany({
       where: {
+        client: {
+          isTestAccount: false,
+        },
         OR: [
           {
             // Stalled intake interviews (IN_PROGRESS >7 days)
@@ -182,6 +186,7 @@ export async function processAssessmentReminders(): Promise<ProcessResult> {
             assessmentUrl,
           ),
           emailContext,
+          { userId: client.id },
         );
 
         if (result.sent) {

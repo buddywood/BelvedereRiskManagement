@@ -42,9 +42,18 @@ export async function processWorkflowReminders(): Promise<ProcessResult> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     // Find all client advisor assignments with complete data for stage computation
+    // Exclude test accounts from reminder processing (both client and advisor)
     const assignments = await prisma.clientAdvisorAssignment.findMany({
       where: {
         status: 'ACTIVE',
+        client: {
+          isTestAccount: false,
+        },
+        advisor: {
+          user: {
+            isTestAccount: false,
+          },
+        },
       },
       include: {
         client: {
