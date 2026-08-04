@@ -71,6 +71,9 @@ public/uploads/
 # Local preview artifacts (round-10 B1 color review) — repo root only
 /preview/
 
+# X campaign data (scheduled posts, stats)
+/data/x-campaign.json
+
 # Vercel env pull artifacts
 /staging
 STAGING.md
