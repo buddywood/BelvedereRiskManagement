@@ -4,7 +4,22 @@ This guide explains how to set up the X API for automated social media posting a
 
 ## Overview
 
-The X posting scripts allow you to:
+AkiliRisk provides two ways to manage social media posting:
+
+### 1. Admin UI with Human-Approval Workflow (Recommended)
+
+The admin panel at `/admin/social` provides:
+- Content calendar for scheduling posts
+- Draft creation with content templates
+- Human review and approval workflow
+- Automatic publishing via cron job (every 5-15 minutes)
+- Post history and error tracking
+
+**Workflow:** Draft → Submit for Review → Approve → Auto-Publish
+
+### 2. CLI Scripts for Direct Posting
+
+Command-line tools for direct posting:
 - Post individual tweets from the command line
 - Schedule content for future publishing
 - Post threads (multi-tweet content)
@@ -76,7 +91,62 @@ Expected output:
    Profile: https://x.com/akilirisk
 ```
 
-## Usage
+## Admin UI Workflow (Recommended)
+
+### Accessing the Social Media Dashboard
+
+Navigate to `/admin/social` to access the social media management dashboard.
+
+### Creating Posts
+
+1. Go to **Drafts** (`/admin/social/drafts`)
+2. Click **New Post**
+3. Select a **Theme** (Cyber Security, Identity Protection, etc.)
+4. Write content or use a pre-built **template**
+5. Optionally set a **scheduled time**
+6. Click **Create Draft**
+
+### Submitting for Review
+
+1. From the Drafts page, find your post
+2. Click **Submit for Review**
+3. The post moves to the Review Queue
+
+### Reviewing and Approving Posts
+
+1. Go to **Review Queue** (`/admin/social/pending`)
+2. Review the post content
+3. Click **Approve** to schedule for publishing, or
+4. Click **Reject** with a reason to send back for revision
+
+### Content Calendar
+
+View all scheduled and published posts at `/admin/social/calendar`:
+- Green dots = Approved (pending publish)
+- Blue dots = Published
+- Yellow dots = Pending review
+
+### Tracking Published Posts
+
+View published posts and any failures at `/admin/social/published`:
+- See X post URLs
+- Track publish errors
+- Retry failed posts
+
+### Content Themes
+
+Posts are organized by theme for analytics:
+- **Cyber Security** - Digital security tips
+- **Identity Protection** - Privacy and identity theft
+- **Family Safety** - Household security
+- **Risk Assessment** - General risk insights
+- **Product Update** - AkiliRisk features
+- **Industry News** - Risk industry commentary
+- **Thought Leadership** - Executive insights
+- **Engagement** - Questions and polls
+- **Promotional** - Direct promotional content
+
+## CLI Usage
 
 ### Post a Single Tweet
 
@@ -156,7 +226,36 @@ npm run x:campaign -- --delete post_1234567890_abc123
 
 ## Automated Publishing with Cron
 
-Set up a cron job to automatically publish scheduled content:
+### Option 1: Admin UI Cron (Recommended)
+
+The admin workflow uses an API endpoint for publishing approved posts:
+
+```bash
+# Vercel cron (vercel.json)
+{
+  "crons": [
+    {
+      "path": "/api/cron/social-publish",
+      "schedule": "*/10 * * * *"
+    }
+  ]
+}
+
+# Or external cron (curl)
+*/10 * * * * curl -X GET "https://akilirisk.com/api/cron/social-publish" \
+  -H "Authorization: Bearer $CRON_SECRET" >> /var/log/social-publish.log 2>&1
+```
+
+The cron endpoint:
+- Finds posts with status `APPROVED` and `scheduledAt <= now`
+- Publishes up to 5 posts per run
+- Updates post status to `PUBLISHED` or `FAILED`
+- Stores the X post ID, URL, and any errors
+- Retries failed posts up to 3 times
+
+### Option 2: CLI Campaign Scheduler
+
+For CLI-based campaigns without the admin UI:
 
 ```bash
 # Edit crontab
