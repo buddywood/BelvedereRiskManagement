@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Find candidates — every assessment still in PREVIEW where
     //    previewEnteredAt + 44h is already in the past.
+    //    Exclude test accounts from reminder processing.
     const startTime = Date.now();
     const threshold = new Date(Date.now() - FORTY_FOUR_HOURS_MS);
 
@@ -69,6 +70,9 @@ export async function GET(request: NextRequest) {
       where: {
         deliverablePhase: "PREVIEW",
         previewEnteredAt: { lte: threshold, not: null },
+        user: {
+          isTestAccount: false,
+        },
       },
       select: { id: true },
     });

@@ -45,11 +45,15 @@ export async function processDocumentReminders(): Promise<ProcessResult> {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // 7 day deduplication
 
     // Find unfulfilled document requirements that need reminders
+    // Exclude test accounts from reminder processing
     const documentsNeedingReminders = await prisma.documentRequirement.findMany({
       where: {
         fulfilled: false,
         createdAt: {
           lt: threeDaysAgo, // Created more than 3 days ago
+        },
+        client: {
+          isTestAccount: false,
         },
         OR: [
           { lastReminderSentAt: null }, // Never sent reminder
@@ -136,6 +140,7 @@ export async function processDocumentReminders(): Promise<ProcessResult> {
             portalUrl: clientPortalUrl(emailContext, "/documents"),
           }),
           emailContext,
+          { userId: client.id },
         );
 
         if (emailResult.sent) {

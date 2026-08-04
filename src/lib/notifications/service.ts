@@ -7,6 +7,7 @@ import { shouldSendNotification } from "./preferences";
 import { withPlatformLogoAttachment } from "@/lib/email/platform-email-logo";
 import { resolveFromEmail } from "@/lib/email/resolve-from-email";
 import { formatEmailSubject } from "@/lib/email/format-email-subject";
+import { checkTestAccountFilter } from "@/lib/email/test-account-filter";
 import { getPublicAppUrlStrict } from "@/lib/public-app-url";
 import { buildNotificationTemplateData, renderNotificationEmail } from "./templates";
 import { NotificationType } from "@prisma/client";
@@ -76,10 +77,22 @@ export async function sendNotification(params: SendNotificationParams): Promise<
     advisorProfileId,
     emailSubject,
     emailHtml,
+    skipTestAccountFilter,
   } = params;
 
   let emailSent = false;
   let inAppCreated = false;
+
+  // Check if recipient is a test account
+  if (!skipTestAccountFilter) {
+    const filterResult = await checkTestAccountFilter(recipientEmail, recipientUserId);
+    if (filterResult) {
+      console.log(
+        `Notification email to ${recipientEmail} skipped: ${filterResult.reason}`,
+      );
+      return { emailSent: false, inAppCreated: false };
+    }
+  }
 
   // Check email preference and send if allowed
   const shouldSendEmail = await shouldSendNotification(recipientUserId, category, 'email');
