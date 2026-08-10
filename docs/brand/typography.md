@@ -4,10 +4,10 @@
 
 | Element | Typeface | Notes |
 |---------|----------|-------|
-| **AKILI wordmark** | IBM Plex Sans | Semibold; bundled in SVG |
-| **Risk Intelligence subline** | IBM Plex Sans | Regular, smaller cap height |
+| **AKILI wordmark** | Montserrat | Bundled in brand SVG lockups |
+| **Risk Intelligence subline** | Montserrat | Medium weight in kit |
 
-Logo SVGs embed font references — do not re-typeset the wordmark in other fonts.
+Logo SVGs embed font references — do not re-typeset the wordmark in other fonts. App UI uses Manrope; decks use Calibri.
 
 ---
 
@@ -63,7 +63,7 @@ HTML emails use system sans stack with inline styles:
 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 ```
 
-Headlines may use brand blue `#4EA5D9`; body `#374151`.
+Headlines may use brand blue `#0564b6`; body `#374151`.
 
 ---
 
@@ -87,6 +87,6 @@ Headlines may use brand blue `#4EA5D9`; body `#374151`.
 - Use tabular nums for scores (`font-variant-numeric: tabular-nums`)
 
 **Don't**
-- Use logo IBM Plex for long body paragraphs in app UI
+- Use logo Montserrat for long body paragraphs in app UI
 - Mix more than two type families on one slide
 - Use all-caps for sentences (kickers only)

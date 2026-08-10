@@ -10,6 +10,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 type Tx = Prisma.TransactionClient;
 
 export const DEFAULT_WORKBOOK_FILENAME = "Belvedere_Household_Risk_Profile.xlsx";
+export const DEFAULT_WORKBOOK_RELATIVE_PATH = path.join("data", DEFAULT_WORKBOOK_FILENAME);
 
 export const CATEGORY_MAPPING = {
   "A.": { id: "household_governance", name: "Household Governance", sortStart: 1 },
@@ -56,7 +57,12 @@ export function resolveWorkbookPath(): string {
   if (fromEnv) {
     return path.isAbsolute(fromEnv) ? fromEnv : path.resolve(process.cwd(), fromEnv);
   }
-  return path.resolve(process.cwd(), DEFAULT_WORKBOOK_FILENAME);
+  const preferred = path.resolve(process.cwd(), DEFAULT_WORKBOOK_RELATIVE_PATH);
+  if (fs.existsSync(preferred)) return preferred;
+  // Legacy location (repo root) for older checkouts/deploys.
+  return fs.existsSync(path.resolve(process.cwd(), DEFAULT_WORKBOOK_FILENAME))
+    ? path.resolve(process.cwd(), DEFAULT_WORKBOOK_FILENAME)
+    : preferred;
 }
 
 /** Map a worksheet tab name to intake/scoring pillar id (riskAreaId). */
