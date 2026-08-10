@@ -120,11 +120,11 @@
   --advisor-logo-url: '';
   --advisor-brand-name: '';
 
-  /* Platform logo lockup — official `logo/` palette (#4EA5D9 radar, not editorial --brand) */
-  --logo-brand-primary: #4ea5d9;
-  --logo-trust-accent: #d97706;
-  --logo-foreground: #1e293b;
-  --logo-muted-foreground: #64748b;
+  /* Platform logo lockup — media kit palette (#0564b6 / #f89c11, not editorial --brand) */
+  --logo-brand-primary: #0564b6;
+  --logo-trust-accent: #f89c11;
+  --logo-foreground: #0b0d1c;
+  --logo-muted-foreground: #061734;
   --logo-border: #e2e8f0;
 
   /* Analytics charts — Recharts SVG fills need resolved colors, not hsl(var(...)) */
@@ -194,9 +194,9 @@
   --card-accent: var(--advisor-accent);
   --border-accent: var(--advisor-primary);
 
-  --logo-brand-primary: #7dd3fc;
+  --logo-brand-primary: #4ea5d9;
   --logo-trust-accent: #f59e0b;
-  --logo-foreground: #f1f5f9;
+  --logo-foreground: #fefefe;
   --logo-muted-foreground: #94a3b8;
   --logo-border: #334155;
 

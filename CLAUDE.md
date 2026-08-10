@@ -60,7 +60,7 @@ npx prisma studio
 # run: `npm run db:fix-enhanced-migration` — that migration SQL is idempotent for partial Neon replays.
 
 # Assessment bank (spreadsheet is source of truth)
-# Place Belvedere_Household_Risk_Profile.xlsx at repo root, or set BELVEDERE_WORKBOOK_PATH in .env.local.
+# Place Belvedere_Household_Risk_Profile.xlsx in data/, or set BELVEDERE_WORKBOOK_PATH in .env.local.
 # Tab names must match scripts/lib/belvedere-workbook.ts (Governance, Cyber, Physical, …).
 npm run seed:pillar-ddl
 # Deprecated alias (runs seed:pillar-ddl): npm run seed:assessment-bank

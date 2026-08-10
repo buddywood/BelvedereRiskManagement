@@ -2,23 +2,23 @@
 
 ## Logo palette (official lockup)
 
-Used in the radar icon, email lockups, and pitch decks. **Do not substitute the editorial UI `--brand` token for logo blue.**
+Used in the icon, email lockups, and pitch decks. **Do not substitute the editorial UI `--brand` token for logo blue.**
 
 | Role | Light | Dark | Usage |
 |------|-------|------|--------|
-| **Brand primary** | `#4EA5D9` | `#7DD3FC` | Radar rings, links, deck accent bar |
-| **Trust accent** | `#D97706` | `#F59E0B` | Highlights, callouts, secondary emphasis |
-| **Foreground** | `#1e293b` | `#f1f5f9` | Headlines on light backgrounds |
-| **Muted** | `#64748b` | `#94a3b8` | Body secondary, captions |
-| **Border** | `#e2e8f0` | `#334155` | Dividers, table borders |
+| **Brand primary** | `#0564b6` | `#4EA5D9` | Icon fills, links, deck accent bar |
+| **Trust accent** | `#f89c11` | `#F59E0B` | Icon highlight, callouts |
+| **Foreground** | `#0b0d1c` | `#fefefe` | Wordmark on light / dark |
+| **Muted** | `#061734` | `#94a3b8` | Secondary type |
+| **Border** | `#e2e8f0` | `#334155` | Dividers |
 
 CSS variables (`src/app/globals.css`):
 
 ```css
---logo-brand-primary: #4ea5d9;
---logo-trust-accent: #d97706;
---logo-foreground: #1e293b;
---logo-muted-foreground: #64748b;
+--logo-brand-primary: #0564b6;
+--logo-trust-accent: #f89c11;
+--logo-foreground: #0b0d1c;
+--logo-muted-foreground: #061734;
 --logo-border: #e2e8f0;
 ```
 
@@ -32,7 +32,7 @@ Warm editorial neutrals with oklch tokens in `globals.css`. Used for app chrome,
 |-------|---------|
 | `--background` / `--foreground` | Page base |
 | `--primary` | Buttons, key actions |
-| `--brand` / `--trust-accent` | Editorial accents (not logo radar) |
+| `--brand` / `--trust-accent` | Editorial accents (not logo palette) |
 | `--muted` / `--muted-foreground` | Secondary surfaces and text |
 | `--destructive` | Errors, critical risk |
 
@@ -46,8 +46,8 @@ Use **logo palette** for external/marketing; **UI tokens** for in-app screens.
 |------|-----|-----|
 | Navy | `#1E293B` | Slide titles, table headers |
 | Navy deep | `#1A1A2E` | Title slide & closing backgrounds |
-| Brand blue | `#4EA5D9` | Top accent bar, links, diagram nodes |
-| Trust accent | `#D97706` | Title marker, traction banner, moat callouts |
+| Brand blue | `#0564b6` | Top accent bar, links, diagram nodes |
+| Trust accent | `#f89c11` | Title marker, traction banner, moat callouts |
 | Off-white | `#F8FAFC` | Content slide background alt, diagram fills |
 | Muted | `#64748B` | Subtitles, footnotes |
 
@@ -75,8 +75,8 @@ Source: `src/lib/pdf/enhanced-styles.ts`
 
 | Role | Value |
 |------|--------|
-| Brand blue | `#4EA5D9` |
-| Trust accent | `#D97706` |
+| Brand blue | `#0564b6` |
+| Trust accent | `#f89c11` |
 | CTA background | `#18181b` |
 | Header gradient | `linear-gradient(145deg,#1e293b 0%,#0f172a 55%,#172554 100%)` |
 
@@ -87,11 +87,11 @@ Source: `src/lib/email/platform-brand.ts` (imports from brand tokens).
 ## Do / Don't
 
 **Do**
-- Use `#4EA5D9` for AKILI logo contexts and investor materials
+- Use `#0564b6` for AKILI logo contexts and investor materials
 - Test lockups on both white and `#1A1A2E` backgrounds
 - Use trust accent sparingly — one focal element per slide
 
 **Don't**
-- Recolor the radar icon or wordmark
+- Recolor the icon or wordmark
 - Use advisor tenant colors in AKILI corporate decks
 - Mix logo blue with unrelated blues (e.g. default Bootstrap `#0d6efd`)

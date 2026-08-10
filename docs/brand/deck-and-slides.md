@@ -4,10 +4,10 @@
 
 | Deck | Markdown | PowerPoint |
 |------|----------|------------|
-| Investor | [pitch-deck-investor.md](../pitch-deck-investor.md) | [Akili-Investor-Deck.pptx](../pitch-decks/Akili-Investor-Deck.pptx) |
-| Product | [pitch-deck-product.md](../pitch-deck-product.md) | [Akili-Product-Deck.pptx](../pitch-decks/Akili-Product-Deck.pptx) |
+| Investor | [pitch-deck-investor.md](../pitch-decks/pitch-deck-investor.md) | [Akili-Investor-Deck.pptx](../pitch-decks/Akili-Investor-Deck.pptx) |
+| Product | [pitch-deck-product.md](../pitch-decks/pitch-deck-product.md) | [Akili-Product-Deck.pptx](../pitch-decks/Akili-Product-Deck.pptx) |
 
-Index: [pitch-deck.md](../pitch-deck.md)
+Index: [pitch-deck.md](../pitch-decks/pitch-deck.md)
 
 ---
 
@@ -29,9 +29,9 @@ Tokens: `src/lib/brand/tokens.ts`
 | **Aspect ratio** | 16:9 |
 | **Title slide background** | `#1A1A2E` (navy deep) |
 | **Content slides** | White background |
-| **Top accent bar** | 8px `#4EA5D9` full width |
-| **Title marker** | 6px `#D97706` left of title |
-| **Footer** | Horizontal compact logo + `akilirisk.com` |
+| **Top accent bar** | 8px `#0564b6` full width |
+| **Title marker** | 6px `#f89c11` left of title |
+| **Footer** | Horizontal Primary logo + `akilirisk.com` |
 | **Title font** | Calibri Light 28pt |
 | **Body font** | Calibri 15pt |
 
@@ -77,9 +77,10 @@ Built automatically in generated PPTX; reference diagram in investor markdown Sl
 
 | Asset | Path |
 |-------|------|
-| Logo SVGs | `logo/*.svg` |
-| Logo PNG/JPG | `logo/*.png`, `logo/*-web.jpg` |
+| Logo SVGs | `logo/akili-horizontal-*.svg`, `logo/akili-vertical-*.svg`, `logo/akili-icon-*.svg` |
+| Logo PNG/JPG | `logo/*.png`, `logo/*-web.jpg` (trimmed from `media/7-Transparent-PNG`) |
+| Design kit | `media/` |
 | Brand colors | [colors.md](./colors.md) |
 | Preview HTML | `logo/logo-export-preview.html` |
 
-For Figma: import SVG lockups; set color styles from logo palette table.
+For Figma: import SVG lockups from `logo/` or `media/1-Full-Logo/`; set color styles from logo palette table.

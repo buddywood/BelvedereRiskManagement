@@ -12,10 +12,10 @@ Official brand reference for **AKILI Risk Intelligence** — logos, colors, typo
 |---|---|
 | **Legal name** | AKILI Risk Intelligence |
 | **Primary tagline** | The governance intelligence platform for modern family wealth. |
-| **Brand blue** | `#4EA5D9` |
-| **Trust accent** | `#D97706` |
+| **Brand blue** | `#0564b6` |
+| **Trust accent** | `#f89c11` |
 | **Navy (text / decks)** | `#1E293B` |
-| **Logo font** | IBM Plex Sans |
+| **Logo font** | Montserrat |
 | **App UI font** | Manrope (+ Cormorant Garamond display) |
 
 ---
@@ -35,7 +35,8 @@ Official brand reference for **AKILI Risk Intelligence** — logos, colors, typo
 ## Asset locations
 
 ```
-logo/                          # Master SVG + raster exports
+media/                         # Design kit (source of truth; not served)
+logo/                          # Delivery SVG + raster for decks/scripts
 public/brand/                  # Web-deployed lockups (app + email)
 docs/pitch-decks/              # Generated .pptx decks
 docs/pitch-decks/screenshots/ # Product screenshots for Slide 6

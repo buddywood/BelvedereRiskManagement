@@ -1,0 +1,37 @@
+/* AKILI — self-hosted Montserrat
+   Upload the four .ttf files alongside this CSS (or adjust the url() paths),
+   link this file in your <head>, then use font-family:"Montserrat" in your styles.
+   Weights: 400 body · 500 tagline · 600 optional heading · 700 logotype/headings */
+
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("Montserrat-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("Montserrat-Medium.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("Montserrat-SemiBold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("Montserrat-Bold.ttf") format("truetype");
+}
+
+/* Optional base rule:
+body { font-family: "Montserrat", "Helvetica Neue", Arial, sans-serif; }
+*/

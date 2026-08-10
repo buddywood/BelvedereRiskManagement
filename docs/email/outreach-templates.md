@@ -131,4 +131,4 @@ Best,
 
 ---
 
-*Sync with [messaging.md](../brand/messaging.md) and [pitch-deck-investor.md](../pitch-deck-investor.md) when positioning changes.*
+*Sync with [messaging.md](../brand/messaging.md) and [pitch-deck-investor.md](../pitch-decks/pitch-deck-investor.md) when positioning changes.*
