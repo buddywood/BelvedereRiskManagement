@@ -17,12 +17,12 @@ export const AKILI_BRAND = {
   },
 } as const;
 
-/** Official logo lockup palette — radar icon, not editorial UI `--brand`. */
+/** Official logo lockup palette — media kit icon, not editorial UI `--brand`. */
 export const AKILI_LOGO_COLORS = {
-  brandPrimary: { light: "#4EA5D9", dark: "#7DD3FC" },
-  trustAccent: { light: "#D97706", dark: "#F59E0B" },
-  foreground: { light: "#1e293b", dark: "#f1f5f9" },
-  muted: { light: "#64748b", dark: "#94a3b8" },
+  brandPrimary: { light: "#0564b6", dark: "#4EA5D9" },
+  trustAccent: { light: "#f89c11", dark: "#F59E0B" },
+  foreground: { light: "#0b0d1c", dark: "#fefefe" },
+  muted: { light: "#061734", dark: "#94a3b8" },
   border: { light: "#e2e8f0", dark: "#334155" },
 } as const;
 
@@ -43,8 +43,8 @@ export const AKILI_UI_COLORS = {
 export const AKILI_DECK_COLORS = {
   navy: "1E293B",
   navyDeep: "1A1A2E",
-  brandBlue: "4EA5D9",
-  trustAccent: "D97706",
+  brandBlue: "0564B6",
+  trustAccent: "F89C11",
   white: "FFFFFF",
   offWhite: "F8FAFC",
   muted: "64748B",
@@ -73,7 +73,7 @@ export const AKILI_MESSAGING = {
 } as const;
 
 export const AKILI_TYPOGRAPHY = {
-  logo: "IBM Plex Sans",
+  logo: "Montserrat",
   uiSans: "Manrope",
   uiDisplay: "Cormorant Garamond",
   uiMono: "Geist Mono",
@@ -81,16 +81,21 @@ export const AKILI_TYPOGRAPHY = {
   deckBody: "Calibri",
 } as const;
 
-/** Repo-relative paths from project root. */
+/** Repo-relative paths from project root. Delivery copies of `media/` kit. */
 export const AKILI_LOGO_ASSETS = {
-  stackedSvg: "logo/akili-stacked.svg",
+  stackedSvg: "logo/akili-vertical-primary.svg",
   stackedWebJpg: "logo/akili-stacked-web.jpg",
-  horizontalSvg: "logo/akili-horizontal-compact.svg",
+  horizontalSvg: "logo/akili-horizontal-primary.svg",
   horizontalPng: "logo/akili-horizontal-compact.png",
-  trademarkSvg: "logo/akili-trademark-only.svg",
+  horizontalWhiteSvg: "logo/akili-horizontal-white.svg",
+  verticalWhiteSvg: "logo/akili-vertical-white.svg",
+  iconSvg: "logo/akili-icon-color.svg",
+  trademarkSvg: "logo/akili-icon-color.svg",
   emailLockupPng: "public/brand/akili-email-lockup.png",
   emailLockupSvg: "public/brand/akili-email-lockup.svg",
   previewHtml: "logo/logo-export-preview.html",
+  /** Design-kit source (not served at runtime). */
+  mediaKitRoot: "media/",
 } as const;
 
 export const AKILI_EMAIL = {

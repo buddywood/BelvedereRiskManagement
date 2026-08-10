@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AKILI Risk Intelligence — Brand Usage</title>
+<style>
+  :root{
+    --blue:#0564B6; --blue2:#0967B7; --orange:#F89C11;
+    --ink:#0B0D1C; --navy:#061734; --paper:#FFFFFF; --line:#E4E7EC; --muted:#667085;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-family:Montserrat,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#fff;font-size:10.5px;line-height:1.5}
+  @page{size:Letter;margin:0}
+  .page{width:8.5in;min-height:11in;padding:0.55in 0.6in;margin:0 auto}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:18px}
+  header img{height:44px}
+  .doctag{text-align:right}
+  .doctag h1{font-size:15px;font-weight:600;letter-spacing:.02em}
+  .doctag span{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.16em}
+
+  h2{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;color:var(--blue);margin-bottom:9px;display:flex;align-items:center;gap:8px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}
+  section{margin-bottom:18px}
+  .note{color:var(--muted);font-size:9.5px}
+
+  /* logo variants */
+  .variants{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .chip{border:1px solid var(--line);border-radius:7px;overflow:hidden}
+  .chip .art{height:66px;display:flex;align-items:center;justify-content:center;padding:8px}
+  .chip .art img{max-height:100%;max-width:92%}
+  .chip .cap{border-top:1px solid var(--line);padding:5px 8px;font-size:8.5px}
+  .chip .cap b{font-weight:600}.chip .cap span{color:var(--muted)}
+  .onlight{background:#fff}.ondark{background:var(--navy)}.ongrey{background:#F2F4F7}
+
+  /* colors */
+  .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .sw .cap{padding-top:6px}
+  .sw .block{height:52px;border-radius:7px;border:1px solid rgba(0,0,0,.06)}
+  .sw b{display:block;font-size:9.5px;font-weight:600}
+  .sw code{font-size:8.5px;color:var(--muted);font-family:inherit;display:block}
+
+  /* type */
+  .typerow{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding:7px 0}
+  .typerow:last-child{border-bottom:0}
+  .typerow .w{width:70px;font-size:8.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .sample{font-weight:600}
+
+  /* clear space / min size */
+  .rules{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .clearbox{border:1px solid var(--line);border-radius:7px;padding:12px;display:flex;align-items:center;justify-content:center;background:#F2F4F7;position:relative;height:96px}
+  .clearbox .frame{position:relative;padding:14px;outline:1.5px dashed var(--blue);outline-offset:0}
+  .clearbox .frame img{height:34px;display:block}
+  .minrow{display:flex;gap:16px;align-items:flex-end;justify-content:center;height:96px;border:1px solid var(--line);border-radius:7px;background:#F2F4F7;padding:10px}
+  .minrow .m{text-align:center}
+  .minrow .m img{display:block;margin:0 auto 5px}
+  .minrow .m span{font-size:8px;color:var(--muted)}
+
+  /* do / dont */
+  .dd{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .dd ul{list-style:none;font-size:9.5px}
+  .dd li{padding:3px 0 3px 18px;position:relative}
+  .dd li::before{position:absolute;left:0;top:2px;font-weight:700}
+  .do li::before{content:"✓";color:#12813a}
+  .dont li::before{content:"✕";color:#c01527}
+  .ddhead{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px}
+
+  footer{margin-top:6px;padding-top:10px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:8.5px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <img src="1-Full-Logo/Horizontal/AKILI-Risk-Intelligence-Horizontal-Primary.svg" alt="AKILI Risk Intelligence">
+    <div class="doctag">
+      <h1>Brand Usage Guidelines</h1>
+      <span>Quick reference · v1</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div>
+
+      <section>
+        <h2>Logo Variants</h2>
+        <div class="variants">
+          <div class="chip"><div class="art onlight"><img src="1-Full-Logo/Horizontal/AKILI-Risk-Intelligence-Horizontal-Primary.svg"></div><div class="cap"><b>Primary</b> · <span>light backgrounds</span></div></div>
+          <div class="chip"><div class="art ondark"><img src="7-Transparent-PNG/AKILI-Risk-Intelligence-Horizontal-Secondary.png"></div><div class="cap"><b>Secondary</b> · <span>dark / brand navy</span></div></div>
+          <div class="chip"><div class="art onlight"><img src="7-Transparent-PNG/AKILI-Risk-Intelligence-Horizontal-Black.png"></div><div class="cap"><b>Black</b> · <span>one-colour / print</span></div></div>
+          <div class="chip"><div class="art ondark"><img src="7-Transparent-PNG/AKILI-Risk-Intelligence-Horizontal-White.png"></div><div class="cap"><b>White</b> · <span>photos / dark UI</span></div></div>
+        </div>
+        <p class="note" style="margin-top:8px">Vertical (stacked) versions of all four exist for square or centred layouts. Use vector <b>SVG</b> or <b>PDF</b> whenever possible; PNG for fixed-size web use.</p>
+      </section>
+
+      <section>
+        <h2>Colour Palette</h2>
+        <div class="swatches">
+          <div class="sw"><div class="block" style="background:#0564B6"></div><div class="cap"><b>Primary Blue</b><code>#0564B6</code><code>rgb 5·100·182</code></div></div>
+          <div class="sw"><div class="block" style="background:#F89C11"></div><div class="cap"><b>Accent Orange</b><code>#F89C11</code><code>rgb 248·156·17</code></div></div>
+          <div class="sw"><div class="block" style="background:#0B0D1C"></div><div class="cap"><b>Ink Navy</b><code>#0B0D1C</code><code>rgb 11·13·28</code></div></div>
+          <div class="sw"><div class="block" style="background:#061734"></div><div class="cap"><b>Deep Navy</b><code>#061734</code><code>rgb 6·23·52</code></div></div>
+        </div>
+        <p class="note" style="margin-top:8px">Blue leads; orange is a sparing accent (roughly 10% of any composition). Navy for text and dark backgrounds.</p>
+      </section>
+
+      <section>
+        <h2>Typography</h2>
+        <div class="typerow"><div class="w">Logotype</div><div class="sample" style="font-size:19px;font-weight:700">Montserrat Bold</div></div>
+        <div class="typerow"><div class="w">Tagline</div><div class="sample" style="font-size:14px;font-weight:500">Montserrat Medium</div></div>
+        <div class="typerow"><div class="w">Body</div><div class="sample" style="font-size:11px;font-weight:400">Montserrat Regular — the quick brown fox jumps.</div></div>
+        <p class="note" style="margin-top:7px">Official typeface: <b>Montserrat</b> — free via Google Fonts (SIL Open Font License). <b>Bold</b> for the logotype, <b>Medium</b> for the tagline. Fallback: Helvetica Neue / Arial.</p>
+      </section>
+
+    </div>
+    <div>
+
+      <section>
+        <h2>Clear Space &amp; Minimum Size</h2>
+        <div class="rules">
+          <div>
+            <div class="clearbox"><div class="frame"><img src="6-Icon/AKILI-Icon-Color.svg"></div></div>
+            <p class="note" style="margin-top:6px">Keep clear space around the logo equal to the <b>height of the icon</b>. Nothing intrudes into this zone.</p>
+          </div>
+          <div>
+            <div class="minrow">
+              <div class="m"><img src="1-Full-Logo/Horizontal/AKILI-Risk-Intelligence-Horizontal-Primary.svg" style="height:20px"><span>full logo<br>≥ 120px / 1in wide</span></div>
+              <div class="m"><img src="6-Icon/AKILI-Icon-Color.svg" style="height:26px"><span>icon<br>≥ 24px</span></div>
+            </div>
+            <p class="note" style="margin-top:6px">Below the full-logo minimum, use the <b>icon</b> alone.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Icon / App Mark</h2>
+        <div class="minrow" style="height:82px;gap:22px">
+          <div class="m" style="background:#fff;padding:8px 10px;border-radius:6px"><img src="6-Icon/AKILI-Icon-Color.svg" style="height:40px"></div>
+          <div class="m" style="padding:8px 10px"><img src="6-Icon/AKILI-Icon-Black.svg" style="height:40px"></div>
+          <div class="m" style="background:var(--navy);padding:8px 10px;border-radius:6px"><img src="6-Icon/AKILI-Icon-White.svg" style="height:40px"></div>
+        </div>
+        <p class="note" style="margin-top:7px">The pentagon mark stands alone for favicons, app icons and avatars. Full favicon package in <b>/6-Icon</b>.</p>
+      </section>
+
+      <section>
+        <h2>Do &amp; Don't</h2>
+        <div class="dd">
+          <div class="do">
+            <div class="ddhead" style="color:#12813a">Do</div>
+            <ul>
+              <li>Use the supplied master files</li>
+              <li>Give it room to breathe</li>
+              <li>Pick the variant with best contrast</li>
+              <li>Scale proportionally</li>
+            </ul>
+          </div>
+          <div class="dont">
+            <div class="ddhead" style="color:#c01527">Don't</div>
+            <ul>
+              <li>Stretch, squash or rotate it</li>
+              <li>Recolour or swap the palette</li>
+              <li>Add shadows, glows or outlines</li>
+              <li>Place on busy / low-contrast areas</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer>
+    <span>AKILI Risk Intelligence — Brand Usage Guidelines</span>
+    <span>Files: /0-Source-Editable (.ai) · /1-Full-Logo · /6-Icon · /7-Transparent-PNG</span>
+  </footer>
+
+</div>
+</body>
+</html>

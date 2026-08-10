@@ -77,3 +77,12 @@ STAGING.md
 
 # local agent rules (personal)
 .cursor/rules/github-identity.mdc
+
+# Local review bin for files staged for deletion
+_to_delete/
+
+# Claude Code worktrees (local scratch checkouts)
+.claude/worktrees/
+
+# Claude Code local settings (any depth)
+**/.claude/settings.local.json

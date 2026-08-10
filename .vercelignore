@@ -18,10 +18,11 @@ coverage
 tests
 
 # Large local-only assets (tracked in git but not needed on Vercel)
-Belvedere_Household_Risk_Profile.xlsx
+media
+data/Belvedere_Household_Risk_Profile.xlsx
 Akili_Risk*.docx
 docs/pitch-decks
-structure.txt
+docs/structure.txt
 
 # Build artifacts
 *.tsbuildinfo

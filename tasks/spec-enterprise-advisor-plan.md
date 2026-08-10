@@ -2,7 +2,7 @@
 
 **Status:** Approved — ready for Phase 1 implementation  
 **Author:** Product + engineering (2026-06-09)  
-**Related:** `STRIPE-SPEC.md`, Epic 5.7 billing/branding, `src/lib/advisor/auth.ts`, `src/lib/billing/subscription-service.ts`
+**Related:** `docs/STRIPE-SPEC.md`, Epic 5.7 billing/branding, `src/lib/advisor/auth.ts`, `src/lib/billing/subscription-service.ts`
 
 ---
 
@@ -632,7 +632,7 @@ describe("enterprise portfolio scoping", () => {
 | Team UI | `src/app/(protected)/advisor/settings/team/page.tsx` (new) |
 | Billing UI | `src/components/advisor/billing/BillingDashboard.tsx` |
 | Subdomain | `src/lib/advisor/subdomain.ts`, `src/proxy.ts` |
-| Docs | `STRIPE-SPEC.md` addendum when implementing |
+| Docs | `docs/STRIPE-SPEC.md` addendum when implementing |
 
 ---
 

@@ -45,7 +45,7 @@ export function BrandingLivePreview({
   showColorSwatches = false,
   className,
 }: BrandingLivePreviewProps) {
-  const accent = branding.primaryColor?.trim() || '#4EA5D9';
+  const accent = branding.primaryColor?.trim() || '#0564b6';
 
   return (
     <section
