@@ -2,11 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import type { SocialPostStatus, SocialContentTheme, SocialPlatform, UserRole } from "@prisma/client";
+import { Prisma, type SocialPostStatus, type SocialContentTheme, type SocialPlatform, type UserRole } from "@prisma/client";
 import { requireAdminRole } from "@/lib/admin/auth";
 import { prisma } from "@/lib/db";
 import { writeAudit, AUDIT_ACTIONS } from "@/lib/audit/audit-log";
-import { Prisma } from "@prisma/client";
 
 const SOCIAL_POSTS_PATH = "/admin/social";
 
@@ -429,7 +428,7 @@ export async function getSocialPosts(filter?: {
   await requireAdminRole();
 
   try {
-    const whereClause: Parameters<typeof prisma.socialPost.findMany>[0]["where"] = {};
+    const whereClause: Prisma.SocialPostWhereInput = {};
 
     if (filter?.status) {
       whereClause.status = Array.isArray(filter.status)

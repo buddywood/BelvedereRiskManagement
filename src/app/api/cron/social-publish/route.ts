@@ -6,7 +6,6 @@ import {
   postTweet,
   postThread,
   validateXConfig,
-  buildTweetUrl,
 } from "@/lib/marketing/x-client";
 
 /**
