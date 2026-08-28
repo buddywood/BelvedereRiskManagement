@@ -344,6 +344,26 @@ export const AUDIT_ACTIONS = {
    *  "field_fill". */
   CLIENT_PII_FIELD_CONSENT: "client_pii.field_consent",
 
+  // ── Social media marketing actions ─────────────────────────────────────────
+  /** Admin creates a social post draft. */
+  ADMIN_SOCIAL_POST_CREATED: "social_post.created",
+  /** Admin updates a social post draft. */
+  ADMIN_SOCIAL_POST_UPDATED: "social_post.updated",
+  /** Admin submits a post for review. */
+  ADMIN_SOCIAL_POST_SUBMITTED: "social_post.submitted",
+  /** Admin approves a post for publishing. */
+  ADMIN_SOCIAL_POST_APPROVED: "social_post.approved",
+  /** Admin rejects a post with reason. */
+  ADMIN_SOCIAL_POST_REJECTED: "social_post.rejected",
+  /** Admin cancels a scheduled post. */
+  ADMIN_SOCIAL_POST_CANCELLED: "social_post.cancelled",
+  /** Admin deletes a post. */
+  ADMIN_SOCIAL_POST_DELETED: "social_post.deleted",
+  /** System publishes a post via cron job. */
+  SYSTEM_SOCIAL_POST_PUBLISHED: "social_post.published",
+  /** System records a publish failure. */
+  SYSTEM_SOCIAL_POST_FAILED: "social_post.failed",
+
   // ── System actions (P1) ───────────────────────────────────────────────────
   /** Written by /api/cron/audit-log-retention each successful sweep. */
   SYSTEM_RETENTION_SWEEP: "system.retention_sweep",
