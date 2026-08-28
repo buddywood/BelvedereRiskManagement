@@ -21,7 +21,10 @@ function emailHash(email: string | null | undefined): string | undefined {
     .slice(0, 8);
 }
 
-const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+const SESSION_REMEMBER_ME_MS = 14 * 24 * 60 * 60 * 1000; // 14 days when "Remember Me" is checked
+const SESSION_DEFAULT_MS = 24 * 60 * 60 * 1000; // 1 day when "Remember Me" is not checked
+const SESSION_REMEMBER_ME_SECONDS = 14 * 24 * 60 * 60; // 14 days in seconds
+const SESSION_DEFAULT_SECONDS = 24 * 60 * 60; // 1 day in seconds
 
 /** Edge-safe random session token (Web Crypto, no Node `crypto` dependency). */
 function generateSessionToken(): string {
@@ -37,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: SESSION_REMEMBER_ME_SECONDS, // 14 days max (actual duration controlled by rememberMe in JWT)
   },
   callbacks: {
     async signIn({ user }) {
@@ -110,6 +113,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user?.email) {
         token.email = user.email;
       }
+      // Capture rememberMe preference on initial sign-in and set JWT expiry
+      if (user && "rememberMe" in user) {
+        token.rememberMe = Boolean(user.rememberMe);
+        // Set JWT expiry based on rememberMe preference
+        const sessionDurationSeconds = token.rememberMe
+          ? SESSION_REMEMBER_ME_SECONDS
+          : SESSION_DEFAULT_SECONDS;
+        token.exp = Math.floor(Date.now() / 1000) + sessionDurationSeconds;
+      }
       // Store MFA fields in JWT so middleware (Edge) can read them without Prisma
       const userId = token.id as string;
       if (userId) {
@@ -138,11 +150,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (userId && !token.sessionToken) {
           const seedVerified = !token.mfaEnabled;
           const sessionToken = generateSessionToken();
+          const sessionDurationMs = token.rememberMe
+            ? SESSION_REMEMBER_ME_MS
+            : SESSION_DEFAULT_MS;
           await prisma.session.create({
             data: {
               sessionToken,
               userId,
-              expires: new Date(Date.now() + SESSION_MAX_AGE_MS),
+              expires: new Date(Date.now() + sessionDurationMs),
               mfaVerified: seedVerified,
             },
           });

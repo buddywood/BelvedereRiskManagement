@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { resolvePostSignInPath } from "@/lib/auth-callback-path";
 import {
@@ -186,6 +187,7 @@ function StaffCredentialsPanel({
 }) {
   const [email, setEmail] = useState(initialEmail ?? "");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [emailVerificationRequired, setEmailVerificationRequired] = useState(false);
   const [resendStatus, setResendStatus] = useState<AdvisorVerificationResendStatus>("idle");
@@ -216,6 +218,7 @@ function StaffCredentialsPanel({
       const result = await signIn("credentials", {
         email,
         password,
+        rememberMe,
         redirect: false,
       });
 
@@ -330,15 +333,28 @@ function StaffCredentialsPanel({
         </Alert>
       ) : null}
 
-      <Button type="submit" size="lg" className="min-h-11 w-full" disabled={isLoading}>
-        {isLoading ? "Signing in..." : "Sign In"}
-      </Button>
-
-      <div className="flex justify-end text-sm">
-        <Link href={forgotPasswordHref} className="font-semibold text-foreground hover:underline">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="remember-me"
+            checked={rememberMe}
+            onCheckedChange={(checked) => setRememberMe(checked === true)}
+          />
+          <Label
+            htmlFor="remember-me"
+            className="text-sm font-normal text-muted-foreground cursor-pointer"
+          >
+            Remember me for 14 days
+          </Label>
+        </div>
+        <Link href={forgotPasswordHref} className="text-sm font-semibold text-foreground hover:underline">
           Forgot password?
         </Link>
       </div>
+
+      <Button type="submit" size="lg" className="min-h-11 w-full" disabled={isLoading}>
+        {isLoading ? "Signing in..." : "Sign In"}
+      </Button>
 
       {role === "advisor" ? (
         <div className="rounded-xl border border-border/60 bg-muted/30 px-4 py-3 text-sm leading-6 text-muted-foreground">

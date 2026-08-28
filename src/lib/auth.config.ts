@@ -24,6 +24,10 @@ const credentialsSchema = z.object({
     .email()
     .transform((s) => s.trim().toLowerCase()),
   password: z.string().min(1),
+  rememberMe: z
+    .union([z.boolean(), z.literal("true"), z.literal("false")])
+    .optional()
+    .transform((v) => v === true || v === "true"),
 });
 
 /** Short, non-reversible identifier for an email so log lines preserve
@@ -230,6 +234,7 @@ export default {
           name: user.name,
           image: user.image,
           passwordChangeRequired: needsPasswordChange,
+          rememberMe: parsed.data.rememberMe,
         };
       },
     }),
