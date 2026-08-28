@@ -16,6 +16,7 @@ import {
   Mic,
   Puzzle,
   Settings,
+  Share2,
   Shield,
   UserPlus,
   UserRound,
@@ -106,6 +107,7 @@ export const ADMIN_NAV_SECTIONS: AdminNavSection[] = [
         icon: Puzzle,
         superAdminOnly: true,
       },
+      { href: "/admin/social", label: "Social Media", icon: Share2 },
       { href: "/admin/audit-log", label: "Audit Logs", icon: Activity },
       { href: "/admin/settings", label: "Settings", icon: Settings },
       {

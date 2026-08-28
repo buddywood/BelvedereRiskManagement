@@ -105,6 +105,12 @@ model User {
   executiveReports              ExecutiveReport[] @relation("ExecutiveReportClient")
   /// Phase 25: executive reports this user has published (advisor/admin).
   publishedExecutiveReports     ExecutiveReport[] @relation("ExecutiveReportPublisher")
+  /// Social media posts created by this user (marketing team).
+  socialPostsCreated            SocialPost[] @relation("SocialPostCreatedBy")
+  /// Social media posts approved by this user.
+  socialPostsApproved           SocialPost[] @relation("SocialPostApprovedBy")
+  /// Social media posts rejected by this user.
+  socialPostsRejected           SocialPost[] @relation("SocialPostRejectedBy")
 
   /// Round-11 commit 2.4a: @@index([email]) + the phase-A
   /// User_emailCiphertext_idx are dropped at the SQL level by
@@ -2467,4 +2473,116 @@ model ExecutiveReport {
   @@unique([clientId, advisorProfileId, version])
   /// Covers "fetch DRAFT for this client+advisor" and "fetch PUBLISHED history" at index speed.
   @@index([clientId, advisorProfileId, status])
+}
+
+// ---------------------------------------------------------------------------
+// Social Media Marketing (X/Twitter posting with human-approval workflow)
+// ---------------------------------------------------------------------------
+
+/// Approval workflow status for social media posts.
+enum SocialPostStatus {
+  DRAFT           // Created but not yet ready for review
+  PENDING_REVIEW  // Submitted for approval
+  APPROVED        // Approved, waiting for scheduled time
+  PUBLISHED       // Successfully posted to platform
+  FAILED          // Publish attempt failed
+  REJECTED        // Rejected during review
+  CANCELLED       // Cancelled before publishing
+}
+
+/// Supported social media platforms (extensible for future platforms).
+enum SocialPlatform {
+  X               // X (formerly Twitter)
+}
+
+/// Content theme/category for organizing posts and analytics.
+enum SocialContentTheme {
+  CYBER_SECURITY        // Cyber risk, digital security tips
+  IDENTITY_PROTECTION   // Identity risk, privacy
+  FAMILY_SAFETY         // Family/household security
+  RISK_ASSESSMENT       // General risk assessment insights
+  PRODUCT_UPDATE        // AkiliRisk feature announcements
+  INDUSTRY_NEWS         // Risk industry news/commentary
+  THOUGHT_LEADERSHIP    // Executive insights, opinions
+  ENGAGEMENT            // Questions, polls, community
+  PROMOTIONAL           // Direct promotional content
+  OTHER
+}
+
+/// Social media post with human-approval workflow.
+/// Posts move through: DRAFT -> PENDING_REVIEW -> APPROVED -> PUBLISHED
+/// Admin/marketing team creates drafts, reviews, and approves before publishing.
+model SocialPost {
+  id                String            @id @default(cuid())
+  platform          SocialPlatform    @default(X)
+  status            SocialPostStatus  @default(DRAFT)
+
+  /// Post content (max 280 chars for X; validated at app layer).
+  content           String            @db.Text
+  /// For threads: JSON array of tweet strings. Null for single posts.
+  threadContent     Json?             @map("thread_content")
+  /// True if this post should be published as a thread.
+  isThread          Boolean           @default(false) @map("is_thread")
+
+  /// Content categorization for analytics and organization.
+  theme             SocialContentTheme @default(OTHER)
+  /// Optional tags for filtering/grouping (e.g., ["campaign-launch", "q1-2024"]).
+  tags              Json?
+
+  /// Scheduled publish time. Null = immediate when approved.
+  scheduledAt       DateTime?         @map("scheduled_at")
+  /// AI-generated draft flag (for future content suggestions).
+  isAiGenerated     Boolean           @default(false) @map("is_ai_generated")
+
+  // --- Workflow tracking ---
+  /// User who created the draft.
+  createdById       String            @map("created_by_id")
+  /// User who approved the post (null until approved).
+  approvedById      String?           @map("approved_by_id")
+  approvedAt        DateTime?         @map("approved_at")
+  /// Rejection reason if status = REJECTED.
+  rejectionReason   String?           @map("rejection_reason")
+  rejectedById      String?           @map("rejected_by_id")
+  rejectedAt        DateTime?         @map("rejected_at")
+
+  // --- Publish result tracking ---
+  /// Platform post ID (e.g., X tweet ID) after successful publish.
+  platformPostId    String?           @map("platform_post_id")
+  /// Full URL to the published post.
+  platformPostUrl   String?           @map("platform_post_url")
+  /// Timestamp when actually published (may differ from scheduledAt).
+  publishedAt       DateTime?         @map("published_at")
+  /// Raw API response from platform (for debugging).
+  publishResponse   Json?             @map("publish_response")
+  /// Error message if publish failed.
+  publishError      String?           @map("publish_error")
+  /// Number of publish attempts (for retry logic).
+  publishAttempts   Int               @default(0) @map("publish_attempts")
+  /// Last publish attempt timestamp.
+  lastAttemptAt     DateTime?         @map("last_attempt_at")
+
+  // --- Future: Performance metrics (populated by analytics job) ---
+  /// Impressions count from platform analytics.
+  impressions       Int?
+  /// Engagements (likes, retweets, replies combined).
+  engagements       Int?
+  /// Last time metrics were synced from platform.
+  metricsSyncedAt   DateTime?         @map("metrics_synced_at")
+
+  // --- Timestamps ---
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+
+  // --- Relations ---
+  createdBy         User              @relation("SocialPostCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  approvedBy        User?             @relation("SocialPostApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  rejectedBy        User?             @relation("SocialPostRejectedBy", fields: [rejectedById], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([status, scheduledAt])
+  @@index([platform, status])
+  @@index([theme])
+  @@index([createdById])
+  @@index([scheduledAt])
+  @@map("social_posts")
 }
